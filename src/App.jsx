@@ -31,7 +31,6 @@ import { RequestsODS } from "./pages/Dashboards/requests_ods";
 import { History } from "./pages/Requisicoes/history";
 import { Products } from "./pages/Estoque/products";
 import { Movements } from "./pages/Estoque/movements";
-import { MobileMovement } from "./pages/Estoque/mobile_movement.jsx"
 import { BarcodeGenerator } from "./pages/Estoque/barcode_generator.jsx";
 import { Floaters } from "./pages/Requisicoes/floaters";
 import ProjetosPage from "./pages/Projetos/ProjetosPage";
@@ -41,9 +40,6 @@ import { AbsenceControl } from "./pages/ControleFaltas"
 import { DisallowanceControl } from "./pages/ControleGlosas"
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard"
 import { PermissionGate } from "./components/PermissionGate"
-import { Importador } from "./pages/Importacao/Importador"
-
-
 
 document.documentElement.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
 
@@ -102,7 +98,6 @@ export function AppRoutes() {
         <Route path="/" element={<Auth />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/reposicoes/requisicao" element={<Request />} />
-        <Route path="/estoque/movimentacao" element={<MobileMovement />} />
         <Route path="/reports/reposicoes/ods" element={<RequestsODS />} />
 
         <Route element={<MainLayout />}>
@@ -131,11 +126,6 @@ export function AppRoutes() {
           <Route path="/estoque/codigos-de-barras" element={<PermissionGate screen="estoque_codigos"><BarcodeGenerator /></PermissionGate>} />
           <Route path="/estoque/movimentacoes" element={<PermissionGate screen="estoque_movimentos"><Movements /></PermissionGate>} />
 
-          {/* Importação */}
-          <Route path="/importacao" element={<Importador />} />
-          <Route path="/importacao/glosas" element={<Importador />} />
-
-          
           {/* Frotas */}
           <Route path="/frotas" element={<Frotas />} />
         </Route>

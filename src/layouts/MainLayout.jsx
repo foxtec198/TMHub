@@ -70,13 +70,7 @@ export function MainLayout() {
           icon: 'pi pi-chart-bar',
           visible: can("dashboard_faltas"),
           command: () => { navigateTo("/reports/faltas") }
-        },
-        {
-          label: 'Logística',
-          disabled: true,
-          icon: 'pi pi-truck',
-          // command: () => { navigateTo("/reports/logistica") }
-        },
+        }
       ]
     },
     {
@@ -180,11 +174,6 @@ export function MainLayout() {
       label: 'Configurações',
       icon: 'pi pi-cog',
       command: () => { navigateTo("/configuracoes") }
-    },
-    {
-      label: 'Importar Planilha',
-      icon: 'pi pi-upload',
-      command: () => { navigateTo("/importacao") }
     },
     {
       label: 'Sair',
