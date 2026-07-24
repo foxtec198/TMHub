@@ -38,7 +38,7 @@ function duration(value) {
 }
 
 function options(values = [], prefix = "") {
-  return [{ label: "Todos", value: ALL }, ...values.map((value) => ({ label: `${prefix}${value}`, value: String(value) }))];
+  return [{ label: "Todos", value: ALL }, ...((values || []).map((value) => ({ label: `${prefix}${value}`, value: String(value) })))];
 }
 
 function periodLabel(period) {
@@ -152,7 +152,7 @@ export function AbsenceDashboard() {
     <section className="absence-analysis-grid">
       <article className="absence-dashboard-panel absence-reasons-panel">
         <header><div><span>Principais causas</span><h2>Ocorrências por motivo</h2></div><Tag value={`${indicators.total || 0} registros`} severity="success" rounded /></header>
-        <div className="absence-reason-chart">{reasonData.length ? <Chart type="bar" data={reasonChart} options={reasonOptions} /> : <EmptyChart text="Nenhuma ocorrência para os filtros atuais." />}</div>
+        <div className="absence-reason-chart">{reasonData.length ? <Chart type="bar" data={reasonChart} options={reasonOptions} style={{ height: "100%" }} /> : <EmptyChart text="Nenhuma ocorrência para os filtros atuais." />}</div>
       </article>
       <article className="absence-dashboard-panel absence-classification-panel">
         <header><div><span>Resultado</span><h2>Classificação</h2></div></header>
@@ -186,7 +186,7 @@ export function AbsenceDashboard() {
       <article className="absence-dashboard-panel absence-recent-panel">
         <header><div><span>Ocorrências recentes</span><h2>Últimas faltas do recorte</h2></div></header>
         <DataTable value={data?.recentes || []} paginator rows={7} stripedRows size="small" emptyMessage="Nenhuma falta no período.">
-          <Column field="data_falta" header="Data" sortable body={(row) => new Date(row.data_falta).toLocaleDateString("pt-BR")} />
+          <Column field="data_falta" header="Data" sortable body={(row) => new Date(`${String(row.data_falta).slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR")} />
           <Column field="colaborador" header="Colaborador" sortable />
           <Column field="contrato" header="Contrato" sortable />
           <Column field="motivo" header="Motivo" sortable />
@@ -205,7 +205,7 @@ export function AbsenceDashboard() {
         <label><span>Supervisor</span><Dropdown value={filters.supervisor} options={options(filterOptions.supervisores)} onChange={(event) => setFilter("supervisor", event.value)} filter /></label>
         <label className="is-wide"><span>Motivo</span><Dropdown value={filters.reason} options={options(filterOptions.motivos)} onChange={(event) => setFilter("reason", event.value)} filter /></label>
         <label className="is-wide"><span>Contrato</span><Dropdown value={filters.contract} options={options(filterOptions.contratos)} onChange={(event) => setFilter("contract", event.value)} filter /></label>
-        <label className="is-wide"><span>Colaborador</span><Dropdown value={filters.collaborator} options={[{ label: "Todos", value: ALL }, ...(filterOptions.colaboradores || [])]} onChange={(event) => setFilter("collaborator", event.value)} filter /></label>
+        <label className="is-wide"><span>Colaborador</span><Dropdown value={filters.collaborator} options={[{ label: "Todos", value: ALL }, ...((filterOptions.colaboradores || []).map((item) => typeof item === "object" && item !== null ? item : { label: item, value: String(item) }))]} onChange={(event) => setFilter("collaborator", event.value)} filter /></label>
       </div>
     </OverlayPanel>
   </section>;

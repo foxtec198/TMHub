@@ -9,6 +9,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
+import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 import { can } from "../../utils/permissions";
@@ -26,11 +27,15 @@ const EMPTY_FORM = {
   competencia: null,
   data_falta: null,
   centro_custo_id: null,
+  contrato_nome: "",
+  departamento: "",
+  colaborador_id: null,
   colaborador_nome: "",
   colaborador_matricula: "",
   cobertura: "em_analise",
   quantidade_dias: 1,
-  valor_diaria: 140,
+  quantidade_horas: 8,
+  valor_diaria: 180,
   justificativa: "",
   observacao: "",
 };
@@ -116,16 +121,24 @@ export function DisallowanceControl() {
   };
 
   const openEdit = (record) => {
+    const days = Number(record.quantidade_dias || 1);
+    const hours = record.quantidade_horas ?? Number((days * 8).toFixed(2));
+    const isDpto269 = String(record.departamento) === "269" || String(record.centro_custo_id) === "269";
+    const defaultRate = isDpto269 ? 182.02 : 180;
     setEditing(record);
     setForm({
       competencia: new Date(`${record.competencia}T12:00:00`),
       data_falta: new Date(`${record.data_falta}T12:00:00`),
       centro_custo_id: record.centro_custo_id,
+      contrato_nome: record.contrato || "",
+      departamento: record.departamento || "",
+      colaborador_id: record.colaborador_id || null,
       colaborador_nome: record.colaborador || "",
       colaborador_matricula: record.matricula || "",
       cobertura: record.cobertura,
-      quantidade_dias: record.quantidade_dias,
-      valor_diaria: record.valor_diaria,
+      quantidade_dias: days,
+      quantidade_horas: hours,
+      valor_diaria: record.valor_diaria ?? defaultRate,
       justificativa: record.justificativa || "",
       observacao: record.observacao || "",
     });
@@ -135,8 +148,8 @@ export function DisallowanceControl() {
 
   const save = async (event) => {
     event.preventDefault();
-    if (!form.competencia || !form.data_falta || !form.centro_custo_id) {
-      return showToast("warn", "Campos obrigatórios", "Informe competência, data da falta e contrato.");
+    if (!form.competencia || !form.data_falta || (!form.colaborador_id && !form.colaborador_nome)) {
+      return showToast("warn", "Campos obrigatórios", "Informe a competência, data da falta e selecione o colaborador.");
     }
     setLoading(true);
     try {
@@ -196,7 +209,7 @@ export function DisallowanceControl() {
         <Column field="contrato" header="Contrato" sortable body={(row) => <div className="glosa-main-cell"><strong>{row.contrato}</strong><small>DPTO. {row.departamento ?? "—"}</small></div>} />
         <Column field="colaborador" header="Colaborador" body={(row) => <div className="glosa-main-cell"><strong>{row.colaborador || "Não informado"}</strong><small>{row.matricula ? `Matrícula ${row.matricula}` : "Sem matrícula"}</small></div>} />
         <Column field="cobertura" header="Situação" sortable body={(row) => coverageTag(row.cobertura)} />
-        <Column field="quantidade_dias" header="Dias" sortable />
+        <Column field="quantidade_dias" header="Tempo" sortable body={(row) => `${row.quantidade_dias}d (${row.quantidade_horas ?? (row.quantidade_dias * 8).toFixed(1)}h)`} />
         <Column field="valor_diaria" header="Diária" body={(row) => money(row.valor_diaria)} />
         <Column field="valor_total" header="Valor" sortable body={(row) => <strong>{money(row.valor_total)}</strong>} />
         {canEdit && <Column header="Ações" body={(row) => <div className="glosa-actions"><Button icon="pi pi-pencil" rounded text aria-label="Editar glosa" onClick={() => openEdit(row)} /><Button icon="pi pi-trash" severity="danger" rounded text aria-label="Excluir glosa" onClick={() => remove(row)} /></div>} />}
@@ -207,12 +220,90 @@ export function DisallowanceControl() {
       <form className="glosa-form" onSubmit={save}>
         <label><span>Competência</span><Calendar value={form.competencia} onChange={(event) => setForm({ ...form, competencia: event.value })} view="month" dateFormat="mm/yy" showIcon /></label>
         <label><span>Data da falta</span><Calendar value={form.data_falta} onChange={(event) => setForm({ ...form, data_falta: event.value })} dateFormat="dd/mm/yy" showIcon /></label>
-        <label className="is-wide"><span>Contrato</span><Dropdown value={form.centro_custo_id} options={centers} onChange={(event) => setForm({ ...form, centro_custo_id: event.value })} filter placeholder="Selecione o contrato" /></label>
-        <label><span>Colaborador</span><InputText value={form.colaborador_nome} onChange={(event) => setForm({ ...form, colaborador_nome: event.target.value })} /></label>
-        <label><span>Matrícula</span><InputText value={form.colaborador_matricula} onChange={(event) => setForm({ ...form, colaborador_matricula: event.target.value })} /></label>
+        <label className="is-wide">
+          <span>Colaborador</span>
+          <CollaboratorDropdown
+            value={form.colaborador_id}
+            selectedOption={
+              form.colaborador_id
+                ? { id: form.colaborador_id, nome: form.colaborador_nome, matricula: form.colaborador_matricula }
+                : null
+            }
+            onChange={(colabId, colabObj) => {
+              if (colabObj) {
+                const isDpto269 = String(colabObj.departamento) === "269" || String(colabObj.centro_id) === "269";
+                const autoRate = colabObj.valor_diaria_glosa != null ? Number(colabObj.valor_diaria_glosa) : (isDpto269 ? 182.02 : 180.00);
+                setForm((prev) => ({
+                  ...prev,
+                  colaborador_id: colabId,
+                  colaborador_nome: colabObj.nome || "",
+                  colaborador_matricula: colabObj.matricula || "",
+                  centro_custo_id: colabObj.centro_id || null,
+                  contrato_nome: colabObj.centro_local || "",
+                  departamento: colabObj.departamento || "",
+                  valor_diaria: autoRate,
+                }));
+              } else {
+                setForm((prev) => ({
+                  ...prev,
+                  colaborador_id: null,
+                  colaborador_nome: "",
+                  colaborador_matricula: "",
+                  centro_custo_id: null,
+                  contrato_nome: "",
+                  departamento: "",
+                  valor_diaria: 180,
+                }));
+              }
+            }}
+            placeholder="Selecione um colaborador"
+          />
+        </label>
+
+        {(form.colaborador_id || form.colaborador_nome) && (
+          <div className="glosa-colab-card is-wide">
+            <div className="glosa-colab-card-header">
+              <i className="pi pi-user" />
+              <strong>{form.colaborador_nome}</strong>
+            </div>
+            <div className="glosa-colab-card-details">
+              <span><i className="pi pi-id-card" /> <strong>Matrícula:</strong> {form.colaborador_matricula || "Sem matrícula"}</span>
+              <span><i className="pi pi-building" /> <strong>Contrato:</strong> {form.contrato_nome || (form.centro_custo_id ? `ID ${form.centro_custo_id}` : "Não informado")} {form.departamento ? `(DPTO. ${form.departamento})` : ""}</span>
+              <span><i className="pi pi-dollar" /> <strong>Diária Padrão:</strong> R$ {Number(form.valor_diaria || 180).toFixed(2)}</span>
+            </div>
+          </div>
+        )}
         <label className="is-wide"><span>Situação da cobertura</span><Dropdown value={form.cobertura} options={COVERAGE_OPTIONS} onChange={(event) => setForm({ ...form, cobertura: event.value })} /></label>
-        <label><span>Quantidade de dias</span><InputNumber value={form.quantidade_dias} onValueChange={(event) => setForm({ ...form, quantidade_dias: event.value })} min={0.01} minFractionDigits={0} maxFractionDigits={2} /></label>
-        <label><span>Valor por dia</span><InputNumber value={form.valor_diaria} onValueChange={(event) => setForm({ ...form, valor_diaria: event.value })} mode="currency" currency="BRL" locale="pt-BR" min={0.01} /></label>
+        <label>
+          <span>Quantidade de dias</span>
+          <InputNumber
+            value={form.quantidade_dias}
+            onValueChange={(event) => {
+              const days = event.value != null ? event.value : null;
+              const hours = days != null ? Number((days * 8).toFixed(2)) : null;
+              setForm((prev) => ({ ...prev, quantidade_dias: days, quantidade_horas: hours }));
+            }}
+            min={0.01}
+            minFractionDigits={0}
+            maxFractionDigits={4}
+          />
+        </label>
+        <label>
+          <span>Quantidade de horas (8h/dia)</span>
+          <InputNumber
+            value={form.quantidade_horas}
+            onValueChange={(event) => {
+              const hours = event.value != null ? event.value : null;
+              const days = hours != null ? Number((hours / 8).toFixed(4)) : null;
+              setForm((prev) => ({ ...prev, quantidade_horas: hours, quantidade_dias: days }));
+            }}
+            min={0.01}
+            minFractionDigits={0}
+            maxFractionDigits={2}
+            suffix=" h"
+          />
+        </label>
+        <label className="is-wide"><span>Valor por dia (Integral 8h)</span><InputNumber value={form.valor_diaria} onValueChange={(event) => setForm({ ...form, valor_diaria: event.value })} mode="currency" currency="BRL" locale="pt-BR" min={0.01} /></label>
         <div className="glosa-calculated is-wide"><span>Valor total calculado</span><strong>{money(Number(form.quantidade_dias || 0) * Number(form.valor_diaria || 0))}</strong></div>
         <label className="is-wide"><span>Justificativa</span><InputTextarea value={form.justificativa} onChange={(event) => setForm({ ...form, justificativa: event.target.value })} rows={3} autoResize /></label>
         <label className="is-wide"><span>Observação</span><InputTextarea value={form.observacao} onChange={(event) => setForm({ ...form, observacao: event.target.value })} rows={3} autoResize /></label>

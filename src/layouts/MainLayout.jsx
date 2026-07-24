@@ -182,6 +182,11 @@ export function MainLayout() {
       command: () => { navigateTo("/configuracoes") }
     },
     {
+      label: 'Importar Planilha',
+      icon: 'pi pi-upload',
+      command: () => { navigateTo("/importacao") }
+    },
+    {
       label: 'Sair',
       icon: 'pi pi-sign-out',
       command: () => { localStorage.clear(); navigateTo("/") }

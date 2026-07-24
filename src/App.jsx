@@ -41,6 +41,9 @@ import { AbsenceControl } from "./pages/ControleFaltas"
 import { DisallowanceControl } from "./pages/ControleGlosas"
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard"
 import { PermissionGate } from "./components/PermissionGate"
+import { Importador } from "./pages/Importacao/Importador"
+
+
 
 document.documentElement.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
 
@@ -128,6 +131,11 @@ export function AppRoutes() {
           <Route path="/estoque/codigos-de-barras" element={<PermissionGate screen="estoque_codigos"><BarcodeGenerator /></PermissionGate>} />
           <Route path="/estoque/movimentacoes" element={<PermissionGate screen="estoque_movimentos"><Movements /></PermissionGate>} />
 
+          {/* Importação */}
+          <Route path="/importacao" element={<Importador />} />
+          <Route path="/importacao/glosas" element={<Importador />} />
+
+          
           {/* Frotas */}
           <Route path="/frotas" element={<Frotas />} />
         </Route>

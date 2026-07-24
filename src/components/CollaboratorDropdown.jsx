@@ -13,6 +13,7 @@ const DEFAULT_DEBOUNCE = 350;
 export function CollaboratorDropdown({
     value,
     onChange,
+    selectedOption = null,
     queryParams = {},
     limit = DEFAULT_LIMIT,
     debounce = DEFAULT_DEBOUNCE,
@@ -32,6 +33,17 @@ export function CollaboratorDropdown({
     const selectedOptionRef = useRef(null); // Preserva a opção escolhida mesmo fora dos 50 resultados seguintes.
     const requestIdRef = useRef(0); // Identifica respostas antigas de buscas que terminaram fora de ordem.
     const serializedParams = useMemo(() => JSON.stringify(queryParams), [queryParams]);
+
+    useEffect(() => {
+        if (selectedOption && selectedOption.id) {
+            selectedOptionRef.current = {
+                ...selectedOption,
+                label: selectedOption.label || (selectedOption.matricula ? `${selectedOption.matricula} - ${selectedOption.nome}` : selectedOption.nome),
+            };
+        } else if (!value) {
+            selectedOptionRef.current = null;
+        }
+    }, [selectedOption, value]);
 
     useEffect(() => {
         const requestId = ++requestIdRef.current;
@@ -54,7 +66,7 @@ export function CollaboratorDropdown({
                     label: item.matricula ? `${item.matricula} - ${item.nome}` : item.nome,
                 }));
                 const selected = selectedOptionRef.current;
-                setOptions(selected && !remoteOptions.some((item) => item.id === selected.id)
+                setOptions(selected && selected.id && !remoteOptions.some((item) => item.id === selected.id)
                     ? [selected, ...remoteOptions]
                     : remoteOptions);
             } catch (error) {
