@@ -142,8 +142,16 @@
     gap: .2rem
 }
 
+.glosa-value-danger {
+    color: var(--red-500)
+}
+
+.glosa-no-evidence {
+    color: var(--text-color-secondary)
+}
+
 .glosa-dialog {
-    width: min(760px, 95vw)
+    width: min(820px, 95vw)
 }
 
 .glosa-form {
@@ -193,6 +201,152 @@
     color: var(--primary-color)
 }
 
+.glosa-filter-panel {
+    width: min(32rem, calc(100vw - 2rem))
+}
+
+.glosa-filter-title,
+.glosa-evidence-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem
+}
+
+.glosa-filter-title>div,
+.glosa-evidence-heading>div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem
+}
+
+.glosa-filter-title span,
+.glosa-evidence-heading span {
+    color: var(--text-color-secondary);
+    font-size: .8rem
+}
+
+.glosa-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem
+}
+
+.glosa-filter-grid label {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .35rem
+}
+
+.glosa-filter-grid label>span {
+    font-size: .78rem;
+    font-weight: 800
+}
+
+.glosa-filter-grid .is-wide {
+    grid-column: 1/-1
+}
+
+.glosa-filter-grid .p-calendar,
+.glosa-filter-grid .p-dropdown {
+    width: 100%
+}
+
+.glosa-calculation {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+    background: var(--surface-ground)
+}
+
+.glosa-calculation>div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .25rem;
+    padding: 1rem
+}
+
+.glosa-calculation>div+div {
+    border-left: 1px solid var(--surface-border)
+}
+
+.glosa-calculation span {
+    color: var(--text-color-secondary);
+    font-size: .75rem;
+    font-weight: 800;
+    text-transform: uppercase
+}
+
+.glosa-calculation strong {
+    overflow: hidden;
+    font-size: 1.2rem;
+    text-overflow: ellipsis
+}
+
+.glosa-calculation .is-covered strong {
+    color: var(--green-500)
+}
+
+.glosa-calculation .is-uncovered strong {
+    color: var(--red-500)
+}
+
+.glosa-evidence {
+    padding: 1rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+    background: var(--surface-ground)
+}
+
+.glosa-evidence-heading>div:last-child {
+    display: flex;
+    align-items: center;
+    gap: .25rem
+}
+
+.glosa-dropzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 9rem;
+    padding: 1.25rem;
+    border: 2px dashed color-mix(in srgb, var(--primary-color) 45%, var(--surface-border));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card));
+    cursor: pointer;
+    flex-direction: column;
+    gap: .35rem;
+    text-align: center;
+    transition: border-color .2s ease, background .2s ease
+}
+
+.glosa-dropzone:hover,
+.glosa-dropzone:focus-visible,
+.glosa-dropzone.has-file {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 9%, var(--surface-card));
+    outline: none
+}
+
+.glosa-dropzone input {
+    display: none
+}
+
+.glosa-dropzone>i {
+    color: var(--primary-color);
+    font-size: 1.75rem
+}
+
+.glosa-dropzone>span {
+    color: var(--text-color-secondary);
+    font-size: .82rem
+}
+
 :root[data-theme="dark"] .glosa-page {
     background: #0c100d
 }
@@ -208,6 +362,12 @@
 }
 
 :root[data-theme="dark"] .glosa-calculated {
+    background: #202923;
+    border-color: #405047
+}
+
+:root[data-theme="dark"] .glosa-calculation,
+:root[data-theme="dark"] .glosa-evidence {
     background: #202923;
     border-color: #405047
 }
@@ -252,6 +412,16 @@
 
     .glosa-form .is-wide {
         grid-column: auto
+    }
+
+    .glosa-filter-grid,
+    .glosa-calculation {
+        grid-template-columns: 1fr
+    }
+
+    .glosa-calculation>div+div {
+        border-top: 1px solid var(--surface-border);
+        border-left: 0
     }
 }
 

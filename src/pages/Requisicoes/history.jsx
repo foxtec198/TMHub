@@ -272,7 +272,9 @@ export function History() {
             {event.description || event.message || event.obs
                 ? <span>{event.description || event.message || event.obs}</span>
                 : null}
-            {event.alterado_por
+            {event.criado_por_usuario
+                ? <small className="text-600">Criado por: {event.criado_por_usuario}</small>
+                : event.alterado_por
                 ? <small className="text-600">Alterado por: {event.alterado_por}</small>
                 : event.criado_por
                     ? <small className="text-600">Criado por: {event.criado_por}</small>

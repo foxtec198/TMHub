@@ -5,6 +5,7 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -14,12 +15,17 @@ import { socketio } from "../../utils/socketio";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
+import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import "./styles.css";
 
 const REASONS = ["ATESTADO", "AFASTAMENTO", "DECLARAÇÃO", "INJUSTIFICADA", "POSTO VAGO", "REMANEJAMENTO", "OUTROS"];
 const CLASSIFICATIONS = [
   { label: "Justificada", value: "justificada" },
   { label: "Injustificada", value: "injustificada" },
+];
+const ABSENCE_TYPES = [
+  { label: "Integral", value: "integral" },
+  { label: "Parcial", value: "parcial" },
 ];
 const hasDocumentDeadline = (reason) => reason?.includes("ATESTADO") || reason?.includes("DECLARA");
 const ALL = "__all__";
@@ -57,6 +63,8 @@ export function AbsenceControl() {
   const [collaboratorFilter, setCollaboratorFilter] = useState(ALL);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
+  const [manualForm, setManualForm] = useState(null);
+  const [supervisors, setSupervisors] = useState([]);
   const [now, setNow] = useState(0);
   const [refresh, setRefresh] = useState(0);
   const filterPanel = useRef(null);
@@ -69,6 +77,14 @@ export function AbsenceControl() {
       .then(({ data }) => { setRecords(Array.isArray(data) ? data : []); setNow(Date.now()); })
       .catch((error) => showToast("error", "Controle de Faltas", error.response?.data || "Não foi possível carregar os registros."));
   }, [refresh, showToast]);
+
+  useEffect(() => {
+    connect.get("/supervisores")
+      .then(({ data }) => setSupervisors((Array.isArray(data) ? data : [])
+        .map((supervisor) => ({ label: supervisor.nome, value: supervisor.id }))
+        .sort((left, right) => left.label.localeCompare(right.label, "pt-BR"))))
+      .catch(() => setSupervisors([]));
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => { setNow(Date.now()); setRefresh((value) => value + 1); }, 60_000);
@@ -175,6 +191,42 @@ export function AbsenceControl() {
     } finally { setLoading(false); }
   };
 
+  const openManual = () => {
+    setManualForm({
+      colaborador_id: null,
+      colaborador_nome: "",
+      colaborador_matricula: "",
+      contrato: "",
+      departamento: "",
+      supervisor_id: null,
+      motivo: null,
+      tipo_ausencia: "integral",
+      quantidade_horas: null,
+      data_falta: new Date(),
+      observacao: "",
+    });
+  };
+
+  const saveManual = async () => {
+    if (!manualForm?.colaborador_id || !manualForm.supervisor_id || !manualForm.motivo || !manualForm.data_falta) {
+      return showToast("warn", "Lançamento manual", "Selecione o colaborador, supervisor, motivo e data da falta.");
+    }
+    if (manualForm.tipo_ausencia === "parcial" && !manualForm.quantidade_horas) {
+      return showToast("warn", "Lançamento manual", "Informe quantas horas correspondem à falta parcial.");
+    }
+    setLoading(true);
+    try {
+      const { data } = await connect.post("/controle-faltas", manualForm);
+      setManualForm(null);
+      setRefresh((value) => value + 1);
+      showToast("success", "Falta lançada", `${data.message} Requisição #${data.requisicao_id}.`);
+    } catch (error) {
+      showToast("error", "Não foi possível lançar a falta", error.response?.data || "Confira os dados informados.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const timerBody = (record) => {
     if (!hasDocumentDeadline(record.motivo) || record.status === "tratada") return <span className="absence-no-timer">Sem prazo</span>;
     const timer = remaining(record.prazo_atestado, now);
@@ -195,6 +247,7 @@ export function AbsenceControl() {
       <div><span>Gestão de ponto</span><h1>Controle de Faltas</h1><p>Registros gerados automaticamente pelas requisições de reposição.</p></div>
       <div className="absence-header-actions">
         <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+        {canEdit && <Button icon="pi pi-plus" label="Lançar falta" onClick={openManual} />}
         <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
       </div>
     </header>
@@ -212,7 +265,7 @@ export function AbsenceControl() {
         <Column field="data_falta" header="Data" sortable body={(record) => new Date(record.data_falta).toLocaleDateString("pt-BR")} />
         <Column field="colaborador" header="Colaborador" sortable body={(record) => <div className="absence-person"><strong>{record.colaborador}</strong><small>Matrícula {record.matricula}</small></div>} />
         <Column field="contrato" header="Contrato" sortable body={(record) => <div className="absence-person"><strong>{record.contrato}</strong><small>DPTO. {record.departamento ?? "—"}</small></div>} />
-        <Column field="motivo" header="Motivo" sortable />
+        <Column field="motivo" header="Motivo" sortable body={(record) => <div className="absence-person"><strong>{record.motivo}</strong><small>{record.tipo_ausencia === "parcial" ? `Parcial · ${record.quantidade_horas || 0}h` : "Integral"}</small></div>} />
         <Column header="Prazo do documento" body={timerBody} />
         <Column header="Classificação" field="classificacao" sortable body={classificationBody} />
         <Column field="status" header="Tratativa" sortable body={(record) => <Tag value={record.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={record.status === "tratada" ? "success" : "info"} />} />
@@ -248,6 +301,48 @@ export function AbsenceControl() {
           {editing.status === "tratada"
             ? <Button label="Voltar para pendente" severity="warning" icon="pi pi-undo" onClick={reopen} />
             : <Button label="Marcar como tratada" icon="pi pi-check" onClick={() => save(true)} />}
+        </div>
+      </div>}
+    </Dialog>
+    <Dialog header="Lançar falta manualmente" visible={Boolean(manualForm)} modal className="absence-manual-dialog" onHide={() => setManualForm(null)}>
+      {manualForm && <div className="absence-manual-form">
+        <div className="absence-manual-intro">
+          <i className="pi pi-info-circle" />
+          <span>Este lançamento criará automaticamente uma requisição aberta como <strong>SEM COBERTURA</strong> e registrará seu usuário na timeline.</span>
+        </div>
+
+        <label className="is-wide">
+          <span>Colaborador ausente</span>
+          <CollaboratorDropdown
+            value={manualForm.colaborador_id}
+            selectedOption={manualForm.colaborador_id ? { id: manualForm.colaborador_id, nome: manualForm.colaborador_nome, matricula: manualForm.colaborador_matricula } : null}
+            queryParams={{ com_local: true }}
+            onChange={(employeeId, employee) => setManualForm((current) => ({
+              ...current,
+              colaborador_id: employeeId,
+              colaborador_nome: employee?.nome || "",
+              colaborador_matricula: employee?.matricula || "",
+              contrato: employee?.centro_local || "",
+              departamento: employee?.departamento || "",
+            }))}
+            placeholder="Selecione ou pesquise o colaborador"
+          />
+        </label>
+
+        {manualForm.colaborador_id && <div className="absence-manual-employee is-wide">
+          <div><i className="pi pi-user" /><strong>{manualForm.colaborador_nome}</strong><span>Matrícula {manualForm.colaborador_matricula || "não informada"}</span></div>
+          <div><i className="pi pi-building" /><strong>{manualForm.contrato || "Local não informado"}</strong><span>{manualForm.departamento ? `DPTO. ${manualForm.departamento}` : "Sem departamento"}</span></div>
+        </div>}
+
+        <label><span>Data e hora da falta</span><Calendar value={manualForm.data_falta} onChange={(event) => setManualForm({ ...manualForm, data_falta: event.value })} dateFormat="dd/mm/yy" showTime hourFormat="24" showIcon /></label>
+        <label><span>Supervisor responsável</span><Dropdown value={manualForm.supervisor_id} options={supervisors} onChange={(event) => setManualForm({ ...manualForm, supervisor_id: event.value })} placeholder="Selecione" filter /></label>
+        <label><span>Motivo</span><Dropdown value={manualForm.motivo} options={REASONS} onChange={(event) => setManualForm({ ...manualForm, motivo: event.value })} placeholder="Selecione o motivo" /></label>
+        <label><span>Tipo da falta</span><Dropdown value={manualForm.tipo_ausencia} options={ABSENCE_TYPES} onChange={(event) => setManualForm({ ...manualForm, tipo_ausencia: event.value, quantidade_horas: null })} /></label>
+        {manualForm.tipo_ausencia === "parcial" && <label className="is-wide"><span>Quantidade de horas da falta</span><InputNumber value={manualForm.quantidade_horas} onValueChange={(event) => setManualForm({ ...manualForm, quantidade_horas: event.value })} min={0.01} max={23.99} minFractionDigits={0} maxFractionDigits={2} suffix=" h" placeholder="Ex.: 2 horas" /></label>}
+        <label className="is-wide"><span>Observação</span><InputTextarea value={manualForm.observacao} onChange={(event) => setManualForm({ ...manualForm, observacao: event.target.value })} rows={4} autoResize placeholder="Descreva informações importantes sobre esta falta" /></label>
+        <div className="dialog-actions is-wide">
+          <Button label="Cancelar" text onClick={() => setManualForm(null)} />
+          <Button label="Lançar e criar requisição" icon="pi pi-check" onClick={saveManual} />
         </div>
       </div>}
     </Dialog>

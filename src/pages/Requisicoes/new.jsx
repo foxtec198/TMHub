@@ -144,7 +144,10 @@ export function Request() {
             setLoadingReplaces(true);
             try {
                 const { data } = await connect.get("/repo/reservas-uso", {
-                    params: { data: selectedRequestDateKey() },
+                    params: {
+                        data: selectedRequestDateKey(),
+                        supervisor_id: user?.id,
+                    },
                 });
                 if (!active) return;
                 const available = data.disponiveis.map((item) => ({ ...item, name: item.nome, disabled: false }));
@@ -163,11 +166,11 @@ export function Request() {
             }
         }
 
-        getReplaces();
+        if (user?.id) getReplaces();
         return () => { active = false; };
         // replace não dispara uma nova consulta; ele é apenas invalidado quando a data muda.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dateChoice])
+    }, [dateChoice, user?.id])
 
     // Formulário público e responsivo de abertura de reposição.
     return (
@@ -196,7 +199,13 @@ export function Request() {
                                 <Dropdown
                                     className="w-full mb-6"
                                     value={user}
-                                    onChange={(e) => selectedUser(e.value)}
+                                    onChange={(e) => {
+                                        selectedUser(e.value);
+                                        selectedAbsent(null);
+                                        setAbsentDetails(null);
+                                        selectedReplace(null);
+                                        setReplaces([]);
+                                    }}
                                     options={supsOtions}
                                     placeholder="Selecione seu nome na lista"
                                     optionLabel="name"
@@ -226,6 +235,7 @@ export function Request() {
                                     panelStyle={{ width: '100%' }}
                                     className="w-full mb-3"
                                     value={absent}
+                                    queryParams={{ supervisor_id: user?.id }}
                                     onChange={(id, collaborator) => {
                                         selectedAbsent(id);
                                         setAbsentDetails(collaborator);
