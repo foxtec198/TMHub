@@ -40,7 +40,7 @@ function formatDateTime(value) {
 function formatHours(value) {
     // Acima de 24 horas a leitura em dias é mais útil para o acompanhamento executivo.
     if (value == null) return '-';
-    return value >= 24 ? `${(value / 24).toFixed(1)} dias` : `${Number(value).toFixed(1)}h`;
+    return value >= 24 ? `${(value / 24).toFixed(1)} dias úteis` : `${Number(value).toFixed(1)}h úteis`;
 }
 
 function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
@@ -115,8 +115,8 @@ export function AdmissionDashboard() {
     // Os tons dos cards refletem a comparação de cada indicador com sua meta vigente.
     const summary = [
         { icon: 'pi pi-briefcase', label: 'Vagas no período', value: indicators.total_vagas ?? 0, detail: `${indicators.vagas_concluidas ?? 0} concluídas`, tone: 'neutral' },
-        { icon: 'pi pi-bolt', label: 'Primeira ação', value: formatHours(indicators.sla_acao_medio_horas), detail: `meta de até ${actionTarget}h`, tone: indicators.sla_acao_medio_horas <= actionTarget ? 'success' : 'warning' },
-        { icon: 'pi pi-check-circle', label: 'Conclusão', value: indicators.sla_conclusao_medio_dias != null ? `${indicators.sla_conclusao_medio_dias} dias` : '-', detail: `meta de até ${closeTargetDays} dias`, tone: indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'success' : 'danger' },
+        { icon: 'pi pi-bolt', label: 'Primeira ação', value: formatHours(indicators.sla_acao_medio_horas), detail: `meta de até ${actionTarget}h úteis`, tone: indicators.sla_acao_medio_horas <= actionTarget ? 'success' : 'warning' },
+        { icon: 'pi pi-check-circle', label: 'Conclusão', value: indicators.sla_conclusao_medio_dias != null ? `${indicators.sla_conclusao_medio_dias} dias úteis` : '-', detail: `meta de até ${closeTargetDays} dias úteis`, tone: indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'success' : 'danger' },
         { icon: 'pi pi-chart-line', label: 'Dentro do SLA', value: indicators.percentual_no_prazo != null ? `${indicators.percentual_no_prazo}%` : '-', detail: 'ação e conclusão', tone: indicators.percentual_no_prazo >= 80 ? 'success' : 'warning' },
         { icon: 'pi pi-hourglass', label: 'Em andamento', value: indicators.vagas_em_andamento ?? 0, detail: `${indicators.sla_estourado ?? 0} fora do prazo`, tone: indicators.sla_estourado ? 'danger' : 'violet' },
     ];
@@ -147,7 +147,7 @@ export function AdmissionDashboard() {
                     <p>O indicador combina a primeira ação do responsável e o tempo total até a conclusão da vaga.</p>
                     <div><span><small>Melhor departamento</small><strong>{bestDepartment ? `DPTO. ${bestDepartment.departamento}` : '-'}</strong></span><em>{bestDepartment?.percentual_no_prazo ?? 0}% no prazo</em></div>
                     <div><span><small>Primeira ação</small><strong>{formatHours(indicators.sla_acao_medio_horas)}</strong></span><em>{indicators.sla_acao_medio_horas <= actionTarget ? 'dentro da meta' : 'acima da meta'}</em></div>
-                    <div><span><small>Fechamento</small><strong>{indicators.sla_conclusao_medio_dias ?? '-'} dias</strong></span><em>{indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'dentro da meta' : 'acima da meta'}</em></div>
+                    <div><span><small>Fechamento</small><strong>{indicators.sla_conclusao_medio_dias ?? '-'} dias úteis</strong></span><em>{indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'dentro da meta' : 'acima da meta'}</em></div>
                     <div className="admission-status-strip">
                         {(data?.status || []).map((item) => (
                             <div className={`admission-status-card is-${item.status}`} key={item.status}>
@@ -171,7 +171,7 @@ export function AdmissionDashboard() {
                         <Column field="departamento" header="Departamento" sortable />
                         <Column field="total" header="Vagas" sortable />
                         <Column header="Primeira ação" body={(row) => formatHours(row.sla_acao_horas)} sortable sortField="sla_acao_horas" />
-                        <Column header="Conclusão" body={(row) => row.sla_conclusao_dias != null ? `${row.sla_conclusao_dias} dias` : '-'} sortable sortField="sla_conclusao_dias" />
+                        <Column header="Conclusão" body={(row) => row.sla_conclusao_dias != null ? `${row.sla_conclusao_dias} dias úteis` : '-'} sortable sortField="sla_conclusao_dias" />
                         <Column header="Dentro do SLA" body={(row) => <Tag value={row.percentual_no_prazo != null ? `${row.percentual_no_prazo}%` : '-'} severity={row.percentual_no_prazo >= 80 ? 'success' : row.percentual_no_prazo >= 60 ? 'warning' : 'danger'} rounded />} sortable sortField="percentual_no_prazo" />
                     </DataTable>}
 

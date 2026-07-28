@@ -346,7 +346,7 @@ body, html, :root, #root {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 200px; /* ajusta conforme a coluna */
+    max-width: 20dvw; /* ajusta conforme a coluna */
 }
 
 .text-truncate-400 {

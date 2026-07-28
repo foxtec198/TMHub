@@ -109,7 +109,8 @@ export function AppRoutes() {
           <Route path="/controle-glosas" element={<PermissionGate screen="controle_glosas"><DisallowanceControl /></PermissionGate>} />
 
           {/* Admissão */}
-          <Route path="/admissao/vagas" element={<PermissionGate screen="admissoes"><Vacancies /></PermissionGate>} />
+          <Route path="/admissao/vagas" element={<PermissionGate screen="admissoes"><Vacancies key="substituicao" /></PermissionGate>} />
+          <Route path="/admissao/aditivos" element={<PermissionGate screen="admissoes"><Vacancies key="aditivo" vacancyType="aditivo" /></PermissionGate>} />
 
           {/* Reposicoes */}
           <Route path="/reposicoes/requisicoes" element={<PermissionGate screen="reposicoes"><Requests /></PermissionGate>} />

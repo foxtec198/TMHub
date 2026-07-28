@@ -67,6 +67,7 @@ const CANDIDATE_RESULT_LABELS = {
 // Uma fábrica garante que cada abertura do diálogo receba a data atual,
 // em vez de reutilizar a data criada quando o módulo foi carregado.
 const createEmptyForm = () => ({
+    centro_custo_id: null,
     colaborador_id: null,
     supervisor_id: null,
     matricula: '',
@@ -122,7 +123,9 @@ function VagaHeader({ vaga }) {
         <div className="flex align-items-center justify-content-between w-full pr-2 flex-wrap gap-2">
             <div className="flex flex-column">
                 <span className="font-bold mb-2">{vaga.colaborador_entrada || 'Novo colaborador não definido'}</span>
-                <span className="text-500 text-sm">Substitui {vaga.colaborador} • {vaga.departamento} • {vaga.centro_custo}</span>
+                <span className="text-500 text-sm">
+                    {vaga.tipo === 'aditivo' ? 'Aditivo contratual' : `Substitui ${vaga.colaborador}`} • {vaga.departamento} • {vaga.centro_custo}
+                </span>
             </div>
             <span className="text-500 text-sm">Saiu em {new Date(vaga.created_at).toLocaleDateString('pt-br')}</span>
         </div>
@@ -259,7 +262,8 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
         <div className="flex flex-column gap-3 p-2">
             <div className="vaga-info-grid">
                 <InfoField label="Matrícula" value={vaga.matricula} />
-                <InfoField label="Colaborador" value={vaga.colaborador} />
+                {vaga.tipo !== 'aditivo' && <InfoField label="Colaborador substituído" value={vaga.colaborador} />}
+                {vaga.tipo === 'aditivo' && <InfoField label="Tipo da vaga" value="Aditivo contratual" />}
                 <InfoField label="Responsável TMHub" value={vaga.responsavel} />
                 <InfoField label="Supervisor da vaga" value={vaga.supervisor} />
                 <InfoField label="Novo colaborador" value={vaga.colaborador_entrada} />
@@ -558,7 +562,8 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
     );
 }
 
-export function Vacancies() {
+export function Vacancies({ vacancyType = 'substituicao' }) {
+    const isAdditive = vacancyType === 'aditivo';
     const [vacancies, setVacancies] = useState([]);
     const [refresh, setRefresh] = useState(false);
 
@@ -570,15 +575,17 @@ export function Vacancies() {
     const [form, setForm] = useState(createEmptyForm);
     const [scheduleSuggestions, setScheduleSuggestions] = useState([]);
     const [supervisors, setSupervisors] = useState([]);
+    const [costCenters, setCostCenters] = useState([]);
 
     const setLoading = useLoading();
     const { showToast } = useToast();
 
     useEffect(() => {
         async function getVacancies() {
+            setVacancies([]);
             setLoading(true);
             try {
-                const res = await connect.get(VACANCIES_ENDPOINT);
+                const res = await connect.get(VACANCIES_ENDPOINT, { params: { tipo: vacancyType } });
                 setVacancies(res.data ?? []);
             } catch (err) {
                 console.warn(err);
@@ -588,7 +595,7 @@ export function Vacancies() {
             }
         }
         getVacancies();
-    }, [refresh, setLoading, showToast]);
+    }, [refresh, setLoading, showToast, vacancyType]);
 
     useEffect(() => {
         // Supervisores alimentam tanto o cadastro quanto a edição rápida de cada vaga.
@@ -596,6 +603,16 @@ export function Vacancies() {
             .then(({ data }) => setSupervisors((data ?? []).map((item) => ({ label: item.nome, value: item.id }))))
             .catch(() => showToast('error', 'Erro!', 'Não foi possível carregar os supervisores.'));
     }, [showToast]);
+
+    useEffect(() => {
+        if (!isAdditive) return;
+        connect.get('/centro')
+            .then(({ data }) => setCostCenters((data ?? []).map((item) => ({
+                label: `${item.local} · DPTO. ${item.departamento ?? '-'}`,
+                value: item.id,
+            }))))
+            .catch(() => showToast('error', 'Erro!', 'Não foi possível carregar os contratos.'));
+    }, [isAdditive, showToast]);
 
     const departamentoOptions = useMemo(() => {
         const set = new Set(vacancies.map((v) => v.departamento).filter(Boolean));
@@ -633,12 +650,17 @@ export function Vacancies() {
     };
 
     const handleSave = async () => {
-        if (!form.colaborador_id) {
+        if (isAdditive && !form.centro_custo_id) {
+            showToast('warn', 'Atenção!', 'Selecione o contrato que receberá o aditivo.');
+            return;
+        }
+
+        if (!isAdditive && !form.colaborador_id) {
             showToast('warn', 'Atenção!', 'Busque e selecione um colaborador pela matrícula ou nome.');
             return;
         }
 
-        if (!form.supervisor_id) {
+        if (!isAdditive && !form.supervisor_id) {
             showToast('warn', 'Atenção!', 'Selecione o supervisor responsável pela vaga.');
             return;
         }
@@ -648,7 +670,7 @@ export function Vacancies() {
             return;
         }
 
-        if (!form.motivo_saida) {
+        if (!isAdditive && !form.motivo_saida) {
             showToast('warn', 'Atenção!', 'Informe o motivo da saída.');
             return;
         }
@@ -661,6 +683,8 @@ export function Vacancies() {
         setLoading(true);
         try {
             await connect.post(VACANCIES_ENDPOINT, {
+                tipo: vacancyType,
+                centro_custo_id: isAdditive ? form.centro_custo_id : null,
                 colaborador_id: form.colaborador_id,
                 supervisor_id: form.supervisor_id,
                 colaborador_entrada: form.colaborador_entrada.trim() || null,
@@ -740,7 +764,7 @@ export function Vacancies() {
 
     const confirmDelete = (vaga) => {
         confirmDialog({
-            message: `Deseja realmente excluir a vaga de "${vaga.colaborador}"?`,
+            message: `Deseja realmente excluir a vaga de "${vaga.tipo === 'aditivo' ? vaga.centro_custo : vaga.colaborador}"?`,
             header: 'Confirmar exclusão',
             icon: 'pi pi-exclamation-triangle',
             acceptClassName: 'p-button-danger',
@@ -755,8 +779,8 @@ export function Vacancies() {
             <ConfirmDialog />
 
             <div style={{lineHeight:"10px"}}>
-                <h1 style={{color: "var(--green-500)"}}>Gerenciamento de Vagas</h1>
-                <p>Gerencie as vagas por status, colaboradores e departamentos.</p>
+                <h1 style={{color: "var(--green-500)"}}>{isAdditive ? 'Vagas de Aditivos' : 'Gerenciamento de Vagas'}</h1>
+                <p>{isAdditive ? 'Gerencie novas vagas contratuais sem colaborador de saída.' : 'Gerencie as vagas por status, colaboradores e departamentos.'}</p>
             </div>
 
             <div className="flex gap-2 align-items-center flex-wrap">
@@ -798,7 +822,7 @@ export function Vacancies() {
                 </div>
 
                 <div className="flex align-items-center gap-2">
-                    <Button label="Histórico de entrevistas" icon="pi pi-history" outlined onClick={() => setHistoryVisible(true)} />
+                    {!isAdditive && <Button label="Histórico de entrevistas" icon="pi pi-history" outlined onClick={() => setHistoryVisible(true)} />}
                     <SelectButton value={order} onChange={(e) => e.value && setOrder(e.value)} options={orderOptions} />
                 </div>
             </div>
@@ -842,9 +866,22 @@ export function Vacancies() {
                 style={{ position: 'absolute', right: '20px', bottom: '20px' }}
             />
 
-            <Dialog header="Nova Vaga" visible={dialogVisible} style={{ width: '32rem' }} onHide={() => setDialogVisible(false)}>
+            <Dialog header={isAdditive ? 'Nova Vaga de Aditivo' : 'Nova Vaga'} visible={dialogVisible} style={{ width: '32rem' }} onHide={() => setDialogVisible(false)}>
                 <form className="flex flex-column gap-4 pt-3" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-                    <CollaboratorDropdown
+                    {isAdditive ? (
+                        <FloatLabel className="mt-4">
+                            <Dropdown
+                                id="centro_custo_id"
+                                className="w-full"
+                                value={form.centro_custo_id}
+                                onChange={(event) => setForm({ ...form, centro_custo_id: event.value })}
+                                options={costCenters}
+                                filter
+                                virtualScrollerOptions={{ itemSize: 44 }}
+                            />
+                            <label htmlFor="centro_custo_id">Contrato que receberá o aditivo *</label>
+                        </FloatLabel>
+                    ) : <CollaboratorDropdown
                         value={form.colaborador_id}
                         className="w-full mt-4"
                         placeholder="Matrícula ou nome do colaborador que saiu"
@@ -855,9 +892,9 @@ export function Vacancies() {
                             colaborador: employee?.nome || '',
                         })}
                         onError={() => showToast('error', 'Erro!', 'Não foi possível buscar os colaboradores.')}
-                    />
+                    />}
 
-                    <FloatLabel>
+                    {!isAdditive && <FloatLabel>
                         <Dropdown
                             id="supervisor_id"
                             className="w-full"
@@ -869,7 +906,7 @@ export function Vacancies() {
                             filter
                         />
                         <label htmlFor="supervisor_id">Supervisor da vaga *</label>
-                    </FloatLabel>
+                    </FloatLabel>}
 
                     <FloatLabel className='mt-3'>
                         <InputText
@@ -929,7 +966,7 @@ export function Vacancies() {
                         <label htmlFor="horario_trabalho">Horário de trabalho (se for novo, será cadastrado)</label>
                     </FloatLabel>
 
-                    <FloatLabel className='mt-3'>
+                    {!isAdditive && <FloatLabel className='mt-3'>
                         <Dropdown
                             id="motivo_saida"
                             className="w-full"
@@ -938,12 +975,12 @@ export function Vacancies() {
                             options={MOTIVO_OPTIONS}
                         />
                         <label htmlFor="motivo_saida">Motivo da saída</label>
-                    </FloatLabel>
+                    </FloatLabel>}
 
                     <Button type="submit" className='mt-3' label="Cadastrar vaga" icon="pi pi-check" />
                 </form>
             </Dialog>
-            <InterviewHistoryDialog visible={historyVisible} onHide={() => setHistoryVisible(false)} />
+            {!isAdditive && <InterviewHistoryDialog visible={historyVisible} onHide={() => setHistoryVisible(false)} />}
         </main>
     );
 }

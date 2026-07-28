@@ -9,7 +9,7 @@ on: # Call event
 
 jobs: # Jobs will run
   deploy: # This a deploy 
-    if: | # Its a condition for CLOSE, PUSH and MERGED (Is obrigatory)
+    if:
       github.event_name == 'push' ||
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     

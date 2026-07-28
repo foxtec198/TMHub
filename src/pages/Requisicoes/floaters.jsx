@@ -138,14 +138,16 @@ export function Floaters() {
 
     // Duas listas permitem promover colaboradores e remover reservas existentes.
     return (
-        <main className="h-full p-2">
-            <div className="flex w-full">
-                <div className="flex flex-column" style={{ lineHeight: '10px' }}>
-                    <h2 className="inter flex align-items-center gap-2 mb-2" style={{ color: "var(--green-600)", fontWeight: 900 }}>
-                        <i className="pi pi-users"></i>
+        <main className="h-full p-3">
+            {/* Header */}
+            <div className="flex flex-wrap justify-content-between align-items-center w-full p-2">
+                <div className="flex flex-column">
+                    <h2
+                        className="inter flex align-items-center gap-2 mb-2"
+                        style={{ color: "var(--green-600)", fontWeight: 900 }}>
                         Reservas Tecnicas
                     </h2>
-                    <p className="mt-0 mb-3 text-secondary">Gerencie os colaboradores ativos e a equipe disponível para cobrir as reposições.</p>
+                    <p className="mb-3 text-secondary mt-0">Gerencie os colaboradores ativos e a equipe disponível para cobrir as reposições.</p>
                 </div>
                 <Button
                     label="Utilizadas x disponíveis"
@@ -158,15 +160,16 @@ export function Floaters() {
                 />
             </div>
 
-            <div className="flex gap-2 justify-content-between align-items-center w-full p-3">
-                <DashCard title="Reservas técnicas" icon="pi pi-shield" value={reservas.length} className="floater-summary-card w-full" />
-                <DashCard title="Total de colaboradores" icon="pi pi-users" value={totalColaboradores} className="floater-summary-card w-full" />
+            {/* Cards */}
+            <div className="flex flex-wrap gap-4 justify-content-between align-items-center w-full p-3">
+                <DashCard title="Total de colaboradores" icon="pi pi-users" value={totalColaboradores} className="floater-summary-card flex-grow-1" />
+                <DashCard title="Reservas técnicas" icon="pi pi-shield" value={reservas.length} className="floater-summary-card flex-grow-1" />
             </div>
 
             {/* FRAME */}
-            <div className="flex w-full gap-2">
+            <div className="flex flex-wrap gap-4 justify-content-between align-items-center w-full p-3">
                 {/* Colaboradores aparecem primeiro e podem ser promovidos para o painel seguinte. */}
-                <div className="flex flex-column gap-2 p-3 overflow-y-auto flex-grow-1 h-screen">
+                <div className="flex flex-column gap-2 flex-grow-1 overflow-y-auto h-screen">
                     <span className="spaceg mb-3">Colaboradores Ativos: </span>
 
                     <FloatLabel className="w-full mb-2">
@@ -212,7 +215,7 @@ export function Floaters() {
                 </div>
 
                 {/* Reservas técnicas aparecem depois dos colaboradores. */}
-                <div className="flex flex-column gap-2 p-3 overflow-y-auto flex-grow-1 h-screen">
+                <div className="flex flex-column gap-2 flex-grow-1 overflow-y-auto h-screen">
                     <span className="spaceg mb-3">Reservas Selecionadas: </span>
 
                     <FloatLabel className="w-full mb-2">
@@ -298,10 +301,12 @@ export function Floaters() {
                             {reservationUsage.disponiveis.length
                                 ? reservationUsage.disponiveis.map((item) => (
                                     <div className="floaters-usage-item" key={item.id}>
-                                        <div className="floaters-usage-person"><strong>{item.nome}</strong></div>
+                                        <div className="floaters-usage-person">
+                                            <strong>{item.nome}</strong>
+                                            <span>Matricula: {item.matricula}</span>
+                                        </div>
                                         <div className="floaters-usage-meta">
                                             <Tag value={item.situacao || "Sem situação"} severity={["ATIVO", "TRABALHANDO"].includes(item.situacao?.toUpperCase()) ? "success" : "warning"} rounded />
-                                            <span>{item.matricula}</span>
                                         </div>
                                     </div>
                                 ))

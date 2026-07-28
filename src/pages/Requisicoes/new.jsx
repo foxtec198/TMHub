@@ -146,7 +146,7 @@ export function Request() {
                 const { data } = await connect.get("/repo/reservas-uso", {
                     params: {
                         data: selectedRequestDateKey(),
-                        supervisor_id: user?.id,
+                        publico: 1,
                     },
                 });
                 if (!active) return;
@@ -235,7 +235,7 @@ export function Request() {
                                     panelStyle={{ width: '100%' }}
                                     className="w-full mb-3"
                                     value={absent}
-                                    queryParams={{ supervisor_id: user?.id }}
+                                    queryParams={{ publico: 1 }}
                                     onChange={(id, collaborator) => {
                                         selectedAbsent(id);
                                         setAbsentDetails(collaborator);

@@ -90,7 +90,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
       <CollaboratorDropdown
         value={form.absent}
         onChange={selectAbsent}
-        queryParams={{ situacao: 1, com_local: 1 }}
+        queryParams={{ com_local: 1 }}
         placeholder="Colaborador ausente"
         onError={() => showToast("error", "Lançamento rápido", "Não foi possível buscar os colaboradores.")}
       />

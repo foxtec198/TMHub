@@ -107,60 +107,58 @@ export function Auth() {
     };
 
     return (
-        <>
-            <div className="flex h-screen p-4 bg-primary justify-content-center align-items-center">
-                <form
-                    className="flex justify-content-center align-items-center text-center bg-white border-round-xl flex-column gap-2 p-5"
-                    onSubmit={(e) => setAuth(e)}
-                >
-                    <img
-                        className="p-5 mb-4"
-                        src="/brands/main_brand.svg"
-                        alt="Logo"
-                        style={{
-                            maxHeight: "20dvh",
-                            maxWidth: "70%"
-
-                        }}
+        <div className="flex h-screen p-4 bg-primary justify-content-center align-items-center">
+            <form
+                style={{ minWidth: '20dvw' }}
+                className="flex justify-content-center align-items-center text-center bg-white border-round-xl flex-column gap-2 p-5"
+                onSubmit={(e) => setAuth(e)}
+            >
+                <img
+                    className="p-5 mb-4"
+                    src="/brands/main_brand.svg"
+                    alt="Logo"
+                    style={{
+                        maxHeight: "20dvh",
+                        maxWidth: "65%"
+                    }}
+                />
+                <FloatLabel className="w-full">
+                    <InputText
+                        className="w-full"
+                        value={user}
+                        onChange={(e) => setUser(e.target.value)}
+                        autoComplete="username"
+                        required
                     />
-                    <FloatLabel className="w-full">
-                        <InputText
-                            className="w-full"
-                            value={user}
-                            onChange={(e) => setUser(e.target.value)}
-                            autoComplete="username"
-                            required
-                        />
-                        <label>Email ou CPF</label>
-                    </FloatLabel>
+                    <label>Email ou CPF</label>
+                </FloatLabel>
 
-                    <FloatLabel className="mt-5 w-full">
-                        <Password
-                            className="w-full"
-                            inputClassName="w-full"
-                            feedback={false}
-                            value={pwd}
-                            onChange={(e) => setPwd(e.target.value)}
-                            toggleMask
-                            autoComplete="current-password"
-                            required
-                        />
-                        <label>Senha</label>
-                    </FloatLabel>
-
-                    <span className="text-accent text-center mt-5">
-                        Ainda não tem conta? <a href="">Fale com um Responsavel.</a>
-                    </span>
-
-                    <Button
-                        label="Realizar Login"
-                        icon='pi pi-angle-double-up'
-                        className="w-full h-3rem"
+                <FloatLabel className="mt-5 w-full">
+                    <Password
+                        className="w-full"
+                        inputClassName="w-full"
+                        feedback={false}
+                        value={pwd}
+                        onChange={(e) => setPwd(e.target.value)}
+                        toggleMask
+                        autoComplete="current-password"
+                        required
                     />
+                    <label>Senha</label>
+                </FloatLabel>
 
-                    <a href="" className="text-accent text-center">Esqueci a senha.</a>
-                </form>
-            </div>
-        </>
+                <span className="text-accent text-center mt-5">
+                    Ainda não tem conta? <a href="">Fale com um Responsavel.</a>
+                </span>
+
+                <Button
+                    label="Realizar Login"
+                    icon='pi pi-angle-double-up'
+                    className="w-full h-3rem"
+                />
+
+                <a href="" className="text-accent text-center">Esqueci a senha.</a>
+            </form>
+        </div>
     );
 };

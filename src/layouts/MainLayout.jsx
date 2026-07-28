@@ -83,6 +83,12 @@ export function MainLayout() {
           visible: can("admissoes"),
           command: () => { navigateTo("/admissao/vagas") }
         },
+        {
+          label: 'Aditivos',
+          icon: 'pi pi-plus-circle',
+          visible: can("admissoes"),
+          command: () => { navigateTo("/admissao/aditivos") }
+        },
       ]
     },
     {
