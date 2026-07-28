@@ -247,13 +247,14 @@ export function Products() {
                     <Button icon="pi pi-tags" label="Categorias" outlined onClick={() => setCatDialogVisible(true)} />
                 </div>
 
-            <div className="products-table-section flex flex-column overflow-auto h-full">
+            <div className="products-table-section flex flex-column overflow-auto">
                 <Table
                     data={products}
-                    tableClassName="products-table w-full h-full"
+                    tableClassName="products-table w-full"
                     style={{ width: '100%' }}
                     columns={table_itens}
                     search
+                   
                 />
             </div>
 

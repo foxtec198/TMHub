@@ -229,7 +229,7 @@ export function Movements() {
     return (
         <main className="flex flex-column gap-3 movements-page">
             <ConfirmDialog />
-            <div className="flex flex-column overflow-auto h-full">
+            <div className="flex flex-column">
                 <Table data={movements} tableClassName="w-full h-full" style={{ width: '100%', height: '100dvh' }} columns={table_itens} />
             </div>
 

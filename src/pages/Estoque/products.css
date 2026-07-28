@@ -1,12 +1,12 @@
 /* Layout específico de produtos. Cores e tipografia vêm do tema global/PrimeReact. */
 .products-page {
     width: 100%;
-    height: 100%;
-    min-height: 0;
+    min-height: 100%;
     background: var(--surface-ground);
     font-family: inherit;
     color: var(--text-primary);
     padding: 24px;
+    overflow: auto;
 }
 
 .products-table-section {
