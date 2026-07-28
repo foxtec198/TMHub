@@ -11,6 +11,7 @@ import { Tag } from 'primereact/tag';
 import connect from '../../utils/request';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
+import { PageHeader } from '../../components/PageHeader';
 
 const STATUS_LABELS = {
     aberta: 'ABERTAS',
@@ -123,13 +124,15 @@ export function AdmissionDashboard() {
 
     return (
         <section className="admission-dashboard">
-            <header className="admission-heading">
-                <div><span>Dashboard</span><h1>SLA de Admissões</h1><p>Acompanhe a velocidade de resposta e conclusão das vagas.</p></div>
-                <div className="admission-heading__actions">
+            <PageHeader
+                section="Dashboards"
+                title="SLA de Admissões"
+                description="Acompanhe a velocidade de resposta e conclusão das vagas."
+                actions={<>
                     <Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" locale="pt-BR" placeholder="Selecione o período" showIcon readOnlyInput hideOnRangeSelection />
                     <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-                </div>
-            </header>
+                </>}
+            />
 
             <div className="admission-summary">
                 {summary.map((item) => <SummaryCard key={item.label} {...item} />)}

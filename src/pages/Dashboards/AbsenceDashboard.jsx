@@ -12,6 +12,7 @@ import { socketio } from "../../utils/socketio";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import "./absenceDashboard.css";
+import { PageHeader } from "../../components/PageHeader";
 
 const ALL = "__all__";
 const now = new Date();
@@ -126,14 +127,16 @@ export function AbsenceDashboard() {
   const clearFilters = () => setFilters({ ...DEFAULT_FILTERS, period: [...DEFAULT_FILTERS.period] });
 
   return <section className="absence-dashboard">
-    <header className="absence-dashboard-heading">
-      <div><span>Gestão de ponto</span><h1>Dashboard de Faltas</h1><p>Indicadores de ocorrência, justificativa e velocidade de tratativa.</p></div>
-      <div className="absence-dashboard-actions">
+    <PageHeader
+      section="Dashboards"
+      title="Dashboard de Faltas"
+      description="Indicadores de ocorrência, justificativa e velocidade de tratativa."
+      actions={<>
         <div className="absence-period-label"><i className="pi pi-calendar" /><span>{periodLabel(filters.period)}</span></div>
         <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
         <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-      </div>
-    </header>
+      </>}
+    />
 
     <section className="absence-overview">
       <article className="absence-primary-kpi">

@@ -165,16 +165,16 @@ export function MainLayout() {
       ]
     },
     {
+      label: 'Estrutura',
+      icon: 'pi pi-building',
+      visible: can("estrutura"),
+      command: () => { navigateTo("/estrutura") }
+    },
+    {
       label: 'Meus Projetos',
       icon: 'pi pi-spinner-dotted',
       visible: can("projetos"),
       command: () => { navigateTo("/projetos") }
-    },
-    {
-      label: 'Frotas',
-      disabled: "True",
-      icon: 'pi pi-car',
-      command: () => { navigateTo("/frotas") }
     },
     {
       label: 'Configurações',

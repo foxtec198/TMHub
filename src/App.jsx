@@ -10,6 +10,7 @@ import connect from "./utils/request";
 import { PrimeReactProvider } from 'primereact/api';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { ToastProvider } from "./contexts/ToastContext";
+import { PermissionGate } from "./components/PermissionGate"
 
 // Styles
 import 'primeicons/primeicons.css';
@@ -39,7 +40,7 @@ import { Settings } from "./pages/Configuracoes"
 import { AbsenceControl } from "./pages/ControleFaltas"
 import { DisallowanceControl } from "./pages/ControleGlosas"
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard"
-import { PermissionGate } from "./components/PermissionGate"
+import { Structure } from "./pages/Estrutura/index";
 
 document.documentElement.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
 
@@ -127,8 +128,8 @@ export function AppRoutes() {
           <Route path="/estoque/codigos-de-barras" element={<PermissionGate screen="estoque_codigos"><BarcodeGenerator /></PermissionGate>} />
           <Route path="/estoque/movimentacoes" element={<PermissionGate screen="estoque_movimentos"><Movements /></PermissionGate>} />
 
-          {/* Frotas */}
-          <Route path="/frotas" element={<Frotas />} />
+          {/* Estrutura */}
+          <Route path="/estrutura" element={<Structure />} />
         </Route>
 
         <Route path="*" element={<Navigate to={token() ? "/init" : "/"} />} />

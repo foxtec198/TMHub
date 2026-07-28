@@ -8,6 +8,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { buildProductBarcode } from './barcode';
 import { AnimatedBarcodeIllustration } from './AnimatedBarcodeIllustration';
+import { PageHeader } from '../../components/PageHeader';
 import './barcode_generator.css';
 
 const PRODUCTS_ENDPOINT = '/estoque/produtos';
@@ -251,11 +252,7 @@ export function BarcodeGenerator() {
 
     return (
         <main className="barcode-generator-page">
-            <header className="barcode-generator-header">
-                <span>Estoque</span>
-                <h1>Gerador de Código de Barras</h1>
-                <p>Selecione os produtos conforme a necessidade de geração.</p>
-            </header>
+            <PageHeader section="Estoque" title="Gerador de Código de Barras" description="Selecione os produtos conforme a necessidade de geração." />
 
             <section className="barcode-generator-body">
                 <div className="barcode-illustration-area">

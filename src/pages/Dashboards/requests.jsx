@@ -14,6 +14,7 @@ import { Dropdown } from "primereact/dropdown"
 // Components
 import { DashCard } from "../../components/DashCard"
 import { Table } from "../../components/tables/Table"
+import { PageHeader } from "../../components/PageHeader"
 
 // Utils
 import { useEffect, useState, useRef, useMemo } from "react"
@@ -574,6 +575,11 @@ export function RequestReport() {
     // A tela é dividida em toolbar, indicadores, gráficos, tabela e painel lateral.
     return (
         <main className="request-dashboard flex flex-column p-2 gap-2 w-full">
+            <PageHeader
+                section="Dashboards"
+                title="Dashboard de Reposições"
+                description="Acompanhe volume, cobertura, motivos e desempenho das requisições."
+            />
             <div className="dashboard-toolbar flex justify-content-between align-items-center w-full">
                 <div className="dashboard-summary flex gap-2 p-2 w-full">
                     <DashCard

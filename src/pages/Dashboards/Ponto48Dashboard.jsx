@@ -12,6 +12,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Table } from "../../components/tables/Table";
+import { PageHeader } from "../../components/PageHeader";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import { Ponto48Adjustments } from "./Ponto48Adjustments";
@@ -319,15 +320,17 @@ export function Ponto48Dashboard() {
 
   return (
     <section className="ponto48-dashboard">
-      <header className="ponto48-heading">
-        <div><span>Dashboard</span><h1>Ponto 48 horas</h1><p>Absenteísmo, horas extras e qualidade das batidas em uma única visão.</p></div>
-        <div className="ponto48-heading__actions">
+      <PageHeader
+        section="Dashboards"
+        title="Ponto 48 horas"
+        description="Absenteísmo, horas extras e qualidade das batidas em uma única visão."
+        actions={<>
           {data.importacoes.length ? <Dropdown value={selectedBatch} options={data.importacoes} optionValue="id" optionLabel="periodo_inicio" valueTemplate={() => formatPeriod(data.importacao)} itemTemplate={formatPeriod} onChange={(event) => loadDashboard(event.value)} /> : null}
           {isAdmin ? <Button icon="pi pi-upload" label="Importar CSVs" outlined onClick={() => setImportVisible(true)} /> : null}
           {isAdmin && selectedBatch ? <Button icon="pi pi-trash" label="Limpar dados" severity="danger" outlined loading={clearing} onClick={confirmClearImportedData} /> : null}
           <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
-        </div>
-      </header>
+        </>}
+      />
 
       <OverlayPanel ref={filterPanel} className="ponto48-filter-panel">
         <div className="ponto48-filter-title"><div><strong>Filtrar Ponto 48 horas</strong><span>Um único conjunto de filtros para as duas abas.</span></div><Button icon="pi pi-filter-slash" text rounded onClick={clearFilters} /></div>

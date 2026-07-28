@@ -7,6 +7,7 @@ import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Avatar } from "primereact/avatar";
 import { TabPanel, TabView } from "primereact/tabview";
+import { PageHeader } from "../../components/PageHeader";
 import connect from "../../utils/request";
 import { getInitials, storeProfile } from "../../utils/profile";
 import { useToast } from "../../contexts/ToastContext";
@@ -117,7 +118,7 @@ export function Settings() {
 
   // Cards separam preferências visuais de operações sensíveis da conta.
   return <section className="settings-page">
-    <div className="settings-heading"><div><span className="settings-kicker">Sua conta</span><h1>Configurações</h1><p>Personalize seu perfil, acesso e aparência do TM Hub.</p></div></div>
+    <PageHeader section="Sistema" title="Configurações" description="Personalize seu perfil, acesso e aparência do TM Hub." />
     <TabView className="settings-tabs">
       <TabPanel header="Minha conta" leftIcon="pi pi-user mr-2">
     <div className="settings-grid">

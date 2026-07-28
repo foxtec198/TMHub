@@ -15,6 +15,7 @@ import { Dialog } from "primereact/dialog";
 import { Calendar } from "primereact/calendar";
 import { QuickRequestDialog } from "./QuickRequestDialog";
 import { RequestImportDialog } from "./RequestImportDialog";
+import { PageHeader } from "../../components/PageHeader";
 import "./requests.css";
 
 // Utils
@@ -390,11 +391,11 @@ export function Requests() {
         <main className="flex flex-column gap-1 p-2">
             <ConfirmDialog />
 
-            <h2 className="inter flex align-items-center gap-2" style={{ color: "var(--green-600)", fontWeight: 900 }}>
-                <i className="pi pi-sync"></i>
-                Requisições
-            </h2>
-            <p className="mt-0 mb-3 text-secondary">Acompanhe as reposições abertas, atualize os dados e acesse rapidamente novos lançamentos e relatórios.</p>
+            <PageHeader
+                section="Reposições"
+                title="Requisições"
+                description="Acompanhe as reposições abertas, atualize os dados e acesse rapidamente novos lançamentos e relatórios."
+            />
 
             <div className="requests-speed-dial">
                 <Tooltip target=".requests-speed-dial .p-speeddial-action" position="left" showDelay={150} />

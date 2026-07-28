@@ -16,6 +16,7 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { DashCard } from '../../components/DashCard';
 import { CollaboratorDropdown } from '../../components/CollaboratorDropdown';
 import { InterviewHistoryDialog } from './InterviewHistoryDialog';
+import { PageHeader } from '../../components/PageHeader';
 
 // Utils
 import { useEffect, useMemo, useState } from 'react';
@@ -778,10 +779,11 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
         <main className="flex flex-column gap-3 admissao-page">
             <ConfirmDialog />
 
-            <div style={{lineHeight:"10px"}}>
-                <h1 style={{color: "var(--green-500)"}}>{isAdditive ? 'Vagas de Aditivos' : 'Gerenciamento de Vagas'}</h1>
-                <p>{isAdditive ? 'Gerencie novas vagas contratuais sem colaborador de saída.' : 'Gerencie as vagas por status, colaboradores e departamentos.'}</p>
-            </div>
+            <PageHeader
+                section="Admissão"
+                title={isAdditive ? 'Vagas de Aditivos' : 'Gerenciamento de Vagas'}
+                description={isAdditive ? 'Gerencie novas vagas contratuais sem colaborador de saída.' : 'Gerencie as vagas por status, colaboradores e departamentos.'}
+            />
 
             <div className="flex gap-2 align-items-center flex-wrap">
                 {STATUS_OPTIONS.map((s) => (

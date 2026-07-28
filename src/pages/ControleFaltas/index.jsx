@@ -14,6 +14,7 @@ import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+import { PageHeader } from "../../components/PageHeader";
 import { can } from "../../utils/permissions";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import "./styles.css";
@@ -243,14 +244,16 @@ export function AbsenceControl() {
   };
 
   return <section className="absence-page">
-    <header className="absence-header">
-      <div><span>Gestão de ponto</span><h1>Controle de Faltas</h1><p>Registros gerados automaticamente pelas requisições de reposição.</p></div>
-      <div className="absence-header-actions">
+    <PageHeader
+      section="Gestão de ponto"
+      title="Controle de Faltas"
+      description="Registros gerados automaticamente pelas requisições de reposição."
+      actions={<>
         <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
         {canEdit && <Button icon="pi pi-plus" label="Lançar falta" onClick={openManual} />}
         <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-      </div>
-    </header>
+      </>}
+    />
     <div className="absence-summary">
       <article><i className="pi pi-list" /><div><small>Total</small><strong>{summary.total}</strong></div></article>
       <article><i className="pi pi-inbox" /><div><small>Pendentes</small><strong>{summary.pending}</strong></div></article>

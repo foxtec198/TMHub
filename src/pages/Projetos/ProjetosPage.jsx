@@ -10,6 +10,7 @@ import CardDetailDialog from '../../components/CardDetailDialog';
 import MembersDialog from '../../components/MembersDialog';
 import NewProjectDialog from '../../components/NewProjectDialog';
 import ProjectMemberAvatar from '../../components/ProjectMemberAvatar';
+import { PageHeader } from '../../components/PageHeader';
 import { useToast } from '../../contexts/ToastContext';
 import './ProjetosPage.css';
 

@@ -10,6 +10,7 @@ import { Dialog } from 'primereact/dialog';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Table } from '../../components/tables/Table';
 import { DashCard } from '../../components/DashCard';
+import { PageHeader } from '../../components/PageHeader';
 
 import { useEffect, useMemo, useState } from 'react';
 import connect from '../../utils/request';
@@ -222,6 +223,7 @@ export function Products() {
     return (
         <main className="flex flex-column gap-3 products-page">
             <ConfirmDialog />
+            <PageHeader section="Estoque" title="Produtos" description="Gerencie produtos, categorias, quantidades e níveis mínimos do estoque." />
 
             <div className="products-summary flex flex-wrap gap-2 align-items-center">
                 <DashCard

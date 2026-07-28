@@ -6,6 +6,7 @@ import { Splitter, SplitterPanel } from "primereact/splitter";
 import { Dialog } from "primereact/dialog";
 import { Calendar } from "primereact/calendar";
 import { DashCard } from "../../components/DashCard";
+import { PageHeader } from "../../components/PageHeader";
 
 // Utils
 import { useEffect, useMemo, useState } from "react";
@@ -139,17 +140,11 @@ export function Floaters() {
     // Duas listas permitem promover colaboradores e remover reservas existentes.
     return (
         <main className="h-full p-3">
-            {/* Header */}
-            <div className="flex flex-wrap justify-content-between align-items-center w-full p-2">
-                <div className="flex flex-column">
-                    <h2
-                        className="inter flex align-items-center gap-2 mb-2"
-                        style={{ color: "var(--green-600)", fontWeight: 900 }}>
-                        Reservas Tecnicas
-                    </h2>
-                    <p className="mb-3 text-secondary mt-0">Gerencie os colaboradores ativos e a equipe disponível para cobrir as reposições.</p>
-                </div>
-                <Button
+            <PageHeader
+                section="Reposições"
+                title="Reservas Técnicas"
+                description="Gerencie os colaboradores ativos e a equipe disponível para cobrir as reposições."
+                actions={<Button
                     label="Utilizadas x disponíveis"
                     icon="pi pi-calendar"
                     outlined
@@ -157,8 +152,8 @@ export function Floaters() {
                         setUsageDialog(true);
                         loadReservationUsage();
                     }}
-                />
-            </div>
+                />}
+            />
 
             {/* Cards */}
             <div className="flex flex-wrap gap-4 justify-content-between align-items-center w-full p-3">

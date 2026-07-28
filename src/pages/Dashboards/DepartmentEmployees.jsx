@@ -6,6 +6,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import connect from "../../utils/request";
 import { useToast } from "../../contexts/ToastContext";
+import { PageHeader } from "../../components/PageHeader";
 import "./departmentEmployees.css";
 
 const EMPTY_FILTERS = {
@@ -132,22 +133,19 @@ export function DepartmentEmployeesDashboard() {
 
     return (
         <section className="department-dashboard">
-            <div className="department-dashboard__heading">
-                <div>
-                    <span className="department-dashboard__eyebrow">Dashboard</span>
-                    <h1>Colaboradores por departamento</h1>
-                    <p>Visualize a distribuição dos colaboradores por contrato e departamento.</p>
-                </div>
-
-                <Button
+            <PageHeader
+                section="Dashboards"
+                title="Colaboradores por departamento"
+                description="Visualize a distribuição dos colaboradores por contrato e departamento."
+                actions={<Button
                     type="button"
                     icon="pi pi-filter-fill"
                     label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
                     className="department-filter-button"
                     aria-label="Abrir filtros do dashboard"
                     onClick={(event) => filterPanel.current?.toggle(event)}
-                />
-            </div>
+                />}
+            />
 
             <div className="department-dashboard__summary">
                 <div><span>Departamentos</span><strong>{departments.length}</strong></div>

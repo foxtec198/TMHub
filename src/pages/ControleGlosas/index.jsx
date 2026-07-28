@@ -17,6 +17,7 @@ import { can } from "../../utils/permissions";
 import { exportDisallowancesXlsx } from "../../utils/exportDisallowancesXlsx";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+import { PageHeader } from "../../components/PageHeader";
 import "./styles.css";
 import "./contrast.css";
 
@@ -402,15 +403,17 @@ export function DisallowanceControl() {
   };
 
   return <section className="glosa-page">
-    <header className="glosa-heading">
-      <div><span>Gestão contratual</span><h1>Controle de Glosas</h1><p>Acompanhe coberturas, valores em análise e perdas por competência.</p></div>
-      <div className="glosa-heading-actions">
+    <PageHeader
+      section="Gestão contratual"
+      title="Controle de Glosas"
+      description="Acompanhe coberturas, valores em análise e perdas por competência."
+      actions={<>
         <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => filterPanel.current?.toggle(event)} />
         <Button label="Exportar XLSX" icon="pi pi-file-excel" outlined onClick={exportSpreadsheet} />
         <Button label="Atualizar" icon="pi pi-refresh" outlined onClick={() => setRefresh((value) => value + 1)} />
         {canCreate && <Button label="Nova glosa" icon="pi pi-plus" onClick={openCreate} />}
-      </div>
-    </header>
+      </>}
+    />
 
     <div className="glosa-summary">
       <article><i className="pi pi-file" /><div><small>Registros</small><strong>{summary.total_registros || 0}</strong><span>{summary.dias || 0} dia(s)</span></div></article>

@@ -16,6 +16,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { BarcodeScanner } from './BarcodeScanner';
+import { PageHeader } from '../../components/PageHeader';
 import { isProductBarcode, productIdFromBarcode } from './barcode';
 
 const MOVEMENTS_ENDPOINT = '/estoque/movimentos';
@@ -229,6 +230,7 @@ export function Movements() {
     return (
         <main className="flex flex-column gap-3 movements-page">
             <ConfirmDialog />
+            <PageHeader section="Estoque" title="Movimentações" description="Acompanhe entradas e saídas e registre novas movimentações do estoque." />
             <div className="flex flex-column">
                 <Table data={movements} tableClassName="w-full h-full" style={{ width: '100%', height: '100dvh' }} columns={table_itens} />
             </div>
