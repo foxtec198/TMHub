@@ -40,6 +40,7 @@ import { Settings } from "./pages/Configuracoes";
 import { AbsenceControl } from "./pages/ControleFaltas";
 import { DisallowanceControl } from "./pages/ControleGlosas";
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
+import { DashboardLogistic } from "./pages/Dashboards/logistic";
 import { Structure } from "./pages/Estrutura/index";
 import { Pcd } from "./pages/Indicadores/pcd";
 
@@ -133,6 +134,7 @@ export function AppRoutes() {
           <Route path="/reports/ponto-48-horas" element={<PermissionGate screen="dashboard_ponto48"><Ponto48Dashboard /></PermissionGate>} />
           <Route path="/reports/admissoes" element={<PermissionGate screen="dashboard_admissoes"><AdmissionDashboard /></PermissionGate>} />
           <Route path="/reports/faltas" element={<PermissionGate screen="dashboard_faltas"><AbsenceDashboard /></PermissionGate>} />
+          <Route path="/reports/logistica" element={<PermissionGate screen="dashboard_logistica"><DashboardLogistic /></PermissionGate>} />
           <Route path="/estoque/produtos" element={<PermissionGate screen="estoque_produtos"><Products /></PermissionGate>} />
           <Route path="/estoque/codigos-de-barras" element={<PermissionGate screen="estoque_codigos"><BarcodeGenerator /></PermissionGate>} />
           <Route path="/estoque/movimentacoes" element={<PermissionGate screen="estoque_movimentos"><Movements /></PermissionGate>} />

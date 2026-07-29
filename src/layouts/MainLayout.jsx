@@ -24,6 +24,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/reports/ponto-48-horas": ["ponto48"],
   "/reports/admissoes": ["admissao"],
   "/reports/faltas": ["controle_faltas"],
+  "/reports/logistica": ["estoque.movimentos"],
   "/estoque/produtos": ["estoque.produtos"],
   "/estoque/codigos-de-barras": ["estoque.produtos"],
   "/estoque/movimentacoes": ["estoque.movimentos"],
@@ -103,6 +104,12 @@ export function MainLayout() {
           icon: 'pi pi-chart-bar',
           visible: can("dashboard_faltas"),
           command: () => { navigateTo("/reports/faltas") }
+        },
+        {
+          label: 'Logística',
+          icon: 'pi pi-truck',
+          visible: can("dashboard_logistica"),
+          command: () => { navigateTo("/reports/logistica") }
         }
       ]
     },

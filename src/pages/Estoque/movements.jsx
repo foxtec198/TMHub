@@ -9,6 +9,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { FloatLabel } from 'primereact/floatlabel';
 import { Tag } from 'primereact/tag';
 import { SelectButton } from 'primereact/selectbutton';
+import { MultiSelect } from 'primereact/multiselect';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import connect from '../../utils/request';
@@ -18,9 +19,11 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { BarcodeScanner } from './BarcodeScanner';
 import { PageHeader } from '../../components/PageHeader';
 import { isProductBarcode, productIdFromBarcode } from './barcode';
+import { can } from '../../utils/permissions';
 
 const MOVEMENTS_ENDPOINT = '/estoque/movimentos';
 const PRODUCTS_ENDPOINT = '/estoque/produtos';
+const CATEGORIES_ENDPOINT = '/estoque/categorias';
 
 const tipoOptions = [
     { label: 'Entrada', value: 'entrada' },
@@ -28,28 +31,38 @@ const tipoOptions = [
 ];
 
 const emptyForm = {
+    id: null,
     item_id: null,
     tipo: 'entrada',
     quantidade: 1,
     observacao: '',
+    destinatarios: [],
 };
 
 export function Movements() {
     const [movements, setMovements] = useState([]);
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [employeeOptions, setEmployeeOptions] = useState([]);
     const [refresh, setRefresh] = useState(false);
 
     const [dialogVisible, setDialogVisible] = useState(false);
     const [form, setForm] = useState(emptyForm);
     const [scannerVisible, setScannerVisible] = useState(false);
+    const [movementDetail, setMovementDetail] = useState(null);
     const scanBufferRef = useRef('');
     const lastScanKeyRef = useRef(0);
+    const employeeSearchTimer = useRef(null);
 
     const setLoading = useLoading();
     const { showToast } = useToast();
 
     const role = localStorage.getItem('role');
     const isAdmin = role === 'ADMIN';
+    const canEdit = can('estoque_movimentos', 'edit');
+    const selectedProduct = products.find((product) => product.id === form.item_id);
+    const isEpi = categories.find((category) => category.id === selectedProduct?.categoria_id)
+        ?.nome?.trim()?.toUpperCase() === 'EPI';
 
     const handleDeleteMovement = async (movement) => {
         setLoading(true);
@@ -96,8 +109,12 @@ export function Movements() {
     useEffect(() => {
         async function getProducts() {
             try {
-                const res = await connect.get(PRODUCTS_ENDPOINT);
-                setProducts(res.data ?? []);
+                const [productsResponse, categoriesResponse] = await Promise.all([
+                    connect.get(PRODUCTS_ENDPOINT),
+                    connect.get(CATEGORIES_ENDPOINT),
+                ]);
+                setProducts(productsResponse.data ?? []);
+                setCategories(categoriesResponse.data ?? []);
             } catch (err) {
                 console.warn(err);
             }
@@ -106,6 +123,98 @@ export function Movements() {
     }, [refresh]);
 
     const productName = (id) => products.find((p) => p.id === id)?.nome ?? `#${id}`;
+
+    const mergeEmployeeOptions = useCallback((items) => {
+        setEmployeeOptions((current) => {
+            const merged = new Map(current.map((item) => [item.id, item]));
+            items.forEach((item) => merged.set(item.id, item));
+            return [...merged.values()];
+        });
+    }, []);
+
+    const searchEmployees = useCallback((query = '') => {
+        window.clearTimeout(employeeSearchTimer.current);
+        employeeSearchTimer.current = window.setTimeout(async () => {
+            try {
+                const { data } = await connect.get('/funcionarios', {
+                    params: { situacao: 1, search: query || undefined, limit: 50 },
+                });
+                mergeEmployeeOptions((data || []).map((employee) => ({
+                    ...employee,
+                    label: `${employee.matricula} - ${employee.nome}`,
+                })));
+            } catch (error) {
+                showToast('error', 'Colaboradores', error.response?.data || 'Não foi possível pesquisar colaboradores.');
+            }
+        }, query ? 300 : 0);
+    }, [mergeEmployeeOptions, showToast]);
+
+    useEffect(() => () => window.clearTimeout(employeeSearchTimer.current), []);
+
+    const distributeRecipients = (ids, total) => {
+        if (!ids.length) return [];
+        const parsedTotal = Number(total || 0);
+        if (parsedTotal < ids.length) return null;
+        const base = Math.floor(parsedTotal / ids.length);
+        let remainder = parsedTotal % ids.length;
+        return ids.map((id) => ({
+            colaborador_id: id,
+            quantidade: base + (remainder-- > 0 ? 1 : 0),
+        }));
+    };
+
+    const selectRecipients = (ids) => {
+        const distributed = distributeRecipients(ids, form.quantidade);
+        if (distributed === null) {
+            showToast('warn', 'Quantidade insuficiente', 'A quantidade total deve ser ao menos igual ao número de colaboradores.');
+            return;
+        }
+        setForm((current) => ({ ...current, destinatarios: distributed }));
+    };
+
+    const changeTotalQuantity = (quantity) => {
+        const ids = form.destinatarios.map((item) => item.colaborador_id);
+        const distributed = distributeRecipients(ids, quantity);
+        setForm((current) => ({
+            ...current,
+            quantidade: quantity,
+            destinatarios: distributed === null ? current.destinatarios : distributed,
+        }));
+    };
+
+    const changeRecipientQuantity = (employeeId, quantity) => {
+        setForm((current) => ({
+            ...current,
+            destinatarios: current.destinatarios.map((item) => (
+                item.colaborador_id === employeeId ? { ...item, quantidade: quantity || 0 } : item
+            )),
+        }));
+    };
+
+    const recipientOption = (employeeId) => employeeOptions.find((item) => item.id === employeeId);
+    const recipientTotal = form.destinatarios.reduce((total, item) => total + Number(item.quantidade || 0), 0);
+
+    function openEdit(movement) {
+        const options = (movement.destinatarios || []).map((recipient) => ({
+            id: recipient.colaborador_id,
+            centro_id: recipient.centro_custo_id,
+            centro_local: recipient.local,
+            label: recipient.colaborador,
+        }));
+        mergeEmployeeOptions(options);
+        setForm({
+            id: movement.id,
+            item_id: movement.item_id,
+            tipo: movement.tipo,
+            quantidade: movement.quantidade,
+            observacao: movement.observacao || '',
+            destinatarios: (movement.destinatarios || []).map((recipient) => ({
+                colaborador_id: recipient.colaborador_id,
+                quantidade: recipient.quantidade,
+            })),
+        });
+        setDialogVisible(true);
+    }
 
     const table_itens = useMemo(() => ([
         {
@@ -127,18 +236,28 @@ export function Movements() {
             body: (row) => <Tag value={row.tipo === 'entrada' ? 'Entrada' : 'Saída'} severity={row.tipo === 'entrada' ? 'success' : 'danger'} rounded />,
         },
         { field: 'quantidade', header: 'Quantidade' },
+        {
+            header: 'Destinatários',
+            body: (row) => row.destinatarios?.length
+                ? <Button label={`${row.destinatarios.length} colaborador(es)`} icon="pi pi-users" text onClick={() => setMovementDetail(row)} />
+                : <span className="text-color-secondary">—</span>,
+        },
         { field: 'observacao', header: 'Observação', class: 'text-truncate' },
         { field: 'origem', header: 'Origem' },
-        ...(isAdmin ? [{
+        ...((canEdit || isAdmin) ? [{
             header: 'Ações',
             body: (row) => (
-                <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDeleteMovement(row)} tooltip="Excluir" />
+                <div className="flex gap-1">
+                    {canEdit && <Button icon="pi pi-pencil" rounded text onClick={() => openEdit(row)} tooltip="Editar" />}
+                    {isAdmin && <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDeleteMovement(row)} tooltip="Excluir" />}
+                </div>
             ),
         }] : []),
-    ]), [products, isAdmin]);
+    ]), [products, isAdmin, canEdit]);
 
     const openCreate = () => {
         setForm(emptyForm);
+        setEmployeeOptions([]);
         setDialogVisible(true);
     };
 
@@ -212,11 +331,31 @@ export function Movements() {
             showToast('warn', 'Atenção!', 'Selecione o produto, o tipo e a quantidade.');
             return;
         }
+        if (form.tipo === 'saida' && isEpi && !form.destinatarios.length) {
+            showToast('warn', 'Destinatários obrigatórios', 'Selecione quem recebeu o EPI.');
+            return;
+        }
+        if (form.destinatarios.length && recipientTotal !== form.quantidade) {
+            showToast('warn', 'Distribuição inválida', 'A soma das quantidades por colaborador deve ser igual à quantidade total.');
+            return;
+        }
 
         setLoading(true);
         try {
-            await connect.post(MOVEMENTS_ENDPOINT, { ...form, origem: 'painel' });
-            showToast('success', 'Sucesso!', 'Movimentação registrada com sucesso.');
+            const payload = {
+                item_id: form.item_id,
+                tipo: form.tipo,
+                quantidade_total: form.quantidade,
+                observacao: form.observacao,
+                origem: 'painel',
+                destinatarios: form.tipo === 'saida' ? form.destinatarios : [],
+            };
+            if (form.id) {
+                await connect.patch(`${MOVEMENTS_ENDPOINT}/${form.id}`, payload);
+            } else {
+                await connect.post(MOVEMENTS_ENDPOINT, payload);
+            }
+            showToast('success', 'Sucesso!', form.id ? 'Movimentação atualizada com sucesso.' : 'Movimentação registrada com sucesso.');
             setDialogVisible(false);
             setRefresh((prev) => !prev);
         } catch (err) {
@@ -256,9 +395,18 @@ export function Movements() {
                 tooltip="Ler código e lançar movimentação"
             />
 
-            <Dialog header="Nova Movimentação" visible={dialogVisible} style={{ width: '28rem' }} onHide={() => setDialogVisible(false)}>
+            <Dialog header={form.id ? 'Editar Movimentação' : 'Nova Movimentação'} visible={dialogVisible} className="movement-dialog" onHide={() => setDialogVisible(false)}>
                 <form className="flex flex-column gap-4 pt-3" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-                    <SelectButton value={form.tipo} onChange={(e) => e.value && setForm({ ...form, tipo: e.value })} options={tipoOptions} className="tipo-select-button w-full" />
+                    <SelectButton
+                        value={form.tipo}
+                        onChange={(e) => e.value && setForm({
+                            ...form,
+                            tipo: e.value,
+                            destinatarios: e.value === 'entrada' ? [] : form.destinatarios,
+                        })}
+                        options={tipoOptions}
+                        className="tipo-select-button w-full"
+                    />
                     {!form.tipo && <small className="movement-type-hint">Agora escolha se o produto está entrando ou saindo do estoque.</small>}
                     <Button
                         type="button"
@@ -272,7 +420,7 @@ export function Movements() {
                             id="produto"
                             className="w-full"
                             value={form.item_id}
-                            onChange={(e) => setForm({ ...form, item_id: e.value })}
+                            onChange={(e) => setForm({ ...form, item_id: e.value, destinatarios: [] })}
                             options={products}
                             optionLabel="nome"
                             optionValue="id"
@@ -282,17 +430,98 @@ export function Movements() {
                     </FloatLabel>
 
                     <FloatLabel>
-                        <InputNumber id="quantidade" className="w-full" value={form.quantidade} onValueChange={(e) => setForm({ ...form, quantidade: e.value ?? 0 })} min={1} />
+                        <InputNumber id="quantidade" className="w-full" value={form.quantidade} onValueChange={(e) => changeTotalQuantity(e.value ?? 0)} min={1} />
                         <label htmlFor="quantidade">Quantidade</label>
                     </FloatLabel>
+
+                    {form.tipo === 'saida' && isEpi && (
+                        <section className="movement-recipients">
+                            <div className="movement-recipients-heading">
+                                <div>
+                                    <strong>Destinatários do EPI</strong>
+                                    <span>O local é obtido automaticamente do cadastro atual.</span>
+                                </div>
+                                <Tag
+                                    value={`${recipientTotal}/${form.quantidade}`}
+                                    severity={recipientTotal === form.quantidade ? 'success' : 'warning'}
+                                />
+                            </div>
+                            <MultiSelect
+                                value={form.destinatarios.map((item) => item.colaborador_id)}
+                                options={employeeOptions}
+                                optionLabel="label"
+                                optionValue="id"
+                                filter
+                                filterBy="label"
+                                onFilter={(event) => searchEmployees(event.filter)}
+                                onShow={() => searchEmployees('')}
+                                onChange={(event) => selectRecipients(event.value || [])}
+                                placeholder="Pesquise por nome ou matrícula"
+                                selectedItemsLabel="{0} colaboradores selecionados"
+                                emptyFilterMessage="Nenhum colaborador ativo encontrado"
+                                display="chip"
+                                className="w-full"
+                            />
+                            <div className="movement-recipient-list">
+                                {form.destinatarios.map((recipient) => {
+                                    const employee = recipientOption(recipient.colaborador_id);
+                                    return (
+                                        <article key={recipient.colaborador_id}>
+                                            <div>
+                                                <strong>{employee?.label || `#${recipient.colaborador_id}`}</strong>
+                                                <span><i className="pi pi-map-marker" /> {employee?.centro_local || employee?.local || 'Local vinculado no cadastro'}</span>
+                                            </div>
+                                            <InputNumber
+                                                value={recipient.quantidade}
+                                                onValueChange={(event) => changeRecipientQuantity(recipient.colaborador_id, event.value)}
+                                                min={1}
+                                                showButtons
+                                                buttonLayout="horizontal"
+                                                decrementButtonIcon="pi pi-minus"
+                                                incrementButtonIcon="pi pi-plus"
+                                            />
+                                        </article>
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    )}
 
                     <FloatLabel>
                         <InputTextarea id="observacao" className="w-full" rows={3} value={form.observacao} onChange={(e) => setForm({ ...form, observacao: e.target.value })} />
                         <label htmlFor="observacao">Observação (opcional)</label>
                     </FloatLabel>
 
-                    <Button type="submit" label="Registrar movimentação" icon="pi pi-check" />
+                    <Button type="submit" label={form.id ? 'Salvar alterações' : 'Registrar movimentação'} icon="pi pi-check" />
                 </form>
+            </Dialog>
+
+            <Dialog
+                header="Detalhes da movimentação"
+                visible={Boolean(movementDetail)}
+                className="movement-detail-dialog"
+                onHide={() => setMovementDetail(null)}
+            >
+                {movementDetail && (
+                    <div className="movement-detail">
+                        <div className="movement-detail-summary">
+                            <span><small>Produto</small><strong>{movementDetail.produto}</strong></span>
+                            <span><small>Tipo</small><Tag value={movementDetail.tipo === 'entrada' ? 'ENTRADA' : 'SAÍDA'} severity={movementDetail.tipo === 'entrada' ? 'success' : 'danger'} /></span>
+                            <span><small>Quantidade total</small><strong>{movementDetail.quantidade}</strong></span>
+                            <span><small>Data</small><strong>{new Date(movementDetail.data_hora).toLocaleString('pt-BR')}</strong></span>
+                            <span><small>Responsável</small><strong>{movementDetail.responsavel}</strong></span>
+                        </div>
+                        <div className="movement-detail-recipients">
+                            <h3>Colaboradores destinatários</h3>
+                            {(movementDetail.destinatarios || []).map((recipient) => (
+                                <article key={recipient.id}>
+                                    <div><strong>{recipient.colaborador}</strong><span>{recipient.local}</span></div>
+                                    <Tag value={`${recipient.quantidade} unidade(s)`} severity="info" />
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </Dialog>
 
             <BarcodeScanner
