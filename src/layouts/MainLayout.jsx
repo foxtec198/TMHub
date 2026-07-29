@@ -6,6 +6,8 @@ import { capitalize, deny_roles } from "../utils/ui";
 import connect from "../utils/request";
 import { getInitials, storeProfile } from "../utils/profile";
 import { can } from "../utils/permissions";
+import { socketio } from "../utils/socketio";
+import { useToast } from "../contexts/ToastContext";
 import './main.css'
 
 export function MainLayout() {
@@ -18,6 +20,8 @@ export function MainLayout() {
   const [isMenuVisible, setIsMenuVisible] = useState(
     () => !window.matchMedia("(max-width: 960px)").matches
   );
+  const [dataRevision, setDataRevision] = useState(0);
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const deny = deny_roles.includes(role)
   const canManageAbsences = can("controle_faltas");
@@ -217,6 +221,39 @@ export function MainLayout() {
     return () => window.removeEventListener("tmhub:profile", listener);
   }, []);
 
+  useEffect(() => {
+    let refreshTimer;
+    const token = sessionStorage.getItem("token");
+    socketio.auth = { token };
+    if (token) {
+      socketio.disconnect().connect();
+    }
+
+    const handleDataChanged = (event = {}) => {
+      if (event.source_socket && event.source_socket === socketio.id) return;
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => {
+        setDataRevision((revision) => revision + 1);
+        window.dispatchEvent(new CustomEvent("tmhub:data-changed", { detail: event }));
+      }, 350);
+    };
+    const handleNotification = (notification = {}) => {
+      showToast(
+        notification.severity || "info",
+        notification.summary || "TM Hub",
+        notification.detail || "Uma operação foi atualizada."
+      );
+    };
+
+    socketio.on("data_changed", handleDataChanged);
+    socketio.on("system_notification", handleNotification);
+    return () => {
+      window.clearTimeout(refreshTimer);
+      socketio.off("data_changed", handleDataChanged);
+      socketio.off("system_notification", handleNotification);
+    };
+  }, [showToast]);
+
   return (
     <div className={`app-layout ${isMenuVisible ? "menu-open" : "menu-closed"}`}>
       {/* DOCKER */}
@@ -274,7 +311,7 @@ export function MainLayout() {
 
         {/* PANEL FRAME */}
         <main className="layout-outlet">
-          <Outlet />
+          <Outlet key={dataRevision} />
         </main>
       </div>
     </div>
