@@ -145,6 +145,14 @@
     padding-left: 2.5rem;
 }
 
+.pcd-filter-panel { width: min(26rem, calc(100vw - 2rem)); }
+.pcd-filter-panel .p-overlaypanel-content { padding: 1.25rem; }
+.pcd-filter-panel__title { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.pcd-filter-panel__title > div { display: flex; flex-direction: column; gap: .2rem; }
+.pcd-filter-panel__title span { color: var(--text-muted); font-size: .82rem; }
+.pcd-filter-field { display: flex; flex-direction: column; gap: .45rem; margin-top: .9rem; font-weight: 700; }
+.pcd-filter-field > span { font-size: .85rem; }
+
 .pcd-empty {
     padding: 1.5rem;
     text-align: center;
@@ -164,6 +172,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .pcd-tab-header-left {
@@ -172,18 +181,60 @@
     gap: .6rem;
 }
 
-.pcd-tab-header-supervisor {
+.pcd-tab-header-filiais {
     display: flex;
     align-items: center;
     gap: .4rem;
-    font-weight: 500;
-    font-size: .85rem;
-    color: var(--text-muted);
-    white-space: nowrap;
+    flex-wrap: wrap;
 }
 
-.pcd-subaccordion {
-    margin: .35rem 0 .35rem .75rem;
+.pcd-filial-tag.p-tag {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-weight: 600;
+}
+
+.pcd-centers {
+    display: grid;
+}
+
+.pcd-center + .pcd-center {
+    border-top: 1px solid var(--border-color-light);
+}
+
+.pcd-center-header {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .85rem 1.2rem;
+    color: var(--text-muted);
+    background: var(--bg-page);
+}
+
+.pcd-center-header i.pi-building {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--accent-dark);
+}
+
+.pcd-center-header strong {
+    color: var(--text-primary);
+}
+
+.pcd-center-header span {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin-left: auto;
+    font-size: .85rem;
+}
+
+.pcd-center .pcd-employee-list {
+    padding: .6rem 1.2rem 1rem;
 }
 
 .pcd-employee-list {
@@ -292,6 +343,7 @@
 }
 
 .pcd-field .p-dropdown,
+.pcd-field .p-multiselect,
 .pcd-field textarea {
     width: 100%;
 }
@@ -393,10 +445,6 @@
     color: #d7ddd9;
     background: #25292b;
     border-color: #48514c;
-}
-
-:root[data-theme="dark"] .pcd-page .pcd-subaccordion .p-accordion-header .p-accordion-header-link {
-    background: #2b3032;
 }
 
 @media(max-width: 520px) {
