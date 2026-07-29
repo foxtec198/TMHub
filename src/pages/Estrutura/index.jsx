@@ -26,7 +26,10 @@ const EMPTY_FORM = {
 
 export function Structure() {
     const [departments, setDepartments] = useState([]);
+    const [supervisors, setSupervisors] = useState([]);
     const [dialog, setDialog] = useState(null);
+    const [supervisorDialog, setSupervisorDialog] = useState(null);
+    const [selectedSupervisorId, setSelectedSupervisorId] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [refresh, setRefresh] = useState(0);
     const [filters, setFilters] = useState({
@@ -44,8 +47,15 @@ export function Structure() {
     useEffect(() => {
         let active = true;
         setLoading(true);
-        connect.get("/estrutura")
-            .then(({ data }) => active && setDepartments(Array.isArray(data) ? data : []))
+        Promise.all([
+            connect.get("/estrutura"),
+            connect.get("/estrutura/supervisores"),
+        ])
+            .then(([structureResponse, supervisorsResponse]) => {
+                if (!active) return;
+                setDepartments(Array.isArray(structureResponse.data) ? structureResponse.data : []);
+                setSupervisors(Array.isArray(supervisorsResponse.data) ? supervisorsResponse.data : []);
+            })
             .catch((error) => showToast(
                 "error",
                 "Estrutura",
@@ -118,6 +128,45 @@ export function Structure() {
         setForm(EMPTY_FORM);
     };
 
+    const openSupervisorEdit = (event, contract) => {
+        event.stopPropagation();
+        setSupervisorDialog(contract);
+        setSelectedSupervisorId(contract.supervisor_id || null);
+    };
+
+    const updateSupervisor = async () => {
+        if (!supervisorDialog || !selectedSupervisorId) {
+            showToast("warn", "Estrutura", "Selecione um supervisor.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const { data } = await connect.patch(
+                `/estrutura/contratos/${supervisorDialog.id}/supervisor`,
+                { supervisor_id: selectedSupervisorId },
+            );
+            const updatedContract = data.contrato;
+            setDepartments((current) => current.map((department) => ({
+                ...department,
+                contratos: department.contratos.map((contract) => (
+                    contract.id === updatedContract.id
+                        ? { ...contract, ...updatedContract }
+                        : contract
+                )),
+            })));
+            setSupervisorDialog(null);
+            showToast("success", "Estrutura", data.message);
+        } catch (error) {
+            showToast(
+                "error",
+                "Estrutura",
+                error.response?.data || "Não foi possível alterar o supervisor.",
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const submit = async () => {
         if (!form.tipo) {
             showToast("warn", "Estrutura", "Escolha se deseja cadastrar um local ou um ativo.");
@@ -176,6 +225,17 @@ export function Structure() {
                 <i className="pi pi-user" />
                 {contract.supervisor}
             </span>
+            {canEdit && (
+                <Button
+                    type="button"
+                    icon="pi pi-user-edit"
+                    rounded
+                    text
+                    aria-label={`Alterar supervisor de ${contract.contrato}`}
+                    tooltip="Alterar supervisor"
+                    onClick={(event) => openSupervisorEdit(event, contract)}
+                />
+            )}
             <Button
                 type="button"
                 icon="pi pi-plus"
@@ -380,6 +440,46 @@ export function Structure() {
                     </label>
                 </div>
             </OverlayPanel>
+
+            <Dialog
+                header={supervisorDialog ? `Supervisor — ${supervisorDialog.id}` : "Alterar supervisor"}
+                visible={Boolean(supervisorDialog)}
+                modal
+                className="structure-supervisor-dialog"
+                onHide={() => setSupervisorDialog(null)}
+                footer={(
+                    <div className="structure-dialog-footer">
+                        <Button label="Cancelar" severity="secondary" text onClick={() => setSupervisorDialog(null)} />
+                        <Button
+                            label="Confirmar alteração"
+                            icon="pi pi-check"
+                            onClick={updateSupervisor}
+                            disabled={!selectedSupervisorId || selectedSupervisorId === supervisorDialog?.supervisor_id}
+                        />
+                    </div>
+                )}
+            >
+                <div className="structure-supervisor-form">
+                    <div className="structure-current-supervisor">
+                        <span>Supervisor atual</span>
+                        <strong><i className="pi pi-user" /> {supervisorDialog?.supervisor}</strong>
+                    </div>
+                    <label>
+                        Novo supervisor
+                        <Dropdown
+                            value={selectedSupervisorId}
+                            options={supervisors}
+                            optionLabel="nome"
+                            optionValue="id"
+                            filter
+                            filterBy="nome"
+                            placeholder="Selecione o supervisor"
+                            emptyMessage="Nenhum supervisor disponível"
+                            onChange={(event) => setSelectedSupervisorId(event.value)}
+                        />
+                    </label>
+                </div>
+            </Dialog>
 
             <Dialog
                 header={dialog ? `${dialog.id} - ${dialog.contrato}` : "Novo item"}

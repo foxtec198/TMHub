@@ -237,6 +237,58 @@
     width: min(94vw, 600px);
 }
 
+.structure-supervisor-dialog {
+    width: min(94vw, 520px);
+}
+
+.structure-supervisor-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.structure-current-supervisor {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    padding: .9rem 1rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    background: var(--surface-ground);
+}
+
+.structure-current-supervisor span {
+    color: var(--text-color-secondary);
+    font-size: .8rem;
+}
+
+.structure-current-supervisor strong {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--text-color);
+}
+
+.structure-supervisor-form label {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.structure-supervisor-form .p-dropdown {
+    width: 100%;
+}
+
+:root[data-theme="dark"] .structure-current-supervisor {
+    border-color: #304b37;
+    background: #111713;
+}
+
+:root[data-theme="dark"] .structure-current-supervisor strong {
+    color: #f3f7f4;
+}
+
 .structure-type-options {
     display: grid;
     grid-template-columns: 1fr 1fr;
