@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -36,10 +37,12 @@ export function Pcd() {
   const [spreadsheet, setSpreadsheet] = useState(null);
   const [importing, setImporting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deletingAll, setDeletingAll] = useState(false);
   const fileInput = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
   const canEdit = can("indicador_pcd", "edit");
+  const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
 
   useEffect(() => {
     setLoading(true);
@@ -54,13 +57,9 @@ export function Pcd() {
     const result = {};
     for (const [filial, departamentos] of Object.entries(tree)) {
       const filialResult = {};
-      for (const [departamento, supervisores] of Object.entries(departamentos)) {
-        const departamentoResult = {};
-        for (const [supervisor, colaboradores] of Object.entries(supervisores)) {
-          const filtered = colaboradores.filter((colaborador) => matches(colaborador, search));
-          if (filtered.length) departamentoResult[supervisor] = filtered;
-        }
-        if (Object.keys(departamentoResult).length) filialResult[departamento] = departamentoResult;
+      for (const [departamento, info] of Object.entries(departamentos)) {
+        const filtered = info.colaboradores.filter((colaborador) => matches(colaborador, search));
+        if (filtered.length) filialResult[departamento] = { supervisor: info.supervisor, colaboradores: filtered };
       }
       if (Object.keys(filialResult).length) result[filial] = filialResult;
     }
@@ -70,13 +69,11 @@ export function Pcd() {
   const summaryByType = useMemo(() => {
     const counts = {};
     for (const departamentos of Object.values(tree)) {
-      for (const supervisores of Object.values(departamentos)) {
-        for (const colaboradores of Object.values(supervisores)) {
-          for (const colaborador of colaboradores) {
-            (colaborador.type_pcd || "Não informado").split(",").map((t) => t.trim()).filter(Boolean).forEach((tipo) => {
-              counts[tipo] = (counts[tipo] || 0) + 1;
-            });
-          }
+      for (const info of Object.values(departamentos)) {
+        for (const colaborador of info.colaboradores) {
+          (colaborador.type_pcd || "Não informado").split(",").map((t) => t.trim()).filter(Boolean).forEach((tipo) => {
+            counts[tipo] = (counts[tipo] || 0) + 1;
+          });
         }
       }
     }
@@ -133,6 +130,32 @@ export function Pcd() {
     }
   }
 
+  async function deleteAll() {
+    setDeletingAll(true);
+    try {
+      const { data } = await connect.delete("/pcd/todos");
+      showToast("success", "Indicador PCD", data?.message || "Todos os dados de PCD foram excluídos.");
+      setRefresh((value) => value + 1);
+    } catch (error) {
+      showToast("error", "Indicador PCD", error.response?.data || "Não foi possível excluir os dados.");
+    } finally {
+      setDeletingAll(false);
+    }
+  }
+
+  function confirmDeleteAll() {
+    confirmDialog({
+      header: "Excluir todos os dados de PCD",
+      message: "Isso remove a marcação de PCD, o tipo e a observação de todos os colaboradores. Use apenas em caso de erro na importação. Deseja continuar?",
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Excluir tudo",
+      rejectLabel: "Cancelar",
+      acceptClassName: "p-button-danger",
+      defaultFocus: "reject",
+      accept: deleteAll,
+    });
+  }
+
   function closeImport() {
     if (importing) return;
     setSpreadsheet(null);
@@ -169,6 +192,7 @@ export function Pcd() {
         <Button icon="pi pi-upload" label="Importar planilha" outlined onClick={() => setImportOpen(true)} />
         <Button icon="pi pi-plus" label="Marcar colaborador como PCD" onClick={openNew} />
         <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
+        {isAdmin && <Button icon="pi pi-trash" label="Excluir todos os dados" severity="danger" outlined loading={deletingAll} onClick={confirmDeleteAll} />}
       </div>}
     </header>
 
@@ -188,41 +212,37 @@ export function Pcd() {
 
       <Accordion multiple>
         {Object.entries(filteredTree).map(([filial, departamentos]) => {
-          const filialTotal = Object.values(departamentos).reduce((sum, sup) => sum + Object.values(sup).reduce((s, c) => s + c.length, 0), 0);
+          const filialTotal = Object.values(departamentos).reduce((sum, info) => sum + info.colaboradores.length, 0);
           return (
             <AccordionTab key={filial} header={<span className="pcd-tab-header">{filial} <Tag value={filialTotal} rounded /></span>}>
               <Accordion multiple className="pcd-subaccordion">
-                {Object.entries(departamentos).map(([departamento, supervisores]) => {
-                  const departamentoTotal = Object.values(supervisores).reduce((s, c) => s + c.length, 0);
-                  return (
-                    <AccordionTab key={departamento} header={<span className="pcd-tab-header">{departamento} <Tag value={departamentoTotal}  rounded /></span>}>
-                      <Accordion multiple className="pcd-subaccordion">
-                        {Object.entries(supervisores).map(([supervisor, colaboradores]) => (
-                          <AccordionTab key={supervisor} header={<span className="pcd-tab-header">{supervisor} <Tag value={colaboradores.length} severity="secondary" rounded /></span>}>
-                            <ul className="pcd-employee-list">
-                              {colaboradores.map((colaborador) => (
-                                <li key={colaborador.id} className="pcd-employee">
-                                  <div className="pcd-employee-info">
-                                    <span className="pcd-employee-name">{colaborador.nome}</span>
-                                    <span className="pcd-employee-subtitle">Matrícula {colaborador.matricula} • {colaborador.cargo || "Sem cargo"}</span>
-                                  </div>
-                                  <div className="pcd-employee-meta">
-                                    {colaborador.type_pcd && <Tag className="pcd-employee-tipo" value={colaborador.type_pcd} />}
-                                    {colaborador.obs_pcd && <span className="pcd-employee-obs">{colaborador.obs_pcd}</span>}
-                                  </div>
-                                  {canEdit && <div className="pcd-employee-actions">
-                                    <Button icon="pi pi-pencil" rounded text aria-label={`Editar ${colaborador.nome}`} onClick={() => openEdit(colaborador)} />
-                                    <Button icon="pi pi-times" rounded text severity="danger" aria-label={`Remover PCD de ${colaborador.nome}`} onClick={() => removePcd(colaborador)} />
-                                  </div>}
-                                </li>
-                              ))}
-                            </ul>
-                          </AccordionTab>
-                        ))}
-                      </Accordion>
-                    </AccordionTab>
-                  );
-                })}
+                {Object.entries(departamentos).map(([departamento, info]) => (
+                  <AccordionTab key={departamento} header={
+                    <span className="pcd-tab-header pcd-tab-header-split">
+                      <span className="pcd-tab-header-left">{departamento} <Tag value={info.colaboradores.length} rounded /></span>
+                      <span className="pcd-tab-header-supervisor"><i className="pi pi-user" /> {info.supervisor}</span>
+                    </span>
+                  }>
+                    <ul className="pcd-employee-list">
+                      {info.colaboradores.map((colaborador) => (
+                        <li key={colaborador.id} className="pcd-employee">
+                          <div className="pcd-employee-info">
+                            <span className="pcd-employee-name">{colaborador.nome}</span>
+                            <span className="pcd-employee-subtitle">Matrícula {colaborador.matricula} • {colaborador.cargo || "Sem cargo"}</span>
+                          </div>
+                          <div className="pcd-employee-meta">
+                            {colaborador.type_pcd && <Tag className="pcd-employee-tipo" value={colaborador.type_pcd} />}
+                            {colaborador.obs_pcd && <span className="pcd-employee-obs">{colaborador.obs_pcd}</span>}
+                          </div>
+                          {canEdit && <div className="pcd-employee-actions">
+                            <Button icon="pi pi-pencil" rounded text aria-label={`Editar ${colaborador.nome}`} onClick={() => openEdit(colaborador)} />
+                            <Button icon="pi pi-times" rounded text severity="danger" aria-label={`Remover PCD de ${colaborador.nome}`} onClick={() => removePcd(colaborador)} />
+                          </div>}
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionTab>
+                ))}
               </Accordion>
             </AccordionTab>
           );
@@ -275,5 +295,6 @@ export function Pcd() {
         </div>
       </form>
     </Dialog>
+    <ConfirmDialog />
   </section>;
 }
