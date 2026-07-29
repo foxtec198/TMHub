@@ -187,6 +187,14 @@
     gap: .2rem;
 }
 
+.structure-item-card .structure-item-actions {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: .25rem;
+}
+
 .structure-item-card strong,
 .structure-item-card small {
     overflow: hidden;

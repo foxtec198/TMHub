@@ -7,10 +7,12 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { PageHeader } from "../../components/PageHeader";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
+import { can } from "../../utils/permissions";
 import "./index.css";
 
 const EMPTY_FORM = {
@@ -37,6 +39,7 @@ export function Structure() {
     const filterPanel = useRef(null);
     const setLoading = useLoading();
     const { showToast } = useToast();
+    const canEdit = can("estrutura", "edit");
 
     useEffect(() => {
         let active = true;
@@ -140,6 +143,32 @@ export function Structure() {
         }
     };
 
+    const removeItem = (event, type, item) => {
+        event.stopPropagation();
+        confirmDialog({
+            header: `Excluir ${type}`,
+            message: type === "local"
+                ? `Deseja excluir o local “${item.nome}”? Os ativos vinculados ficarão sem local definido.`
+                : `Deseja excluir o ativo “${item.nome}” (${item.patrimonio})?`,
+            icon: "pi pi-exclamation-triangle",
+            acceptLabel: "Excluir",
+            rejectLabel: "Cancelar",
+            acceptClassName: "p-button-danger",
+            accept: async () => {
+                setLoading(true);
+                try {
+                    const { data } = await connect.delete("/estrutura", { data: { tipo: type, id: item.id } });
+                    showToast("success", "Estrutura", data);
+                    setRefresh((value) => value + 1);
+                } catch (error) {
+                    showToast("error", "Estrutura", error.response?.data || "Não foi possível excluir.");
+                } finally {
+                    setLoading(false);
+                }
+            },
+        });
+    };
+
     const contractHeader = (contract) => (
         <div className="structure-contract-header">
             <span className="structure-contract-name">{contract.id} - {contract.contrato}</span>
@@ -214,7 +243,20 @@ export function Structure() {
                                                             <strong>{location.nome}</strong>
                                                             {location.descricao && <small>{location.descricao}</small>}
                                                         </div>
-                                                        <Tag value="LOCAL" severity="info" />
+                                                        <div className="structure-item-actions">
+                                                            <Tag value="LOCAL" severity="info" />
+                                                            {canEdit && (
+                                                                <Button
+                                                                    icon="pi pi-trash"
+                                                                    severity="danger"
+                                                                    text
+                                                                    rounded
+                                                                    aria-label={`Excluir local ${location.nome}`}
+                                                                    tooltip="Excluir local"
+                                                                    onClick={(event) => removeItem(event, "local", location)}
+                                                                />
+                                                            )}
+                                                        </div>
                                                     </article>
                                                 )) : <p className="structure-empty">Nenhum local cadastrado.</p>}
                                             </section>
@@ -228,7 +270,20 @@ export function Structure() {
                                                                 <strong>{asset.nome}</strong>
                                                                 <small>{asset.categoria}{location ? ` · ${location.nome}` : ""}</small>
                                                             </div>
-                                                            <Tag value={asset.patrimonio} severity="success" />
+                                                            <div className="structure-item-actions">
+                                                                <Tag value={asset.patrimonio} severity="success" />
+                                                                {canEdit && (
+                                                                    <Button
+                                                                        icon="pi pi-trash"
+                                                                        severity="danger"
+                                                                        text
+                                                                        rounded
+                                                                        aria-label={`Excluir ativo ${asset.nome}`}
+                                                                        tooltip="Excluir ativo"
+                                                                        onClick={(event) => removeItem(event, "ativo", asset)}
+                                                                    />
+                                                                )}
+                                                            </div>
                                                         </article>
                                                     );
                                                 }) : <p className="structure-empty">Nenhum ativo cadastrado.</p>}
@@ -416,6 +471,7 @@ export function Structure() {
                     </div>
                 )}
             </Dialog>
+            <ConfirmDialog />
         </main>
     );
 }
