@@ -3,6 +3,7 @@ import { Button } from "primereact/button";
 import { FloatLabel } from "primereact/floatlabel";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
+import { Carousel } from "primereact/carousel";
 
 // Utils
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
+import { LOGIN_INFORMATIVES } from "./informativos";
 
 // CSS
 import './main.css'
@@ -17,6 +19,8 @@ import './main.css'
 export function Auth() {
     const [user, setUser] = useState("");
     const [pwd, setPwd] = useState("");
+    const [githubCommits, setGithubCommits] = useState([]);
+    const [configuredNews, setConfiguredNews] = useState([]);
 
     const { showToast } = useToast();
     const navigate = useNavigate();
@@ -55,6 +59,16 @@ export function Auth() {
 
         return () => clearInterval(interval);
     }, [bloqueadoAte]);
+
+    useEffect(() => {
+        Promise.allSettled([
+            connect.get("/updates/github"),
+            connect.get("/updates/noticias"),
+        ]).then(([commitsResult, newsResult]) => {
+            setGithubCommits(commitsResult.status === "fulfilled" && Array.isArray(commitsResult.value.data?.commits) ? commitsResult.value.data.commits : []);
+            setConfiguredNews(newsResult.status === "fulfilled" && Array.isArray(newsResult.value.data) ? newsResult.value.data : []);
+        });
+    }, []);
 
     async function setAuth(e) {
         e.preventDefault();
@@ -106,22 +120,80 @@ export function Auth() {
         finally { setLoading(false) };
     };
 
+    const informativeTemplate = (item) => item.type === "github" ? (
+        <article className="auth-informative-slide auth-commits-slide">
+            <div className="auth-commits-header">
+                <div>
+                    <span><i className="pi pi-github" /> Novidades do TM Hub</span>
+                    <h2>Últimas atualizações</h2>
+                    <p>Alterações publicadas recentemente no frontend e na API.</p>
+                </div>
+                <span className="auth-live-badge"><i className="pi pi-circle-fill" /> GitHub</span>
+            </div>
+            <div className="auth-commits-list">
+                {item.commits.map((commit) => (
+                    <a href={commit.url} target="_blank" rel="noreferrer" key={`${commit.repository}-${commit.sha}`}>
+                        <span className={`auth-repo-badge ${commit.repository_label === "API" ? "is-api" : ""}`}>
+                            {commit.repository_label}
+                        </span>
+                        <div>
+                            <strong>{commit.message}</strong>
+                            <small>{commit.author} · {new Date(commit.date).toLocaleDateString("pt-BR")}</small>
+                        </div>
+                        <code>{commit.sha}</code>
+                    </a>
+                ))}
+            </div>
+        </article>
+    ) : (
+        <article className="auth-informative-slide" style={{ "--slide-accent": item.accent }}>
+            {item.image ? (
+                <div className="auth-informative-art-frame">
+                    <img className="auth-informative-art" src={item.image} alt={item.title} />
+                </div>
+            ) : (
+                <div className="auth-informative-visual" aria-hidden="true">
+                    <img src="/brands/main_brand_white.svg" alt="" />
+                    <span><i className={item.icon} /></span>
+                </div>
+            )}
+            <div className="auth-informative-copy">
+                <span>{item.eyebrow}</span>
+                <h2>{item.title}</h2>
+                <p>{item.description}</p>
+                {item.link && <a className="auth-news-link" href={item.link} target="_blank" rel="noreferrer">Saiba mais <i className="pi pi-arrow-up-right" /></a>}
+            </div>
+        </article>
+    );
+
+    const informativeItems = configuredNews.length ? configuredNews : LOGIN_INFORMATIVES;
+    const carouselItems = githubCommits.length
+        ? [...informativeItems, { type: "github", commits: githubCommits }]
+        : informativeItems;
+
     return (
-        <div className="flex h-screen p-4 bg-primary justify-content-center align-items-center">
-            <form
-                style={{ minWidth: '20dvw' }}
-                className="flex justify-content-center align-items-center text-center bg-white border-round-xl flex-column gap-2 p-5"
-                onSubmit={(e) => setAuth(e)}
-            >
-                <img
-                    className="p-5 mb-4"
-                    src="/brands/main_brand.svg"
-                    alt="Logo"
-                    style={{
-                        maxHeight: "20dvh",
-                        maxWidth: "65%"
-                    }}
+        <main className="auth-page">
+            <section className="auth-showcase" aria-label="Informativos do TM Hub">
+                <Carousel
+                    value={carouselItems}
+                    itemTemplate={informativeTemplate}
+                    numVisible={1}
+                    numScroll={1}
+                    circular
+                    autoplayInterval={6500}
+                    className="auth-carousel"
                 />
+                <span className="auth-showcase-note"><i className="pi pi-megaphone" /> Espaço de comunicados e informativos</span>
+            </section>
+
+            <section className="auth-login-panel">
+              <form className="auth-login-card" onSubmit={(e) => setAuth(e)}>
+                <div className="auth-login-brand">
+                    <img src="/brands/main_brand.svg" alt="TM Hub — Painel Executivo" />
+                    <span>Acesso ao painel executivo</span>
+                    <h1>Bem-vindo de volta</h1>
+                    <p>Entre com suas credenciais para continuar.</p>
+                </div>
                 <FloatLabel className="w-full">
                     <InputText
                         className="w-full"
@@ -148,7 +220,7 @@ export function Auth() {
                 </FloatLabel>
 
                 <span className="text-accent text-center mt-5">
-                    Ainda não tem conta? <a href="">Fale com um Responsavel.</a>
+                    Ainda não tem conta? <strong>Fale com um responsável.</strong>
                 </span>
 
                 <Button
@@ -157,8 +229,9 @@ export function Auth() {
                     className="w-full h-3rem"
                 />
 
-                <a href="" className="text-accent text-center">Esqueci a senha.</a>
-            </form>
-        </div>
+                <span className="auth-password-help">Esqueceu a senha? Procure um administrador.</span>
+              </form>
+            </section>
+        </main>
     );
 };

@@ -15,6 +15,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
 import { CollaboratorImportSettings } from "./CollaboratorImportSettings";
+import { NewsSettings } from "./NewsSettings";
 import "./settings.css";
 
 // Mantida igual à validação do backend para feedback imediato no formulário.
@@ -163,6 +164,9 @@ export function Settings() {
       </TabPanel>}
       {isAdmin && <TabPanel header="Importar colaboradores" leftIcon="pi pi-upload mr-2">
         <CollaboratorImportSettings />
+      </TabPanel>}
+      {isAdmin && <TabPanel header="Notícias" leftIcon="pi pi-megaphone mr-2">
+        <NewsSettings />
       </TabPanel>}
     </TabView>
 

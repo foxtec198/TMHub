@@ -268,22 +268,22 @@
 
 .init-help-card li>span {
   display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 2rem;
+  height: 2rem;
   flex: 0 0 auto;
   place-items: center;
   color: #fff;
   background: var(--primary-color);
   border-radius: 50%;
-  font-size: .72rem;
+  font-size: .82rem;
   font-weight: 900;
 }
 
 .init-help-card li p {
   margin: 0;
   color: var(--text-color-secondary);
-  font-size: .78rem;
-  line-height: 1.4;
+  font-size: .94rem;
+  line-height: 1.55;
 }
 
 .init-team-card {
