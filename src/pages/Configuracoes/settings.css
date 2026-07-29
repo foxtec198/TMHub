@@ -284,6 +284,67 @@
     border-color: #4d7258
 }
 
+:root[data-theme="dark"] .permission-editor {
+    color: #f3f7f4;
+    border-color: #3d5444;
+    background: #151a17
+}
+
+:root[data-theme="dark"] .permission-editor header strong,
+:root[data-theme="dark"] .permission-row {
+    color: #f3f7f4
+}
+
+:root[data-theme="dark"] .permission-editor header span,
+:root[data-theme="dark"] .permission-row small,
+:root[data-theme="dark"] .permission-unavailable {
+    color: #aebbb1
+}
+
+:root[data-theme="dark"] .permission-table {
+    color: #f3f7f4;
+    border-color: #3d5444;
+    background: #111713;
+    scrollbar-color: #657168 #111713
+}
+
+:root[data-theme="dark"] .permission-row {
+    border-color: #304438;
+    background: #111713
+}
+
+:root[data-theme="dark"] .permission-row:nth-child(even):not(.permission-head) {
+    background: #151c17
+}
+
+:root[data-theme="dark"] .permission-row.permission-head {
+    color: #dce6df;
+    border-color: #45604d;
+    background: #203126
+}
+
+:root[data-theme="dark"] .permission-row .p-checkbox .p-checkbox-box {
+    color: #f3f7f4;
+    border-color: #52705b;
+    background: #0d120f
+}
+
+:root[data-theme="dark"] .permission-row .p-checkbox:not(.p-disabled) .p-checkbox-box:hover {
+    border-color: #70e38d;
+    background: #1b2b20
+}
+
+:root[data-theme="dark"] .permission-row .p-checkbox.p-highlight .p-checkbox-box,
+:root[data-theme="dark"] .permission-row .p-checkbox .p-checkbox-box.p-highlight {
+    color: #06150a;
+    border-color: #4bd66e;
+    background: #4bd66e
+}
+
+:root[data-theme="dark"] .permission-row .p-checkbox .p-checkbox-icon {
+    color: inherit
+}
+
 @media(max-width:900px) {
     .users-settings-layout {
         grid-template-columns: 1fr
