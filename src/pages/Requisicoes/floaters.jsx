@@ -1,5 +1,4 @@
 // Widgets
-import { Divider } from "primereact/divider";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Splitter, SplitterPanel } from "primereact/splitter";
@@ -139,7 +138,7 @@ export function Floaters() {
 
     // Duas listas permitem promover colaboradores e remover reservas existentes.
     return (
-        <main className="h-full p-3">
+        <main className="floaters-page">
             <PageHeader
                 section="Reposições"
                 title="Reservas Técnicas"
@@ -156,104 +155,116 @@ export function Floaters() {
             />
 
             {/* Cards */}
-            <div className="flex flex-wrap gap-4 justify-content-between align-items-center w-full p-3">
-                <DashCard title="Total de colaboradores" icon="pi pi-users" value={totalColaboradores} className="floater-summary-card flex-grow-1" />
-                <DashCard title="Reservas técnicas" icon="pi pi-shield" value={reservas.length} className="floater-summary-card flex-grow-1" />
+            <div className="floaters-summary">
+                <DashCard title="Total de colaboradores" icon="pi pi-users" value={totalColaboradores} className="floater-summary-card" />
+                <DashCard title="Reservas técnicas" icon="pi pi-shield" value={reservas.length} className="floater-summary-card" />
             </div>
 
-            {/* FRAME */}
-            <div className="flex flex-wrap gap-4 justify-content-between align-items-center w-full p-3">
-                {/* Colaboradores aparecem primeiro e podem ser promovidos para o painel seguinte. */}
-                <div className="flex flex-column gap-2 flex-grow-1 overflow-y-auto h-screen">
-                    <span className="spaceg mb-3">Colaboradores Ativos: </span>
+            <Splitter className="floaters-splitter" layout={isMobile ? "vertical" : "horizontal"} gutterSize={12}>
+                <SplitterPanel className="floaters-panel" size={50} minSize={35}>
+                    <header className="floaters-panel-header">
+                        <div>
+                            <span>Equipe disponível</span>
+                            <h2>Colaboradores ativos</h2>
+                            <p>Busque um colaborador e adicione-o à equipe de reservas.</p>
+                        </div>
+                        <Tag value={`${colaboradores.length} exibidos`} severity="info" rounded />
+                    </header>
 
-                    <FloatLabel className="w-full mb-2">
-                        <InputText
-                            id="active-employees-search"
-                            className="w-full"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                        <label htmlFor="active-employees-search">Buscar Colaboradores.</label>
+                    <FloatLabel className="floaters-search">
+                        <InputText id="active-employees-search" value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <label htmlFor="active-employees-search">Nome ou matrícula</label>
                     </FloatLabel>
-                    {colaboradores.map(colaborador => {
-                        const data = new Date(colaborador.data_admissao)
-                        return (
-                            <div
-                                key={colaborador.id}
-                                className="floater-card flex flex-grow-1 justify-content-between align-items-center border-round-lg p-2 shadow-5"
-                            >
-                                <div className="flex flex-column gap-2">
-                                    <div className="flex justify-content-center align-items-center">
-                                        <span className="inter font-bold text-truncate">{colaborador.matricula} - {colaborador.nome}</span>
-                                        <Divider className="h-1rem" layout="vertical" />
-                                        <span className="spaceg flex align-items-center gap-1">
-                                            <i className="pi pi-calendar-plus"></i>
-                                            {data.toLocaleDateString("pt-br", { day: "2-digit", month: "2-digit", year: "numeric" })}
-                                        </span>
+
+                    <div className="floaters-list">
+                        {colaboradores.length ? colaboradores.map(colaborador => {
+                            const data = new Date(colaborador.data_admissao);
+                            return (
+                                <article key={colaborador.id} className="floater-card">
+                                    <div className="floater-card-content">
+                                        <strong>{colaborador.nome}</strong>
+                                        <div className="floater-card-details">
+                                            <span><i className="pi pi-id-card" /> Matrícula {colaborador.matricula}</span>
+                                            <span><i className="pi pi-calendar-plus" /> Admissão {data.toLocaleDateString("pt-br")}</span>
+                                        </div>
+                                        <div className="floater-card-tags">
+                                            <Tag value={colaborador.cargo || "Cargo não informado"} rounded />
+                                            <Tag value={(colaborador.situacao || "Sem situação").toUpperCase()} severity="success" rounded />
+                                        </div>
                                     </div>
-                                    <div className="flex gap-2 align-items-center">
-                                        <Tag className="bg-primary" rounded> {colaborador.cargo} </Tag>
-                                        <Tag style={{ background: "var(--gray-700)" }} rounded> <span>{colaborador.situacao.toUpperCase()}</span> </Tag>
-                                    </div>
-                                </div>
-                                <Button
-                                    className="bg-primary"
-                                    disabled={!canCreate}
-                                    icon={isMobile ? "pi pi-caret-down" : "pi pi-caret-right"}
-                                    aria-label={`Adicionar ${colaborador.nome} às reservas`}
-                                    onClick={() => setReserva(colaborador.id, colaborador.nome)}
-                                />
+                                    <Button
+                                        rounded
+                                        disabled={!canCreate}
+                                        icon={isMobile ? "pi pi-arrow-down" : "pi pi-arrow-right"}
+                                        tooltip="Adicionar às reservas"
+                                        aria-label={`Adicionar ${colaborador.nome} às reservas`}
+                                        onClick={() => setReserva(colaborador.id, colaborador.nome)}
+                                    />
+                                </article>
+                            );
+                        }) : (
+                            <div className="floaters-empty">
+                                <i className="pi pi-search" />
+                                <strong>Nenhum colaborador encontrado</strong>
+                                <span>Tente buscar por outro nome ou matrícula.</span>
                             </div>
-                        )
-                    })}
-                </div>
+                        )}
+                    </div>
+                </SplitterPanel>
 
-                {/* Reservas técnicas aparecem depois dos colaboradores. */}
-                <div className="flex flex-column gap-2 flex-grow-1 overflow-y-auto h-screen">
-                    <span className="spaceg mb-3">Reservas Selecionadas: </span>
+                <SplitterPanel className="floaters-panel" size={50} minSize={35}>
+                    <header className="floaters-panel-header">
+                        <div>
+                            <span>Equipe de cobertura</span>
+                            <h2>Reservas selecionadas</h2>
+                            <p>Colaboradores disponíveis para atender às reposições.</p>
+                        </div>
+                        <Tag value={`${reservasFiltradas.length} reservas`} severity="success" rounded />
+                    </header>
 
-                    <FloatLabel className="w-full mb-2">
-                        <InputText
-                            id="reservations-search"
-                            className="w-full"
-                            value={searchReservas}
-                            onChange={(e) => setSearchReservas(e.target.value)}
-                        />
-                        <label htmlFor="reservations-search">Buscar Reservas.</label>
+                    <FloatLabel className="floaters-search">
+                        <InputText id="reservations-search" value={searchReservas} onChange={(e) => setSearchReservas(e.target.value)} />
+                        <label htmlFor="reservations-search">Buscar nas reservas</label>
                     </FloatLabel>
-                    {reservasFiltradas.map(reserva => {
-                        const data = new Date(reserva.data)
-                        return (
-                            <div
-                                key={reserva.id}
-                                className="floater-card flex flex-grow-1 justify-content-between align-items-center border-round-lg p-2 shadow-5"
-                            >
-                                <div className="flex flex-column gap-2">
-                                    <div className="flex justify-content-center align-items-center">
-                                        <span className="inter font-bold text-truncate">{reserva.matricula} - {reserva.nome}</span>
-                                        <Divider className="h-1rem" layout="vertical" />
-                                        <span className="spaceg flex align-items-center gap-1">
-                                            <i className="pi pi-calendar-plus"></i>
-                                            Criado em: {data.toLocaleDateString("pt-br", { day: "2-digit", month: "2-digit", year: "numeric" })}
-                                        </span>
+
+                    <div className="floaters-list">
+                        {reservasFiltradas.length ? reservasFiltradas.map(reserva => {
+                            const data = new Date(reserva.data);
+                            return (
+                                <article key={reserva.id} className="floater-card">
+                                    <div className="floater-card-content">
+                                        <strong>{reserva.nome}</strong>
+                                        <div className="floater-card-details">
+                                            <span><i className="pi pi-id-card" /> Matrícula {reserva.matricula}</span>
+                                            <span><i className="pi pi-calendar" /> Incluído em {data.toLocaleDateString("pt-br")}</span>
+                                        </div>
+                                        <div className="floater-card-tags">
+                                            <Tag value={reserva.cargo || "Cargo não informado"} rounded />
+                                            <Tag value={(reserva.situacao || "Sem situação").toUpperCase()} severity="success" rounded />
+                                        </div>
                                     </div>
-                                    <div className="flex gap-2 align-items-center">
-                                        <Tag className="bg-primary" rounded> {reserva.cargo} </Tag>
-                                        <Tag style={{ background: "var(--gray-700)" }} rounded> <span>{reserva.situacao.toUpperCase()}</span> </Tag>
-                                    </div>
-                                </div>
-                                <Button
-                                    icon="pi pi-trash"
-                                    disabled={!canEdit}
-                                    severity="danger"
-                                    onClick={() => delReserva(reserva.floater_id, reserva.nome)}
-                                />
+                                    <Button
+                                        rounded
+                                        outlined
+                                        icon="pi pi-trash"
+                                        disabled={!canEdit}
+                                        severity="danger"
+                                        tooltip="Remover das reservas"
+                                        aria-label={`Remover ${reserva.nome} das reservas`}
+                                        onClick={() => delReserva(reserva.floater_id, reserva.nome)}
+                                    />
+                                </article>
+                            );
+                        }) : (
+                            <div className="floaters-empty">
+                                <i className="pi pi-shield" />
+                                <strong>Nenhuma reserva encontrada</strong>
+                                <span>Adicione um colaborador ativo ou ajuste a busca.</span>
                             </div>
-                        )
-                    })}
-                </div>
-            </div>
+                        )}
+                    </div>
+                </SplitterPanel>
+            </Splitter>
 
             {/* A data pode ser alterada sem fechar o diálogo; cada troca refaz a consulta no backend. */}
             <Dialog header="Utilizadas x disponíveis" visible={usageDialog} modal className="floaters-usage-dialog" onHide={() => setUsageDialog(false)}>

@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { PanelMenu } from "primereact/panelmenu";
 import { Avatar } from "primereact/avatar";
@@ -9,6 +9,27 @@ import { can } from "../utils/permissions";
 import { socketio } from "../utils/socketio";
 import { useToast } from "../contexts/ToastContext";
 import './main.css'
+
+const REALTIME_CHANNELS_BY_ROUTE = {
+  "/configuracoes": ["configuracoes", "colaboradores"],
+  "/controle-faltas": ["controle_faltas"],
+  "/controle-glosas": ["glosas"],
+  "/indicadores/pcd": ["pcd", "colaboradores"],
+  "/admissao/vagas": ["admissao"],
+  "/admissao/aditivos": ["admissao"],
+  "/reposicoes/requisicoes": ["reposicoes.requisicoes"],
+  "/reposicoes/reservas": ["reposicoes.reservas"],
+  "/reposicoes/historico": ["reposicoes.historico"],
+  "/reports/colaboradores-departamento": ["colaboradores"],
+  "/reports/ponto-48-horas": ["ponto48"],
+  "/reports/admissoes": ["admissao"],
+  "/reports/faltas": ["controle_faltas"],
+  "/estoque/produtos": ["estoque.produtos"],
+  "/estoque/codigos-de-barras": ["estoque.produtos"],
+  "/estoque/movimentacoes": ["estoque.movimentos"],
+  "/estrutura": ["estrutura"],
+  "/projetos": ["projetos"],
+};
 
 export function MainLayout() {
   const [displayName, setDisplayName] = useState(() => localStorage.getItem("display_name") || "");
@@ -23,6 +44,7 @@ export function MainLayout() {
   const [dataRevision, setDataRevision] = useState(0);
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const deny = deny_roles.includes(role)
   const canManageAbsences = can("controle_faltas");
 
@@ -222,15 +244,19 @@ export function MainLayout() {
   }, []);
 
   useEffect(() => {
-    let refreshTimer;
     const token = sessionStorage.getItem("token");
     socketio.auth = { token };
     if (token) {
       socketio.disconnect().connect();
     }
+  }, []);
 
+  useEffect(() => {
+    let refreshTimer;
     const handleDataChanged = (event = {}) => {
       if (event.source_socket && event.source_socket === socketio.id) return;
+      const routeChannels = REALTIME_CHANNELS_BY_ROUTE[location.pathname] || [];
+      if (!event.channel || !routeChannels.includes(event.channel)) return;
       window.clearTimeout(refreshTimer);
       refreshTimer = window.setTimeout(() => {
         setDataRevision((revision) => revision + 1);
@@ -252,7 +278,7 @@ export function MainLayout() {
       socketio.off("data_changed", handleDataChanged);
       socketio.off("system_notification", handleNotification);
     };
-  }, [showToast]);
+  }, [location.pathname, showToast]);
 
   return (
     <div className={`app-layout ${isMenuVisible ? "menu-open" : "menu-closed"}`}>
