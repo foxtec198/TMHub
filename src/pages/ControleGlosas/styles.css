@@ -442,10 +442,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, .04)
 }
 
-.glosa-colab-card[data-theme="dark"]{
-    background-color: #333 !important;
-}
-
 .glosa-colab-card-header {
     display: flex;
     align-items: center;
@@ -470,4 +466,45 @@
 
 .glosa-colab-card-details strong {
     color: var(--text-color)
+}
+
+:root[data-theme="dark"] .glosa-colab-card {
+    color: #f3f7f4;
+    border-color: #405b48;
+    background: #172019 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .24);
+}
+
+:root[data-theme="dark"] .glosa-colab-card-header,
+:root[data-theme="dark"] .glosa-colab-card-header i {
+    color: #63e58b;
+}
+
+:root[data-theme="dark"] .glosa-colab-card-details {
+    color: #b7c2ba;
+}
+
+:root[data-theme="dark"] .glosa-colab-card-details strong {
+    color: #f3f7f4;
+}
+
+:root[data-theme="dark"] .glosa-dropzone {
+    color: #f3f7f4;
+    border-color: #557a60;
+    background: #111713 !important;
+}
+
+:root[data-theme="dark"] .glosa-dropzone:hover,
+:root[data-theme="dark"] .glosa-dropzone:focus-visible,
+:root[data-theme="dark"] .glosa-dropzone.has-file {
+    border-color: #63e58b;
+    background: #1b2c20 !important;
+}
+
+:root[data-theme="dark"] .glosa-dropzone > i {
+    color: #63e58b;
+}
+
+:root[data-theme="dark"] .glosa-dropzone > span {
+    color: #b7c2ba;
 }
