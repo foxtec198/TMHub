@@ -1,39 +1,150 @@
-import { Button } from "primereact/button"
-import { Divider } from "primereact/divider"
-import { PageHeader } from "../../components/PageHeader"
+import { useEffect, useState } from "react";
+import connect from "../../utils/request";
+import { getInitials } from "../../utils/profile";
+import "./init.css";
+
+const documentation = [
+  {
+    title: "Documentação do Frontend",
+    description: "Interface React, componentes, permissões, temas e fluxo de desenvolvimento.",
+    icon: "pi pi-desktop",
+    tech: "React + Vite",
+    href: "https://github.com/foxtec198/tmhub#readme",
+  },
+  {
+    title: "Documentação da API",
+    description: "Rotas, serviços, banco de dados, WebSocket e execução do backend.",
+    icon: "pi pi-server",
+    tech: "Flask + PostgreSQL",
+    href: "https://github.com/foxtec198/api_tmhub#readme",
+  },
+];
+
+const supportChecklist = [
+  "Informe a tela e a ação que estava realizando.",
+  "Envie uma captura da mensagem apresentada.",
+  "Se possível, inclua matrícula, contrato ou código do registro.",
+];
 
 export function Init() {
-    return (
-        <div className="panel_frame flex flex-column justify-content-center align-items-center text-center">
-            <div className="flex flex-column">
-                <PageHeader
-                    section="TM Hub"
-                    title="Início"
-                    description="Bem-vindo ao painel executivo."
-                    className="app-page-header--centered"
-                />
-                <h3 className="px-8">
-                    Este app está em desenvolvimento e por estar nesta fase,
-                    somente nossa filial utiliza por enquanto. espero que aproveite e desfrute de nossas soluções!
-                    duvidas? Entre em contato conosco!
-                </h3>
-            </div>
-            <div className="flex gap-2 ms-auto mb-5 mt-3">
-                <Button
-                    label="Bryan Gabriel"
-                    icon="pi pi-whatsapp"
-                    className="border-round-lg"
-                />
-                <Button
-                    label="Guilherme Breve"
-                    icon="pi pi-whatsapp"
-                    className="border-round-lg"
-                />
-            </div>
-            <Divider />
-            <div className="flex align-items-center font-italic mt-5">
-                <span>Uma parceria entre</span> <img src="/logo.png" width={300} /> <span>e sua equipe.</span>
-            </div>
+  const [admins, setAdmins] = useState([]);
+
+  useEffect(() => {
+    connect.get("/usuarios/suporte")
+      .then(({ data }) => setAdmins(Array.isArray(data) ? data : []))
+      .catch(() => setAdmins([]));
+  }, []);
+
+  return (
+    <main className="init-support-page">
+      <section className="init-support-hero">
+        <div className="init-support-hero-content">
+          <span className="init-support-eyebrow">TM HUB · CENTRAL DE AJUDA</span>
+          <h1>Suporte e documentação em um só lugar.</h1>
+          <p>
+            Encontre orientações técnicas, consulte os recursos do sistema e saiba
+            quais informações enviar para agilizar seu atendimento.
+          </p>
+          <div className="init-support-hero-tags">
+            <span><i className="pi pi-book" /> Documentação atualizada</span>
+            <span><i className="pi pi-comments" /> Suporte interno</span>
+            <span><i className="pi pi-shield" /> Acesso controlado</span>
+          </div>
         </div>
-    )
+        <div className="init-support-hero-mark" aria-hidden="true">
+          <img src="/brands/main_brand_white.svg" alt="" />
+          <i className="pi pi-headphones" />
+        </div>
+      </section>
+
+      <section className="init-support-section">
+        <header className="init-support-section-header">
+          <div>
+            <span>Base técnica</span>
+            <h2>Documentação do projeto</h2>
+            <p>Acesse diretamente o README oficial de cada aplicação no GitHub.</p>
+          </div>
+          <i className="pi pi-github" aria-hidden="true" />
+        </header>
+
+        <div className="init-docs-grid">
+          {documentation.map((item) => (
+            <article className="init-doc-card" key={item.title}>
+              <div className="init-doc-icon"><i className={item.icon} /></div>
+              <span className="init-doc-tech">{item.tech}</span>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <a href={item.href} target="_blank" rel="noreferrer">
+                <i className="pi pi-external-link" />
+                Abrir documentação
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="init-support-grid">
+        <article className="init-help-card">
+          <div className="init-help-card-title">
+            <i className="pi pi-send" />
+            <div>
+              <span>Atendimento eficiente</span>
+              <h2>Antes de solicitar suporte</h2>
+            </div>
+          </div>
+          <ol>
+            {supportChecklist.map((item, index) => (
+              <li key={item}>
+                <span>{index + 1}</span>
+                <p>{item}</p>
+              </li>
+            ))}
+          </ol>
+        </article>
+
+        <article className="init-team-card">
+          <div>
+            <span>Equipe responsável</span>
+            <h2>Precisa de ajuda?</h2>
+            <p>Entre em contato com o suporte interno do TM Hub.</p>
+          </div>
+          <div className="init-team-list">
+            {admins.length ? admins.map((admin) => (
+              <div key={admin.id}>
+                {admin.foto_perfil
+                  ? <img src={admin.foto_perfil} alt={`Foto de ${admin.nome}`} />
+                  : <span>{getInitials(admin.nome)}</span>}
+                <div>
+                  <strong>{admin.nome}</strong>
+                  <small>Administrador · Suporte TM Hub</small>
+                </div>
+              </div>
+            )) : (
+              <div className="init-team-empty">
+                <span><i className="pi pi-users" /></span>
+                <div>
+                  <strong>Equipe de administradores</strong>
+                  <small>Consulte um administrador interno.</small>
+                </div>
+              </div>
+            )}
+          </div>
+          <a
+            className="init-issue-link"
+            href="https://github.com/foxtec198/tmhub/issues/new"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <i className="pi pi-github" />
+            Registrar problema técnico
+          </a>
+        </article>
+      </section>
+
+      <footer className="init-support-footer">
+        <img src="/brands/main_brand.svg" alt="TM Hub — Painel Executivo" />
+        <span>Feito para conectar gestão, operação e tecnologia.</span>
+      </footer>
+    </main>
+  );
 }
