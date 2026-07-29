@@ -86,16 +86,18 @@ export function AuthRequirementsGate() {
   };
 
   const saveProfile = async () => {
-    if (!cpf || !photo) {
-      showToast("warn", "Cadastro incompleto", "Informe um CPF válido e uma foto de perfil.");
+    if (!cpf) {
+      showToast("warn", "Cadastro incompleto", "Informe um CPF válido.");
       return;
     }
     setLoading(true);
     try {
-      const { data } = await connect.patch("/usuarios/onboarding/perfil", { cpf, foto_perfil: photo });
-      localStorage.setItem("profile_photo", data.foto_perfil);
+      const payload = { cpf };
+      if (photo) payload.foto_perfil = photo;
+      const { data } = await connect.patch("/usuarios/onboarding/perfil", payload);
+      if (data.foto_perfil) localStorage.setItem("profile_photo", data.foto_perfil);
       applyResponse(data);
-      showToast("success", "Cadastro concluído", "CPF e foto validados com sucesso.");
+      showToast("success", "Cadastro concluído", "CPF validado com sucesso.");
     } catch (error) {
       showToast("error", "Não foi possível concluir", error.response?.data || "Confira os dados informados.");
     } finally {
@@ -142,7 +144,7 @@ export function AuthRequirementsGate() {
     window.location.href = "/login";
   };
 
-  const profileStep = requirements.cpf_pendente || requirements.foto_pendente;
+  const profileStep = requirements.cpf_pendente;
   const passwordStep = !profileStep && (requirements.troca_senha_obrigatoria || requirements.senha_padrao);
 
   return (
@@ -164,7 +166,7 @@ export function AuthRequirementsGate() {
             <i className="pi pi-user-edit" />
             <div>
               <strong>Precisamos confirmar seus dados</strong>
-              <span>CPF e foto são obrigatórios para utilizar o TM Hub.</span>
+              <span>O CPF é obrigatório. A foto de perfil é opcional.</span>
             </div>
           </div>
           <label>CPF
@@ -175,7 +177,7 @@ export function AuthRequirementsGate() {
               {photo ? <img src={photo} alt="Prévia da foto de perfil" /> : <i className="pi pi-user" />}
             </div>
             <div>
-              <strong>Foto de perfil</strong>
+              <strong>Foto de perfil <small>(opcional)</small></strong>
               <span>PNG, JPG ou WEBP de até 1,5 MB.</span>
               <Button label={photo ? "Trocar foto" : "Selecionar foto"} icon="pi pi-camera" outlined onClick={() => fileRef.current?.click()} />
               <input ref={fileRef} hidden type="file" accept="image/png,image/jpeg,image/webp" onChange={selectPhoto} />
