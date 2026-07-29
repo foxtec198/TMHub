@@ -16,6 +16,8 @@ const PHASE_LABELS = {
   erro: "Falha na importação",
 };
 
+const UPLOAD_CHUNK_SIZE = 512 * 1024;
+
 export function CollaboratorImportSettings() {
   const [file, setFile] = useState(null);
   const [stage, setStage] = useState("idle");
@@ -80,26 +82,50 @@ export function CollaboratorImportSettings() {
 
   const startImport = async () => {
     if (!file) return;
-    const payload = new FormData();
-    payload.append("file", file);
     setStage("uploading");
     setUploadProgress(0);
     setJob(null);
     try {
-      const { data } = await connect.post("/importacao-colaboradores", payload, {
-        timeout: 120000,
-        onUploadProgress: (event) => {
-          if (!event.total) return;
-          setUploadProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)));
-        },
+      const totalChunks = Math.ceil(file.size / UPLOAD_CHUNK_SIZE);
+      const { data: upload } = await connect.post("/importacao-colaboradores/upload/iniciar", {
+        filename: file.name,
+        size: file.size,
+        chunks: totalChunks,
       });
+      setJob(upload);
+
+      for (let index = 0; index < totalChunks; index += 1) {
+        const start = index * UPLOAD_CHUNK_SIZE;
+        const chunk = file.slice(start, Math.min(file.size, start + UPLOAD_CHUNK_SIZE));
+        const payload = new FormData();
+        payload.append("chunk", chunk, `${file.name}.part`);
+        payload.append("index", String(index));
+        await connect.post(`/importacao-colaboradores/${upload.id}/parte`, payload, {
+          timeout: 120000,
+          onUploadProgress: (event) => {
+            const loadedInChunk = event.total ? Math.min(event.loaded, event.total) : chunk.size;
+            const loaded = Math.min(file.size, start + loadedInChunk);
+            setUploadProgress(Math.round((loaded / file.size) * 100));
+          },
+        });
+      }
+
       setUploadProgress(100);
+      const { data } = await connect.post(`/importacao-colaboradores/${upload.id}/concluir`, null, {
+        timeout: 120000,
+      });
       setJob(data);
       setStage("processing");
       setJobId(data.id);
     } catch (error) {
       setStage("error");
-      showToast("error", "Importação de colaboradores", error.response?.data || "Não foi possível enviar o JSON.");
+      const serverMessage = typeof error.response?.data === "string"
+        ? error.response.data
+        : error.response?.data?.message;
+      const message = error.response?.status === 413
+        ? "O servidor recusou o tamanho enviado. Tente novamente ou contate o suporte."
+        : serverMessage || "Não foi possível enviar o JSON. Verifique a conexão e tente novamente.";
+      showToast("error", "Importação de colaboradores", message);
     }
   };
 
