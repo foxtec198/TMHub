@@ -92,6 +92,18 @@ export function MainLayout() {
       ]
     },
     {
+      label: "Indicadores",
+      icon: 'pi pi-user-plus',
+      items: [
+        {
+          label: 'PCD',
+          icon: 'pi pi-briefcase',
+          visible: can("indicador_pcd"),
+          command: () => { navigateTo("/indicadores/pcd") }
+        },
+      ]
+    },
+    {
       label: "RPA Center",
       disabled: true,
 

@@ -35,12 +35,13 @@ import { Movements } from "./pages/Estoque/movements";
 import { BarcodeGenerator } from "./pages/Estoque/barcode_generator.jsx";
 import { Floaters } from "./pages/Requisicoes/floaters";
 import ProjetosPage from "./pages/Projetos/ProjetosPage";
-import { Vacancies } from "./pages/Admissao/vacancies.jsx"
-import { Settings } from "./pages/Configuracoes"
-import { AbsenceControl } from "./pages/ControleFaltas"
-import { DisallowanceControl } from "./pages/ControleGlosas"
-import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard"
+import { Vacancies } from "./pages/Admissao/vacancies.jsx";
+import { Settings } from "./pages/Configuracoes";
+import { AbsenceControl } from "./pages/ControleFaltas";
+import { DisallowanceControl } from "./pages/ControleGlosas";
+import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
 import { Structure } from "./pages/Estrutura/index";
+import { Pcd } from "./pages/Indicadores/pcd";
 
 document.documentElement.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
 
@@ -108,6 +109,9 @@ export function AppRoutes() {
           <Route path="/configuracoes" element={<Settings />} />
           <Route path="/controle-faltas" element={<PermissionGate screen="controle_faltas"><AbsenceControl /></PermissionGate>} />
           <Route path="/controle-glosas" element={<PermissionGate screen="controle_glosas"><DisallowanceControl /></PermissionGate>} />
+
+          {/* Indicadores */}
+          <Route path="/indicadores/pcd" element={<PermissionGate screen="indicador_pcd"><Pcd /></PermissionGate>} />
 
           {/* Admissão */}
           <Route path="/admissao/vagas" element={<PermissionGate screen="admissoes"><Vacancies key="substituicao" /></PermissionGate>} />
