@@ -93,11 +93,21 @@ export function Auth() {
             localStorage.setItem("theme", theme);
             document.documentElement.dataset.theme = theme;
             sessionStorage.setItem("token", res.data.access_token);
+            const requirements = {
+                primeiro_acesso: res.data.primeiro_acesso,
+                cpf_pendente: res.data.cpf_pendente,
+                foto_pendente: res.data.foto_pendente,
+                troca_senha_obrigatoria: res.data.troca_senha_obrigatoria,
+                senha_padrao: res.data.senha_padrao,
+                pendencia_obrigatoria: res.data.pendencia_obrigatoria,
+                interacao_pendente: res.data.interacao_pendente,
+            };
+            localStorage.setItem("auth_requirements", JSON.stringify(requirements));
+            window.dispatchEvent(new CustomEvent("tmhub:auth-requirements", { detail: requirements }));
             localStorage.setItem("current_id", res.data.id);
             navigate("/init")
         } catch (error) {
-            console.log(error)
-            const msg = error.response.data
+            const msg = error.response?.data || "Não foi possível autenticar."
             const isPwdError = msg.toLowerCase().includes("senha")
 
             if (isPwdError) {

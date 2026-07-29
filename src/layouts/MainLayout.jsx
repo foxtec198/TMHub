@@ -56,6 +56,13 @@ export function MainLayout() {
     }
   };
 
+  const logout = () => {
+    socketio.disconnect();
+    sessionStorage.removeItem("token");
+    localStorage.clear();
+    navigateTo("/");
+  };
+
   const items = [
     {
       label: 'Dashboards',
@@ -222,7 +229,7 @@ export function MainLayout() {
     {
       label: 'Sair',
       icon: 'pi pi-sign-out',
-      command: () => { localStorage.clear(); navigateTo("/") }
+      command: logout
     },
   ];
 

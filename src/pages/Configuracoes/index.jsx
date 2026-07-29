@@ -12,6 +12,7 @@ import connect from "../../utils/request";
 import { getInitials, storeProfile } from "../../utils/profile";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
+import { socketio } from "../../utils/socketio";
 import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
 import { CollaboratorImportSettings } from "./CollaboratorImportSettings";
@@ -50,6 +51,11 @@ export function Settings() {
     setLoading(true);
     try {
       const { data } = await connect.patch("/usuarios/perfil", payload);
+      if (data.access_token) {
+        sessionStorage.setItem("token", data.access_token);
+        socketio.auth = { token: data.access_token };
+        socketio.disconnect().connect();
+      }
       setProfile(data);
       storeProfile(data);
       showToast("success", "Configurações", message);

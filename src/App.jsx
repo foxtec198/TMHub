@@ -11,6 +11,7 @@ import { PrimeReactProvider } from 'primereact/api';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { ToastProvider } from "./contexts/ToastContext";
 import { PermissionGate } from "./components/PermissionGate"
+import { AuthRequirementsGate } from "./components/AuthRequirementsGate"
 
 // Styles
 import 'primeicons/primeicons.css';
@@ -25,7 +26,6 @@ import { Ponto48Dashboard } from "./pages/Dashboards/Ponto48Dashboard"
 import { AdmissionDashboard } from "./pages/Dashboards/AdmissionDashboard.jsx"
 import { Requests } from "./pages/Requisicoes/requests"
 import { Request } from "./pages/Requisicoes/new.jsx"
-import { Frotas } from "./pages/Frotas"
 import { Auth } from "./pages/Auth"
 import { Init } from "./pages/Init"
 import { RequestsODS } from "./pages/Dashboards/requests_ods";
@@ -82,6 +82,11 @@ export function AppRoutes() {
       (response) => response,
       (error) => {
         const isLoginRequest = String(error.config?.url || "").includes("/login");
+        if (error.response?.status === 428 && error.response?.data?.code === "AUTH_REQUIREMENTS_PENDING") {
+          const requirements = error.response.data.requirements || {};
+          localStorage.setItem("auth_requirements", JSON.stringify(requirements));
+          window.dispatchEvent(new CustomEvent("tmhub:auth-requirements", { detail: requirements }));
+        }
         if (error.response?.status === 401 && !isLoginRequest) {
           sessionStorage.removeItem("token");
           window.location.href = "/login";
@@ -138,6 +143,7 @@ export function AppRoutes() {
 
         <Route path="*" element={<Navigate to={token() ? "/init" : "/"} />} />
       </Routes>
+      <AuthRequirementsGate />
     </>
   )
 };

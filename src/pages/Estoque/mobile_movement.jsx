@@ -71,7 +71,11 @@ export function MobileMovement() {
     const [tempoRestante, setTempoRestante] = useState(0);
 
     useEffect(() => {
-        if (!bloqueadoAte) { return setTempoRestante(0); }
+        if (!bloqueadoAte) {
+            // Estado derivado do bloqueio persistido; mantém o contador visual sincronizado.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            return setTempoRestante(0);
+        }
 
         const atualizarCronometro = () => {
             const agora = Date.now();
@@ -105,6 +109,8 @@ export function MobileMovement() {
     }
 
     useEffect(() => {
+        // O carregamento é disparado somente ao entrar na etapa autenticada.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (step === "movimentacao") { getProducts(); }
     }, [step]);
 
@@ -129,11 +135,21 @@ export function MobileMovement() {
             sessionStorage.setItem("token", res.data.access_token);
             localStorage.setItem("display_name", res.data.display_name);
             localStorage.setItem("role", res.data.role);
+            const requirements = {
+                primeiro_acesso: res.data.primeiro_acesso,
+                cpf_pendente: res.data.cpf_pendente,
+                foto_pendente: res.data.foto_pendente,
+                troca_senha_obrigatoria: res.data.troca_senha_obrigatoria,
+                senha_padrao: res.data.senha_padrao,
+                pendencia_obrigatoria: res.data.pendencia_obrigatoria,
+                interacao_pendente: res.data.interacao_pendente,
+            };
+            localStorage.setItem("auth_requirements", JSON.stringify(requirements));
+            window.dispatchEvent(new CustomEvent("tmhub:auth-requirements", { detail: requirements }));
             setDisplayName(res.data.display_name);
             setPwd("");
             setStep("movimentacao");
         } catch (err) {
-            console.warn(err);
             const msg = err.response?.data ?? "Não foi possível autenticar.";
             const isPwdError = typeof msg === "string" && msg.toLowerCase().includes("senha");
 
@@ -160,6 +176,7 @@ export function MobileMovement() {
 
     function logout() {
         sessionStorage.removeItem("token");
+        localStorage.removeItem("auth_requirements");
         localStorage.removeItem("display_name");
         localStorage.removeItem("role");
         setDisplayName("");
