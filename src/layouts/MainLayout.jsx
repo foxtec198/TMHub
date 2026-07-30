@@ -133,11 +133,11 @@ export function MainLayout() {
     },
     {
       label: "Indicadores",
-      icon: 'pi pi-user-plus',
+      icon: 'pi pi-chart-line',
       items: [
         {
           label: 'PCD',
-          icon: 'pi pi-briefcase',
+          icon: 'pi pi-heart',
           visible: can("indicador_pcd"),
           command: () => { navigateTo("/indicadores/pcd") }
         },
