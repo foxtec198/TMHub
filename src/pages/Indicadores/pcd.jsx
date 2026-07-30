@@ -8,15 +8,27 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
+import { SpeedDial } from "primereact/speeddial";
 import { Tag } from "primereact/tag";
+import { Tooltip } from "primereact/tooltip";
 import connect from "../../utils/request";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
 import { can } from "../../utils/permissions";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+import { PageHeader } from "../../components/PageHeader";
 import "./pcd.css";
 
 const TIPOS_PCD = ["Motora", "Visual", "Auditiva", "Intelectual", "Outras", "Reabilitado"];
+
+const TYPE_ICONS = {
+  "Motora": "pi pi-arrows-alt",
+  "Visual": "pi pi-eye",
+  "Auditiva": "pi pi-volume-up",
+  "Intelectual": "pi pi-book",
+  "Outras": "pi pi-question-circle",
+  "Reabilitado": "pi pi-refresh",
+};
 
 const EMPTY_FILTERS = {
   filiais: [],
@@ -24,6 +36,7 @@ const EMPTY_FILTERS = {
   centros: [],
   supervisores: [],
   tipos: [],
+  situacoes: [],
 };
 
 function uniqueOptions(items, valueKey, labelKey = valueKey) {
@@ -100,6 +113,7 @@ export function Pcd() {
     departamentos: uniqueOptions(colaboradores, "departamento"),
     centros: uniqueOptions(colaboradores, "centro_id", "centro_custo"),
     supervisores: uniqueOptions(colaboradores, "supervisor_id", "supervisor"),
+    situacoes: uniqueOptions(colaboradores, "situacao_id", "situacao"),
     tipos: uniqueOptions(
       colaboradores.flatMap((colaborador) => (colaborador.type_pcd || "Não informado")
         .split(",").map((tipo) => tipo.trim()).filter(Boolean).map((tipo) => ({ tipo }))),
@@ -117,6 +131,7 @@ export function Pcd() {
       && (!filters.centros.length || filters.centros.includes(colaborador.centro_id))
       && (!filters.supervisores.length || filters.supervisores.includes(colaborador.supervisor_id))
       && (!filters.tipos.length || filters.tipos.some((tipo) => tipos.includes(tipo)))
+      && (!filters.situacoes.length || filters.situacoes.includes(colaborador.situacao_id))
     );
   }), [colaboradores, filiaisPorDepartamento, search, filters]);
 
@@ -253,10 +268,24 @@ export function Pcd() {
     }
   }
 
+  const speedDialItems = [
+    ...(canEdit ? [
+      { label: "Importar planilha", icon: "pi pi-upload", command: () => setImportOpen(true) },
+      { label: "Marcar colaborador como PCD", icon: "pi pi-plus", command: openNew },
+    ] : []),
+    { label: "Exportar (em breve)", icon: "pi pi-download", disabled: true, command: () => {} },
+    ...(isAdmin ? [
+      { label: "Excluir todos os dados", icon: "pi pi-trash", command: confirmDeleteAll },
+    ] : []),
+  ];
+
   return <section className="pcd-page">
-    <header className="pcd-header">
-      <div className="pcd-title"><span>Indicadores</span><h1>Controle de PCD</h1><p>Colaboradores com deficiência, organizados por departamento e centro de custo.</p></div>
-      <div className="pcd-header-actions">
+    <PageHeader
+      section="Indicadores"
+      title="Controle de PCD"
+      description="Colaboradores com deficiência, organizados por departamento e centro de custo."
+      actions={<>
+        <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
         <Button
           type="button"
           icon="pi pi-filter-fill"
@@ -264,14 +293,13 @@ export function Pcd() {
           outlined
           onClick={(event) => filterPanel.current?.toggle(event)}
         />
-        {canEdit && <>
-          <Button icon="pi pi-upload" label="Importar planilha" outlined onClick={() => setImportOpen(true)} />
-          <Button icon="pi pi-plus" label="Marcar colaborador como PCD" onClick={openNew} />
-          <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-          {isAdmin && <Button icon="pi pi-trash" label="Excluir todos os dados" severity="danger" outlined loading={deletingAll} onClick={confirmDeleteAll} />}
-        </>}
-      </div>
-    </header>
+      </>}
+    />
+
+    {(canEdit || isAdmin) && <div className="pcd-speed-dial">
+      <Tooltip target=".pcd-speed-dial .p-speeddial-action" position="left" showDelay={150} />
+      <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações de PCD" />
+    </div>}
 
     <OverlayPanel ref={filterPanel} className="pcd-filter-panel">
       <div className="pcd-filter-panel__title">
@@ -289,6 +317,7 @@ export function Pcd() {
         ["centros", "Centros de custo"],
         ["supervisores", "Supervisores"],
         ["tipos", "Tipos de PCD"],
+        ["situacoes", "Situação"],
       ].map(([name, label]) => (
         <label className="pcd-filter-field" key={name}>
           <span>{label}</span>
@@ -311,7 +340,7 @@ export function Pcd() {
     <div className="pcd-summary">
       <article className="pcd-summary-card"><i className="pi pi-users" /><div><small>Total PCD</small><strong>{filteredColaboradores.length}</strong></div></article>
       {Object.entries(summaryByType).map(([tipo, count]) => (
-        <article className="pcd-summary-card" key={tipo}><i className="pi pi-tag" /><div><small>{tipo}</small><strong>{count}</strong></div></article>
+        <article className="pcd-summary-card" key={tipo}><i className={TYPE_ICONS[tipo] || "pi pi-tag"} /><div><small>{tipo}</small><strong>{count}</strong></div></article>
       ))}
     </div>
 
@@ -356,8 +385,12 @@ export function Pcd() {
                           <li key={colaborador.id} className="pcd-employee">
                             <div className="pcd-employee-info">
                               <span className="pcd-employee-name">{colaborador.nome}</span>
-                              <span className="pcd-employee-subtitle">Matrícula {colaborador.matricula} • {colaborador.cargo || "Sem cargo"}</span>
+                              <span className="pcd-employee-subtitle">
+                                Matrícula {colaborador.matricula} • {colaborador.cargo || "Sem cargo"}
+                                <span className={`pcd-employee-status ${colaborador.situacao_id === 8 ? "is-inativo" : "is-ativo"}`}>{colaborador.situacao}</span>
+                              </span>
                             </div>
+                            <Divider layout="vertical" />
                             <div className="pcd-employee-meta">
                               {colaborador.type_pcd && <Tag className="pcd-employee-tipo" value={colaborador.type_pcd} />}
                               {colaborador.obs_pcd && <span className="pcd-employee-obs">{colaborador.obs_pcd}</span>}

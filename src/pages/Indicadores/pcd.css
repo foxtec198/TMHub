@@ -46,38 +46,69 @@
     gap: 1.25rem;
 }
 
-.pcd-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+.pcd-speed-dial {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 20;
 }
 
-.pcd-header .pcd-title span {
-    color: var(--primary-color);
-    font-size: .75rem;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
+.pcd-speed-dial .p-speeddial {
+    position: relative;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
-.pcd-header .pcd-title h1 {
-    margin: .2rem 0;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(1.6rem, 3vw, 2.1rem);
+.pcd-speed-dial .p-speeddial.p-component,
+.pcd-speed-dial .p-speeddial-button-wrapper {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
-.pcd-header .pcd-title p {
-    margin: 0;
-    color: var(--text-muted);
+.pcd-speed-dial .p-speeddial-list,
+.pcd-speed-dial .p-speeddial-list.p-component {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
 }
 
-.pcd-header-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: .6rem;
-    flex-wrap: wrap;
+.pcd-speed-dial .p-speeddial-action {
+    width: 3.25rem;
+    height: 3.25rem;
+    color: var(--accent-light);
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 50%;
+    box-shadow: var(--shadow-md);
+}
+
+.pcd-speed-dial .p-speeddial-action:hover {
+    color: #071009;
+    background: var(--accent-dark) !important;
+}
+
+.pcd-speed-dial .p-speeddial-action.p-disabled,
+.pcd-speed-dial .p-speeddial-action[aria-disabled="true"] {
+    opacity: .5;
+    pointer-events: none;
+}
+
+.pcd-speed-dial .p-speeddial-button {
+    width: 4rem;
+    height: 4rem;
+    color: #071009 !important;
+    background: var(--accent-dark) !important;
+    border: 3px solid var(--accent-light) !important;
+    box-shadow: var(--shadow-md);
+}
+
+.pcd-speed-dial .p-speeddial-button:hover,
+.pcd-speed-dial .p-speeddial-button:focus,
+.pcd-speed-dial .p-speeddial-opened .p-speeddial-button {
+    color: #020603 !important;
+    background: var(--accent-dark) !important;
 }
 
 .pcd-summary {
@@ -249,8 +280,7 @@
 .pcd-employee {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    gap: 1.1rem;
     padding: .9rem 1.1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
@@ -268,9 +298,47 @@
     font-weight: 700;
 }
 
+.pcd-employee-actions {
+    display: flex;
+    align-items: center;
+    gap: .1rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
 .pcd-employee-subtitle {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
     color: var(--text-muted);
     font-size: .82rem;
+}
+
+.pcd-employee-status {
+    padding: .05rem .5rem;
+    border-radius: var(--radius-pill);
+    font-size: .72rem;
+    font-weight: 600;
+}
+
+.pcd-employee-status.is-ativo {
+    color: var(--accent-dark);
+    background: var(--accent-light);
+}
+
+.pcd-employee-status.is-inativo {
+    color: #d1495b;
+    background: #fbe4e7;
+}
+
+:root[data-theme="dark"] .pcd-employee-status.is-inativo {
+    color: #ff9aa6;
+    background: #3a2226;
+}
+
+.pcd-employee .p-divider-vertical {
+    align-self: stretch;
+    margin: 0;
 }
 
 .pcd-employee-meta {
@@ -291,12 +359,6 @@
     color: var(--text-muted);
     font-size: .78rem;
     text-align: right;
-}
-
-.pcd-employee-actions {
-    display: flex;
-    gap: .15rem;
-    flex-shrink: 0;
 }
 
 .pcd-dialog,
@@ -452,14 +514,14 @@
         padding: 16px;
     }
 
-    .pcd-header {
-        align-items: flex-start;
-        flex-direction: column;
+    .pcd-speed-dial {
+        right: 1rem;
+        bottom: 1rem;
     }
 
-    .pcd-header-actions,
-    .pcd-header-actions .p-button {
-        width: 100%;
+    .pcd-speed-dial .p-speeddial-action {
+        width: 3rem;
+        height: 3rem;
     }
 
     .pcd-summary {
@@ -469,6 +531,10 @@
     .pcd-employee {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .pcd-employee .p-divider-vertical {
+        display: none;
     }
 
     .pcd-employee-meta {
