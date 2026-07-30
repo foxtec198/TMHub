@@ -20,20 +20,41 @@ import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
 import "./styles.css";
 import "./contrast.css";
+import {
+  CombinedFiltersProvider,
+  CombinedMultiSelect,
+  useCombinedFilters,
+} from "../../contexts/CombinedFiltersContext";
 
-const ALL = "__all__";
 const COVERAGE_OPTIONS = [
   { label: "Em análise", value: "em_analise" },
   { label: "Coberta", value: "coberta" },
   { label: "Parcialmente coberta", value: "parcial" },
   { label: "Descoberta", value: "descoberta" },
 ];
-const DEFAULT_FILTERS = {
-  cobertura: ALL,
-  departamento: ALL,
-  contrato: ALL,
-  colaborador: ALL,
+const FILTER_DEFINITIONS = {
+  cobertura: {
+    getValue: (record) => record.cobertura,
+    options: COVERAGE_OPTIONS,
+  },
+  departamento: {
+    getValue: (record) => (record.departamento == null || record.departamento === "")
+      ? null
+      : String(record.departamento),
+    getLabel: (record) => `DPTO. ${record.departamento}`,
+  },
+  contrato: {
+    getValue: (record) => record.centro_custo_id,
+    getLabel: (record) => record.contrato || `Contrato ${record.centro_custo_id}`,
+  },
+  colaborador: {
+    getValue: (record) => record.colaborador_id,
+    getLabel: (record) => record.matricula
+      ? `${record.matricula} - ${record.colaborador}`
+      : record.colaborador,
+  },
 };
+
 const EMPTY_FORM = {
   competencia: null,
   data_falta: null,
@@ -130,12 +151,11 @@ function normalizeRecord(record) {
   };
 }
 
-export function DisallowanceControl() {
+function DisallowanceControlContent() {
   const [period, setPeriod] = useState(defaultPeriod);
   const [records, setRecords] = useState([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [evidenceFile, setEvidenceFile] = useState(null);
@@ -193,30 +213,19 @@ export function DisallowanceControl() {
     return () => window.removeEventListener("paste", handlePaste);
   }, [dialogOpen, form.cobertura]);
 
-  const filterOptions = useMemo(() => ({
-    departamentos: [...new Set(records.map((record) => record.departamento).filter((value) => value != null && value !== ""))]
-      .map(String)
-      .sort((left, right) => left.localeCompare(right, "pt-BR", { numeric: true })),
-    contratos: [...new Map(records.filter((record) => record.centro_custo_id).map((record) => [
-      record.centro_custo_id,
-      { label: record.contrato, value: record.centro_custo_id },
-    ])).values()].sort((left, right) => left.label.localeCompare(right.label, "pt-BR")),
-    colaboradores: [...new Map(records.filter((record) => record.colaborador_id).map((record) => [
-      record.colaborador_id,
-      { label: record.colaborador, value: record.colaborador_id, matricula: record.matricula },
-    ])).values()].sort((left, right) => left.label.localeCompare(right.label, "pt-BR")),
-  }), [records]);
+  const {
+    filteredData: multiSelectFilteredRecords,
+    options: filterOptions,
+    activeFilterCount,
+    clearFilters: clearMultiSelectFilters,
+  } = useCombinedFilters(records);
 
-  const filteredRecords = useMemo(() => records.filter((record) => {
-    if (filters.cobertura !== ALL && record.cobertura !== filters.cobertura) return false;
-    if (filters.departamento !== ALL && String(record.departamento) !== String(filters.departamento)) return false;
-    if (filters.contrato !== ALL && String(record.centro_custo_id) !== String(filters.contrato)) return false;
-    if (filters.colaborador !== ALL && String(record.colaborador_id) !== String(filters.colaborador)) return false;
+  const filteredRecords = useMemo(() => multiSelectFilteredRecords.filter((record) => {
     if (!debouncedSearch) return true;
     const term = debouncedSearch.toLocaleLowerCase("pt-BR");
     return [record.contrato, record.colaborador, record.matricula, record.justificativa, record.observacao]
       .some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
-  }), [records, filters, debouncedSearch]);
+  }), [multiSelectFilteredRecords, debouncedSearch]);
 
   const summary = useMemo(() => ({
     total_registros: filteredRecords.length,
@@ -231,7 +240,6 @@ export function DisallowanceControl() {
       .reduce((total, record) => total + record.valor_total, 0),
   }), [filteredRecords]);
 
-  const activeFilterCount = Object.values(filters).filter((value) => value !== ALL).length;
   const totalValue = Number(form.quantidade_dias || 0) * Number(form.valor_diaria || 0);
   const coveredDays = form.cobertura === "coberta"
     ? Number(form.quantidade_dias || 0)
@@ -389,7 +397,7 @@ export function DisallowanceControl() {
 
   const clearFilters = () => {
     setPeriod(defaultPeriod());
-    setFilters(DEFAULT_FILTERS);
+    clearMultiSelectFilters();
     setSearch("");
   };
 
@@ -450,10 +458,10 @@ export function DisallowanceControl() {
       </div>
       <div className="glosa-filter-grid">
         <label className="is-wide"><span>Competência</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" showIcon readOnlyInput hideOnRangeSelection /></label>
-        <label><span>Situação</span><Dropdown value={filters.cobertura} options={[{ label: "Todas", value: ALL }, ...COVERAGE_OPTIONS]} onChange={(event) => setFilters((current) => ({ ...current, cobertura: event.value }))} /></label>
-        <label><span>Departamento</span><Dropdown value={filters.departamento} options={[{ label: "Todos", value: ALL }, ...filterOptions.departamentos.map((value) => ({ label: `DPTO. ${value}`, value }))]} onChange={(event) => setFilters((current) => ({ ...current, departamento: event.value }))} filter /></label>
-        <label className="is-wide"><span>Contrato</span><Dropdown value={filters.contrato} options={[{ label: "Todos", value: ALL }, ...filterOptions.contratos]} onChange={(event) => setFilters((current) => ({ ...current, contrato: event.value }))} filter /></label>
-        <label className="is-wide"><span>Colaborador</span><Dropdown value={filters.colaborador} options={[{ label: "Todos", value: ALL }, ...filterOptions.colaboradores.map((item) => ({ ...item, label: item.matricula ? `${item.matricula} - ${item.label}` : item.label }))]} onChange={(event) => setFilters((current) => ({ ...current, colaborador: event.value }))} filter /></label>
+        <CombinedMultiSelect name="cobertura" label="Situação" options={filterOptions.cobertura} placeholder="Todas as situações" />
+        <CombinedMultiSelect name="departamento" label="Departamento" options={filterOptions.departamento} placeholder="Todos os departamentos" />
+        <CombinedMultiSelect name="contrato" label="Contrato" options={filterOptions.contrato} placeholder="Todos os contratos" className="is-wide" />
+        <CombinedMultiSelect name="colaborador" label="Colaborador" options={filterOptions.colaborador} placeholder="Todos os colaboradores" className="is-wide" />
       </div>
     </OverlayPanel>
 
@@ -472,7 +480,7 @@ export function DisallowanceControl() {
                 return;
               }
               const isDepartment269 = String(employee.departamento) === "269" || String(employee.centro_id) === "269";
-              const dailyRate = employee.valor_diaria_glosa != null ? Number(employee.valor_diaria_glosa) : (isDepartment269 ? 182.02 : 180);
+              const dailyRate = employee.valor_diaria_glosa != null ? Number(employee.valor_diaria_glosa) : (isDepartment269 ? 182.03 : 180);
               setForm((current) => ({
                 ...current,
                 colaborador_id: employeeId,
@@ -537,4 +545,12 @@ export function DisallowanceControl() {
       </form>
     </Dialog>
   </section>;
+}
+
+export function DisallowanceControl() {
+  return (
+    <CombinedFiltersProvider definitions={FILTER_DEFINITIONS}>
+      <DisallowanceControlContent />
+    </CombinedFiltersProvider>
+  );
 }

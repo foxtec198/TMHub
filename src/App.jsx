@@ -24,25 +24,25 @@ import { RequestReport } from "./pages/Dashboards/requests"
 import { DepartmentEmployeesDashboard } from "./pages/Dashboards/DepartmentEmployees"
 import { Ponto48Dashboard } from "./pages/Dashboards/Ponto48Dashboard"
 import { AdmissionDashboard } from "./pages/Dashboards/AdmissionDashboard.jsx"
-import { Requests } from "./pages/Requisicoes/requests"
-import { Request } from "./pages/Requisicoes/new.jsx"
+import { Requests } from "./pages/Requests/requests"
+import { Request } from "./pages/Requests/new.jsx"
 import { Auth } from "./pages/Auth"
 import { Init } from "./pages/Init"
 import { RequestsODS } from "./pages/Dashboards/requests_ods";
-import { History } from "./pages/Requisicoes/history";
-import { Products } from "./pages/Estoque/products";
-import { Movements } from "./pages/Estoque/movements";
-import { BarcodeGenerator } from "./pages/Estoque/barcode_generator.jsx";
-import { Floaters } from "./pages/Requisicoes/floaters";
-import ProjetosPage from "./pages/Projetos/ProjetosPage";
-import { Vacancies } from "./pages/Admissao/vacancies.jsx";
-import { Settings } from "./pages/Configuracoes";
-import { AbsenceControl } from "./pages/ControleFaltas";
-import { DisallowanceControl } from "./pages/ControleGlosas";
+import { History } from "./pages/Requests/history";
+import { Products } from "./pages/Stock/products";
+import { Movements } from "./pages/Stock/movements";
+import { BarcodeGenerator } from "./pages/Stock/barcode_generator.jsx";
+import { Floaters } from "./pages/Requests/floaters";
+import { ProjetosPage } from "./pages/Projects/ProjetosPage";
+import { Vacancies } from "./pages/Admission/vacancies.jsx";
+import { Settings } from "./pages/Configuratiom";
+import { AbsenceControl } from "./pages/FaltsControl";
+import { DisallowanceControl } from "./pages/DissallowancesControls";
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
 import { DashboardLogistic } from "./pages/Dashboards/logistic";
-import { Structure } from "./pages/Estrutura/index";
-import { Pcd } from "./pages/Indicadores/pcd";
+import { Structure } from "./pages/Structure/index";
+import { Pcd } from "./pages/Indicators/pcd";
 
 document.documentElement.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
 
