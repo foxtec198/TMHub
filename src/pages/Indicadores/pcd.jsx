@@ -12,6 +12,7 @@ import { SpeedDial } from "primereact/speeddial";
 import { Tag } from "primereact/tag";
 import { Tooltip } from "primereact/tooltip";
 import connect from "../../utils/request";
+import { socketio } from "../../utils/socketio";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
 import { can } from "../../utils/permissions";
@@ -105,6 +106,17 @@ export function Pcd() {
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
+
+  // Mantém a listagem sincronizada em tempo real quando outro usuário altera o indicador de PCD.
+  useEffect(() => {
+    const refreshPcd = () => setRefresh((value) => value + 1);
+
+    socketio.on("pcd_update", refreshPcd);
+
+    return () => {
+      socketio.off("pcd_update", refreshPcd);
+    };
+  }, []);
 
   const options = useMemo(() => ({
     filiais: [...new Set(Object.values(filiaisPorDepartamento).flat())]
