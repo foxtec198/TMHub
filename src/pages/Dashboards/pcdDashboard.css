@@ -1,0 +1,387 @@
+.pcd-dashboard {
+    min-height: 100%;
+    padding: clamp(1rem, 2.5vw, 2rem);
+    color: var(--text-color, #26332a);
+}
+
+.pcd-dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .8rem;
+    margin-bottom: 1rem;
+}
+
+.pcd-dashboard-summary-card {
+    --card-accent: #268f50;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: .8rem;
+    min-width: 0;
+    padding: 1rem;
+    background: var(--surface-card, #fff);
+    border: 1px solid var(--surface-border, #dce7df);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(15, 63, 30, .07);
+}
+
+.pcd-dashboard-summary-card.is-success {
+    --card-accent: #31b765;
+}
+
+.pcd-dashboard-summary-card.is-warning {
+    --card-accent: #d59b19;
+}
+
+.pcd-dashboard-summary-card.is-danger {
+    --card-accent: #e5484d;
+}
+
+.pcd-dashboard-summary-card.is-violet {
+    --card-accent: #815ac0;
+}
+
+.pcd-dashboard-summary-card__icon {
+    display: grid;
+    width: 2.7rem;
+    height: 2.7rem;
+    place-items: center;
+    color: var(--card-accent);
+    background: color-mix(
+        in srgb,
+        var(--card-accent) 13%,
+        transparent
+    );
+    border-radius: 12px;
+    font-size: 1.15rem;
+}
+
+.pcd-dashboard-summary-card > span:last-child {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.pcd-dashboard-summary-card small {
+    color: var(--text-color-secondary);
+    font-weight: 700;
+}
+
+.pcd-dashboard-summary-card strong {
+    overflow-wrap: anywhere;
+    color: var(--card-accent);
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.pcd-dashboard-summary-card em {
+    overflow: hidden;
+    color: var(--text-color-secondary);
+    font-size: .72rem;
+    font-style: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pcd-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(18rem, .8fr);
+    gap: 1rem;
+}
+
+.pcd-dashboard-panel {
+    min-width: 0;
+    padding: 1.2rem;
+    background: var(--surface-card, #fff);
+    border: 1px solid var(--surface-border, #dce7df);
+    border-radius: 16px;
+    box-shadow: 0 12px 34px rgba(15, 63, 30, .07);
+}
+
+.pcd-dashboard-panel--types {
+    grid-column: 1 / -1;
+}
+
+.pcd-dashboard-panel > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.pcd-dashboard-panel header span {
+    color: var(--primary-color);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.pcd-dashboard-panel h2 {
+    margin: .2rem 0 0;
+    font-size: 1.15rem;
+}
+
+.pcd-dashboard-chart {
+    height: 22rem;
+    margin-top: .75rem;
+}
+
+.pcd-dashboard-chart--types {
+    height: 19rem;
+}
+
+.pcd-dashboard-chart > .p-chart,
+.pcd-dashboard-chart > .p-chart > canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.pcd-dashboard-insight {
+    display: grid;
+    align-content: start;
+    gap: .8rem;
+    background: linear-gradient(
+        155deg,
+        color-mix(
+            in srgb,
+            var(--primary-color) 10%,
+            var(--surface-card, #fff)
+        ),
+        var(--surface-card, #fff)
+    );
+}
+
+.pcd-dashboard-insight > span {
+    color: var(--primary-color);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.pcd-dashboard-insight h2 {
+    margin: 0;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+.pcd-dashboard-insight p {
+    margin: 0;
+    color: var(--text-color-secondary);
+    line-height: 1.55;
+}
+
+.pcd-dashboard-insight > div:not(.pcd-dashboard-status-strip) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .8rem;
+    background: color-mix(
+        in srgb,
+        var(--primary-color) 8%,
+        transparent
+    );
+    border-radius: 12px;
+}
+
+.pcd-dashboard-insight > div:not(.pcd-dashboard-status-strip) > span {
+    display: flex;
+    flex-direction: column;
+}
+
+.pcd-dashboard-insight small,
+.pcd-dashboard-insight em {
+    color: var(--text-color-secondary);
+    font-size: .72rem;
+    font-style: normal;
+}
+
+.pcd-dashboard-insight strong {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.pcd-dashboard-status-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+    width: 100%;
+    margin-top: .2rem;
+}
+
+.pcd-dashboard-status-strip > div {
+    --status-color: #31b765;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: .35rem;
+    padding: .65rem .7rem;
+    background: color-mix(
+        in srgb,
+        var(--status-color) 9%,
+        var(--surface-card, #fff)
+    );
+    border: 1px solid color-mix(
+        in srgb,
+        var(--status-color) 34%,
+        transparent
+    );
+    border-radius: 10px;
+}
+
+.pcd-dashboard-status-strip .is-away {
+    --status-color: #d59b19;
+}
+
+.pcd-dashboard-status-strip .is-total {
+    --status-color: #815ac0;
+}
+
+.pcd-dashboard-status-strip .is-base {
+    --status-color: #4da3ff;
+}
+
+.pcd-dashboard-status-strip span {
+    overflow: hidden;
+    color: var(--text-color-secondary);
+    font-size: .66rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pcd-dashboard-status-strip strong {
+    flex: 0 0 auto;
+    color: var(--status-color);
+    font-size: 1rem;
+}
+
+.pcd-dashboard-empty {
+    display: grid;
+    height: 100%;
+    place-content: center;
+    justify-items: center;
+    gap: .65rem;
+    color: var(--text-color-secondary);
+    text-align: center;
+}
+
+.pcd-dashboard-empty i {
+    color: var(--primary-color);
+    font-size: 2rem;
+    opacity: .65;
+}
+
+.pcd-dashboard-filter-panel {
+    width: min(26rem, calc(100vw - 2rem));
+}
+
+.pcd-dashboard-filter-panel__title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.pcd-dashboard-filter-panel__title > div {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.pcd-dashboard-filter-panel__title span {
+    color: var(--text-color-secondary);
+    font-size: .78rem;
+}
+
+.pcd-dashboard-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+
+.pcd-dashboard-filter-field > span {
+    color: var(--text-color-secondary);
+    font-size: .75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.pcd-dashboard-filter-field .p-multiselect {
+    width: 100%;
+}
+
+:root[data-theme="dark"] .pcd-dashboard-summary-card,
+:root[data-theme="dark"] .pcd-dashboard-panel {
+    background: #292e2b;
+    border-color: #465149;
+}
+
+:root[data-theme="dark"] .pcd-dashboard {
+    color: #f2f6f3;
+}
+
+:root[data-theme="dark"] .pcd-dashboard-panel header span,
+:root[data-theme="dark"] .pcd-dashboard-insight > span,
+:root[data-theme="dark"] .pcd-dashboard-insight > div:not(.pcd-dashboard-status-strip) strong,
+:root[data-theme="dark"] .pcd-dashboard-empty i {
+    color: #61e990;
+}
+
+:root[data-theme="dark"] .pcd-dashboard-insight {
+    background: linear-gradient(155deg, #1c3b27, #292e2b 68%);
+}
+
+:root[data-theme="dark"] .pcd-dashboard-status-strip > div {
+    background: color-mix(
+        in srgb,
+        var(--status-color) 10%,
+        #222724
+    );
+}
+
+@media (max-width: 1180px) {
+    .pcd-dashboard-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .pcd-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pcd-dashboard-panel--types {
+        grid-column: auto;
+    }
+
+    .pcd-dashboard-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 540px) {
+    .pcd-dashboard {
+        padding: 1rem;
+    }
+
+    .pcd-dashboard-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .pcd-dashboard-panel > header,
+    .pcd-dashboard-insight > div:not(.pcd-dashboard-status-strip) {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pcd-dashboard-chart {
+        height: 18rem;
+    }
+
+    .pcd-dashboard-chart--types {
+        height: 20rem;
+    }
+}
