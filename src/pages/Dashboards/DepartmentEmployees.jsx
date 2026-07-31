@@ -1,14 +1,19 @@
+// Colab. por DTPO.
+
+// Utils
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useToast } from "../../contexts/ToastContext";
+import connect from "../../utils/request";
+
+// Widgets
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
 
-import connect from "../../utils/request";
-
+// Styles
 import "./departmentEmployees.css";
 
 const EMPTY_FILTERS = {

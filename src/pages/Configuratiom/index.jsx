@@ -1,4 +1,14 @@
+// Index of Config
+
+// Utils
 import { useEffect, useRef, useState } from "react";
+import connect from "../../utils/request";
+import { getInitials, storeProfile } from "../../utils/profile";
+import { useToast } from "../../contexts/ToastContext";
+import { useLoading } from "../../contexts/LoadingContext";
+import { socketio } from "../../utils/socketio";
+
+// Widgets
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputOtp } from "primereact/inputotp";
@@ -8,15 +18,12 @@ import { Password } from "primereact/password";
 import { Avatar } from "primereact/avatar";
 import { TabPanel, TabView } from "primereact/tabview";
 import { PageHeader } from "../../components/PageHeader";
-import connect from "../../utils/request";
-import { getInitials, storeProfile } from "../../utils/profile";
-import { useToast } from "../../contexts/ToastContext";
-import { useLoading } from "../../contexts/LoadingContext";
-import { socketio } from "../../utils/socketio";
 import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
-import { CollaboratorImportSettings } from "./CollaboratorImportSettings";
+import { CollaboratorImportSettings } from "./EmployeeImportSettings";
 import { NewsSettings } from "./NewsSettings";
+
+// Styles
 import "./settings.css";
 
 // Mantida igual à validação do backend para feedback imediato no formulário.
@@ -43,7 +50,7 @@ export function Settings() {
       setProfile(data);
       setDark(data.tema === "dark");
       storeProfile(data);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   // Ponto único para alterações de nome, foto e senha.
@@ -129,37 +136,37 @@ export function Settings() {
     <PageHeader section="Sistema" title="Configurações" description="Personalize seu perfil, acesso e aparência do TM Hub." />
     <TabView className="settings-tabs">
       <TabPanel header="Minha conta" leftIcon="pi pi-user mr-2">
-    <div className="settings-grid">
-      <div className="settings-column">
-      <article className="settings-card profile-card">
-        <div className="settings-card-title"><i className="pi pi-user"/><div><h2>Perfil</h2><p>Como você aparece no TM Hub</p></div></div>
-        <div className="photo-row">
-          <Avatar image={profile.foto_perfil || undefined} label={!profile.foto_perfil ? getInitials(profile.nome) : undefined} shape="circle" className="settings-avatar" />
-          <div><Button label="Trocar foto" icon="pi pi-camera" outlined onClick={() => fileRef.current?.click()} /><input ref={fileRef} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={changePhoto}/><small>PNG, JPG ou WEBP · máximo 1,5 MB</small></div>
+        <div className="settings-grid">
+          <div className="settings-column">
+            <article className="settings-card profile-card">
+              <div className="settings-card-title"><i className="pi pi-user" /><div><h2>Perfil</h2><p>Como você aparece no TM Hub</p></div></div>
+              <div className="photo-row">
+                <Avatar image={profile.foto_perfil || undefined} label={!profile.foto_perfil ? getInitials(profile.nome) : undefined} shape="circle" className="settings-avatar" />
+                <div><Button label="Trocar foto" icon="pi pi-camera" outlined onClick={() => fileRef.current?.click()} /><input ref={fileRef} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={changePhoto} /><small>PNG, JPG ou WEBP · máximo 1,5 MB</small></div>
+              </div>
+              <label>Nome de usuário</label><div className="settings-inline"><InputText value={profile.nome || ""} onChange={(e) => setProfile({ ...profile, nome: e.target.value })} /><Button label="Salvar" onClick={() => save({ nome: profile.nome }, "Nome atualizado.")} /></div>
+            </article>
+
+            <article className="settings-card">
+              <div className="settings-card-title"><i className="pi pi-envelope" /><div><h2>E-mail</h2><p>Atual: {profile.email || "Não informado"}</p></div></div>
+              <label>Novo e-mail</label><div className="settings-inline"><InputText autoComplete="off" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="voce@empresa.com" /><Button label="Verificar" icon="pi pi-send" onClick={requestCode} /></div>
+            </article>
+          </div>
+
+          <div className="settings-column">
+            <article className="settings-card">
+              <div className="settings-card-title"><i className="pi pi-palette" /><div><h2>Aparência</h2><p>Escolha o tema da interface</p></div></div>
+              <div className="theme-option"><div><strong>Modo escuro</strong><span>Preto como base e verde como destaque</span></div><InputSwitch checked={dark} onChange={(e) => changeTheme(e.value)} /></div>
+            </article>
+
+            <article className="settings-card password-card">
+              <div className="settings-card-title"><i className="pi pi-lock" /><div><h2>Alterar senha</h2><p>Proteja sua conta com uma senha forte</p></div></div>
+              <div className="password-fields"><Password value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} feedback={false} toggleMask placeholder="Senha atual" /><Password value={newPassword} onChange={(e) => setNewPassword(e.target.value)} toggleMask placeholder="Nova senha" promptLabel="Digite uma senha" weakLabel="Fraca" mediumLabel="Média" strongLabel="Forte" /><Password value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} feedback={false} toggleMask placeholder="Confirmar nova senha" /></div>
+              <p className="password-hint"><i className="pi pi-info-circle" /> Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial.</p>
+              <Button label="Atualizar senha" icon="pi pi-shield" onClick={changePassword} />
+            </article>
+          </div>
         </div>
-        <label>Nome de usuário</label><div className="settings-inline"><InputText value={profile.nome || ""} onChange={(e) => setProfile({ ...profile, nome: e.target.value })}/><Button label="Salvar" onClick={() => save({ nome: profile.nome }, "Nome atualizado.")}/></div>
-      </article>
-
-      <article className="settings-card">
-        <div className="settings-card-title"><i className="pi pi-envelope"/><div><h2>E-mail</h2><p>Atual: {profile.email || "Não informado"}</p></div></div>
-        <label>Novo e-mail</label><div className="settings-inline"><InputText autoComplete="off" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="voce@empresa.com"/><Button label="Verificar" icon="pi pi-send" onClick={requestCode}/></div>
-      </article>
-      </div>
-
-      <div className="settings-column">
-      <article className="settings-card">
-        <div className="settings-card-title"><i className="pi pi-palette"/><div><h2>Aparência</h2><p>Escolha o tema da interface</p></div></div>
-        <div className="theme-option"><div><strong>Modo escuro</strong><span>Preto como base e verde como destaque</span></div><InputSwitch checked={dark} onChange={(e) => changeTheme(e.value)} /></div>
-      </article>
-
-      <article className="settings-card password-card">
-        <div className="settings-card-title"><i className="pi pi-lock"/><div><h2>Alterar senha</h2><p>Proteja sua conta com uma senha forte</p></div></div>
-        <div className="password-fields"><Password value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} feedback={false} toggleMask placeholder="Senha atual"/><Password value={newPassword} onChange={(e) => setNewPassword(e.target.value)} toggleMask placeholder="Nova senha" promptLabel="Digite uma senha" weakLabel="Fraca" mediumLabel="Média" strongLabel="Forte"/><Password value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} feedback={false} toggleMask placeholder="Confirmar nova senha"/></div>
-        <p className="password-hint"><i className="pi pi-info-circle"/> Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial.</p>
-        <Button label="Atualizar senha" icon="pi pi-shield" onClick={changePassword}/>
-      </article>
-      </div>
-    </div>
       </TabPanel>
 
       {isAdmin && <TabPanel header="Usuários" leftIcon="pi pi-users mr-2">
@@ -178,8 +185,8 @@ export function Settings() {
 
     <Dialog header="Confirme seu novo e-mail" visible={emailDialog} onHide={() => setEmailDialog(false)} className="otp-dialog" modal>
       <p>Digite o código de 6 dígitos enviado para <strong>{newEmail}</strong>.</p>
-      <InputOtp value={otp} onChange={(e) => setOtp(e.value)} integerOnly length={6}/>
-      <div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEmailDialog(false)}/><Button label="Confirmar e-mail" disabled={String(otp).length !== 6} onClick={confirmEmail}/></div>
+      <InputOtp value={otp} onChange={(e) => setOtp(e.value)} integerOnly length={6} />
+      <div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEmailDialog(false)} /><Button label="Confirmar e-mail" disabled={String(otp).length !== 6} onClick={confirmEmail} /></div>
     </Dialog>
   </section>;
 }
