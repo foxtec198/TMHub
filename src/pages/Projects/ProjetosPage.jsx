@@ -10,11 +10,10 @@ import CardDetailDialog from '../../components/CardDetailDialog';
 import MembersDialog from '../../components/MembersDialog';
 import NewProjectDialog from '../../components/NewProjectDialog';
 import ProjectMemberAvatar from '../../components/ProjectMemberAvatar';
-import { PageHeader } from '../../components/PageHeader';
 import { useToast } from '../../contexts/ToastContext';
 import './ProjetosPage.css';
 
-export default function ProjetosPage() {
+export function ProjetosPage() {
   // Estado normalizado da tela: projetos carregados, seleção e diálogos abertos.
   const [projetos, setProjetos] = useState([]);
   const [currentUserId] = useState(() => {

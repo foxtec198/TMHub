@@ -33,6 +33,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
 };
 
 export function MainLayout() {
+  const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   const [displayName, setDisplayName] = useState(() => localStorage.getItem("display_name") || "");
   const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem("profile_photo"));
   const [role] = useState(() => {
