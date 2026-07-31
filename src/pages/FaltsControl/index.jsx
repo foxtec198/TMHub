@@ -1,4 +1,18 @@
+// Controle de Faltas - FaltsControl.jsx
+// Utils
 import { useEffect, useMemo, useRef, useState } from "react";
+import { can } from "../../utils/permissions";
+import connect from "../../utils/request";
+import { socketio } from "../../utils/socketio";
+import { useLoading } from "../../contexts/LoadingContext";
+import { useToast } from "../../contexts/ToastContext";
+import {
+  CombinedFiltersProvider,
+  CombinedMultiSelect,
+  useCombinedFilters,
+} from "../../contexts/CombinedFiltersContext";
+
+// Widgets
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
@@ -10,13 +24,12 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
-import connect from "../../utils/request";
-import { socketio } from "../../utils/socketio";
-import { useLoading } from "../../contexts/LoadingContext";
-import { useToast } from "../../contexts/ToastContext";
+
+// Components
 import { PageHeader } from "../../components/PageHeader";
-import { can } from "../../utils/permissions";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+
+// Styles
 import "./styles.css";
 
 const REASONS = ["ATESTADO", "AFASTAMENTO", "DECLARAÇÃO", "INJUSTIFICADA", "POSTO VAGO", "REMANEJAMENTO", "OUTROS"];
@@ -29,18 +42,11 @@ const ABSENCE_TYPES = [
   { label: "Parcial", value: "parcial" },
 ];
 const hasDocumentDeadline = (reason) => reason?.includes("ATESTADO") || reason?.includes("DECLARA");
-const ALL = "__all__";
 const loadedAt = new Date();
 const CURRENT_MONTH = [
   new Date(loadedAt.getFullYear(), loadedAt.getMonth(), 1),
   new Date(loadedAt.getFullYear(), loadedAt.getMonth() + 1, 0, 23, 59, 59, 999),
 ];
-
-function uniqueOptions(records, field, formatter = (value) => String(value)) {
-  return [...new Set(records.map((record) => record[field]).filter((value) => value != null && value !== ""))]
-    .map((value) => ({ label: formatter(value), value: String(value) }))
-    .sort((left, right) => left.label.localeCompare(right.label, "pt-BR", { numeric: true }));
-}
 
 function remaining(deadline, now) {
   if (!deadline) return null;
@@ -51,17 +57,49 @@ function remaining(deadline, now) {
   return { expired: false, text: `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}min` };
 }
 
-export function AbsenceControl() {
+const FILTER_DEFINITIONS = {
+  status: {
+    getValue: (record) => record.status,
+    options: [
+      { label: "Pendentes", value: "pendente" },
+      { label: "Tratadas", value: "tratada" },
+    ],
+  },
+  classificacao: {
+    getValue: (record) => record.classificacao || "em_analise",
+    options: [
+      ...CLASSIFICATIONS,
+      { label: "Em análise", value: "em_analise" },
+    ],
+  },
+  departamento: {
+    getValue: (record) => String(record.departamento ?? ""),
+    getLabel: (record) => `DPTO. ${record.departamento}`,
+  },
+  supervisor: {
+    getValue: (record) => String(record.supervisor ?? ""),
+    getLabel: (record) => record.supervisor,
+  },
+  motivo: {
+    getValue: (record) => String(record.motivo ?? ""),
+    getLabel: (record) => record.motivo,
+  },
+  contrato: {
+    getValue: (record) => String(record.contrato ?? ""),
+    getLabel: (record) => record.contrato,
+  },
+  colaborador: {
+    getValue: (record) => `${record.colaborador || ""}|||${record.matricula || ""}`,
+    getLabel: (record) => record.matricula
+      ? `${record.colaborador} · ${record.matricula}`
+      : record.colaborador,
+  },
+};
+
+function AbsenceControlPage() {
   const [records, setRecords] = useState([]);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("pendente");
-  const [classificationFilter, setClassificationFilter] = useState(ALL);
   const [dateRange, setDateRange] = useState(() => [...CURRENT_MONTH]);
-  const [departmentFilter, setDepartmentFilter] = useState(ALL);
-  const [supervisorFilter, setSupervisorFilter] = useState(ALL);
-  const [reasonFilter, setReasonFilter] = useState(ALL);
-  const [contractFilter, setContractFilter] = useState(ALL);
-  const [collaboratorFilter, setCollaboratorFilter] = useState(ALL);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [manualForm, setManualForm] = useState(null);
@@ -72,6 +110,20 @@ export function AbsenceControl() {
   const setLoading = useLoading();
   const { showToast } = useToast();
   const canEdit = can("controle_faltas", "edit");
+  const {
+    options: filterOptions,
+    setFilter,
+    clearFilters: clearCombinedFilters,
+    filteredData: combinedFilteredRecords,
+    activeFilterCount,
+  } = useCombinedFilters(records);
+  const initialStatusApplied = useRef(false);
+
+  useEffect(() => {
+    if (initialStatusApplied.current) return;
+    initialStatusApplied.current = true;
+    setFilter("status", ["pendente"]);
+  }, [setFilter]);
 
   useEffect(() => {
     connect.get("/controle-faltas")
@@ -103,52 +155,32 @@ export function AbsenceControl() {
     return result;
   }, { total: 0, pending: 0, expired: 0, treated: 0 }), [records, now]);
 
-  const filterOptions = useMemo(() => ({
-    departments: uniqueOptions(records, "departamento", (value) => `DPTO. ${value}`),
-    supervisors: uniqueOptions(records, "supervisor"),
-    reasons: uniqueOptions(records, "motivo"),
-    contracts: uniqueOptions(records, "contrato"),
-    collaborators: [...new Map(records.map((record) => {
-      const value = `${record.colaborador || ""}|||${record.matricula || ""}`;
-      const label = record.matricula ? `${record.colaborador} · ${record.matricula}` : record.colaborador;
-      return [value, { label, value }];
-    })).values()].filter((option) => option.label).sort((left, right) => left.label.localeCompare(right.label, "pt-BR")),
-  }), [records]);
-
-  const filtered = useMemo(() => records.filter((record) => {
-    const term = search.trim().toLowerCase();
+  const filtered = useMemo(() => combinedFilteredRecords.filter((record) => {
+    const term = search.trim().toLocaleLowerCase("pt-BR");
     const recordDate = new Date(record.data_falta);
-    const collaboratorKey = `${record.colaborador || ""}|||${record.matricula || ""}`;
     const rangeStart = dateRange?.[0] ? new Date(dateRange[0]) : null;
     const rangeEnd = dateRange?.[1] ? new Date(dateRange[1]) : null;
+
     rangeStart?.setHours(0, 0, 0, 0);
     rangeEnd?.setHours(23, 59, 59, 999);
-    if (statusFilter !== ALL && record.status !== statusFilter) return false;
-    if (classificationFilter !== ALL && record.classificacao !== classificationFilter) return false;
+
     if (rangeStart && recordDate < rangeStart) return false;
     if (rangeEnd && recordDate > rangeEnd) return false;
-    if (departmentFilter !== ALL && String(record.departamento) !== departmentFilter) return false;
-    if (supervisorFilter !== ALL && String(record.supervisor) !== supervisorFilter) return false;
-    if (reasonFilter !== ALL && String(record.motivo) !== reasonFilter) return false;
-    if (contractFilter !== ALL && String(record.contrato) !== contractFilter) return false;
-    if (collaboratorFilter !== ALL && collaboratorKey !== collaboratorFilter) return false;
-    return !term || [record.colaborador, record.matricula, record.contrato, record.supervisor, record.motivo]
-      .some((value) => String(value || "").toLowerCase().includes(term));
-  }), [records, search, statusFilter, classificationFilter, dateRange, departmentFilter, supervisorFilter, reasonFilter, contractFilter, collaboratorFilter]);
+
+    return !term || [
+      record.colaborador,
+      record.matricula,
+      record.contrato,
+      record.supervisor,
+      record.motivo,
+    ].some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
+  }), [combinedFilteredRecords, search, dateRange]);
 
   const clearFilters = () => {
-    setStatusFilter(ALL);
-    setClassificationFilter(ALL);
+    clearCombinedFilters();
     setDateRange([...CURRENT_MONTH]);
-    setDepartmentFilter(ALL);
-    setSupervisorFilter(ALL);
-    setReasonFilter(ALL);
-    setContractFilter(ALL);
-    setCollaboratorFilter(ALL);
+    setSearch("");
   };
-
-  const activeFilterCount = [statusFilter, classificationFilter, departmentFilter, supervisorFilter, reasonFilter, contractFilter, collaboratorFilter]
-    .filter((value) => value !== ALL).length;
 
   const open = (record) => {
     setEditing(record);
@@ -280,13 +312,13 @@ export function AbsenceControl() {
       <div className="absence-filter-title"><div><strong>Filtrar faltas</strong><span>O período começa no mês atual.</span></div><Button icon="pi pi-filter-slash" text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
       <div className="absence-filter-grid">
         <label className="is-wide"><span>Período</span><Calendar value={dateRange} onChange={(event) => setDateRange(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" showIcon /></label>
-        <label><span>Situação</span><Dropdown value={statusFilter} options={[{ label: "Todas", value: ALL }, { label: "Pendentes", value: "pendente" }, { label: "Tratadas", value: "tratada" }]} onChange={(event) => setStatusFilter(event.value)} /></label>
-        <label><span>Classificação</span><Dropdown value={classificationFilter} options={[{ label: "Todas", value: ALL }, ...CLASSIFICATIONS, { label: "Em análise", value: "em_analise" }]} onChange={(event) => setClassificationFilter(event.value)} /></label>
-        <label><span>Departamento</span><Dropdown value={departmentFilter} options={[{ label: "Todos", value: ALL }, ...filterOptions.departments]} onChange={(event) => setDepartmentFilter(event.value)} filter /></label>
-        <label><span>Supervisor</span><Dropdown value={supervisorFilter} options={[{ label: "Todos", value: ALL }, ...filterOptions.supervisors]} onChange={(event) => setSupervisorFilter(event.value)} filter /></label>
-        <label className="is-wide"><span>Motivo</span><Dropdown value={reasonFilter} options={[{ label: "Todos", value: ALL }, ...filterOptions.reasons]} onChange={(event) => setReasonFilter(event.value)} filter /></label>
-        <label className="is-wide"><span>Contrato</span><Dropdown value={contractFilter} options={[{ label: "Todos", value: ALL }, ...filterOptions.contracts]} onChange={(event) => setContractFilter(event.value)} filter /></label>
-        <label className="is-wide"><span>Colaborador</span><Dropdown value={collaboratorFilter} options={[{ label: "Todos", value: ALL }, ...filterOptions.collaborators]} onChange={(event) => setCollaboratorFilter(event.value)} filter /></label>
+        <CombinedMultiSelect name="status" label="Situação" options={filterOptions.status} placeholder="Todas as situações" />
+        <CombinedMultiSelect name="classificacao" label="Classificação" options={filterOptions.classificacao} placeholder="Todas as classificações" />
+        <CombinedMultiSelect name="departamento" label="Departamento" options={filterOptions.departamento} placeholder="Todos os departamentos" />
+        <CombinedMultiSelect name="supervisor" label="Supervisor" options={filterOptions.supervisor} placeholder="Todos os supervisores" />
+        <CombinedMultiSelect name="motivo" label="Motivo" options={filterOptions.motivo} placeholder="Todos os motivos" className="is-wide" />
+        <CombinedMultiSelect name="contrato" label="Contrato" options={filterOptions.contrato} placeholder="Todos os contratos" className="is-wide" />
+        <CombinedMultiSelect name="colaborador" label="Colaborador" options={filterOptions.colaborador} placeholder="Todos os colaboradores" className="is-wide" />
       </div>
     </OverlayPanel>
 
@@ -350,4 +382,12 @@ export function AbsenceControl() {
       </div>}
     </Dialog>
   </section>;
+}
+
+export function AbsenceControl() {
+  return (
+    <CombinedFiltersProvider definitions={FILTER_DEFINITIONS}>
+      <AbsenceControlPage />
+    </CombinedFiltersProvider>
+  );
 }

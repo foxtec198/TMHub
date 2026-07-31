@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-import KanbanColumn from '../pages/Projetos/KanbanColumn';
+import KanbanColumn from '../pages/Projects/KanbanColumn';
 
 export default function KanbanBoard({ projeto, todosUsuarios, onUpdateProjeto, onOpenCard }) {
   // Estados transitórios de drag-and-drop e criação de coluna.

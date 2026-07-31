@@ -1,12 +1,19 @@
+// Colab. por DTPO.
+
+// Utils
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useToast } from "../../contexts/ToastContext";
+import connect from "../../utils/request";
+
+// Widgets
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
-import connect from "../../utils/request";
-import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
+
+// Styles
 import "./departmentEmployees.css";
 
 const EMPTY_FILTERS = {
@@ -15,6 +22,7 @@ const EMPTY_FILTERS = {
     supervisores: [],
     cidades: [],
     situacoes: [],
+    cargos: [],
 };
 
 function uniqueOptions(items, valueKey, labelKey = valueKey) {
@@ -85,15 +93,13 @@ export function DepartmentEmployeesDashboard() {
                 setEmployees(Array.isArray(response.data) ? response.data : []);
             } catch (error) {
                 showToast(
-                    "error",
-                    "Erro ao carregar colaboradores",
+                    "error", "Erro ao carregar colaboradores",
                     error.response?.data?.message || error.response?.data || "Não foi possível carregar o dashboard."
                 );
             } finally {
                 setLoading(false);
             }
         }
-
         loadEmployees();
     }, [showToast]);
 
@@ -103,6 +109,7 @@ export function DepartmentEmployeesDashboard() {
         supervisores: uniqueOptions(employees, "supervisor_id", "supervisor"),
         cidades: uniqueOptions(employees, "cidade_id", "cidade"),
         situacoes: uniqueOptions(employees, "situacao_id", "situacao"),
+        cargos: uniqueOptions(employees, "cargo", "cargo"),
     }), [employees]);
 
     const filteredEmployees = useMemo(() => employees.filter((employee) => (
@@ -111,6 +118,7 @@ export function DepartmentEmployeesDashboard() {
         && (!filters.supervisores.length || filters.supervisores.includes(employee.supervisor_id))
         && (!filters.cidades.length || filters.cidades.includes(employee.cidade_id))
         && (!filters.situacoes.length || filters.situacoes.includes(employee.situacao_id))
+        && (!filters.cargos.length || filters.cargos.includes(employee.cargo))
     )), [employees, filters]);
 
     const departments = useMemo(() => {
@@ -177,6 +185,7 @@ export function DepartmentEmployeesDashboard() {
                     ["supervisores", "Supervisores"],
                     ["cidades", "Cidades"],
                     ["situacoes", "Situações"],
+                    ["cargos", "Cargos"],
                 ].map(([name, label]) => (
                     <label className="department-filter-field" key={name}>
                         <span>{label}</span>
