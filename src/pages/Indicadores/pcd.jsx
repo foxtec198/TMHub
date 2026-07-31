@@ -396,21 +396,68 @@ export function Pcd() {
                         {centerColaboradores.map((colaborador) => (
                           <li key={colaborador.id} className="pcd-employee">
                             <div className="pcd-employee-info">
-                              <span className="pcd-employee-name">{colaborador.nome}</span>
+                              <span className="pcd-employee-name">
+                                {colaborador.nome}
+                              </span>
+
                               <span className="pcd-employee-subtitle">
-                                Matrícula {colaborador.matricula} • {colaborador.cargo || "Sem cargo"}
-                                <span className={`pcd-employee-status ${colaborador.situacao_id === 8 ? "is-inativo" : "is-ativo"}`}>{colaborador.situacao}</span>
+                                <span>
+                                  Matrícula: {colaborador.matricula || "—"}
+                                </span>
+
+                                <span className="pcd-employee-role">
+                                  • {colaborador.cargo || "Sem cargo"}
+                                </span>
                               </span>
                             </div>
+
                             <Divider layout="vertical" />
+
                             <div className="pcd-employee-meta">
-                              {colaborador.type_pcd && <Tag className="pcd-employee-tipo" value={colaborador.type_pcd} />}
-                              {colaborador.obs_pcd && <span className="pcd-employee-obs">{colaborador.obs_pcd}</span>}
+                              <div className="pcd-employee-badges">
+                                
+                              <Tag
+                                className="pcd-employee-status"
+                                value={colaborador.situacao || "Situação não informada"}
+                                rounded
+                              />
+
+                                {colaborador.type_pcd && (
+                                  <Tag
+                                    className="pcd-employee-tipo"
+                                    value={colaborador.type_pcd}
+                                    rounded
+                                  />
+                                )}
+                              </div>
+
+                              {colaborador.obs_pcd && (
+                                <span className="pcd-employee-obs">
+                                  {colaborador.obs_pcd}
+                                </span>
+                              )}
                             </div>
-                            {canEdit && <div className="pcd-employee-actions">
-                              <Button icon="pi pi-pencil" rounded text aria-label={`Editar ${colaborador.nome}`} onClick={() => openEdit(colaborador)} />
-                              <Button icon="pi pi-times" rounded text severity="danger" aria-label={`Remover PCD de ${colaborador.nome}`} onClick={() => removePcd(colaborador)} />
-                            </div>}
+
+                            {canEdit && (
+                              <div className="pcd-employee-actions">
+                                <Button
+                                  icon="pi pi-pencil"
+                                  rounded
+                                  text
+                                  aria-label={`Editar ${colaborador.nome}`}
+                                  onClick={() => openEdit(colaborador)}
+                                />
+
+                                <Button
+                                  icon="pi pi-times"
+                                  rounded
+                                  text
+                                  severity="danger"
+                                  aria-label={`Remover PCD de ${colaborador.nome}`}
+                                  onClick={() => removePcd(colaborador)}
+                                />
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>
