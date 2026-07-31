@@ -449,3 +449,35 @@
         width: 100%;
     }
 }
+
+.vacancy-exit-summary {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+
+.departure-date-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: .45rem;
+    margin-top: -.7rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+.departure-date-hint .pi {
+    margin-top: .15rem;
+    color: var(--warning);
+}
+
+@media (max-width: 640px) {
+    .vacancy-exit-summary {
+        width: 100%;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-direction: column;
+        gap: .4rem;
+    }
+}

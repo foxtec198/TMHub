@@ -52,10 +52,10 @@
     min-width: 17rem;
 }
 
-/* Faixa superior de indicadores: cinco colunas no desktop e quebra progressiva em telas menores. */
+/* Faixa superior de indicadores: seis colunas no desktop e quebra progressiva em telas menores. */
 .admission-summary {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: .8rem;
     margin-bottom: 1rem;
 }
