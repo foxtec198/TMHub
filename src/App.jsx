@@ -41,8 +41,7 @@ import { AbsenceControl } from "./pages/FaltsControl";
 import { DisallowanceControl } from "./pages/DissallowancesControls";
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
 import { DashboardLogistic } from "./pages/Dashboards/logistic";
-import { Structure } from "./pages/Estrutura/index";
-import { Pcd } from "./pages/Indicadores/pcd";
+import { Pcd } from "./pages/Indicators/pcd";
 import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
 import { Structure } from "./pages/Structure/index";
 
