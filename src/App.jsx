@@ -41,14 +41,10 @@ import { AbsenceControl } from "./pages/FaltsControl";
 import { DisallowanceControl } from "./pages/DissallowancesControls";
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
 import { DashboardLogistic } from "./pages/Dashboards/logistic";
-<<<<<<< HEAD
 import { Structure } from "./pages/Estrutura/index";
 import { Pcd } from "./pages/Indicadores/pcd";
 import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
-=======
 import { Structure } from "./pages/Structure/index";
-import { Pcd } from "./pages/Indicators/pcd";
->>>>>>> main
 
 document.documentElement.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
 
