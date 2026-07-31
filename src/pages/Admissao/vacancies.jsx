@@ -76,6 +76,7 @@ const createEmptyForm = () => ({
     colaborador_entrada: '',
     telefone_colaborador_entrada: '',
     data_aviso: new Date(),
+    data_saida: null,
     horario_trabalho: '',
     motivo_saida: '',
 });
@@ -95,6 +96,22 @@ function formatDateOnly(value) {
 
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? '-' : date.toLocaleDateString('pt-br');
+}
+
+function isFutureDate(value) {
+    if (!value) return false;
+
+    const isoDate = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    const date = isoDate
+        ? new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]))
+        : new Date(value);
+
+    if (Number.isNaN(date.getTime())) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return date > today;
 }
 
 function toApiDateTime(value) {
@@ -128,7 +145,19 @@ function VagaHeader({ vaga }) {
                     {vaga.tipo === 'aditivo' ? 'Aditivo contratual' : `Substitui ${vaga.colaborador}`} • {vaga.departamento} • {vaga.centro_custo}
                 </span>
             </div>
-            <span className="text-500 text-sm">Saiu em {new Date(vaga.created_at).toLocaleDateString('pt-br')}</span>
+            <div className="vacancy-exit-summary">
+                {vaga.tipo !== 'aditivo' && vaga.data_saida && (
+                    <Tag
+                        value={`${isFutureDate(vaga.data_saida) ? 'SAÍDA PREVISTA' : 'SAÍDA'} · ${formatDateOnly(vaga.data_saida)}`}
+                        severity={isFutureDate(vaga.data_saida) ? 'warning' : 'secondary'}
+                        icon="pi pi-calendar"
+                        rounded
+                    />
+                )}
+                <span className="text-500 text-sm">
+                    Vaga criada em {new Date(vaga.created_at).toLocaleDateString('pt-br')}
+                </span>
+            </div>
         </div>
     );
 }
@@ -279,6 +308,12 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                 <InfoField label="Carga Horária" value={vaga.carga_horaria} />
                 <InfoField label="Horário de Trabalho" value={vaga.horario_trabalho} />
                 <InfoField label="Motivo da Saída" value={vaga.motivo_saida} />
+                {vaga.tipo !== 'aditivo' && vaga.data_saida && (
+                    <InfoField
+                        label={isFutureDate(vaga.data_saida) ? 'Data prevista de saída' : 'Data de saída'}
+                        value={formatDateOnly(vaga.data_saida)}
+                    />
+                )}
                 {vaga.entrevistador && <InfoField label="Entrevistadora" value={vaga.entrevistador} />}
                 {vaga.entrevista_data && <InfoField label="Data da Entrevista" value={new Date(vaga.entrevista_data).toLocaleString('pt-br')} />}
                 {vaga.status === 'concluido' && <InfoField label="Matrícula do contratado" value={vaga.colaborador_entrada_matricula} />}
@@ -691,6 +726,7 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
                 colaborador_entrada: form.colaborador_entrada.trim() || null,
                 telefone_colaborador_entrada: form.telefone_colaborador_entrada.trim() || null,
                 aviso_em: toApiDateTime(form.data_aviso),
+                data_saida: !isAdditive && form.data_saida ? toApiDate(form.data_saida) : null,
                 horario_trabalho: form.horario_trabalho,
                 motivo_saida: form.motivo_saida,
             });
@@ -978,6 +1014,33 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
                         />
                         <label htmlFor="motivo_saida">Motivo da saída</label>
                     </FloatLabel>}
+
+                    {!isAdditive && (
+                        <>
+                            <FloatLabel className="mt-3">
+                                <Calendar
+                                    id="data_saida"
+                                    className="w-full"
+                                    value={form.data_saida}
+                                    onChange={(event) => setForm({
+                                        ...form,
+                                        data_saida: event.value,
+                                    })}
+                                    dateFormat="dd/mm/yy"
+                                    locale="pt-BR"
+                                    showIcon
+                                    showButtonBar
+                                    readOnlyInput
+                                />
+                                <label htmlFor="data_saida">Data prevista de saída (opcional)</label>
+                            </FloatLabel>
+
+                            <small className="departure-date-hint">
+                                <i className="pi pi-info-circle" />
+                                Essa data não bloqueia a vaga. O processo seletivo pode começar e ser concluído antes da saída.
+                            </small>
+                        </>
+                    )}
 
                     <Button type="submit" className='mt-3' label="Cadastrar vaga" icon="pi pi-check" />
                 </form>

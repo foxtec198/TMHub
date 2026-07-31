@@ -38,10 +38,20 @@ function formatDateTime(value) {
     return value ? new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '-';
 }
 
+function formatDateOnly(value) {
+    if (!value) return '-';
+
+    const isoDate = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoDate) return `${isoDate[3]}/${isoDate[2]}/${isoDate[1]}`;
+
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '-' : date.toLocaleDateString('pt-BR');
+}
+
 function formatHours(value) {
     // Acima de 24 horas a leitura em dias é mais útil para o acompanhamento executivo.
     if (value == null) return '-';
-    return value >= 24 ? `${(value / 24).toFixed(1)} dias úteis` : `${Number(value).toFixed(1)}h úteis`;
+    return value >= 24 ? `${(value / 24).toFixed(1)} dias` : `${Number(value).toFixed(1)}h úteis`;
 }
 
 function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
@@ -116,18 +126,20 @@ export function AdmissionDashboard() {
     // Os tons dos cards refletem a comparação de cada indicador com sua meta vigente.
     const summary = [
         { icon: 'pi pi-briefcase', label: 'Vagas no período', value: indicators.total_vagas ?? 0, detail: `${indicators.vagas_concluidas ?? 0} concluídas`, tone: 'neutral' },
+        { icon: 'pi pi-calendar-plus', label: 'Com data prevista', value: indicators.vagas_data_prevista ?? 0, detail: 'não contabilizadas no SLA', tone: 'warning' },
         { icon: 'pi pi-bolt', label: 'Primeira ação', value: formatHours(indicators.sla_acao_medio_horas), detail: `meta de até ${actionTarget}h úteis`, tone: indicators.sla_acao_medio_horas <= actionTarget ? 'success' : 'warning' },
-        { icon: 'pi pi-check-circle', label: 'Conclusão', value: indicators.sla_conclusao_medio_dias != null ? `${indicators.sla_conclusao_medio_dias} dias úteis` : '-', detail: `meta de até ${closeTargetDays} dias úteis`, tone: indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'success' : 'danger' },
+        { icon: 'pi pi-check-circle', label: 'Conclusão', value: indicators.sla_conclusao_medio_dias != null ? `${indicators.sla_conclusao_medio_dias} dias` : '-', detail: `meta de até ${closeTargetDays} dias úteis`, tone: indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'success' : 'danger' },
         { icon: 'pi pi-chart-line', label: 'Dentro do SLA', value: indicators.percentual_no_prazo != null ? `${indicators.percentual_no_prazo}%` : '-', detail: 'ação e conclusão', tone: indicators.percentual_no_prazo >= 80 ? 'success' : 'warning' },
         { icon: 'pi pi-hourglass', label: 'Em andamento', value: indicators.vagas_em_andamento ?? 0, detail: `${indicators.sla_estourado ?? 0} fora do prazo`, tone: indicators.sla_estourado ? 'danger' : 'violet' },
     ];
 
     return (
         <section className="admission-dashboard">
+            
             <PageHeader
                 section="Dashboards"
                 title="SLA de Admissões"
-                description="Acompanhe a velocidade de resposta e conclusão das vagas."
+                description="Acompanhe a velocidade de resposta e conclusão. Vagas com saída prevista permanecem fora do SLA."
                 actions={<>
                     <Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" locale="pt-BR" placeholder="Selecione o período" showIcon readOnlyInput hideOnRangeSelection />
                     <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
@@ -173,6 +185,7 @@ export function AdmissionDashboard() {
                     {activeTable === 'departments' && <DataTable value={data?.departamentos || []} size="small" stripedRows paginator rows={10} rowsPerPageOptions={[10, 20, 50]} emptyMessage="Sem dados no período.">
                         <Column field="departamento" header="Departamento" sortable />
                         <Column field="total" header="Vagas" sortable />
+                        <Column field="data_prevista" header="Com data prevista" sortable />
                         <Column header="Primeira ação" body={(row) => formatHours(row.sla_acao_horas)} sortable sortField="sla_acao_horas" />
                         <Column header="Conclusão" body={(row) => row.sla_conclusao_dias != null ? `${row.sla_conclusao_dias} dias úteis` : '-'} sortable sortField="sla_conclusao_dias" />
                         <Column header="Dentro do SLA" body={(row) => <Tag value={row.percentual_no_prazo != null ? `${row.percentual_no_prazo}%` : '-'} severity={row.percentual_no_prazo >= 80 ? 'success' : row.percentual_no_prazo >= 60 ? 'warning' : 'danger'} rounded />} sortable sortField="percentual_no_prazo" />
@@ -181,9 +194,22 @@ export function AdmissionDashboard() {
                     {activeTable === 'recent' && <DataTable value={data?.recentes || []} size="small" stripedRows paginator rows={10} emptyMessage="Sem vagas no período.">
                         <Column header="Vaga" body={(row) => <div className="admission-vacancy-cell"><strong>{row.candidato || row.colaborador_saida || 'Sem candidato'}</strong><span>{row.candidato_matricula ? `Matrícula ${row.candidato_matricula} • ${row.contrato}` : row.contrato}</span></div>} style={{ minWidth: '18rem' }} />
                         <Column header="Aviso" body={(row) => formatDateTime(row.aviso_em)} sortable sortField="aviso_em" />
+                        <Column
+                            header="Saída prevista"
+                            body={(row) => row.data_saida_prevista
+                                ? <Tag value={formatDateOnly(row.data_saida)} severity="warning" icon="pi pi-calendar" rounded />
+                                : '-'}
+                            sortable
+                            sortField="data_saida"
+                        />
                         <Column header="Responsável" field="responsavel" />
                         <Column header="Tentativas" field="tentativas" />
-                        <Column header="Primeira ação" body={(row) => formatHours(row.sla_acao_horas ?? row.sla_acao_decorrido_horas)} />
+                        <Column
+                            header="Primeira ação"
+                            body={(row) => row.data_saida_prevista
+                                ? <Tag value="Fora do SLA" severity="secondary" rounded />
+                                : formatHours(row.sla_acao_horas ?? row.sla_acao_decorrido_horas)}
+                        />
                         <Column header="Status" body={(row) => <Tag value={STATUS_LABELS[row.status] || row.status} severity={row.status === 'concluido' ? 'success' : 'info'} rounded />} />
                     </DataTable>}
 
