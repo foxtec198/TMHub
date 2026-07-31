@@ -41,7 +41,9 @@ import { AbsenceControl } from "./pages/FaltsControl";
 import { DisallowanceControl } from "./pages/DissallowancesControls";
 import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
 import { DashboardLogistic } from "./pages/Dashboards/logistic";
-import { Structure } from "./pages/Structure/index";
+import { Structure } from "./pages/Estrutura/index";
+import { Pcd } from "./pages/Indicadores/pcd";
+import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
 import { Pcd } from "./pages/Indicators/pcd";
 
 document.documentElement.dataset.theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
@@ -116,6 +118,15 @@ export function AppRoutes() {
           <Route path="/controle-faltas" element={<PermissionGate screen="controle_faltas"><AbsenceControl /></PermissionGate>} />
           <Route path="/controle-glosas" element={<PermissionGate screen="controle_glosas"><DisallowanceControl /></PermissionGate>} />
 
+          {/* Dashboards */}
+          <Route path="/reports/reposicoes" element={<PermissionGate screen="dashboard_reposicoes"><RequestReport /></PermissionGate>} />
+          <Route path="/reports/colaboradores-departamento" element={<PermissionGate screen="dashboard_colaboradores"><DepartmentEmployeesDashboard /></PermissionGate>} />
+          <Route path="/reports/ponto-48-horas" element={<PermissionGate screen="dashboard_ponto48"><Ponto48Dashboard /></PermissionGate>} />
+          <Route path="/reports/admissoes" element={<PermissionGate screen="dashboard_admissoes"><AdmissionDashboard /></PermissionGate>} />
+          <Route path="/reports/faltas" element={<PermissionGate screen="dashboard_faltas"><AbsenceDashboard /></PermissionGate>} />
+          <Route path="/reports/logistica" element={<PermissionGate screen="dashboard_logistica"><DashboardLogistic /></PermissionGate>} />
+          <Route path="/reports/pcd" element={<PermissionGate screen="dashboard_pcd"><PcdDashboard /></PermissionGate>} />
+
           {/* Indicadores */}
           <Route path="/indicadores/pcd" element={<PermissionGate screen="indicador_pcd"><Pcd /></PermissionGate>} />
 
@@ -129,12 +140,6 @@ export function AppRoutes() {
           <Route path="/reposicoes/historico" element={<PermissionGate screen="historico_reposicoes"><History /></PermissionGate>} />
 
           {/* Estoque */}
-          <Route path="/reports/reposicoes" element={<PermissionGate screen="dashboard_reposicoes"><RequestReport /></PermissionGate>} />
-          <Route path="/reports/colaboradores-departamento" element={<PermissionGate screen="dashboard_colaboradores"><DepartmentEmployeesDashboard /></PermissionGate>} />
-          <Route path="/reports/ponto-48-horas" element={<PermissionGate screen="dashboard_ponto48"><Ponto48Dashboard /></PermissionGate>} />
-          <Route path="/reports/admissoes" element={<PermissionGate screen="dashboard_admissoes"><AdmissionDashboard /></PermissionGate>} />
-          <Route path="/reports/faltas" element={<PermissionGate screen="dashboard_faltas"><AbsenceDashboard /></PermissionGate>} />
-          <Route path="/reports/logistica" element={<PermissionGate screen="dashboard_logistica"><DashboardLogistic /></PermissionGate>} />
           <Route path="/estoque/produtos" element={<PermissionGate screen="estoque_produtos"><Products /></PermissionGate>} />
           <Route path="/estoque/codigos-de-barras" element={<PermissionGate screen="estoque_codigos"><BarcodeGenerator /></PermissionGate>} />
           <Route path="/estoque/movimentacoes" element={<PermissionGate screen="estoque_movimentos"><Movements /></PermissionGate>} />

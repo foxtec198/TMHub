@@ -77,16 +77,16 @@
 .pcd-speed-dial .p-speeddial-action {
     width: 3.25rem;
     height: 3.25rem;
-    color: var(--accent-light);
-    background: var(--bg-card) !important;
+    color: #fff;
+    background: #000 !important;
     border: 1px solid var(--border-color) !important;
     border-radius: 50%;
     box-shadow: var(--shadow-md);
 }
 
 .pcd-speed-dial .p-speeddial-action:hover {
-    color: #071009;
-    background: var(--accent-dark) !important;
+    color: #fff;
+    background: #171717 !important;
 }
 
 .pcd-speed-dial .p-speeddial-action.p-disabled,
@@ -98,8 +98,8 @@
 .pcd-speed-dial .p-speeddial-button {
     width: 4rem;
     height: 4rem;
-    color: #071009 !important;
-    background: var(--accent-dark) !important;
+    color: #fff !important;
+    background: #000 !important;
     border: 3px solid var(--accent-light) !important;
     box-shadow: var(--shadow-md);
 }
@@ -107,7 +107,16 @@
 .pcd-speed-dial .p-speeddial-button:hover,
 .pcd-speed-dial .p-speeddial-button:focus,
 .pcd-speed-dial .p-speeddial-opened .p-speeddial-button {
-    color: #020603 !important;
+    color: #fff !important;
+    background: #000 !important;
+}
+
+:root[data-theme="dark"] .pcd-speed-dial .p-speeddial-action,
+:root[data-theme="dark"] .pcd-speed-dial .p-speeddial-button,
+:root[data-theme="dark"] .pcd-speed-dial .p-speeddial-button:hover,
+:root[data-theme="dark"] .pcd-speed-dial .p-speeddial-button:focus,
+:root[data-theme="dark"] .pcd-speed-dial .p-speeddial-opened .p-speeddial-button {
+    color: #071009 !important;
     background: var(--accent-dark) !important;
 }
 
@@ -278,47 +287,105 @@
 }
 
 .pcd-employee {
-    display: flex;
-    align-items: center;
-    gap: 1.1rem;
-    padding: .9rem 1.1rem;
+    display: grid;
+    grid-template-columns: minmax(17rem, 22rem) auto minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: .85rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: .95rem 1.1rem;
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
 }
 
 .pcd-employee-info {
     display: flex;
-    flex-direction: column;
-    gap: .25rem;
+    overflow: hidden;
     min-width: 0;
+    width: 100%;
+    max-width: 22rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: .3rem;
 }
 
 .pcd-employee-name {
-    font-weight: 700;
-}
-
-.pcd-employee-actions {
-    display: flex;
-    align-items: center;
-    gap: .1rem;
-    flex-shrink: 0;
-    margin-left: auto;
+    overflow: hidden;
+    color: var(--text-primary);
+    font-size: clamp(1rem, 1vw, 1.1rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .pcd-employee-subtitle {
     display: flex;
+    min-width: 0;
     align-items: center;
-    gap: .5rem;
+    flex-wrap: wrap;
+    gap: .35rem;
     color: var(--text-muted);
-    font-size: .82rem;
+    font-size: clamp(.82rem, 1vw, .80rem);
+    line-height: 1.35;
+}
+
+.pcd-employee-role {
+    overflow: hidden;
+    color: var(--text-primary);
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Divisor entre a identificação e os dados de PCD */
+.pcd-employee .p-divider-vertical {
+    align-self: stretch;
+    min-height: 3.8rem;
+    margin: 0;
+}
+
+.pcd-employee .p-divider-vertical::before {
+    border-left: 2px solid var(--accent-dark);
+}
+
+.pcd-employee .p-divider-content {
+    display: none;
+}
+
+/* Situação, tipo de deficiência e observação */
+.pcd-employee-meta {
+    display: flex;
+    overflow: hidden;
+    min-width: 0;
+    width: 100%;
+    max-width: min(42rem, 100%);
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.pcd-employee-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .45rem;
 }
 
 .pcd-employee-status {
     padding: .05rem .5rem;
+    color: var(--accent-dark);
+    background: var(--accent-light);
     border-radius: var(--radius-pill);
     font-size: .72rem;
     font-weight: 600;
+    line-height: normal;
+    white-space: nowrap;
 }
 
 .pcd-employee-status.is-ativo {
@@ -327,40 +394,36 @@
 }
 
 .pcd-employee-status.is-inativo {
-    color: #d1495b;
-    background: #fbe4e7;
-}
-
-:root[data-theme="dark"] .pcd-employee-status.is-inativo {
-    color: #ff9aa6;
-    background: #3a2226;
-}
-
-.pcd-employee .p-divider-vertical {
-    align-self: stretch;
-    margin: 0;
-}
-
-.pcd-employee-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: .3rem;
-    flex-shrink: 0;
+    color: var(--accent-dark);
+    background: var(--accent-light);
 }
 
 .pcd-employee-meta .pcd-employee-tipo.p-tag {
-    background: var(--accent-light);
     color: var(--accent-dark);
+    background: var(--accent-light);
+    font-weight: 600;
 }
 
 .pcd-employee-obs {
-    max-width: 22rem;
-    color: var(--text-muted);
-    font-size: .78rem;
-    text-align: right;
+    overflow: hidden;
+    width: 100%;
+    max-width: 42rem;
+    color: var(--text-primary);
+    font-size: clamp(.82rem, 1vw, .95rem);
+    line-height: 1.4;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+.pcd-employee-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    align-self: center;
+    gap: .1rem;
+    margin-left: 0;
+}
 .pcd-dialog,
 .pcd-import-dialog {
     --accent-light: #E7FBEC;
@@ -509,6 +572,21 @@
     border-color: #48514c;
 }
 
+@media(max-width: 900px) {
+    .pcd-employee {
+        grid-template-columns: minmax(14rem, 18rem) auto minmax(0, 1fr) auto;
+    }
+
+    .pcd-employee-info {
+        max-width: 18rem;
+    }
+
+    .pcd-employee-meta,
+    .pcd-employee-obs {
+        max-width: 100%;
+    }
+}
+
 @media(max-width: 520px) {
     .pcd-page {
         padding: 16px;
@@ -529,20 +607,65 @@
     }
 
     .pcd-employee {
+        display: flex;
+        align-items: stretch;
         flex-direction: column;
+        gap: .85rem;
+        padding: 1rem;
+    }
+
+    .pcd-employee-info {
+        width: 100%;
+        max-width: 100%;
+        flex-basis: auto;
+    }
+
+    .pcd-employee-name {
+        overflow: visible;
+        white-space: normal;
+    }
+
+    .pcd-employee-subtitle {
         align-items: flex-start;
+        flex-direction: column;
+        gap: .15rem;
+    }
+
+    .pcd-employee-role {
+        overflow: visible;
+        white-space: normal;
     }
 
     .pcd-employee .p-divider-vertical {
         display: none;
     }
 
+    .pcd-employee .p-divider-vertical::before {
+        display: none;
+    }
+
     .pcd-employee-meta {
+        width: 100%;
         align-items: flex-start;
     }
 
+    .pcd-employee-badges {
+        width: 100%;
+    }
+
     .pcd-employee-obs {
+        display: -webkit-box;
         max-width: 100%;
         text-align: left;
+        white-space: normal;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+    }
+
+    .pcd-employee-actions {
+        justify-content: flex-start;
+        align-self: flex-start;
+        margin-left: 0;
     }
 }

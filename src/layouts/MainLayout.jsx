@@ -111,6 +111,12 @@ export function MainLayout() {
           icon: 'pi pi-truck',
           visible: can("dashboard_logistica"),
           command: () => { navigateTo("/reports/logistica") }
+        },
+        {
+          label: 'PCD',
+          icon: 'pi pi-heart',
+          visible: can("dashboard_pcd"),
+          command: () => { navigateTo("/reports/pcd") }
         }
       ]
     },
