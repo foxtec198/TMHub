@@ -3,7 +3,6 @@ import axios from "axios";
 import { socketio } from "./socketio";
 
 export const server = import.meta.env.VITE_SERVER
-console.log(server)
 
 const connect = axios.create({
   baseURL: server,

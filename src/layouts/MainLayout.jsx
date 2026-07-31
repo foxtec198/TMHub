@@ -1,13 +1,20 @@
+// Utils
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { PanelMenu } from "primereact/panelmenu";
-import { Avatar } from "primereact/avatar";
-import { capitalize, deny_roles } from "../utils/ui";
-import connect from "../utils/request";
 import { getInitials, storeProfile } from "../utils/profile";
 import { can } from "../utils/permissions";
-import { socketio } from "../utils/socketio";
+import { useEffect, useState } from "react";
+import connect from "../utils/request";
 import { useToast } from "../contexts/ToastContext";
+import { capitalize, deny_roles } from "../utils/ui";
+import { socketio } from "../utils/socketio";
+
+// Widgets
+import { PanelMenu } from "primereact/panelmenu";
+import { Avatar } from "primereact/avatar";
+import { MultiSelect } from "primereact/multiselect";
+import { FloatLabel } from "primereact/floatlabel";
+
+// Styles
 import './main.css'
 
 const REALTIME_CHANNELS_BY_ROUTE = {
@@ -34,6 +41,8 @@ const REALTIME_CHANNELS_BY_ROUTE = {
 
 export function MainLayout() {
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
+
+  const [fls, setFls] = useState([]);
   const [displayName, setDisplayName] = useState(() => localStorage.getItem("display_name") || "");
   const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem("profile_photo"));
   const [role] = useState(() => {
@@ -44,6 +53,7 @@ export function MainLayout() {
     () => !window.matchMedia("(max-width: 960px)").matches
   );
   const [dataRevision, setDataRevision] = useState(0);
+
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -258,9 +268,12 @@ export function MainLayout() {
       setDisplayName(profile.nome || "");
       setProfilePhoto(profile.foto_perfil || null);
     };
+
     const listener = (event) => updateProfile(event.detail);
+
     window.addEventListener("tmhub:profile", listener);
-    connect.get("/usuarios/perfil").then(({ data }) => { storeProfile(data); updateProfile(data); }).catch(() => { });
+
+    connect.get("/usuarios/perfil").then(({ data }) => { setFls(data.filiais); storeProfile(data); updateProfile(data); }).catch(() => { });
     return () => window.removeEventListener("tmhub:profile", listener);
   }, []);
 
@@ -353,6 +366,15 @@ export function MainLayout() {
 
         {/* MENU BAR */}
         <aside id="main-sidebar" className="layout-sidebar bg-primary shadow-4" aria-hidden={!isMenuVisible}>
+          { isAdmin ?
+            <FloatLabel className="flex mx-5 mt-5">
+              <MultiSelect
+                className="w-full"
+              />
+              <label htmlFor="">Filiais</label>
+            </FloatLabel>
+            : null
+          }
           <PanelMenu model={items} className="layout-panel-menu" />
         </aside>
 
