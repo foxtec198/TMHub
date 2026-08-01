@@ -104,22 +104,22 @@ export function DashboardLogistic() {
     }), [data?.mais_movimentados]);
 
     const collaboratorChart = useMemo(() => ({
-        labels: (data?.epis_por_colaborador || []).map((item) => item.colaborador),
+        labels: (data?.produtos_por_colaborador || data?.epis_por_colaborador || []).map((item) => item.colaborador),
         datasets: [{
-            data: (data?.epis_por_colaborador || []).map((item) => item.quantidade),
+            data: (data?.produtos_por_colaborador || data?.epis_por_colaborador || []).map((item) => item.quantidade),
             backgroundColor: '#2eafda',
             borderRadius: 7,
         }],
-    }), [data?.epis_por_colaborador]);
+    }), [data?.produtos_por_colaborador, data?.epis_por_colaborador]);
 
     const localChart = useMemo(() => ({
-        labels: (data?.epis_por_local || []).map((item) => item.local),
+        labels: (data?.produtos_por_local || data?.epis_por_local || []).map((item) => item.local),
         datasets: [{
-            data: (data?.epis_por_local || []).map((item) => item.quantidade),
+            data: (data?.produtos_por_local || data?.epis_por_local || []).map((item) => item.quantidade),
             backgroundColor: '#9b7de3',
             borderRadius: 7,
         }],
-    }), [data?.epis_por_local]);
+    }), [data?.produtos_por_local, data?.epis_por_local]);
 
     const axisOptions = {
         responsive: true,
@@ -137,7 +137,7 @@ export function DashboardLogistic() {
             <PageHeader
                 section="Dashboards"
                 title="Dashboard de Logística"
-                description="Estoque, movimentações e rastreabilidade das entregas de EPI."
+                description="Estoque, movimentações e rastreabilidade das saídas de produtos."
                 actions={(
                     <>
                         <div className="logistic-period">
@@ -161,7 +161,7 @@ export function DashboardLogistic() {
                 <article className="is-danger"><i className="pi pi-arrow-up" /><span>Saídas no período</span><strong>{indicators.saidas || 0}</strong></article>
                 <article className="is-warning"><i className="pi pi-exclamation-triangle" /><span>Estoque baixo</span><strong>{indicators.estoque_baixo || 0}</strong></article>
                 <article className="is-danger"><i className="pi pi-times-circle" /><span>Sem estoque</span><strong>{indicators.sem_estoque || 0}</strong></article>
-                <article className="is-info"><i className="pi pi-shield" /><span>EPIs entregues</span><strong>{indicators.epis_entregues || 0}</strong></article>
+                <article className="is-info"><i className="pi pi-box" /><span>Produtos entregues</span><strong>{indicators.produtos_entregues || indicators.epis_entregues || 0}</strong></article>
             </section>
 
             <section className="logistic-grid logistic-grid-main">
@@ -185,19 +185,19 @@ export function DashboardLogistic() {
 
             <section className="logistic-grid">
                 <article className="logistic-panel">
-                    <header><div><span>Distribuição de EPI</span><h2>Entregas por colaborador</h2></div></header>
+                    <header><div><span>Distribuição de produtos</span><h2>Saídas por colaborador</h2></div></header>
                     <div className="logistic-chart">
-                        {data?.epis_por_colaborador?.length
+                        {(data?.produtos_por_colaborador || data?.epis_por_colaborador)?.length
                             ? <Chart type="bar" data={collaboratorChart} options={horizontalOptions} />
-                            : <EmptyChart label="Nenhuma entrega de EPI registrada." />}
+                            : <EmptyChart label="Nenhuma saída para colaborador registrada." />}
                     </div>
                 </article>
                 <article className="logistic-panel">
-                    <header><div><span>Contratos e locais</span><h2>Entregas de EPI por centro de custo</h2></div></header>
+                    <header><div><span>Contratos e locais</span><h2>Saídas por centro de custo</h2></div></header>
                     <div className="logistic-chart">
-                        {data?.epis_por_local?.length
+                        {(data?.produtos_por_local || data?.epis_por_local)?.length
                             ? <Chart type="bar" data={localChart} options={horizontalOptions} />
-                            : <EmptyChart label="Nenhuma entrega vinculada a local." />}
+                            : <EmptyChart label="Nenhuma saída vinculada a local." />}
                     </div>
                 </article>
             </section>

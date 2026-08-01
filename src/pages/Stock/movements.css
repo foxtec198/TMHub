@@ -176,9 +176,29 @@
 }
 
 :root[data-theme="dark"] .movement-recipients,
-:root[data-theme="dark"] .movement-detail-summary > span {
+:root[data-theme="dark"] .movement-detail-summary > span,
+:root[data-theme="dark"] .movement-recipient-list article,
+:root[data-theme="dark"] .movement-detail-recipients article {
     border-color: #304b37;
     background: #111713;
+}
+
+:root[data-theme="dark"] .movement-recipient-list article strong,
+:root[data-theme="dark"] .movement-recipients-heading strong,
+:root[data-theme="dark"] .movement-recipient-list article span,
+:root[data-theme="dark"] .movement-detail-recipients article span {
+    color: var(--text-primary, #f1f5f2);
+}
+
+:root[data-theme="dark"] .movement-recipient-list article span,
+:root[data-theme="dark"] .movement-detail-recipients article span {
+    color: var(--text-color-secondary, #a9b8ae);
+}
+
+:root[data-theme="dark"] .movement-recipient-list .p-inputnumber-input {
+    color: var(--text-primary, #f1f5f2);
+    background: #0d110f;
+    border-color: #304b37;
 }
 
 @media (max-width: 560px) {

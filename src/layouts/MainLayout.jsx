@@ -40,12 +40,12 @@ const REALTIME_CHANNELS_BY_ROUTE = {
 };
 
 export function MainLayout() {
-  const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
-
   const [fls, setFls] = useState([]);
+  const [selectedFilialIds, setSelectedFilialIds] = useState([]);
+  const [canSelectFiliais, setCanSelectFiliais] = useState(false);
   const [displayName, setDisplayName] = useState(() => localStorage.getItem("display_name") || "");
   const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem("profile_photo"));
-  const [role] = useState(() => {
+  const [role, setRole] = useState(() => {
     const storedRole = localStorage.getItem("role");
     return storedRole ? capitalize(storedRole) : "";
   });
@@ -264,18 +264,95 @@ export function MainLayout() {
   }, [displayName, navigate, role]);
 
   useEffect(() => {
+    let active = true;
+
     const updateProfile = (profile) => {
       setDisplayName(profile.nome || "");
       setProfilePhoto(profile.foto_perfil || null);
+      setRole(profile.role ? capitalize(profile.role) : "");
+
+      const profileRole = String(profile.role || "").toUpperCase();
+      const isProfileAdmin = profileRole === "ADMIN";
+      const isMatrixUser = Array.isArray(profile.filiais)
+        && profile.filiais.some((filial) => Number(filial.id) === 1);
+
+      return isProfileAdmin || isMatrixUser;
     };
 
-    const listener = (event) => updateProfile(event.detail);
+    const loadProfileAndBranches = async () => {
+      try {
+        const { data: profile } = await connect.get("/usuarios/perfil");
+        if (!active) return;
+
+        storeProfile(profile);
+        const maySelectBranches = updateProfile(profile);
+        setCanSelectFiliais(maySelectBranches);
+
+        if (!maySelectBranches) {
+          setFls([]);
+          setSelectedFilialIds([]);
+          localStorage.removeItem("selected_filial_ids");
+          return;
+        }
+
+        const { data: branches } = await connect.get("/filiais");
+        if (!active) return;
+
+        const activeBranches = (Array.isArray(branches) ? branches : [])
+          .filter((branch) => branch.ativa !== false)
+          .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+
+        const availableIds = new Set(activeBranches.map((branch) => Number(branch.id)));
+        let storedIds = [];
+
+        try {
+          const parsed = JSON.parse(localStorage.getItem("selected_filial_ids") || "[]");
+          storedIds = Array.isArray(parsed)
+            ? parsed.map(Number).filter((id) => availableIds.has(id))
+            : [];
+        } catch {
+          storedIds = [];
+        }
+
+        const initialSelection = storedIds.length
+          ? storedIds
+          : activeBranches.map((branch) => Number(branch.id));
+
+        setFls(activeBranches);
+        setSelectedFilialIds(initialSelection);
+        localStorage.setItem("selected_filial_ids", JSON.stringify(initialSelection));
+      } catch {
+        if (!active) return;
+        setFls([]);
+        setSelectedFilialIds([]);
+        setCanSelectFiliais(false);
+        localStorage.removeItem("selected_filial_ids");
+      }
+    };
+
+    const listener = (event) => {
+      const maySelectBranches = updateProfile(event.detail || {});
+      setCanSelectFiliais(maySelectBranches);
+    };
 
     window.addEventListener("tmhub:profile", listener);
+    loadProfileAndBranches();
 
-    connect.get("/usuarios/perfil").then(({ data }) => { setFls(data.filiais); storeProfile(data); updateProfile(data); }).catch(() => { });
-    return () => window.removeEventListener("tmhub:profile", listener);
+    return () => {
+      active = false;
+      window.removeEventListener("tmhub:profile", listener);
+    };
   }, []);
+
+  const handleFiliaisChange = (event) => {
+    const ids = (event.value || []).map(Number);
+    setSelectedFilialIds(ids);
+    localStorage.setItem("selected_filial_ids", JSON.stringify(ids));
+    setDataRevision((revision) => revision + 1);
+    window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
+      detail: { filialIds: ids },
+    }));
+  };
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -366,15 +443,30 @@ export function MainLayout() {
 
         {/* MENU BAR */}
         <aside id="main-sidebar" className="layout-sidebar bg-primary shadow-4" aria-hidden={!isMenuVisible}>
-          { isAdmin ?
-            <FloatLabel className="flex mx-5 mt-5">
-              <MultiSelect
-                className="w-full"
-              />
-              <label htmlFor="">Filiais</label>
-            </FloatLabel>
-            : null
-          }
+          {(() => {
+            return canSelectFiliais && fls.length > 0 ? (
+              <FloatLabel className="flex mx-3 mt-5">
+                <MultiSelect
+                  inputId="layout-filiais"
+                  className="w-full"
+                  value={selectedFilialIds}
+                  options={fls}
+                  optionLabel="nome"
+                  optionValue="id"
+                  onChange={handleFiliaisChange}
+                  placeholder="Selecione as filiais"
+                  display="chip"
+                  filter
+                  showClear
+                  maxSelectedLabels={2}
+                  selectedItemsLabel="{0} filiais selecionadas"
+                  emptyMessage="Nenhuma filial disponível"
+                  emptyFilterMessage="Nenhuma filial encontrada"
+                />
+                <label htmlFor="layout-filiais">Filiais</label>
+              </FloatLabel>
+            ) : null;
+          })()}
           <PanelMenu model={items} className="layout-panel-menu" />
         </aside>
 

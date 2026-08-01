@@ -137,7 +137,12 @@ export function Movements() {
         employeeSearchTimer.current = window.setTimeout(async () => {
             try {
                 const { data } = await connect.get('/funcionarios', {
-                    params: { situacao: 1, search: query || undefined, limit: 50 },
+                    params: {
+                        situacao: 1,
+                        com_local: 1,
+                        search: query || undefined,
+                        limit: 50,
+                    },
                 });
                 mergeEmployeeOptions((data || []).map((employee) => ({
                     ...employee,
@@ -434,11 +439,11 @@ export function Movements() {
                         <label htmlFor="quantidade">Quantidade</label>
                     </FloatLabel>
 
-                    {form.tipo === 'saida' && isEpi && (
+                    {form.tipo === 'saida' && (
                         <section className="movement-recipients">
                             <div className="movement-recipients-heading">
                                 <div>
-                                    <strong>Destinatários do EPI</strong>
+                                    <strong>Destinatários da saída</strong>
                                     <span>O local é obtido automaticamente do cadastro atual.</span>
                                 </div>
                                 <Tag
