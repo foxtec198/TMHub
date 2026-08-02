@@ -1,0 +1,576 @@
+/* O Executor é um produto separado do painel administrativo: tema claro fixo. */
+body.schedular-executor-active,
+body.schedular-executor-active #root {
+  min-height: 100vh;
+  background: #edf6ef !important;
+}
+
+.schedular-shell,
+.executor-app {
+  color-scheme: light;
+}
+
+.schedular-shell {
+  display: grid;
+  min-height: 100vh;
+  max-width: 620px;
+  margin: auto;
+  place-items: center;
+  padding: 1.25rem;
+  border-right: 1px solid #d9e8de;
+  border-left: 1px solid #d9e8de;
+  background: #fff;
+  color: #154b2a;
+}
+.schedular-panel {
+  width: min(100%, 420px);
+  padding: 1.5rem;
+  border: 1px solid #cfe6d6;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(15, 73, 40, 0.08);
+}
+.schedular-panel img {
+  width: 175px;
+  margin-bottom: 1.5rem;
+}
+.schedular-form {
+  display: grid;
+  gap: 1rem;
+}
+.schedular-form label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+.schedular-form .p-inputtext,
+.schedular-form .p-password,
+.schedular-form .p-password-input {
+  width: 100%;
+}
+.executor-app {
+  min-height: 100vh;
+  max-width: 620px;
+  margin: auto;
+  padding: 0 16px 96px;
+  background: #fff;
+  color: #154b2a;
+  box-shadow: 0 0 0 1px #d9e8de;
+}
+.executor-top {
+  min-height: 130px;
+  padding: 16px 0 10px;
+}
+.executor-top-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  min-height: 74px;
+}
+.executor-top-row > img {
+  justify-self: center;
+}
+.executor-top img {
+  width: min(158px, 58vw);
+  height: auto;
+}
+.executor-top .p-button,
+.executor-top-spacer {
+  width: 44px;
+  height: 44px;
+}
+.executor-top .p-button {
+  color: #174b2a;
+}
+.executor-back {
+  border: 1px solid #cbe4d3 !important;
+  background: #f4fbf6 !important;
+}
+.executor-account {
+  color: #47705a !important;
+}
+.executor-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.6rem 0 0;
+  color: #6a8072;
+  font-size: 0.8rem;
+}
+.executor-breadcrumb strong {
+  color: #174b2a;
+}
+.executor-cards {
+  display: grid;
+  gap: 1rem;
+}
+.executor-task-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+}
+.executor-task-search .p-input-icon-left,
+.executor-task-search .p-inputtext {
+  width: 100%;
+}
+.executor-task-search .p-inputtext {
+  min-height: 46px;
+  border-color: #b9d8c4;
+  background: #fff;
+  color: #174b2a;
+}
+.executor-task-search .p-button {
+  width: 2.8rem;
+  background: #08783b;
+  border-color: #08783b;
+}
+.executor-qr-dialog {
+  width: min(94vw, 32rem);
+}
+.executor-qr-content {
+  display: grid;
+  gap: 0.75rem;
+}
+.executor-qr-content > div {
+  display: flex;
+  gap: 0.5rem;
+}
+.executor-qr-content .p-inputtext {
+  flex: 1;
+}
+.executor-qr-video {
+  width: 100%;
+  min-height: 13rem;
+  border-radius: 14px;
+  background: #102518;
+  object-fit: cover;
+}
+.executor-qr-content p {
+  margin: 0;
+  color: var(--text-color-secondary);
+  font-size: 0.85rem;
+}
+.executor-list-card {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 184px;
+  padding: 16px 16px 14px 12px;
+  border: 1px solid #319b68;
+  border-left: 10px solid #08783b;
+  border-radius: 18px;
+  background: #fff;
+  color: #164a2b;
+  text-align: left;
+}
+.executor-deadline {
+  display: grid;
+  width: 92px;
+  min-height: 92px;
+  place-items: center;
+  gap: 0.1rem;
+  margin-top: -24px;
+  border-radius: 19px;
+  background: #39c96b;
+  color: white;
+  text-align: center;
+  box-shadow: 0 6px 14px rgba(29, 132, 69, 0.18);
+}
+.executor-deadline i {
+  font-size: 0.9rem;
+}
+.executor-deadline strong {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.executor-deadline small {
+  max-width: 76px;
+  font-size: 0.66rem;
+  line-height: 1.1;
+}
+.executor-list-card.late .executor-deadline {
+  background: #d23836;
+  box-shadow: 0 6px 14px rgba(185, 42, 42, 0.18);
+}
+.executor-card-content {
+  display: grid;
+  min-width: 0;
+  min-height: 150px;
+  grid-template-rows: auto auto 1fr auto;
+}
+.executor-card-content > strong {
+  display: block;
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+.executor-card-content > small {
+  overflow: hidden;
+  color: #54705e;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.executor-card-content p {
+  align-self: center;
+  margin: 0.8rem 0;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+.executor-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+.executor-origin {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #e5f6ea;
+  color: #08783b;
+  font-size: 0.95rem;
+}
+.executor-card-meta em {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  color: #8c6c00;
+  font-size: 0.95rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+.executor-card-meta em i {
+  font-size: 0.72rem;
+}
+.executor-card-meta em.started {
+  color: #00c966;
+}
+.executor-card-meta em.paused {
+  color: #9a6c15;
+}
+.executor-card-meta b {
+  margin-left: auto;
+  color: #255c38;
+  font-size: 0.82rem;
+  text-align: right;
+  white-space: nowrap;
+}
+.executor-details {
+  padding: 18px 12px;
+}
+.executor-details h1,
+.executor-checklist h1 {
+  font-size: 1.28rem;
+  margin: 0;
+}
+.executor-status {
+  display: flex;
+  justify-content: space-between;
+  margin: 14px 0 44px;
+  padding: 14px;
+  border-radius: 14px;
+  background: #f2faf4;
+  font-size: 1.05rem;
+}
+.executor-status span {
+  color: #946f00;
+}
+.executor-status .started {
+  color: #00be61;
+}
+.executor-details h2 {
+  font-size: 1.05rem;
+}
+.executor-question {
+  padding: 18px 0;
+  border-bottom: 2px dashed #31704a;
+  font-size: 1rem;
+}
+.executor-checklist {
+  display: grid;
+  gap: 1rem;
+  padding: 12px 0 20px;
+}
+.executor-checklist > h1 {
+  padding: 0 10px;
+}
+.executor-checklist article {
+  display: grid;
+  gap: 1.5rem;
+  padding: 28px 22px;
+  border: 1px solid #319b68;
+  border-left: 10px solid #08783b;
+  border-radius: 18px;
+  background: #fff;
+}
+.executor-checklist article strong {
+  font-size: 1.1rem;
+}
+.executor-checklist .p-dropdown,
+.executor-checklist .p-inputtext {
+  width: 100%;
+}
+.executor-evidence-capture {
+  display: grid;
+  gap: 0.7rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #d8e7dd;
+}
+.executor-evidence-heading {
+  display: grid;
+  gap: 0.12rem;
+}
+.executor-evidence-heading small {
+  color: #63806e;
+  font-size: 0.78rem;
+}
+.executor-evidence-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.executor-evidence-action {
+  position: relative;
+  display: inline-flex;
+}
+.executor-evidence-icon.p-button {
+  width: 2.8rem;
+  height: 2.8rem;
+  color: #08783b;
+  border-color: #8bc9a5;
+  background: #fff;
+}
+.executor-evidence-action.is-recorded .executor-evidence-icon.p-button {
+  color: #fff;
+  border-color: #08783b;
+  background: #08783b;
+}
+.executor-evidence-required-badge {
+  position: absolute;
+  top: -0.28rem;
+  right: -0.18rem;
+  z-index: 1;
+  display: grid;
+  width: 1.1rem;
+  height: 1.1rem;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  background: #d63636;
+  box-shadow: 0 1px 4px rgba(128, 24, 24, 0.28);
+  font-size: 0.62rem;
+}
+.executor-evidence-open {
+  position: absolute;
+  right: -0.28rem;
+  bottom: -0.2rem;
+  z-index: 1;
+  display: grid;
+  width: 1.1rem;
+  height: 1.1rem;
+  place-items: center;
+  border: 1px solid #8bc9a5;
+  border-radius: 999px;
+  color: #08783b;
+  background: #fff;
+  font-size: 0.58rem;
+}
+.executor-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+.executor-capture-dialog {
+  width: min(94vw, 34rem);
+}
+.executor-capture-content,
+.executor-signature-content {
+  display: grid;
+  gap: 0.8rem;
+}
+.executor-capture-content p,
+.executor-signature-content p {
+  margin: 0;
+  color: #63806e;
+  font-size: 0.88rem;
+}
+.executor-capture-video {
+  width: 100%;
+  min-height: 15rem;
+  border-radius: 14px;
+  background: #102518;
+  object-fit: cover;
+}
+.executor-manual-code,
+.executor-signature-content > div {
+  display: flex;
+  gap: 0.55rem;
+}
+.executor-manual-code .p-inputtext {
+  flex: 1;
+}
+.executor-signature-pad {
+  width: 100%;
+  height: 210px;
+  touch-action: none;
+  border: 2px dashed #8bb99b;
+  border-radius: 14px;
+  background: #f9fdf9;
+}
+.executor-footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  gap: 0.5rem;
+  max-width: 620px;
+  margin: auto;
+  padding: 10px max(16px, calc((100vw - 620px) / 2 + 16px));
+  background: #08783b;
+  box-shadow: 0 -6px 18px rgba(6, 57, 27, 0.16);
+}
+.executor-footer .p-button {
+  flex: 1;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.executor-footer .p-button.p-button-secondary {
+  background: rgba(255, 255, 255, 0.16);
+}
+.executor-empty {
+  margin: 2rem 0;
+  padding: 1.3rem;
+  border: 1px dashed #b7d8c2;
+  border-radius: 16px;
+  background: #f7fcf8;
+  color: #52725e;
+  text-align: center;
+}
+
+/* PrimeReact herda o tema do TMHub: estes elementos permanecem claros no Executor. */
+.executor-app .p-inputtext,
+.executor-app .p-dropdown,
+.executor-app .p-dropdown-label,
+.executor-app .p-dropdown-trigger,
+.executor-qr-dialog .p-dialog-header,
+.executor-qr-dialog .p-dialog-content {
+  background: #fff !important;
+  color: #174b2a !important;
+}
+.executor-capture-dialog .p-dialog-header,
+.executor-capture-dialog .p-dialog-content {
+  background: #fff !important;
+  color: #174b2a !important;
+  border-color: #b9d8c4 !important;
+}
+.schedular-shell .p-inputtext,
+.schedular-shell .p-password-input,
+body.schedular-executor-active .p-dropdown-panel,
+body.schedular-executor-active .p-dropdown-panel .p-dropdown-item {
+  background: #fff !important;
+  color: #174b2a !important;
+}
+/* Dropdown overlays are appended to body, so they need to beat the global
+   dark-theme selectors as well as the executor card styles. */
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel {
+  color: #174b2a !important;
+  background: #fff !important;
+  border-color: #b9d8c4 !important;
+  box-shadow: 0 14px 30px rgba(15, 73, 40, 0.16) !important;
+}
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-header,
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-items,
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-items-wrapper {
+  color: #174b2a !important;
+  background: #fff !important;
+  border-color: #d9e8de !important;
+}
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-filter {
+  color: #174b2a !important;
+  background: #fff !important;
+  border-color: #b9d8c4 !important;
+}
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-item {
+  color: #174b2a !important;
+  background: #fff !important;
+}
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-item.p-highlight {
+  color: #0d4f29 !important;
+  background: #e1f3e6 !important;
+}
+.executor-app .p-dropdown,
+.executor-app .p-inputtext,
+.executor-qr-dialog .p-dialog-header,
+.executor-qr-dialog .p-dialog-content {
+  border-color: #b9d8c4 !important;
+}
+.executor-qr-dialog .p-dialog-header {
+  border-bottom: 1px solid #d9e8de;
+}
+.executor-qr-dialog .p-dialog-title,
+.executor-qr-dialog .p-dialog-header-icon {
+  color: #174b2a !important;
+}
+@media (min-width: 621px) {
+  .executor-app {
+    border-right: 1px solid #d9e8de;
+    border-left: 1px solid #d9e8de;
+  }
+}
+
+@media (max-width: 420px) {
+  .executor-app {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+  .executor-list-card {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 0.65rem;
+    min-height: 0;
+  }
+  .executor-deadline {
+    width: 70px;
+    min-height: 76px;
+    border-radius: 14px;
+    margin-top: -18px;
+  }
+  .executor-deadline strong {
+    font-size: 0.98rem;
+  }
+  .executor-card-content {
+    min-height: 132px;
+  }
+  .executor-card-meta {
+    gap: 0.45rem;
+  }
+  .executor-card-meta b {
+    font-size: 0.72rem;
+  }
+  .executor-details {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+  .executor-manual-code,
+  .executor-signature-content > div {
+    flex-direction: column;
+  }
+}

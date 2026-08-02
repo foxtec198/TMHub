@@ -22,6 +22,7 @@ import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
 import { CollaboratorImportSettings } from "./EmployeeImportSettings";
 import { NewsSettings } from "./NewsSettings";
+import { SchedularAccessSettings } from "./SchedularAccessSettings";
 
 // Styles
 import "./settings.css";
@@ -177,6 +178,9 @@ export function Settings() {
       </TabPanel>}
       {isAdmin && <TabPanel header="Importar colaboradores" leftIcon="pi pi-upload mr-2">
         <CollaboratorImportSettings />
+      </TabPanel>}
+      {isAdmin && <TabPanel header="Schedular" leftIcon="pi pi-calendar-clock mr-2">
+        <SchedularAccessSettings />
       </TabPanel>}
       {isAdmin && <TabPanel header="Notícias" leftIcon="pi pi-megaphone mr-2">
         <NewsSettings />

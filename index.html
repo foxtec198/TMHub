@@ -6,8 +6,14 @@
     <meta name="theme-color" content="#0b3518" />
     <link rel="icon" href="/brands/main_fav.png" type="image/png" />
     <link rel="apple-touch-icon" href="/icons/ios/180.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
     <title>TM Hub</title>
+    <link id="app-manifest" rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      if (window.location.pathname === "/schedular" || window.location.pathname.startsWith("/schedular/")) {
+        document.querySelector("#app-manifest")?.setAttribute("href", "/manifest-schedular.webmanifest");
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#087842");
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

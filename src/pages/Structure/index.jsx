@@ -9,6 +9,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { PageHeader } from "../../components/PageHeader";
+import { RoutineDialog } from "../../components/Schedular/RoutineDialog";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
@@ -21,6 +22,7 @@ const EMPTY_FORM = {
     categoria: "",
     patrimonio: "",
     local_id: null,
+    parent_id: null,
     descricao: "",
 };
 
@@ -30,6 +32,8 @@ export function Structure() {
     const [dialog, setDialog] = useState(null);
     const [supervisorDialog, setSupervisorDialog] = useState(null);
     const [selectedSupervisorId, setSelectedSupervisorId] = useState(null);
+    const [routineDialog, setRoutineDialog] = useState(null);
+    const [dragLocationId, setDragLocationId] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [refresh, setRefresh] = useState(0);
     const [filters, setFilters] = useState({
@@ -43,6 +47,7 @@ export function Structure() {
     const setLoading = useLoading();
     const { showToast } = useToast();
     const canEdit = can("estrutura", "edit");
+    const canCreateRoutine = can("schedular", "create");
 
     useEffect(() => {
         let active = true;
@@ -128,6 +133,27 @@ export function Structure() {
         setForm(EMPTY_FORM);
     };
 
+    const openSubstructureCreate = (event, contract, parent) => {
+        event.stopPropagation();
+        setDialog(contract);
+        setForm({ ...EMPTY_FORM, tipo: "local", parent_id: parent.id });
+    };
+
+    const moveLocation = async (locationId, parentId) => {
+        if (!locationId || locationId === parentId) return;
+        setLoading(true);
+        try {
+            await connect.patch(`/estrutura/locais/${locationId}`, { parent_id: parentId });
+            setRefresh((value) => value + 1);
+        } catch (error) { showToast("error", "Estrutura", error.response?.data || "Não foi possível mover a estrutura."); }
+        finally { setLoading(false); setDragLocationId(null); }
+    };
+
+    const openRoutineCreate = (event, contract, location) => {
+        event.stopPropagation();
+        setRoutineDialog({ contract, location });
+    };
+
     const openSupervisorEdit = (event, contract) => {
         event.stopPropagation();
         setSupervisorDialog(contract);
@@ -191,6 +217,22 @@ export function Structure() {
             setLoading(false);
         }
     };
+
+    const renderLocation = (location, contract, depth = 0) => (
+        <article
+            className="structure-item-card structure-location-card"
+            key={location.id}
+            draggable
+            onDragStart={() => setDragLocationId(location.id)}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => { event.preventDefault(); moveLocation(dragLocationId, location.id); }}
+            style={{ marginLeft: `${Math.min(depth, 6) * 1.1}rem` }}
+        >
+            <div><strong><i className="pi pi-bars mr-2" />{location.nome}</strong>{location.descricao && <small>{location.descricao}</small>}</div>
+            <div className="structure-item-actions"><Tag value={depth ? "SUBESTRUTURA" : "LOCAL"} severity="info" />{canCreateRoutine && <Button icon="pi pi-calendar-plus" text rounded aria-label={`Criar rotina para ${location.nome}`} tooltip="Criar rotina" onClick={(event) => openRoutineCreate(event, contract, location)} />}{canEdit && <Button icon="pi pi-plus" text rounded aria-label={`Adicionar subestrutura em ${location.nome}`} tooltip="Adicionar subestrutura" onClick={(event) => openSubstructureCreate(event, contract, location)} />}{canEdit && <Button icon="pi pi-trash" severity="danger" text rounded aria-label={`Excluir local ${location.nome}`} tooltip="Excluir local" onClick={(event) => removeItem(event, "local", location)} />}</div>
+            {location.filhos?.map((child) => renderLocation(child, contract, depth + 1))}
+        </article>
+    );
 
     const removeItem = (event, type, item) => {
         event.stopPropagation();
@@ -297,28 +339,7 @@ export function Structure() {
                                         <div className="structure-items">
                                             <section>
                                                 <h3><i className="pi pi-map-marker" /> Locais</h3>
-                                                {contract.locais.length ? contract.locais.map((location) => (
-                                                    <article className="structure-item-card" key={location.id}>
-                                                        <div>
-                                                            <strong>{location.nome}</strong>
-                                                            {location.descricao && <small>{location.descricao}</small>}
-                                                        </div>
-                                                        <div className="structure-item-actions">
-                                                            <Tag value="LOCAL" severity="info" />
-                                                            {canEdit && (
-                                                                <Button
-                                                                    icon="pi pi-trash"
-                                                                    severity="danger"
-                                                                    text
-                                                                    rounded
-                                                                    aria-label={`Excluir local ${location.nome}`}
-                                                                    tooltip="Excluir local"
-                                                                    onClick={(event) => removeItem(event, "local", location)}
-                                                                />
-                                                            )}
-                                                        </div>
-                                                    </article>
-                                                )) : <p className="structure-empty">Nenhum local cadastrado.</p>}
+                                                {contract.locais.length ? (contract.estrutura || contract.locais.filter((location) => !location.parent_id)).map((location) => renderLocation(location, contract)) : <p className="structure-empty">Nenhum local cadastrado.</p>}
                                             </section>
                                             <section>
                                                 <h3><i className="pi pi-box" /> Ativos</h3>
@@ -441,6 +462,12 @@ export function Structure() {
                 </div>
             </OverlayPanel>
 
+            <RoutineDialog
+                visible={Boolean(routineDialog)}
+                fixedStructure={routineDialog}
+                onHide={() => setRoutineDialog(null)}
+            />
+
             <Dialog
                 header={supervisorDialog ? `Supervisor — ${supervisorDialog.id}` : "Alterar supervisor"}
                 visible={Boolean(supervisorDialog)}
@@ -499,7 +526,7 @@ export function Structure() {
                     <button
                         type="button"
                         className={form.tipo === "local" ? "selected" : ""}
-                        onClick={() => setForm({ ...EMPTY_FORM, tipo: "local" })}
+                        onClick={() => setForm((current) => ({ ...EMPTY_FORM, tipo: "local", parent_id: current.parent_id }))}
                     >
                         <i className="pi pi-map-marker" />
                         <strong>Local</strong>
@@ -526,6 +553,21 @@ export function Structure() {
                                 placeholder={form.tipo === "local" ? "Ex.: Almoxarifado" : "Ex.: Veículo operacional"}
                             />
                         </label>
+                        {form.tipo === "local" && (
+                            <label>
+                                Estrutura pai
+                                <Dropdown
+                                    value={form.parent_id}
+                                    options={dialog?.locais || []}
+                                    optionLabel="nome"
+                                    optionValue="id"
+                                    filter
+                                    showClear
+                                    placeholder="Estrutura principal"
+                                    onChange={(event) => setForm({ ...form, parent_id: event.value })}
+                                />
+                            </label>
+                        )}
                         {form.tipo === "ativo" && (
                             <>
                                 <label>

@@ -234,6 +234,35 @@ export function MainLayout() {
       ]
     },
     {
+      label: 'Schedular',
+      icon: 'pi pi-calendar-clock',
+      visible: can("schedular"),
+      items: [
+        {
+          label: 'Rotinas e locais',
+          icon: 'pi pi-calendar-plus',
+          command: () => { navigateTo("/schedular/gestao") },
+        },
+        {
+          label: 'Checklists',
+          icon: 'pi pi-list-check',
+          command: () => { navigateTo("/schedular/checklists") },
+        },
+        {
+          label: 'Tarefas',
+          icon: 'pi pi-list',
+          command: () => { navigateTo("/schedular/tarefas") },
+        },
+        {
+          label: 'Abrir execução',
+          icon: 'pi pi-external-link',
+          command: () => { window.open("/schedular/login", "_blank", "noopener,noreferrer") },
+        },
+      ],
+    },
+
+    // MENUITEMS SEM SUBITEMS
+    {
       label: 'Estrutura',
       icon: 'pi pi-building',
       visible: can("estrutura"),

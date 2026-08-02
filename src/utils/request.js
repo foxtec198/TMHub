@@ -13,6 +13,9 @@ connect.interceptors.request.use((config) => {
 
   if (token) {
     config.headers["Access-Token"] = token;
+    // A resposta precisa conseguir distinguir uma falha de sessão de um 401
+    // devolvido por uma chamada pública ou por uma requisição antiga.
+    config.__tmhubAccessToken = token;
   }
 
   if (socketio.connected && socketio.id) {

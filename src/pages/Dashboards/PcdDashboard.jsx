@@ -1,11 +1,8 @@
 import "./pcdDashboard.css";
 //teste
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
-import { Divider } from "primereact/divider";
-import { MultiSelect } from "primereact/multiselect";
-import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
 import connect from "../../utils/request";
@@ -49,9 +46,7 @@ function EmptyChart({ text }) {
 }
 
 export function PcdDashboard() {
-    const filterPanel = useRef(null);
     const [data, setData] = useState(null);
-    const [selectedBranches, setSelectedBranches] = useState([]);
     const [refresh, setRefresh] = useState(0);
     const setGlobalLoading = useLoading();
     const { showToast } = useToast();
@@ -62,7 +57,11 @@ export function PcdDashboard() {
         );
 
         socketio.on("pcd_update", updateDashboard);
-        return () => socketio.off("pcd_update", updateDashboard);
+        window.addEventListener("tmhub:filiais-changed", updateDashboard);
+        return () => {
+            socketio.off("pcd_update", updateDashboard);
+            window.removeEventListener("tmhub:filiais-changed", updateDashboard);
+        };
     }, []);
 
     useEffect(() => {
@@ -71,11 +70,7 @@ export function PcdDashboard() {
         const loadDashboard = async () => {
             setGlobalLoading(true);
             try {
-                const response = await connect.get("/dash/pcd", {
-                    params: selectedBranches.length
-                        ? { filiais: selectedBranches.join(",") }
-                        : {},
-                });
+                const response = await connect.get("/dash/pcd");
                 if (!cancelled) setData(response.data);
             } catch (error) {
                 if (!cancelled) {
@@ -94,15 +89,17 @@ export function PcdDashboard() {
         loadDashboard();
         return () => { cancelled = true; };
     }, [
-        selectedBranches,
         refresh,
         setGlobalLoading,
         showToast,
     ]);
 
     const summary = data?.resumo || {};
-    const branches = data?.filiais || [];
-    const disabilityTypes = data?.tipos_deficiencia || [];
+    const branches = useMemo(() => data?.filiais || [], [data]);
+    const disabilityTypes = useMemo(
+        () => data?.tipos_deficiencia || [],
+        [data],
+    );
     const currentPercentage = Number(summary.percentual_pcd || 0);
     const targetPercentage = Number(summary.meta_percentual || 5);
     const totalEmployees = Number(summary.total_colaboradores || 0);
@@ -195,16 +192,11 @@ export function PcdDashboard() {
         },
     }), []);
 
-    const branchOptions = data?.filiais_disponiveis || [];
-    const activeFilterCount = selectedBranches.length;
-    const selectedBranchNames = branchOptions
-        .filter((branch) => selectedBranches.includes(branch.id))
-        .map((branch) => branch.nome);
-    const scopeLabel = selectedBranchNames.length === 1
-        ? selectedBranchNames[0]
-        : selectedBranchNames.length > 1
-            ? `${selectedBranchNames.length} filiais selecionadas`
-            : "Todas as filiais permitidas";
+    const scopeLabel = branches.length === 1
+        ? branches[0].nome
+        : branches.length > 1
+            ? `${branches.length} filiais selecionadas no menu principal`
+            : "Nenhuma filial selecionada no menu principal";
 
     const cards = [
         {
@@ -253,71 +245,16 @@ export function PcdDashboard() {
                 title="Dashboard PCD"
                 description="Acompanhe o quadro de colaboradores PCD e o comparativo com a meta."
                 actions={(
-                    <>
-                        <Button
-                            type="button"
-                            icon="pi pi-filter-fill"
-                            label={
-                                activeFilterCount
-                                    ? `Filiais (${activeFilterCount})`
-                                    : "Filiais"
-                            }
-                            outlined
-                            onClick={(event) => (
-                                filterPanel.current?.toggle(event)
-                            )}
-                        />
-                        <Button
-                            icon="pi pi-refresh"
-                            label="Atualizar"
-                            outlined
-                            onClick={() => (
-                                setRefresh((value) => value + 1)
-                            )}
-                        />
-                    </>
+                    <Button
+                        icon="pi pi-refresh"
+                        label="Atualizar"
+                        outlined
+                        onClick={() => (
+                            setRefresh((value) => value + 1)
+                        )}
+                    />
                 )}
             />
-
-            <OverlayPanel
-                ref={filterPanel}
-                className="pcd-dashboard-filter-panel"
-            >
-                <div className="pcd-dashboard-filter-panel__title">
-                    <div>
-                        <strong>Filtrar por filial</strong>
-                        <span>
-                            Selecione somente as unidades que deseja comparar.
-                        </span>
-                    </div>
-                    <Button
-                        type="button"
-                        icon="pi pi-filter-slash"
-                        text
-                        rounded
-                        aria-label="Limpar filtro de filiais"
-                        onClick={() => setSelectedBranches([])}
-                    />
-                </div>
-                <Divider />
-                <label className="pcd-dashboard-filter-field">
-                    <span>Filiais</span>
-                    <MultiSelect
-                        value={selectedBranches}
-                        options={branchOptions}
-                        optionLabel="nome"
-                        optionValue="id"
-                        onChange={(event) => (
-                            setSelectedBranches(event.value || [])
-                        )}
-                        placeholder="Todas as filiais"
-                        display="chip"
-                        filter
-                        className="w-full"
-                        panelClassName="pcd-dashboard-filter-dropdown"
-                    />
-                </label>
-            </OverlayPanel>
 
             <div className="pcd-dashboard-summary">
                 {cards.map((card) => (
