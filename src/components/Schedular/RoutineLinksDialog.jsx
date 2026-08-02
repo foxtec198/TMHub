@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -110,15 +111,49 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
     }
   };
 
+  const removeLinkedInstance = (instance) => {
+    confirmDialog({
+      header: "Remover rotina vinculada",
+      message: "A instância será removida e as tarefas ainda em aberto serão canceladas. As tarefas concluídas permanecerão no histórico.",
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Remover rotina",
+      rejectLabel: "Cancelar",
+      acceptClassName: "p-button-danger",
+      accept: async () => {
+        setLoading(true);
+        try {
+          const { data } = await connect.delete(
+            `/schedular/rotinas/${instance.id}`,
+          );
+          setLinkedInstances((rows) =>
+            rows.filter((row) => row.id !== instance.id),
+          );
+          onSaved?.();
+          showToast("success", "Rotina vinculada", data || "Rotina removida.");
+        } catch (error) {
+          showToast(
+            "error",
+            "Rotina vinculada",
+            error.response?.data || "Não foi possível remover a rotina.",
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
+  };
+
   return (
-    <Dialog
-      header="Vincular rotina a outros locais"
-      visible={visible}
-      onHide={onHide}
-      modal
-      className="schedular-routine-dialog"
-    >
-      <div className="schedular-routine-form">
+    <>
+      <ConfirmDialog />
+      <Dialog
+        header="Vincular rotina a outros locais"
+        visible={visible}
+        onHide={onHide}
+        modal
+        className="schedular-routine-dialog"
+      >
+        <div className="schedular-routine-form">
         <div className="schedular-routine-context">
           <strong>{routine?.nome}</strong>
           <span>
@@ -182,9 +217,20 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
           <div className="schedular-linked-instances is-wide">
             <strong>Instâncias já vinculadas</strong>
             {linkedInstances.map((instance) => (
-              <span key={instance.id}>
-                {instance.estrutura || instance.nome}
-              </span>
+              <div key={instance.id}>
+                <span>{instance.estrutura || instance.nome}</span>
+                <Button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  text
+                  rounded
+                  tooltip="Remover rotina vinculada"
+                  aria-label={`Remover rotina vinculada de ${
+                    instance.estrutura || instance.nome
+                  }`}
+                  onClick={() => removeLinkedInstance(instance)}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -192,7 +238,8 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
           <Button label="Cancelar" severity="secondary" text onClick={onHide} />
           <Button label="Vincular locais" icon="pi pi-link" onClick={save} />
         </div>
-      </div>
-    </Dialog>
+        </div>
+      </Dialog>
+    </>
   );
 }

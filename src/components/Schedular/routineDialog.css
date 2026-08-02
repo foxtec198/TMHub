@@ -56,6 +56,12 @@
   border-radius: 12px;
   background: var(--surface-ground);
 }
+.schedular-linked-instances > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
 .schedular-linked-instances span {
   color: var(--text-color-secondary);
   font-size: 0.85rem;
