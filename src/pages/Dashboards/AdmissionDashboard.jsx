@@ -1,8 +1,7 @@
 import './admissionDashboard.css';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
-import { Calendar } from 'primereact/calendar';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
@@ -12,6 +11,7 @@ import connect from '../../utils/request';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { PageHeader } from '../../components/PageHeader';
+import { DashboardFilterButton, DashboardFilterPanel } from '../../components/DashboardFilterPanel';
 
 const STATUS_LABELS = {
     aberta: 'ABERTAS',
@@ -66,11 +66,13 @@ function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
 export function AdmissionDashboard() {
     const now = new Date();
     const [period, setPeriod] = useState([new Date(now.getFullYear(), now.getMonth() - 5, 1), now]);
+    const [filters, setFilters] = useState({ departamento: [], status: [], contrato: [], responsavel: [], colaborador: [] });
     const [data, setData] = useState(null);
     const [refresh, setRefresh] = useState(0);
     const [activeTable, setActiveTable] = useState('departments');
     const setGlobalLoading = useLoading();
     const { showToast } = useToast();
+    const filterPanel = useRef(null);
 
     useEffect(() => {
         // Só consulta a API quando o intervalo estiver completo; refresh força uma nova leitura.
@@ -80,7 +82,14 @@ export function AdmissionDashboard() {
             setGlobalLoading(true);
             try {
                 const response = await connect.get('/admissao/vagas/dashboard', {
-                    params: { inicio: dateParam(period[0]), fim: dateParam(period[1]) },
+                    params: {
+                        inicio: dateParam(period[0]), fim: dateParam(period[1]),
+                        departamento: filters.departamento.join(',') || undefined,
+                        status: filters.status.join(',') || undefined,
+                        contrato: filters.contrato.join(',') || undefined,
+                        responsavel: filters.responsavel.join(',') || undefined,
+                        colaborador: filters.colaborador.join(',') || undefined,
+                    },
                 });
                 if (!cancelled) setData(response.data);
             } catch (error) {
@@ -92,7 +101,7 @@ export function AdmissionDashboard() {
         };
         load();
         return () => { cancelled = true; };
-    }, [period, refresh, setGlobalLoading, showToast]);
+    }, [period, filters, refresh, setGlobalLoading, showToast]);
 
     // Barras mostram volume e a linha usa um segundo eixo para não distorcer a escala de vagas.
     const monthlyChart = useMemo(() => ({
@@ -116,6 +125,13 @@ export function AdmissionDashboard() {
     };
 
     const indicators = data?.indicadores || {};
+    const filterOptions = data?.filtros || {};
+    const activeFilterCount = Object.values(filters).filter((value) => value.length).length;
+    const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
+    const clearFilters = () => {
+        setPeriod([new Date(now.getFullYear(), now.getMonth() - 5, 1), new Date()]);
+        setFilters({ departamento: [], status: [], contrato: [], responsavel: [], colaborador: [] });
+    };
     const actionTarget = data?.metas?.acao_horas ?? 24;
     const closeTargetDays = (data?.metas?.conclusao_horas ?? 120) / 24;
     // A cópia evita ordenar diretamente o array retornado pela API.
@@ -141,7 +157,7 @@ export function AdmissionDashboard() {
                 title="SLA de Admissões"
                 description="Acompanhe a velocidade de resposta e conclusão. Vagas com saída prevista permanecem fora do SLA."
                 actions={<>
-                    <Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" locale="pt-BR" placeholder="Selecione o período" showIcon readOnlyInput hideOnRangeSelection />
+                    <DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />
                     <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
                 </>}
             />
@@ -223,6 +239,20 @@ export function AdmissionDashboard() {
                     </DataTable>}
                 </div>
             </article>
+            <DashboardFilterPanel
+                panelRef={filterPanel}
+                period={period}
+                onPeriodChange={setPeriod}
+                onClear={clearFilters}
+                title="Filtrar admissões"
+                fields={[
+                    { name: 'departamento', label: 'Departamentos', value: filters.departamento, options: (filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value })), onChange: (value) => setFilter('departamento', value) },
+                    { name: 'status', label: 'Status', value: filters.status, options: (filterOptions.status || []).map((value) => ({ label: STATUS_LABELS[value] || value, value })), onChange: (value) => setFilter('status', value) },
+                    { name: 'contrato', label: 'Contratos', value: filters.contrato, options: (filterOptions.contratos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('contrato', value), wide: true },
+                    { name: 'responsavel', label: 'Responsáveis', value: filters.responsavel, options: (filterOptions.responsaveis || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('responsavel', value) },
+                    { name: 'colaborador', label: 'Colaboradores', value: filters.colaborador, options: (filterOptions.colaboradores || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('colaborador', value), wide: true },
+                ]}
+            />
         </section>
     );
 }

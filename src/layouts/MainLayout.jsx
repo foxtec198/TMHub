@@ -123,6 +123,18 @@ export function MainLayout() {
           command: () => { navigateTo("/reports/logistica") }
         },
         {
+          label: 'Projetos',
+          icon: 'pi pi-chart-line',
+          visible: can("dashboard_projetos"),
+          command: () => { navigateTo("/reports/projetos") }
+        },
+        {
+          label: 'Glosas',
+          icon: 'pi pi-money-bill',
+          visible: can("dashboard_glosas"),
+          command: () => { navigateTo("/reports/glosas") }
+        },
+        {
           label: 'PCD',
           icon: 'pi pi-heart',
           visible: can("dashboard_pcd"),
@@ -236,7 +248,7 @@ export function MainLayout() {
     {
       label: 'Schedular',
       icon: 'pi pi-calendar-clock',
-      visible: can("schedular"),
+      visible: can("schedular") && String(role || "").toUpperCase() === "ADMIN",
       items: [
         {
           label: 'Rotinas e locais',

@@ -6,6 +6,8 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { MultiSelect } from "primereact/multiselect";
+import { Checkbox } from "primereact/checkbox";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
@@ -16,7 +18,8 @@ const emptyRoutine = (fixedStructure) => ({
   descricao: "",
   centro_custo_id: fixedStructure?.contract?.id || null,
   local_id: fixedStructure?.location?.id || null,
-  colaborador_responsavel_id: null,
+  colaborador_ids: [],
+  executar_apenas_um: false,
   checklist_id: null,
   recorrencia_tipo: "dia",
   intervalo_horas: null,
@@ -86,6 +89,7 @@ export function RoutineDialog({
       ? {
           ...emptyRoutine(fixedStructure),
           ...initialRoutine,
+          colaborador_ids: initialRoutine.colaborador_ids || (initialRoutine.colaborador_responsavel_id ? [initialRoutine.colaborador_responsavel_id] : []),
           proxima_execucao: initialRoutine.proxima_execucao
             ? new Date(initialRoutine.proxima_execucao)
             : null,
@@ -135,13 +139,13 @@ export function RoutineDialog({
       !routine.nome.trim() ||
       !routine.centro_custo_id ||
       !routine.local_id ||
-      !routine.colaborador_responsavel_id ||
+      !routine.colaborador_ids?.length ||
       !routine.proxima_execucao
     ) {
       showToast(
         "warn",
         "Rotina",
-        "Preencha nome, contrato, local, responsável e próxima execução.",
+        "Preencha nome, contrato, local, colaboradores e próxima execução.",
       );
       return;
     }
@@ -271,20 +275,32 @@ export function RoutineDialog({
         </label>
         <label>
           Responsável
-          <Dropdown
-            value={routine.colaborador_responsavel_id}
+          <MultiSelect
+            value={routine.colaborador_ids}
             options={employees}
             optionLabel="label"
             optionValue="id"
             filter
-            placeholder="Colaborador"
+            display="chip"
+            placeholder="Selecione um ou mais colaboradores"
             onChange={(event) =>
               setRoutine({
                 ...routine,
-                colaborador_responsavel_id: event.value,
+                colaborador_ids: event.value,
               })
             }
           />
+        </label>
+        <label className="schedular-routine-exclusive">
+          <Checkbox
+            inputId="executar-apenas-um"
+            checked={Boolean(routine.executar_apenas_um)}
+            onChange={(event) => setRoutine({ ...routine, executar_apenas_um: event.checked })}
+          />
+          <span>
+            <strong>Executar apenas por um colaborador</strong>
+            <small>O primeiro a iniciar assume a execução exclusiva da tarefa.</small>
+          </span>
         </label>
         <label>
           Checklist

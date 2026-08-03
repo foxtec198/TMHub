@@ -43,6 +43,8 @@ import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
 import { DashboardLogistic } from "./pages/Dashboards/logistic";
 import { Pcd } from "./pages/Indicators/pcd";
 import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
+import { ProjectDashboard } from "./pages/Dashboards/ProjectDashboard";
+import { GlosaDashboard } from "./pages/Dashboards/GlosaDashboard";
 import { Structure } from "./pages/Structure/index";
 import { Schedular } from "./pages/Schedular";
 import { SchedularManagement } from "./pages/Schedular/Management";
@@ -245,6 +247,8 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
+          <Route path="/reports/projetos" element={<PermissionGate screen="dashboard_projetos"><ProjectDashboard /></PermissionGate>} />
+          <Route path="/reports/glosas" element={<PermissionGate screen="dashboard_glosas"><GlosaDashboard /></PermissionGate>} />
           <Route
             path="/reports/pcd"
             element={
@@ -339,7 +343,7 @@ export function AppRoutes() {
           <Route
             path="/schedular/gestao"
             element={
-              <PermissionGate screen="schedular">
+              <PermissionGate screen="schedular" adminOnly>
                 <SchedularManagement mode="routines" />
               </PermissionGate>
             }
@@ -347,7 +351,7 @@ export function AppRoutes() {
           <Route
             path="/schedular/checklists"
             element={
-              <PermissionGate screen="schedular">
+              <PermissionGate screen="schedular" adminOnly>
                 <SchedularManagement mode="checklists" />
               </PermissionGate>
             }
@@ -355,7 +359,7 @@ export function AppRoutes() {
           <Route
             path="/schedular/tarefas"
             element={
-              <PermissionGate screen="schedular">
+              <PermissionGate screen="schedular" adminOnly>
                 <SchedularTasks />
               </PermissionGate>
             }
@@ -375,7 +379,7 @@ document.addEventListener("DOMContentLoaded", function () {
     container = document.getElementById("root");
     const root = createRoot(container);
     root.render(
-      <PrimeReactProvider>
+      <PrimeReactProvider value={{ locale: "pt-BR" }}>
         <LoadingProvider>
           <BrowserRouter>
             <ToastProvider>

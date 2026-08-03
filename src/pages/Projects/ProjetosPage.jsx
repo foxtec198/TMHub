@@ -262,6 +262,10 @@ export function ProjetosPage() {
         onHide={() => setCardSelecionado(null)}
         onSave={salvarCard}
         onDelete={excluirCard}
+        onProjectChange={(data) => {
+          setProjetos((prev) => prev.map((item) => (item.id === data.id ? data : item)));
+          setCardSelecionado((current) => (current ? data.cards?.[current.id] || null : null));
+        }}
       />
 
       <MembersDialog

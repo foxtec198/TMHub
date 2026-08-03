@@ -9,12 +9,13 @@ import { Knob } from 'primereact/knob';
 import { Button } from "primereact/button"
 import { OverlayPanel } from "primereact/overlaypanel"
 import { FloatLabel } from "primereact/floatlabel"
-import { Dropdown } from "primereact/dropdown"
+import { MultiSelect } from "primereact/multiselect"
 
 // Components
 import { DashCard } from "../../components/DashCard"
 import { Table } from "../../components/tables/Table"
 import { PageHeader } from "../../components/PageHeader"
+import { DashboardFilterButton } from "../../components/DashboardFilterPanel"
 
 // Utils
 import { useEffect, useState, useRef, useMemo } from "react"
@@ -124,10 +125,12 @@ export function RequestReport() {
     const op_filters = useRef(); // Overlay Panel Ref
 
     const defaultFilters = {
-        contrato: null,
-        departamento: null,
-        supervisor: null,
-        motivo: null
+        contrato: [],
+        departamento: [],
+        supervisor: [],
+        motivo: [],
+        status: [],
+        colaborador: [],
     };
 
     // Filtros
@@ -192,12 +195,12 @@ export function RequestReport() {
     // Use Memo para setar 
     const hist = useMemo(() => {
         return histOriginal.filter(item => {
-            if (filters.contrato && item.local !== filters.contrato) return false;
-            if (filters.departamento && item.dpto !== filters.departamento) return false;
-            if (filters.supervisor && item.supervisor !== filters.supervisor) return false;
-            if (filters.colaborador && item.ausente !== filters.colaborador) return false;
-            if (filters.motivo && item.motivo !== filters.motivo) return false;
-            if (filters.status && item.status !== filters.status) return false;
+            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
+            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
+            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
+            if (filters.colaborador.length && !filters.colaborador.includes(item.ausente)) return false;
+            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
+            if (filters.status.length && !filters.status.includes(item.status)) return false;
             return true;
         });
     }, [histOriginal, filters.contrato, filters.departamento, filters.supervisor, filters.colaborador, filters.motivo, filters.status]);
@@ -205,13 +208,14 @@ export function RequestReport() {
     const clearFilters = () => {
         setFilters(() => ({ ...defaultFilters }));
     };
+    const activeFilterCount = Object.values(filters).filter((value) => value?.length).length;
 
     const contratosOptions = useMemo(() => {
         const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento && item.dpto !== filters.departamento) return false;
-            if (filters.supervisor && item.supervisor !== filters.supervisor) return false;
-            if (filters.motivo && item.motivo !== filters.motivo) return false;
-            if (filters.status && item.status !== filters.status) return false;
+            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
+            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
+            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
+            if (filters.status.length && !filters.status.includes(item.status)) return false;
 
             return true;
         });
@@ -224,10 +228,10 @@ export function RequestReport() {
 
     const dptoOptions = useMemo(() => {
         const histFiltro = histOriginal.filter(item => {
-            if (filters.contrato && item.local !== filters.contrato) return false;
-            if (filters.supervisor && item.supervisor !== filters.supervisor) return false;
-            if (filters.motivo && item.motivo !== filters.motivo) return false;
-            if (filters.status && item.status !== filters.status) return false;
+            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
+            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
+            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
+            if (filters.status.length && !filters.status.includes(item.status)) return false;
 
             return true;
         });
@@ -240,10 +244,10 @@ export function RequestReport() {
 
     const motivoOptions = useMemo(() => {
         const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento && item.dpto !== filters.departamento) return false;
-            if (filters.contrato && item.local !== filters.contrato) return false;
-            if (filters.supervisor && item.supervisor !== filters.supervisor) return false;
-            if (filters.status && item.status !== filters.status) return false;
+            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
+            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
+            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
+            if (filters.status.length && !filters.status.includes(item.status)) return false;
 
             return true;
         });
@@ -256,10 +260,10 @@ export function RequestReport() {
 
     const supervisorOptions = useMemo(() => {
         const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento && item.dpto !== filters.departamento) return false;
-            if (filters.contrato && item.local !== filters.contrato) return false;
-            if (filters.motivo && item.motivo !== filters.motivo) return false;
-            if (filters.status && item.status !== filters.status) return false;
+            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
+            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
+            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
+            if (filters.status.length && !filters.status.includes(item.status)) return false;
 
             return true;
         });
@@ -272,10 +276,10 @@ export function RequestReport() {
 
     const statusOptions = useMemo(() => {
         const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento && item.dpto !== filters.departamento) return false;
-            if (filters.contrato && item.local !== filters.contrato) return false;
-            if (filters.supervisor && item.supervisor !== filters.supervisor) return false;
-            if (filters.motivo && item.motivo !== filters.motivo) return false;
+            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
+            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
+            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
+            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
 
             return true;
         });
@@ -703,7 +707,7 @@ export function RequestReport() {
                     </FloatLabel>
 
                     <FloatLabel className="w-full mb-4">
-                        <Dropdown
+                        <MultiSelect
                             inputId="dashboard-contract"
                             filter
                             appendTo="self"
@@ -722,7 +726,7 @@ export function RequestReport() {
                     </FloatLabel>
 
                     <FloatLabel className="w-full mb-4">
-                        <Dropdown
+                        <MultiSelect
                             inputId="dashboard-department"
                             panelClassName="dashboard-filter-dropdown"
                             className="w-full"
@@ -739,7 +743,7 @@ export function RequestReport() {
                     </FloatLabel>
 
                     <FloatLabel className="w-full mb-4">
-                        <Dropdown
+                        <MultiSelect
                             inputId="dashboard-reason"
                             panelClassName="dashboard-filter-dropdown"
                             options={motivoOptions}
@@ -756,7 +760,7 @@ export function RequestReport() {
                     </FloatLabel>
 
                     <FloatLabel className="w-full mb-4">
-                        <Dropdown
+                        <MultiSelect
                             inputId="dashboard-supervisor"
                             panelClassName="dashboard-filter-dropdown"
                             options={supervisorOptions}
@@ -773,7 +777,7 @@ export function RequestReport() {
                     </FloatLabel>
 
                     <FloatLabel className="w-full mb-4">
-                        <Dropdown
+                        <MultiSelect
                             inputId="dashboard-status"
                             panelClassName="dashboard-filter-dropdown"
                             options={statusOptions}
@@ -798,16 +802,7 @@ export function RequestReport() {
                     />
                 </OverlayPanel>
 
-                <Button
-                    icon="pi pi-filter-fill"
-                    className="dashboard-filter-button border-round-lg shadow-6"
-                    onClick={(e) => op_filters.current.toggle(e)}
-                    style={{
-                        background: "ghostwhite",
-                        border: "1px solid ghostwhite",
-                        color: "#3a3535",
-                    }}
-                />
+                <DashboardFilterButton panelRef={op_filters} activeCount={activeFilterCount} className="shadow-2" />
             </div>
 
             <div className="dashboard-content flex w-full min-h-full gap-4">

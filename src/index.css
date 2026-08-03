@@ -378,3 +378,97 @@ body, html, :root, #root {
 .p-datatable-wrapper {
     overflow-x: auto;
 }
+
+/* Dashboard surfaces are mostly custom elements rather than PrimeReact cards.
+   This closes the light-mode fallbacks that leaked through Dark Mode. */
+:root[data-theme="dark"] .request-dashboard,
+:root[data-theme="dark"] .admission-dashboard,
+:root[data-theme="dark"] .pcd-dashboard,
+:root[data-theme="dark"] .ponto48-dashboard,
+:root[data-theme="dark"] .department-dashboard,
+:root[data-theme="dark"] .absence-dashboard,
+:root[data-theme="dark"] .logistic-dashboard,
+:root[data-theme="dark"] .project-dashboard { background:#090d0a !important; color:#edf4ef !important; }
+
+:root[data-theme="dark"] .admission-summary-card,
+:root[data-theme="dark"] .admission-panel,
+:root[data-theme="dark"] .admission-table-panel,
+:root[data-theme="dark"] .pcd-dashboard-summary-card,
+:root[data-theme="dark"] .pcd-dashboard-panel,
+:root[data-theme="dark"] .ponto48-card,
+:root[data-theme="dark"] .ponto48-panel,
+:root[data-theme="dark"] .ponto48-table-panel,
+:root[data-theme="dark"] .ponto48-empty,
+:root[data-theme="dark"] .department-dashboard__content,
+:root[data-theme="dark"] .department-dashboard__summary > div,
+:root[data-theme="dark"] .absence-kpi-grid article,
+:root[data-theme="dark"] .absence-dashboard-panel,
+:root[data-theme="dark"] .logistic-kpis article,
+:root[data-theme="dark"] .logistic-panel,
+:root[data-theme="dark"] .project-dashboard-kpis article,
+:root[data-theme="dark"] .project-dashboard-panel { background:#141b16 !important; color:#edf4ef !important; border-color:#34513b !important; box-shadow:0 12px 28px rgba(0,0,0,.28) !important; }
+
+:root[data-theme="dark"] .admission-insight,
+:root[data-theme="dark"] .pcd-dashboard-insight,
+:root[data-theme="dark"] .ponto48-insight { background:linear-gradient(145deg,#16351f,#141b16 72%) !important; }
+
+:root[data-theme="dark"] .admission-table-tabs,
+:root[data-theme="dark"] .pcd-dashboard-status-strip > div,
+:root[data-theme="dark"] .admission-status-card,
+:root[data-theme="dark"] .ponto48-detail-summary > div,
+:root[data-theme="dark"] .ponto48-punches span,
+:root[data-theme="dark"] .department-center__header,
+:root[data-theme="dark"] .department-employee,
+:root[data-theme="dark"] .department-employee:nth-child(even) { background:#1b261e !important; color:#dce8df !important; border-color:#34513b !important; }
+
+:root[data-theme="dark"] .admission-heading h1,
+:root[data-theme="dark"] .admission-panel h2,
+:root[data-theme="dark"] .pcd-dashboard-panel h2,
+:root[data-theme="dark"] .pcd-dashboard-insight h2,
+:root[data-theme="dark"] .ponto48-panel h2,
+:root[data-theme="dark"] .ponto48-table-heading h2,
+:root[data-theme="dark"] .department-dashboard__heading h1,
+:root[data-theme="dark"] .absence-dashboard-heading h1,
+:root[data-theme="dark"] .logistic-panel h2,
+:root[data-theme="dark"] .project-dashboard h1,
+:root[data-theme="dark"] .project-dashboard h2,
+:root[data-theme="dark"] .project-dashboard h3 { color:#f2f8f3 !important; }
+
+:root[data-theme="dark"] .admission-heading > div:first-child > span,
+:root[data-theme="dark"] .admission-panel header span,
+:root[data-theme="dark"] .pcd-dashboard-panel header span,
+:root[data-theme="dark"] .pcd-dashboard-insight > span,
+:root[data-theme="dark"] .ponto48-heading > div:first-child > span,
+:root[data-theme="dark"] .ponto48-panel header span,
+:root[data-theme="dark"] .department-dashboard__eyebrow,
+:root[data-theme="dark"] .absence-dashboard-panel header span,
+:root[data-theme="dark"] .logistic-panel header span { color:#70e38d !important; }
+
+:root[data-theme="dark"] .project-dashboard canvas,
+:root[data-theme="dark"] .admission-dashboard canvas,
+:root[data-theme="dark"] .pcd-dashboard canvas,
+:root[data-theme="dark"] .absence-dashboard canvas,
+:root[data-theme="dark"] .logistic-dashboard canvas,
+:root[data-theme="dark"] .ponto48-dashboard canvas { background:transparent !important; }
+
+/* Filtro único dos dashboards. Os campos não podem herdar superfícies claras no DM. */
+.dashboard-filter-trigger { border-radius:10px !important; }
+.dashboard-filter-panel { width:min(42rem,calc(100vw - 2rem)); }
+.dashboard-filter-panel .p-overlaypanel-content { padding:1rem; }
+.dashboard-filter-title { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
+.dashboard-filter-title>div { display:flex; flex-direction:column; gap:.2rem; }
+.dashboard-filter-title strong { color:var(--text-color); }
+.dashboard-filter-title span { color:var(--text-color-secondary); font-size:.8rem; }
+.dashboard-filter-title .p-button { flex:0 0 auto; }
+.dashboard-filter-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; }
+.dashboard-filter-grid label { display:flex; min-width:0; flex-direction:column; gap:.4rem; }
+.dashboard-filter-grid label>span { color:var(--text-color-secondary); font-size:.75rem; font-weight:800; }
+.dashboard-filter-grid label.is-wide { grid-column:1/-1; }
+.dashboard-filter-grid .p-calendar,.dashboard-filter-grid .p-calendar .p-inputtext { width:100%; }
+:root[data-theme="dark"] .dashboard-filter-panel,:root[data-theme="dark"] .dashboard-filter-panel .p-overlaypanel-content,:root[data-theme="dark"] .dashboard-filter-dropdown,:root[data-theme="dark"] .dashboard-filter-dropdown .p-multiselect-panel { background:#151c17 !important; color:#edf4ef !important; }
+:root[data-theme="dark"] .dashboard-filter-panel { border-color:#365240 !important; }
+:root[data-theme="dark"] .dashboard-filter-panel .p-inputtext,:root[data-theme="dark"] .dashboard-filter-panel .p-multiselect,:root[data-theme="dark"] .dashboard-filter-panel .p-calendar-w-btn .p-inputtext { background:#101610 !important; border-color:#3b5d46 !important; color:#edf4ef !important; }
+:root[data-theme="dark"] .dashboard-filter-panel .p-multiselect-token { background:#24472f !important; color:#dff8e5 !important; }
+:root[data-theme="dark"] .dashboard-filter-panel .p-multiselect-item { color:#d9e8dd !important; }
+:root[data-theme="dark"] .dashboard-filter-panel .p-multiselect-item.p-highlight,:root[data-theme="dark"] .dashboard-filter-panel .p-multiselect-item:hover { background:#24472f !important; }
+@media(max-width:640px){.dashboard-filter-panel{width:calc(100vw - 1rem)}.dashboard-filter-title{align-items:stretch;flex-direction:column}.dashboard-filter-title .p-button{align-self:flex-start}.dashboard-filter-grid{grid-template-columns:1fr}.dashboard-filter-grid label.is-wide{grid-column:auto}}

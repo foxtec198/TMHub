@@ -5,8 +5,11 @@ import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
+import { MultiSelect } from 'primereact/multiselect';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { Tag } from 'primereact/tag';
+
+import { DashboardFilterButton } from '../../components/DashboardFilterPanel';
 
 import { PageHeader } from '../../components/PageHeader';
 import { useLoading } from '../../contexts/LoadingContext';
@@ -17,10 +20,10 @@ import './logistic.css';
 const today = new Date();
 const DEFAULT_FILTERS = {
     period: [new Date(today.getFullYear(), today.getMonth(), 1), today],
-    product: null,
-    type: null,
-    employee: null,
-    center: null,
+    product: [],
+    type: [],
+    employee: [],
+    center: [],
 };
 
 function isoDate(value) {
@@ -47,10 +50,10 @@ export function DashboardLogistic() {
             inicio: isoDate(filters.period[0]),
             fim: isoDate(filters.period[1]),
         };
-        if (filters.product) params.produto_id = filters.product;
-        if (filters.type) params.tipo = filters.type;
-        if (filters.employee) params.colaborador_id = filters.employee;
-        if (filters.center) params.centro_custo_id = filters.center;
+        if (filters.product.length) params.produto_id = filters.product.join(',');
+        if (filters.type.length) params.tipo = filters.type.join(',');
+        if (filters.employee.length) params.colaborador_id = filters.employee.join(',');
+        if (filters.center.length) params.centro_custo_id = filters.center.join(',');
         connect.get('/estoque/movimentos/dashboard', { params })
             .then(({ data: response }) => active && setData(response))
             .catch((error) => active && showToast(
@@ -65,8 +68,8 @@ export function DashboardLogistic() {
     const indicators = data?.indicadores || {};
     const options = data?.filtros || {};
     const activeFilterCount = ['product', 'type', 'employee', 'center']
-        .filter((key) => filters[key] !== null).length;
-    const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value }));
+        .filter((key) => filters[key]?.length).length;
+    const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
     const clearFilters = () => setFilters({
         ...DEFAULT_FILTERS,
         period: [new Date(today.getFullYear(), today.getMonth(), 1), new Date()],
@@ -144,11 +147,7 @@ export function DashboardLogistic() {
                             <i className="pi pi-calendar" />
                             {filters.period?.[0]?.toLocaleDateString('pt-BR')} — {filters.period?.[1]?.toLocaleDateString('pt-BR')}
                         </div>
-                        <Button
-                            icon="pi pi-filter-fill"
-                            label={activeFilterCount ? `Filtros (${activeFilterCount})` : 'Filtros'}
-                            onClick={(event) => filterPanel.current?.toggle(event)}
-                        />
+                        <DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />
                         <Button icon="pi pi-refresh" outlined onClick={() => setRefresh((value) => value + 1)} />
                     </>
                 )}
@@ -228,14 +227,14 @@ export function DashboardLogistic() {
             <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
                 <div className="dashboard-filter-title">
                     <div><strong>Filtrar logística</strong><span>Todos os indicadores usam o mesmo recorte.</span></div>
-                    <Button icon="pi pi-filter-slash" text rounded aria-label="Limpar filtros" onClick={clearFilters} />
+                    <Button icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
                 </div>
                 <div className="dashboard-filter-grid">
                     <label className="is-wide"><span>Período</span><Calendar value={filters.period} onChange={(event) => setFilter('period', event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" showIcon /></label>
-                    <label><span>Produto</span><Dropdown value={filters.product} options={options.produtos || []} onChange={(event) => setFilter('product', event.value)} filter showClear placeholder="Todos" /></label>
-                    <label><span>Tipo</span><Dropdown value={filters.type} options={[{ label: 'Entrada', value: 'entrada' }, { label: 'Saída', value: 'saida' }]} onChange={(event) => setFilter('type', event.value)} showClear placeholder="Todos" /></label>
-                    <label className="is-wide"><span>Colaborador</span><Dropdown value={filters.employee} options={options.colaboradores || []} onChange={(event) => setFilter('employee', event.value)} filter showClear placeholder="Todos" /></label>
-                    <label className="is-wide"><span>Local, contrato ou centro de custo</span><Dropdown value={filters.center} options={options.centros_custo || []} onChange={(event) => setFilter('center', event.value)} filter showClear placeholder="Todos" /></label>
+                    <label><span>Produto</span><MultiSelect value={filters.product} options={options.produtos || []} onChange={(event) => setFilter('product', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
+                    <label><span>Tipo</span><MultiSelect value={filters.type} options={[{ label: 'Entrada', value: 'entrada' }, { label: 'Saída', value: 'saida' }]} onChange={(event) => setFilter('type', event.value)} showClear display="chip" placeholder="Todos" /></label>
+                    <label className="is-wide"><span>Colaborador</span><MultiSelect value={filters.employee} options={options.colaboradores || []} onChange={(event) => setFilter('employee', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
+                    <label className="is-wide"><span>Local, contrato ou centro de custo</span><MultiSelect value={filters.center} options={options.centros_custo || []} onChange={(event) => setFilter('center', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
                 </div>
             </OverlayPanel>
         </main>
