@@ -29,11 +29,18 @@ function captureFormats(type) {
       ];
 }
 
+function stopStream(streamRef) {
+  streamRef.current?.getTracks().forEach((track) => track.stop());
+  streamRef.current = null;
+}
+
 export function TaskEvidenceCapture({ task, item, onSaved }) {
   const { showToast } = useToast();
   const galleryInput = useRef(null);
   const videoRef = useRef(null);
   const photoVideoRef = useRef(null);
+  const scannerStreamRef = useRef(null);
+  const photoStreamRef = useRef(null);
   const photoCanvasRef = useRef(null);
   const canvasRef = useRef(null);
   const drawingRef = useRef(false);
@@ -41,8 +48,10 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
   const [scannerType, setScannerType] = useState(null);
   const [manualValue, setManualValue] = useState("");
   const [scannerStatus, setScannerStatus] = useState("");
+  const [scannerReady, setScannerReady] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [cameraStatus, setCameraStatus] = useState("");
+  const [cameraReady, setCameraReady] = useState(false);
   const [signatureVisible, setSignatureVisible] = useState(false);
 
   const configurations =
@@ -87,7 +96,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
   };
 
   useEffect(() => {
-    if (!scannerType || !videoRef.current) return undefined;
+    if (!scannerType || !scannerReady || !videoRef.current) return undefined;
     let stream;
     let frame;
     let active = true;
@@ -122,6 +131,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: "environment" } },
         });
+        scannerStreamRef.current = stream;
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         setScannerStatus("Aponte a câmera para o código.");
@@ -137,11 +147,12 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
       active = false;
       cancelAnimationFrame(frame);
       stream?.getTracks().forEach((track) => track.stop());
+      if (scannerStreamRef.current === stream) scannerStreamRef.current = null;
     };
-  }, [scannerType, submit]);
+  }, [scannerReady, scannerType, submit]);
 
   useEffect(() => {
-    if (!cameraVisible || !photoVideoRef.current) return undefined;
+    if (!cameraVisible || !cameraReady || !photoVideoRef.current) return undefined;
     let stream;
     let active = true;
     const start = async () => {
@@ -149,6 +160,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: "environment" } },
         });
+        photoStreamRef.current = stream;
         if (!active || !photoVideoRef.current) return;
         photoVideoRef.current.srcObject = stream;
         await photoVideoRef.current.play();
@@ -163,8 +175,17 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     return () => {
       active = false;
       stream?.getTracks().forEach((track) => track.stop());
+      if (photoStreamRef.current === stream) photoStreamRef.current = null;
     };
-  }, [cameraVisible]);
+  }, [cameraReady, cameraVisible]);
+
+  useEffect(
+    () => () => {
+      stopStream(scannerStreamRef);
+      stopStream(photoStreamRef);
+    },
+    [],
+  );
 
   const takePhoto = () => {
     const video = photoVideoRef.current;
@@ -286,6 +307,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
                 onClick={() => {
                   if (type === "camera") {
                     setCameraStatus("");
+                    setCameraReady(false);
                     setCameraVisible(true);
                   } else if (type === "image") galleryInput.current?.click();
                   else if (type === "signature") {
@@ -327,7 +349,12 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
           scannerType === "qrcode" ? "Ler QR Code" : "Ler código de barras"
         }
         visible={Boolean(scannerType)}
-        onHide={() => setScannerType(null)}
+        onShow={() => setScannerReady(true)}
+        onHide={() => {
+          setScannerReady(false);
+          stopStream(scannerStreamRef);
+          setScannerType(null);
+        }}
         className="executor-capture-dialog"
         modal
       >
@@ -337,6 +364,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
             className="executor-capture-video"
             muted
             playsInline
+            autoPlay
           />
           <p>{scannerStatus}</p>
           <div className="executor-manual-code">
@@ -358,7 +386,12 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
       <Dialog
         header="Tirar foto"
         visible={cameraVisible}
-        onHide={() => setCameraVisible(false)}
+        onShow={() => setCameraReady(true)}
+        onHide={() => {
+          setCameraReady(false);
+          stopStream(photoStreamRef);
+          setCameraVisible(false);
+        }}
         className="executor-capture-dialog"
         modal
       >
@@ -368,6 +401,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
             className="executor-capture-video"
             muted
             playsInline
+            autoPlay
           />
           <canvas ref={photoCanvasRef} className="executor-visually-hidden" />
           <p>{cameraStatus}</p>

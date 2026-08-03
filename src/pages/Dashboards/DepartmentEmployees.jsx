@@ -12,6 +12,7 @@ import { Divider } from "primereact/divider";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { PageHeader } from "../../components/PageHeader";
+import { exportDepartmentEmployeesXlsx } from "../../utils/exportDepartmentEmployeesXlsx";
 
 // Styles
 import "./departmentEmployees.css";
@@ -139,20 +140,41 @@ export function DepartmentEmployeesDashboard() {
         setFilters((current) => ({ ...current, [name]: value || [] }));
     };
 
+    const exportEmployees = () => {
+        if (!filteredEmployees.length) {
+            showToast("warn", "Exportação", "Não há colaboradores para os filtros selecionados.");
+            return;
+        }
+        exportDepartmentEmployeesXlsx(filteredEmployees);
+        showToast("success", "Exportação", `${filteredEmployees.length} colaborador(es) exportado(s).`);
+    };
+
     return (
         <section className="department-dashboard">
             <PageHeader
                 section="Dashboards"
                 title="Colaboradores por departamento"
                 description="Visualize a distribuição dos colaboradores por contrato e departamento."
-                actions={<Button
-                    type="button"
-                    icon="pi pi-filter-fill"
-                    label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
-                    className="department-filter-button"
-                    aria-label="Abrir filtros do dashboard"
-                    onClick={(event) => filterPanel.current?.toggle(event)}
-                />}
+                actions={
+                    <div className="department-dashboard__actions">
+                        <Button
+                            type="button"
+                            icon="pi pi-file-excel"
+                            label="Exportar"
+                            outlined
+                            disabled={!filteredEmployees.length}
+                            onClick={exportEmployees}
+                        />
+                        <Button
+                            type="button"
+                            icon="pi pi-filter-fill"
+                            label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
+                            className="department-filter-button"
+                            aria-label="Abrir filtros do dashboard"
+                            onClick={(event) => filterPanel.current?.toggle(event)}
+                        />
+                    </div>
+                }
             />
 
             <div className="department-dashboard__summary">

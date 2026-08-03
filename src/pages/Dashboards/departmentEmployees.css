@@ -39,6 +39,13 @@
     box-shadow: 0 10px 24px rgba(0, 104, 56, .18);
 }
 
+.department-dashboard__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .55rem;
+}
+
 .department-dashboard__summary {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -166,6 +173,18 @@
 .department-filter-panel__title > div { display: flex; flex-direction: column; gap: .2rem; }
 .department-filter-field { display: flex; flex-direction: column; gap: .45rem; margin-top: .9rem; font-weight: 700; }
 .department-filter-field > span { font-size: .85rem; }
+
+@media (max-width: 580px) {
+    .department-dashboard__actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .department-dashboard__actions .p-button {
+        flex: 1;
+        justify-content: center;
+    }
+}
 
 :root[data-theme="dark"] .department-dashboard {
     color: #d8ddda;

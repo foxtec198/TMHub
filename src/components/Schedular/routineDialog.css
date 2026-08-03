@@ -154,6 +154,22 @@
   border-color: #31543a !important;
   color: #f1f8f2 !important;
 }
+:root[data-theme="dark"] .schedular-routine-exclusive {
+  background: #17241b !important;
+  border-color: #31543a !important;
+  color: #f1f8f2 !important;
+}
+:root[data-theme="dark"] .schedular-routine-exclusive small {
+  color: #aebfb1 !important;
+}
+:root[data-theme="dark"] .schedular-routine-exclusive .p-checkbox .p-checkbox-box {
+  background: #101a13;
+  border-color: #4fcf77;
+}
+:root[data-theme="dark"] .schedular-routine-exclusive .p-checkbox.p-highlight .p-checkbox-box {
+  background: #249c4b;
+  border-color: #54db80;
+}
 :root[data-theme="dark"] .schedular-routine-form label {
   color: #edf7ef !important;
 }

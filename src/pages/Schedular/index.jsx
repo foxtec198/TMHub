@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -54,6 +54,45 @@ const taskDeadlineStatus = (task, now) => {
   };
 };
 
+const GEO_MIN_INTERVAL_MS = 60_000;
+const GEO_MIN_DISTANCE_METERS = 20;
+
+const geolocationPayload = (position) => ({
+  latitude: position.coords.latitude,
+  longitude: position.coords.longitude,
+  accuracy: position.coords.accuracy,
+});
+
+const distanceInMeters = (first, second) => {
+  const earthRadius = 6_371_000;
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const latitudeDelta = toRadians(second.latitude - first.latitude);
+  const longitudeDelta = toRadians(second.longitude - first.longitude);
+  const latitude1 = toRadians(first.latitude);
+  const latitude2 = toRadians(second.latitude);
+  const haversine =
+    Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(latitude1) * Math.cos(latitude2) * Math.sin(longitudeDelta / 2) ** 2;
+  return 2 * earthRadius * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+};
+
+const captureCurrentGeolocation = () =>
+  new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve(geolocationPayload(position)),
+      () => resolve(null),
+      {
+        enableHighAccuracy: true,
+        maximumAge: 15_000,
+        timeout: 8_000,
+      },
+    );
+  });
+
 export function Schedular() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,6 +106,7 @@ export function Schedular() {
   const [clock, setClock] = useState(0);
   const [taskSearch, setTaskSearch] = useState("");
   const [scannerVisible, setScannerVisible] = useState(false);
+  const lastExecutionLocation = useRef(null);
   const load = async () => {
     const { data } = await schedularRequest.get("/schedular/tarefas/minhas");
     setTasks(data || []);
@@ -119,6 +159,54 @@ export function Schedular() {
       ) || selected,
     [taskId, tasks, selected],
   );
+  useEffect(() => {
+    if (!session || !active?.id || active.status !== "em_andamento") {
+      return undefined;
+    }
+    if (!navigator.geolocation) return undefined;
+
+    let disposed = false;
+    lastExecutionLocation.current = null;
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const location = geolocationPayload(position);
+        const now = Date.now();
+        const previous = lastExecutionLocation.current;
+        const isNewTask = previous?.taskId !== active.id;
+        const movedEnough =
+          previous && distanceInMeters(previous.location, location) >= GEO_MIN_DISTANCE_METERS;
+        const intervalElapsed =
+          previous && now - previous.sentAt >= GEO_MIN_INTERVAL_MS;
+        if (!isNewTask && !movedEnough && !intervalElapsed) return;
+
+        lastExecutionLocation.current = {
+          taskId: active.id,
+          location,
+          sentAt: now,
+        };
+        schedularRequest
+          .post(`/schedular/tarefas/${active.id}/geolocalizacoes`, {
+            geolocalizacao: location,
+          })
+          .catch(() => {
+            if (!disposed) lastExecutionLocation.current = previous || null;
+          });
+      },
+      () => {
+        // GPS can be unavailable indoors. The task remains executable and the
+        // next position update will be attempted by the browser.
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 15_000,
+        timeout: 20_000,
+      },
+    );
+    return () => {
+      disposed = true;
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [active?.id, active?.status, session]);
   const openTask = useCallback(
     (task, destination = "details") => {
       setSelected(task);
@@ -174,9 +262,12 @@ export function Schedular() {
   };
   const action = async (acao) => {
     try {
+      const geolocalizacao = ["iniciar", "finalizar"].includes(acao)
+        ? await captureCurrentGeolocation()
+        : null;
       const { data } = await schedularRequest.post(
         `/schedular/tarefas/${active.id}/acao`,
-        { acao },
+        { acao, geolocalizacao },
       );
       setSelected(data.tarefa);
       setTasks((rows) =>
