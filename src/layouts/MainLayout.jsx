@@ -24,6 +24,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/indicadores/pcd": ["pcd", "colaboradores"],
   "/admissao/vagas": ["admissao"],
   "/admissao/aditivos": ["admissao"],
+  "/rescisoes": ["rescisoes", "colaboradores"],
   "/reposicoes/requisicoes": ["reposicoes.requisicoes"],
   "/reposicoes/reservas": ["reposicoes.reservas"],
   "/reposicoes/historico": ["reposicoes.historico"],
@@ -274,6 +275,12 @@ export function MainLayout() {
     },
 
     // MENUITEMS SEM SUBITEMS
+    {
+          label: 'Rescisões',
+          icon: 'pi pi-user-minus',
+          visible: can("controle_rescisoes"),
+          command: () => { navigateTo("/rescisoes") }
+    },
     {
       label: 'Estrutura',
       icon: 'pi pi-building',

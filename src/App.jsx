@@ -36,6 +36,7 @@ import { BarcodeGenerator } from "./pages/Stock/barcode_generator.jsx";
 import { Floaters } from "./pages/Requests/floaters";
 import { ProjetosPage } from "./pages/Projects/ProjetosPage";
 import { Vacancies } from "./pages/Admission/vacancies.jsx";
+import { TerminationControl } from "./pages/TerminationControl";
 import { Settings } from "./pages/Configuratiom";
 import { AbsenceControl } from "./pages/FaltsControl";
 import { DisallowanceControl } from "./pages/DissallowancesControls";
@@ -282,6 +283,14 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="admissoes">
                 <Vacancies key="aditivo" vacancyType="aditivo" />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/rescisoes"
+            element={
+              <PermissionGate screen="controle_rescisoes">
+                <TerminationControl />
               </PermissionGate>
             }
           />
