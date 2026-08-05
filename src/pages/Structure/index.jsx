@@ -9,7 +9,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { PageHeader } from "../../components/PageHeader";
-import { RoutineDialog } from "../../components/Schedular/RoutineDialog";
+import { RoutineDialog } from "../../components/TMOps/RoutineDialog";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
@@ -47,7 +47,7 @@ export function Structure() {
     const setLoading = useLoading();
     const { showToast } = useToast();
     const canEdit = can("estrutura", "edit");
-    const canCreateRoutine = can("schedular", "create");
+    const canCreateRoutine = can("tm_ops", "create");
 
     useEffect(() => {
         let active = true;

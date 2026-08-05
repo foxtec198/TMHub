@@ -34,7 +34,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
     let active = true;
     Promise.all([
       connect.get("/estrutura"),
-      connect.get(`/schedular/rotinas/${routine.id}/vinculos`),
+      connect.get(`/tm-ops/rotinas/${routine.id}/vinculos`),
     ])
       .then(([{ data: structureData }, { data: linksData }]) => {
         if (!active) return;
@@ -94,7 +94,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
     setLoading(true);
     try {
       const { data } = await connect.post(
-        `/schedular/rotinas/${routine.id}/vinculos`,
+        `/tm-ops/rotinas/${routine.id}/vinculos`,
         { instancias: instances },
       );
       showToast("success", "Vincular rotina", data.message);
@@ -123,7 +123,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
         setLoading(true);
         try {
           const { data } = await connect.delete(
-            `/schedular/rotinas/${instance.id}`,
+            `/tm-ops/rotinas/${instance.id}`,
           );
           setLinkedInstances((rows) =>
             rows.filter((row) => row.id !== instance.id),
@@ -151,18 +151,18 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
         visible={visible}
         onHide={onHide}
         modal
-        className="schedular-routine-dialog"
+        className="tm-ops-routine-dialog"
       >
-        <div className="schedular-routine-form">
-        <div className="schedular-routine-context">
+        <div className="tm-ops-routine-form">
+        <div className="tm-ops-routine-context">
           <strong>{routine?.nome}</strong>
           <span>
             Cada local recebe uma instância própria, sincronizada com esta
             rotina-pai.
           </span>
         </div>
-        <div className="schedular-links-table is-wide">
-          <div className="schedular-links-table-toolbar">
+        <div className="tm-ops-links-table is-wide">
+          <div className="tm-ops-links-table-toolbar">
             <div>
               <strong>Locais disponíveis na sua filial</strong>
               <span>
@@ -185,7 +185,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
               />
             </div>
           </div>
-          <span className="p-input-icon-left schedular-links-search">
+          <span className="p-input-icon-left tm-ops-links-search">
             <i className="pi pi-search" />
             <InputText
               value={filter}
@@ -214,7 +214,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
           <small>{selectedLocations.length} local(is) selecionado(s).</small>
         </div>
         {!!linkedInstances.length && (
-          <div className="schedular-linked-instances is-wide">
+          <div className="tm-ops-linked-instances is-wide">
             <strong>Instâncias já vinculadas</strong>
             {linkedInstances.map((instance) => (
               <div key={instance.id}>
@@ -234,7 +234,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
             ))}
           </div>
         )}
-        <div className="is-wide schedular-routine-actions">
+        <div className="is-wide tm-ops-routine-actions">
           <Button label="Cancelar" severity="secondary" text onClick={onHide} />
           <Button label="Vincular locais" icon="pi pi-link" onClick={save} />
         </div>

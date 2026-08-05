@@ -33,6 +33,8 @@ export function UsersSettings() {
   const [users, setUsers] = useState([]);
   const [branches, setBranches] = useState([]);
   const [permissionCatalog, setPermissionCatalog] = useState([]);
+  const [usersStatus, setUsersStatus] = useState("loading");
+  const [usersError, setUsersError] = useState("");
   const [refresh, setRefresh] = useState(0);
   const [userDialog, setUserDialog] = useState(false);
   const [bulkDialog, setBulkDialog] = useState(false);
@@ -47,17 +49,23 @@ export function UsersSettings() {
 
   useEffect(() => {
     async function loadUsers() {
+      setUsersStatus("loading");
+      setUsersError("");
       try {
         const { data } = await connect.get("/usuarios", { params: { detail: 1 } });
         setUsers(Array.isArray(data) ? data : []);
+        setUsersStatus("ready");
       } catch (error) {
-        showToast("error", "Usuários", error.response?.data || "Não foi possível listar os usuários.");
+        const message = error.response?.status === 403 ? "Você não possui permissão para listar usuários." : error.response?.data || "Não foi possível listar os usuários.";
+        setUsersError(message);
+        setUsersStatus("error");
+        showToast("error", "Usuários", message);
       }
     }
     loadUsers();
     if (canManage) {
-      connect.get("/filiais").then(({ data }) => setBranches((Array.isArray(data) ? data : []).filter((branch) => branch.ativa))).catch(() => {});
-      connect.get("/usuarios/permissoes/catalogo").then(({ data }) => setPermissionCatalog(Array.isArray(data) ? data : [])).catch(() => {});
+      connect.get("/filiais").then(({ data }) => setBranches((Array.isArray(data) ? data : []).filter((branch) => branch.ativa))).catch((error) => showToast("error", "Filiais", error.response?.data || "Não foi possível carregar as filiais dos usuários."));
+      connect.get("/usuarios/permissoes/catalogo").then(({ data }) => setPermissionCatalog(Array.isArray(data) ? data : [])).catch((error) => showToast("error", "Permissões", error.response?.data || "Não foi possível carregar o catálogo de permissões."));
     }
   }, [canManage, refresh, showToast]);
 
@@ -170,7 +178,10 @@ export function UsersSettings() {
   return <div className="users-settings-layout">
     <article className="settings-card users-table-card">
       <div className="settings-card-title"><i className="pi pi-users" /><div><h2>Usuários cadastrados</h2><p>Contas com acesso ao TM Hub</p></div></div>
-      <Table data={users} columns={columns} search rows={5} rowsPerPageOptions={[3, 5, 10, 50, 100]} />
+      {usersStatus === "loading" && <div className="settings-feedback"><i className="pi pi-spin pi-spinner" /> Carregando usuários...</div>}
+      {usersStatus === "error" && <div className="settings-feedback is-error"><i className="pi pi-exclamation-triangle" /><span>{usersError}</span><Button label="Tentar novamente" text onClick={() => setRefresh((value) => value + 1)} /></div>}
+      {usersStatus === "ready" && users.length > 0 && <Table data={users} columns={columns} search rows={5} rowsPerPageOptions={[3, 5, 10, 50, 100]} />}
+      {usersStatus === "ready" && users.length === 0 && <div className="settings-feedback">Nenhum usuário cadastrado.</div>}
     </article>
 
     <aside className="settings-card users-actions-card">

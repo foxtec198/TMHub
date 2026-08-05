@@ -4,7 +4,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import schedularRequest from "../../utils/schedularRequest";
+import tmOpsRequest from "../../utils/tmOpsRequest";
 import { useToast } from "../../contexts/ToastContext";
 import { TaskQrScanner } from "./TaskQrScanner";
 import { TaskEvidenceCapture } from "./TaskEvidenceCapture";
@@ -93,7 +93,7 @@ const captureCurrentGeolocation = () =>
     );
   });
 
-export function Schedular() {
+export function TMOps() {
   const navigate = useNavigate();
   const location = useLocation();
   const { taskId } = useParams();
@@ -108,7 +108,7 @@ export function Schedular() {
   const [scannerVisible, setScannerVisible] = useState(false);
   const lastExecutionLocation = useRef(null);
   const load = async () => {
-    const { data } = await schedularRequest.get("/schedular/tarefas/minhas");
+    const { data } = await tmOpsRequest.get("/tm-ops/tarefas/minhas");
     setTasks(data || []);
     return data || [];
   };
@@ -119,30 +119,30 @@ export function Schedular() {
     : "list";
 
   useEffect(() => {
-    document.body.classList.add("schedular-executor-active");
+    document.body.classList.add("tm-ops-executor-active");
     const manifest = document.querySelector("#app-manifest");
     const themeColor = document.querySelector('meta[name="theme-color"]');
     const previousManifest = manifest?.getAttribute("href");
     const previousThemeColor = themeColor?.getAttribute("content");
     const previousTitle = document.title;
 
-    manifest?.setAttribute("href", "/manifest-schedular.webmanifest");
+    manifest?.setAttribute("href", "/manifest-tm-ops.webmanifest");
     themeColor?.setAttribute("content", "#087842");
-    document.title = "TM Hub Schedular";
+    document.title = "TM Ops";
 
     return () => {
-      document.body.classList.remove("schedular-executor-active");
+      document.body.classList.remove("tm-ops-executor-active");
       if (previousManifest) manifest?.setAttribute("href", previousManifest);
       if (previousThemeColor) themeColor?.setAttribute("content", previousThemeColor);
       document.title = previousTitle;
     };
   }, []);
   useEffect(() => {
-    if (sessionStorage.getItem("schedular_token"))
-      schedularRequest
-        .get("/schedular/sessao")
+    if (sessionStorage.getItem("tm_ops_token"))
+      tmOpsRequest
+        .get("/tm-ops/sessao")
         .then(({ data }) => setSession(data))
-        .catch(() => sessionStorage.removeItem("schedular_token"));
+        .catch(() => sessionStorage.removeItem("tm_ops_token"));
   }, []);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -184,8 +184,8 @@ export function Schedular() {
           location,
           sentAt: now,
         };
-        schedularRequest
-          .post(`/schedular/tarefas/${active.id}/geolocalizacoes`, {
+        tmOpsRequest
+          .post(`/tm-ops/tarefas/${active.id}/geolocalizacoes`, {
             geolocalizacao: location,
           })
           .catch(() => {
@@ -211,7 +211,7 @@ export function Schedular() {
     (task, destination = "details") => {
       setSelected(task);
       navigate(
-        `/schedular/tarefa/${task.id}${
+        `/tm-ops/tarefa/${task.id}${
           destination === "checklist" ? "/executar" : ""
         }`,
       );
@@ -246,11 +246,11 @@ export function Schedular() {
   const login = async (event) => {
     event.preventDefault();
     try {
-      const { data } = await schedularRequest.post("/schedular/login", {
+      const { data } = await tmOpsRequest.post("/tm-ops/login", {
         matricula,
         password,
       });
-      sessionStorage.setItem("schedular_token", data.access_token);
+      sessionStorage.setItem("tm_ops_token", data.access_token);
       setSession(data);
     } catch (error) {
       showToast(
@@ -265,8 +265,8 @@ export function Schedular() {
       const geolocalizacao = ["iniciar", "finalizar"].includes(acao)
         ? await captureCurrentGeolocation()
         : null;
-      const { data } = await schedularRequest.post(
-        `/schedular/tarefas/${active.id}/acao`,
+      const { data } = await tmOpsRequest.post(
+        `/tm-ops/tarefas/${active.id}/acao`,
         { acao, geolocalizacao },
       );
       setSelected(data.tarefa);
@@ -276,11 +276,11 @@ export function Schedular() {
           .filter((row) => row.status !== "concluida"),
       );
       if (acao === "iniciar" || acao === "continuar") {
-        navigate(`/schedular/tarefa/${active.id}/executar`);
+        navigate(`/tm-ops/tarefa/${active.id}/executar`);
       }
       if (acao === "finalizar") {
         setSelected(null);
-        navigate("/schedular");
+        navigate("/tm-ops");
       }
     } catch (error) {
       showToast(
@@ -292,8 +292,8 @@ export function Schedular() {
   };
   const answer = async (item, valor) => {
     try {
-      const { data } = await schedularRequest.post(
-        `/schedular/tarefas/${active.id}/respostas`,
+      const { data } = await tmOpsRequest.post(
+        `/tm-ops/tarefas/${active.id}/respostas`,
         { respostas: [{ checklist_item_id: item.id, valor }] },
       );
       setSelected(data.tarefa);
@@ -310,11 +310,11 @@ export function Schedular() {
   };
   if (!session)
     return (
-      <main className="schedular-shell">
-        <section className="schedular-panel">
+      <main className="tm-ops-shell">
+        <section className="tm-ops-panel">
           <img src="/brands/main_brand.svg" alt="TM Hub" />
-          <h1>Entrar no Schedular</h1>
-          <form onSubmit={login} className="schedular-form">
+          <h1>Entrar no TM Ops</h1>
+          <form onSubmit={login} className="tm-ops-form">
             <label>
               Matrícula
               <InputText
@@ -354,15 +354,15 @@ export function Schedular() {
             onClick={() =>
               navigate(
                 screen === "checklist"
-                  ? `/schedular/tarefa/${active?.id}`
-                  : "/schedular",
+                  ? `/tm-ops/tarefa/${active?.id}`
+                  : "/tm-ops",
               )
             }
           />
         ) : (
           <span className="executor-top-spacer" aria-hidden="true" />
         )}
-        <img src="/brands/main_brand.svg" alt="TM Hub Schedular" />
+        <img src="/brands/main_brand.svg" alt="TM Ops" />
         <Button
           className="executor-account"
           icon="pi pi-sign-out"
@@ -370,9 +370,9 @@ export function Schedular() {
           rounded
           text
           onClick={() => {
-            sessionStorage.removeItem("schedular_token");
+            sessionStorage.removeItem("tm_ops_token");
             setSession(null);
-            navigate("/schedular/login");
+            navigate("/tm-ops/login");
           }}
         />
       </div>
@@ -526,7 +526,7 @@ export function Schedular() {
               <Button
                 label="CONTINUAR EXECUÇÃO"
                 onClick={() =>
-                  navigate(`/schedular/tarefa/${active.id}/executar`)
+                  navigate(`/tm-ops/tarefa/${active.id}/executar`)
                 }
               />
             ) : (

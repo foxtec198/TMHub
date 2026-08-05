@@ -10,13 +10,13 @@ import { PageHeader } from "../../components/PageHeader";
 import connect from "../../utils/request";
 import "./management.css";
 
-export function SchedularTasks() {
+export function TMOpsTasks() {
   const [tasks, setTasks] = useState([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const load = useCallback(async () => {
-    const { data } = await connect.get("/schedular/tarefas");
+    const { data } = await connect.get("/tm-ops/tarefas");
     setTasks(data || []);
   }, []);
   useEffect(() => {
@@ -45,14 +45,14 @@ export function SchedularTasks() {
     return String(value);
   };
   return (
-    <main className="schedular-management">
+    <main className="tm-ops-management">
       <PageHeader
-        section="Schedular"
+        section="TM Ops"
         title="Tarefas"
         description="Acompanhe as tarefas geradas pelas rotinas e suas execuções."
         actions={<Button icon="pi pi-refresh" outlined onClick={load} />}
       />
-      <section className="schedular-task-cards">
+      <section className="tm-ops-task-cards">
         <div>
           <b>{tasks.length}</b>
           <span>Total</span>
@@ -74,8 +74,8 @@ export function SchedularTasks() {
           <span>Finalizadas</span>
         </div>
       </section>
-      <section className="schedular-content-card">
-        <div className="schedular-toolbar">
+      <section className="tm-ops-content-card">
+        <div className="tm-ops-toolbar">
           <InputText
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -167,12 +167,12 @@ export function SchedularTasks() {
         }
         visible={Boolean(selectedTask)}
         onHide={() => setSelectedTask(null)}
-        className="schedular-task-history-dialog"
+        className="tm-ops-task-history-dialog"
         modal
       >
         {selectedTask && (
-          <div className="schedular-response-timeline">
-            <div className="schedular-response-summary">
+          <div className="tm-ops-response-timeline">
+            <div className="tm-ops-response-summary">
               <strong>{selectedTask.local || "Estrutura não informada"}</strong>
               <span>
                 Concluída em{" "}
@@ -184,8 +184,8 @@ export function SchedularTasks() {
             {(selectedTask.itens || []).map((item, index) => {
               const response = item.resposta;
               return (
-                <article className="schedular-response-event" key={item.id}>
-                  <span className="schedular-response-marker">{index + 1}</span>
+                <article className="tm-ops-response-event" key={item.id}>
+                  <span className="tm-ops-response-marker">{index + 1}</span>
                   <div>
                     <strong>{item.pergunta}</strong>
                     <p>{formatAnswer(response?.valor)}</p>
@@ -199,7 +199,7 @@ export function SchedularTasks() {
                       </small>
                     )}
                     {!!response?.evidencias?.length && (
-                      <div className="schedular-response-evidences">
+                      <div className="tm-ops-response-evidences">
                         {response.evidencias.map((evidence) => (
                           <span key={evidence.id}>
                             <i

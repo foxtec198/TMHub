@@ -22,5 +22,7 @@ export function can(screen, action = "view") {
       ? localStorage.getItem("gerencia_faltas") === "true"
       : true;
   }
-  return Boolean(permissions.find((item) => item.screen === screen)?.[action]);
+  const permission = permissions.find((item) => item.screen === screen)
+    || (screen === "tm_ops" ? permissions.find((item) => item.screen === "schedular") : null);
+  return Boolean(permission?.[action]);
 }

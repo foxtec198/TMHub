@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import schedularRequest from "../../utils/schedularRequest";
+import tmOpsRequest from "../../utils/tmOpsRequest";
 import { useToast } from "../../contexts/ToastContext";
 
 const EVIDENCE_META = {
@@ -67,8 +67,8 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
         form.append("tipo", tipo);
         if (file) form.append("arquivo", file);
         if (valor) form.append("valor", valor);
-        const { data } = await schedularRequest.post(
-          `/schedular/tarefas/${task.id}/respostas/${item.id}/evidencias`,
+        const { data } = await tmOpsRequest.post(
+          `/tm-ops/tarefas/${task.id}/respostas/${item.id}/evidencias`,
           form,
         );
         onSaved(data.tarefa);

@@ -19,16 +19,32 @@ export function BranchSettings() {
   const [dialog, setDialog] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [refresh, setRefresh] = useState(0);
+  const [status, setStatus] = useState("loading");
+  const [loadError, setLoadError] = useState("");
   const setLoading = useLoading();
   const { showToast } = useToast();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStatus("loading");
+    setLoadError("");
     Promise.all([connect.get("/filiais"), connect.get("/filiais/opcoes")])
       .then(([branchResponse, optionsResponse]) => {
         setBranches(Array.isArray(branchResponse.data) ? branchResponse.data : []);
-        setOptions(optionsResponse.data || { usuarios: [], centros_custo: [] });
+        setOptions({
+          usuarios: Array.isArray(optionsResponse.data?.usuarios) ? optionsResponse.data.usuarios : [],
+          centros_custo: Array.isArray(optionsResponse.data?.centros_custo) ? optionsResponse.data.centros_custo : [],
+        });
+        setStatus("ready");
       })
-      .catch((error) => showToast("error", "Filiais", error.response?.data || "Não foi possível carregar as filiais."));
+      .catch((error) => {
+        const message = error.response?.status === 403
+          ? "Você não possui permissão para configurar filiais."
+          : error.response?.data || "Não foi possível carregar filiais, departamentos e usuários.";
+        setLoadError(message);
+        setStatus("error");
+        showToast("error", "Filiais", message);
+      });
   }, [refresh, showToast]);
 
   const departmentOptions = useMemo(() => [...new Set(options.centros_custo.map((center) => center.departamento).filter((value) => value != null))]
@@ -66,7 +82,10 @@ export function BranchSettings() {
   return <div className="branch-settings-layout">
     <article className="settings-card branch-table-card">
       <div className="settings-card-title"><i className="pi pi-building" /><div><h2>Filiais</h2><p>Defina os usuários e contratos de cada unidade</p></div></div>
-      <Table data={branches} columns={columns} search rows={5} rowsPerPageOptions={[5, 10, 25]} />
+      {status === "loading" && <div className="settings-feedback"><i className="pi pi-spin pi-spinner" /> Carregando filiais e vínculos...</div>}
+      {status === "error" && <div className="settings-feedback is-error"><i className="pi pi-exclamation-triangle" /><span>{loadError}</span><Button label="Tentar novamente" text onClick={() => setRefresh((value) => value + 1)} /></div>}
+      {status === "ready" && branches.length > 0 && <Table data={branches} columns={columns} search rows={5} rowsPerPageOptions={[5, 10, 25]} />}
+      {status === "ready" && branches.length === 0 && <div className="settings-feedback">Nenhuma filial cadastrada.</div>}
     </article>
     <aside className="settings-card branch-help-card">
       <div className="settings-card-title"><i className="pi pi-sitemap" /><div><h2>Escopo de acesso</h2><p>As filiais vinculadas ao usuário são unificadas</p></div></div>

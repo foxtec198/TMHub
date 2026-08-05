@@ -22,7 +22,7 @@ import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
 import { CollaboratorImportSettings } from "./EmployeeImportSettings";
 import { NewsSettings } from "./NewsSettings";
-import { SchedularAccessSettings } from "./SchedularAccessSettings";
+import { TMOpsAccessSettings } from "./TMOpsAccessSettings";
 
 // Styles
 import "./settings.css";
@@ -51,8 +51,12 @@ export function Settings() {
       setProfile(data);
       setDark(data.tema === "dark");
       storeProfile(data);
-    }).catch(() => { });
-  }, []);
+    }).catch((error) => showToast(
+      "error",
+      error.response?.status === 403 ? "Sem permissão" : "Configurações",
+      error.response?.data || "Não foi possível carregar seu perfil.",
+    ));
+  }, [showToast]);
 
   // Ponto único para alterações de nome, foto e senha.
   const save = async (payload, message) => {
@@ -179,8 +183,8 @@ export function Settings() {
       {isAdmin && <TabPanel header="Importar colaboradores" leftIcon="pi pi-upload mr-2">
         <CollaboratorImportSettings />
       </TabPanel>}
-      {isAdmin && <TabPanel header="Schedular" leftIcon="pi pi-calendar-clock mr-2">
-        <SchedularAccessSettings />
+      {isAdmin && <TabPanel header="TM Ops" leftIcon="pi pi-calendar-clock mr-2">
+        <TMOpsAccessSettings />
       </TabPanel>}
       {isAdmin && <TabPanel header="Notícias" leftIcon="pi pi-megaphone mr-2">
         <NewsSettings />

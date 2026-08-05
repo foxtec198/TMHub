@@ -137,6 +137,28 @@
   width: 100%;
 }
 
+.tm-ops-access-fields {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tm-ops-access-fields > .p-dropdown,
+.tm-ops-access-fields > .p-password,
+.tm-ops-access-fields .p-password-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.tm-ops-access-fields > .p-password,
+.tm-ops-access-fields .tm-ops-password {
+  display: flex;
+  width: 100% !important;
+}
+
+.tm-ops-access-fields .p-password-input {
+  flex: 1 1 auto;
+  width: 100% !important;
+}
+
 .password-hint {
   font-size: 0.85rem;
   margin: 1rem 0 !important;
@@ -881,13 +903,13 @@
   color: #fff !important;
   background: #1565c0 !important;
 }
-.schedular-access-list {
+.tm-ops-access-list {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
   margin-top: 1rem;
 }
-.schedular-access-list > div {
+.tm-ops-access-list > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -897,24 +919,48 @@
   border-radius: 10px;
   background: var(--surface-ground);
 }
-.schedular-access-list span {
+.tm-ops-access-list span {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
 }
-.schedular-access-list small {
+.tm-ops-access-list small {
   color: var(--text-color-secondary);
   font-size: 0.78rem;
 }
-:root[data-theme="dark"] .schedular-access-list > div {
+
+.settings-feedback {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 3rem;
+  color: var(--text-color-secondary);
+}
+
+.settings-feedback.is-error {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  color: var(--red-600);
+}
+
+.settings-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding-top: .5rem;
+  color: var(--text-color-secondary);
+  font-size: .78rem;
+}
+:root[data-theme="dark"] .tm-ops-access-list > div {
   border-color: #385440;
   background: #111a14;
   color: #edf7ef;
 }
-:root[data-theme="dark"] .schedular-access-list strong {
+:root[data-theme="dark"] .tm-ops-access-list strong {
   color: #f3faf5;
 }
-:root[data-theme="dark"] .schedular-access-list small {
+:root[data-theme="dark"] .tm-ops-access-list small {
   color: #aebfb3;
 }
 :root[data-theme="dark"] .settings-card .p-dropdown,

@@ -1,16 +1,16 @@
 /* O Executor é um produto separado do painel administrativo: tema claro fixo. */
-body.schedular-executor-active,
-body.schedular-executor-active #root {
+body.tm-ops-executor-active,
+body.tm-ops-executor-active #root {
   min-height: 100vh;
   background: #edf6ef !important;
 }
 
-.schedular-shell,
+.tm-ops-shell,
 .executor-app {
   color-scheme: light;
 }
 
-.schedular-shell {
+.tm-ops-shell {
   display: grid;
   min-height: 100vh;
   max-width: 620px;
@@ -22,7 +22,7 @@ body.schedular-executor-active #root {
   background: #fff;
   color: #154b2a;
 }
-.schedular-panel {
+.tm-ops-panel {
   width: min(100%, 420px);
   padding: 1.5rem;
   border: 1px solid #cfe6d6;
@@ -30,22 +30,22 @@ body.schedular-executor-active #root {
   background: #fff;
   box-shadow: 0 12px 30px rgba(15, 73, 40, 0.08);
 }
-.schedular-panel img {
+.tm-ops-panel img {
   width: 175px;
   margin-bottom: 1.5rem;
 }
-.schedular-form {
+.tm-ops-form {
   display: grid;
   gap: 1rem;
 }
-.schedular-form label {
+.tm-ops-form label {
   display: grid;
   gap: 0.4rem;
   font-weight: 700;
 }
-.schedular-form .p-inputtext,
-.schedular-form .p-password,
-.schedular-form .p-password-input {
+.tm-ops-form .p-inputtext,
+.tm-ops-form .p-password,
+.tm-ops-form .p-password-input {
   width: 100%;
 }
 .executor-app {
@@ -481,39 +481,39 @@ body.schedular-executor-active #root {
   color: #174b2a !important;
   border-color: #b9d8c4 !important;
 }
-.schedular-shell .p-inputtext,
-.schedular-shell .p-password-input,
-body.schedular-executor-active .p-dropdown-panel,
-body.schedular-executor-active .p-dropdown-panel .p-dropdown-item {
+.tm-ops-shell .p-inputtext,
+.tm-ops-shell .p-password-input,
+body.tm-ops-executor-active .p-dropdown-panel,
+body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-item {
   background: #fff !important;
   color: #174b2a !important;
 }
 /* Dropdown overlays are appended to body, so they need to beat the global
    dark-theme selectors as well as the executor card styles. */
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel {
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel {
   color: #174b2a !important;
   background: #fff !important;
   border-color: #b9d8c4 !important;
   box-shadow: 0 14px 30px rgba(15, 73, 40, 0.16) !important;
 }
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-header,
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-items,
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-items-wrapper {
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-header,
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-items,
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-items-wrapper {
   color: #174b2a !important;
   background: #fff !important;
   border-color: #d9e8de !important;
 }
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-filter {
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-filter {
   color: #174b2a !important;
   background: #fff !important;
   border-color: #b9d8c4 !important;
 }
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-item {
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-item {
   color: #174b2a !important;
   background: #fff !important;
 }
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
-:root[data-theme="dark"] body.schedular-executor-active .p-dropdown-panel .p-dropdown-item.p-highlight {
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+:root[data-theme="dark"] body.tm-ops-executor-active .p-dropdown-panel .p-dropdown-item.p-highlight {
   color: #0d4f29 !important;
   background: #e1f3e6 !important;
 }

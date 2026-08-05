@@ -1,6 +1,6 @@
 // Utils
 import { MainLayout } from "./layouts/MainLayout";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import { useEffect } from "react";
 import { addLocale } from "primereact/api";
@@ -47,9 +47,9 @@ import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
 import { ProjectDashboard } from "./pages/Dashboards/ProjectDashboard";
 import { GlosaDashboard } from "./pages/Dashboards/GlosaDashboard";
 import { Structure } from "./pages/Structure/index";
-import { Schedular } from "./pages/Schedular";
-import { SchedularManagement } from "./pages/Schedular/Management";
-import { SchedularTasks } from "./pages/Schedular/Tasks";
+import { TMOps } from "./pages/TMOps";
+import { TMOpsManagement } from "./pages/TMOps/Management";
+import { TMOpsTasks } from "./pages/TMOps/Tasks";
 
 document.documentElement.dataset.theme =
   localStorage.getItem("theme") === "dark" ? "dark" : "light";
@@ -99,6 +99,12 @@ addLocale("pt-BR", {
   clear: "Limpar",
 });
 
+function LegacyTMOpsRedirect() {
+  const location = useLocation();
+  const target = location.pathname.replace(/^\/schedular(?=\/|$)/, "/tm-ops");
+  return <Navigate to={`${target}${location.search}${location.hash}`} replace />;
+}
+
 export function AppRoutes() {
   const token = function () {
     return !!sessionStorage.getItem("token");
@@ -133,10 +139,6 @@ export function AppRoutes() {
             }),
           );
         }
-        // Não deslogue a aplicação por qualquer 401: alguns endpoints são
-        // públicos, outros podem falhar durante um refresh em segundo plano e
-        // uma resposta de uma sessão antiga pode chegar depois de um novo login.
-        // Apenas uma chamada feita com o token atual pode encerrar a sessão.
         if (
           error.response?.status === 401
           && !isLoginRequest
@@ -162,13 +164,15 @@ export function AppRoutes() {
         <Route path="/login" element={<Auth />} />
         <Route path="/reposicoes/requisicao" element={<Request />} />
         <Route path="/reports/reposicoes/ods" element={<RequestsODS />} />
-        <Route path="/schedular/login" element={<Schedular />} />
-        <Route path="/schedular" element={<Schedular />} />
-        <Route path="/schedular/tarefa/:taskId" element={<Schedular />} />
+        <Route path="/tm-ops/login" element={<TMOps />} />
+        <Route path="/tm-ops" element={<TMOps />} />
+        <Route path="/tm-ops/tarefa/:taskId" element={<TMOps />} />
         <Route
-          path="/schedular/tarefa/:taskId/executar"
-          element={<Schedular />}
+          path="/tm-ops/tarefa/:taskId/executar"
+          element={<TMOps />}
         />
+        <Route path="/schedular/*" element={<LegacyTMOpsRedirect />} />
+        <Route path="/schedular" element={<LegacyTMOpsRedirect />} />
 
         <Route element={<MainLayout />}>
           {/* Init Page */}
@@ -350,26 +354,26 @@ export function AppRoutes() {
           {/* Estrutura */}
           <Route path="/estrutura" element={<Structure />} />
           <Route
-            path="/schedular/gestao"
+            path="/tm-ops/gestao"
             element={
-              <PermissionGate screen="schedular" adminOnly>
-                <SchedularManagement mode="routines" />
+              <PermissionGate screen="tm_ops" adminOnly>
+                <TMOpsManagement mode="routines" />
               </PermissionGate>
             }
           />
           <Route
-            path="/schedular/checklists"
+            path="/tm-ops/checklists"
             element={
-              <PermissionGate screen="schedular" adminOnly>
-                <SchedularManagement mode="checklists" />
+              <PermissionGate screen="tm_ops" adminOnly>
+                <TMOpsManagement mode="checklists" />
               </PermissionGate>
             }
           />
           <Route
-            path="/schedular/tarefas"
+            path="/tm-ops/tarefas"
             element={
-              <PermissionGate screen="schedular" adminOnly>
-                <SchedularTasks />
+              <PermissionGate screen="tm_ops" adminOnly>
+                <TMOpsTasks />
               </PermissionGate>
             }
           />

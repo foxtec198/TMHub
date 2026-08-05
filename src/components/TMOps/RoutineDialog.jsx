@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
+import { AutoComplete } from "primereact/autocomplete";
 import { Calendar } from "primereact/calendar";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { MultiSelect } from "primereact/multiselect";
 import { Checkbox } from "primereact/checkbox";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -42,7 +42,8 @@ export function RoutineDialog({
   fixedStructure,
 }) {
   const [routine, setRoutine] = useState(emptyRoutine(fixedStructure));
-  const [employees, setEmployees] = useState([]);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
+  const [employeeSuggestions, setEmployeeSuggestions] = useState([]);
   const [checklists, setChecklists] = useState([]);
   const [structure, setStructure] = useState([]);
   const [unlinkPrompt, setUnlinkPrompt] = useState(false);
@@ -56,24 +57,11 @@ export function RoutineDialog({
     let active = true;
     const loadOptions = async () => {
       try {
-        const [
-          { data: employeeData },
-          { data: checklistData },
-          { data: structureData },
-        ] = await Promise.all([
-          connect.get("/funcionarios", {
-            params: { situacao: 1, limit: 50000 },
-          }),
-          connect.get("/schedular/checklists"),
+        const [{ data: checklistData }, { data: structureData }] = await Promise.all([
+          connect.get("/tm-ops/checklists"),
           connect.get("/estrutura"),
         ]);
         if (!active) return;
-        setEmployees(
-          (employeeData || []).map((item) => ({
-            ...item,
-            label: `${item.matricula} - ${item.nome}`,
-          })),
-        );
         setChecklists(checklistData || []);
         setStructure(structureData || []);
       } catch (error) {
@@ -98,6 +86,12 @@ export function RoutineDialog({
     // Ao abrir, o formulário precisa refletir a rotina/estrutura selecionada.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRoutine(base);
+    setSelectedEmployees(
+      (initialRoutine?.colaboradores || []).map((item) => ({
+        ...item,
+        label: `${item.matricula} - ${item.nome}`,
+      })),
+    );
     loadOptions();
     return () => {
       active = false;
@@ -119,10 +113,36 @@ export function RoutineDialog({
     (item) => item.value === routine.centro_custo_id,
   );
 
+  const searchEmployees = async ({ query }) => {
+    try {
+      const { data } = await connect.get("/funcionarios", {
+        params: {
+          fields: "tm_ops",
+          search: String(query || "").trim(),
+          page: 1,
+          per_page: 20,
+        },
+      });
+      setEmployeeSuggestions(
+        (data?.items || []).map((item) => ({
+          ...item,
+          label: `${item.matricula} - ${item.nome}`,
+        })),
+      );
+    } catch (error) {
+      setEmployeeSuggestions([]);
+      showToast(
+        "error",
+        error.response?.status === 403 ? "Sem permissão" : "Colaboradores",
+        error.response?.data || "Não foi possível buscar colaboradores.",
+      );
+    }
+  };
+
   const submit = async (payload) => {
     const response = isEditing
-      ? await connect.patch(`/schedular/rotinas/${initialRoutine.id}`, payload)
-      : await connect.post("/schedular/rotinas", payload);
+      ? await connect.patch(`/tm-ops/rotinas/${initialRoutine.id}`, payload)
+      : await connect.post("/tm-ops/rotinas", payload);
     showToast(
       "success",
       "Rotina",
@@ -210,11 +230,11 @@ export function RoutineDialog({
       visible={visible}
       onHide={onHide}
       modal
-      className="schedular-routine-dialog"
+      className="tm-ops-routine-dialog"
     >
-      <div className="schedular-routine-form">
+      <div className="tm-ops-routine-form">
         {isEditing && initialRoutine.rotina_pai_id && (
-          <div className="schedular-routine-linked-warning">
+          <div className="tm-ops-routine-linked-warning">
             Esta é uma instância vinculada a{" "}
             <strong>
               {initialRoutine.rotina_pai || `#${initialRoutine.rotina_pai_id}`}
@@ -223,7 +243,7 @@ export function RoutineDialog({
           </div>
         )}
         {fixedStructure && (
-          <div className="schedular-routine-context">
+          <div className="tm-ops-routine-context">
             <strong>{fixedStructure.location.nome}</strong>
             <span>
               {fixedStructure.contract.id} - {fixedStructure.contract.contrato}
@@ -275,23 +295,29 @@ export function RoutineDialog({
         </label>
         <label>
           Responsável
-          <MultiSelect
-            value={routine.colaborador_ids}
-            options={employees}
-            optionLabel="label"
-            optionValue="id"
-            filter
-            display="chip"
-            placeholder="Selecione um ou mais colaboradores"
-            onChange={(event) =>
+          <AutoComplete
+            value={selectedEmployees}
+            suggestions={employeeSuggestions}
+            completeMethod={searchEmployees}
+            field="label"
+            multiple
+            delay={350}
+            minLength={0}
+            dropdown
+            forceSelection
+            placeholder="Busque por nome, matrícula ou CPF"
+            emptyMessage="Nenhum colaborador ativo encontrado."
+            onChange={(event) => {
+              const values = Array.isArray(event.value) ? event.value : [];
+              setSelectedEmployees(values);
               setRoutine({
                 ...routine,
-                colaborador_ids: event.value,
-              })
-            }
+                colaborador_ids: values.map((item) => item.id),
+              });
+            }}
           />
         </label>
-        <label className="schedular-routine-exclusive">
+        <label className="tm-ops-routine-exclusive">
           <Checkbox
             inputId="executar-apenas-um"
             checked={Boolean(routine.executar_apenas_um)}
@@ -396,7 +422,7 @@ export function RoutineDialog({
             }
           />
         </label>
-        <div className="is-wide schedular-routine-actions">
+        <div className="is-wide tm-ops-routine-actions">
           <Button label="Cancelar" severity="secondary" text onClick={onHide} />
           <Button
             label={isEditing ? "Salvar alterações" : "Criar rotina"}
@@ -410,13 +436,13 @@ export function RoutineDialog({
         visible={unlinkPrompt}
         onHide={() => setUnlinkPrompt(false)}
         modal
-        className="schedular-routine-unlink-dialog"
+        className="tm-ops-routine-unlink-dialog"
       >
         <p>
           Ao salvar esta alteração, esta instância deixará de receber mudanças
           da rotina-pai e se tornará uma rotina independente.
         </p>
-        <div className="schedular-routine-actions">
+        <div className="tm-ops-routine-actions">
           <Button
             label="Cancelar"
             severity="secondary"

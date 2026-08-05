@@ -247,29 +247,29 @@ export function MainLayout() {
       ]
     },
     {
-      label: 'Schedular',
+      label: 'TM Ops',
       icon: 'pi pi-calendar-clock',
-      visible: can("schedular") && String(role || "").toUpperCase() === "ADMIN",
+      visible: can("tm_ops") && String(role || "").toUpperCase() === "ADMIN",
       items: [
         {
           label: 'Rotinas e locais',
           icon: 'pi pi-calendar-plus',
-          command: () => { navigateTo("/schedular/gestao") },
+          command: () => { navigateTo("/tm-ops/gestao") },
         },
         {
           label: 'Checklists',
           icon: 'pi pi-list-check',
-          command: () => { navigateTo("/schedular/checklists") },
+          command: () => { navigateTo("/tm-ops/checklists") },
         },
         {
           label: 'Tarefas',
           icon: 'pi pi-list',
-          command: () => { navigateTo("/schedular/tarefas") },
+          command: () => { navigateTo("/tm-ops/tarefas") },
         },
         {
           label: 'Abrir execução',
           icon: 'pi pi-external-link',
-          command: () => { window.open("/schedular/login", "_blank", "noopener,noreferrer") },
+          command: () => { window.open("/tm-ops/login", "_blank", "noopener,noreferrer") },
         },
       ],
     },

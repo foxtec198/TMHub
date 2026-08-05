@@ -9,8 +9,8 @@
     <title>TM Hub</title>
     <link id="app-manifest" rel="manifest" href="/manifest.webmanifest" />
     <script>
-      if (window.location.pathname === "/schedular" || window.location.pathname.startsWith("/schedular/")) {
-        document.querySelector("#app-manifest")?.setAttribute("href", "/manifest-schedular.webmanifest");
+      if (/^\/(tm-ops|schedular)(\/|$)/.test(window.location.pathname)) {
+        document.querySelector("#app-manifest")?.setAttribute("href", "/manifest-tm-ops.webmanifest");
         document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#087842");
       }
     </script>

@@ -10,8 +10,8 @@ import { Tag } from "primereact/tag";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { PageHeader } from "../../components/PageHeader";
-import { RoutineDialog } from "../../components/Schedular/RoutineDialog";
-import { RoutineLinksDialog } from "../../components/Schedular/RoutineLinksDialog";
+import { RoutineDialog } from "../../components/TMOps/RoutineDialog";
+import { RoutineLinksDialog } from "../../components/TMOps/RoutineLinksDialog";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
@@ -37,7 +37,7 @@ const normalizeEvidences = (evidences = []) =>
     )
     .filter((evidence) => evidence.tipo);
 
-export function SchedularManagement({ mode = "routines" }) {
+export function TMOpsManagement({ mode = "routines" }) {
   const [routines, setRoutines] = useState([]);
   const [checklists, setChecklists] = useState([]);
   const [routineDialog, setRoutineDialog] = useState(false);
@@ -57,20 +57,20 @@ export function SchedularManagement({ mode = "routines" }) {
   const load = useCallback(async () => {
     try {
       const requests = isChecklistScreen
-        ? [connect.get("/schedular/checklists")]
-        : [connect.get("/schedular/rotinas")];
+        ? [connect.get("/tm-ops/checklists")]
+        : [connect.get("/tm-ops/rotinas")];
       const [{ data }] = await Promise.all(requests);
       if (isChecklistScreen) setChecklists(data || []);
       else setRoutines(data || []);
     } catch (error) {
       showToast(
         "error",
-        "Schedular",
+        "TM Ops",
         error.response?.data || "Não foi possível carregar os dados.",
       );
     }
   }, [isChecklistScreen, showToast]);
-  // Mantém cada rota do Scheduler sincronizada sem misturar os dois cadastros.
+  // Mantém cada rota do TM Ops sincronizada sem misturar os dois cadastros.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
@@ -85,10 +85,10 @@ export function SchedularManagement({ mode = "routines" }) {
     try {
       if (editingChecklistId)
         await connect.patch(
-          `/schedular/checklists/${editingChecklistId}`,
+          `/tm-ops/checklists/${editingChecklistId}`,
           checklist,
         );
-      else await connect.post("/schedular/checklists", checklist);
+      else await connect.post("/tm-ops/checklists", checklist);
       setChecklistDialog(false);
       setChecklist({ nome: "", descricao: "", itens: [] });
       setEditingChecklistId(null);
@@ -112,7 +112,7 @@ export function SchedularManagement({ mode = "routines" }) {
   };
   const toggleRoutine = async (row) => {
     try {
-      await connect.patch(`/schedular/rotinas/${row.id}`, {
+      await connect.patch(`/tm-ops/rotinas/${row.id}`, {
         ativa: !row.ativa,
       });
       await load();
@@ -126,7 +126,7 @@ export function SchedularManagement({ mode = "routines" }) {
   };
   const deleteRoutine = async (row) => {
     try {
-      await connect.delete(`/schedular/rotinas/${row.id}`);
+      await connect.delete(`/tm-ops/rotinas/${row.id}`);
       await load();
       showToast("success", "Rotina", "Rotina excluída.");
     } catch (error) {
@@ -148,7 +148,7 @@ export function SchedularManagement({ mode = "routines" }) {
   };
   const deleteChecklist = async (row) => {
     try {
-      await connect.delete(`/schedular/checklists/${row.id}`);
+      await connect.delete(`/tm-ops/checklists/${row.id}`);
       await load();
       showToast("success", "Checklist", "Checklist excluído.");
     } catch (error) {
@@ -199,13 +199,13 @@ export function SchedularManagement({ mode = "routines" }) {
 
   const title = isChecklistScreen ? "Checklists" : "Rotinas";
   const description = isChecklistScreen
-    ? "Monte e mantenha os checklists que serão usados nas tarefas do Scheduler."
+    ? "Monte e mantenha os checklists que serão usados nas tarefas do TM Ops."
     : "Programe tarefas recorrentes vinculadas aos contratos e locais da estrutura.";
 
   return (
-    <main className="schedular-management">
+    <main className="tm-ops-management">
       <PageHeader
-        section="Schedular"
+        section="TM Ops"
         title={title}
         description={description}
         actions={
@@ -218,10 +218,10 @@ export function SchedularManagement({ mode = "routines" }) {
           />
         }
       />
-      <section className="schedular-content-card">
-        <div className="schedular-toolbar">
+      <section className="tm-ops-content-card">
+        <div className="tm-ops-toolbar">
           <div>
-            <span className="schedular-section-kicker">
+            <span className="tm-ops-section-kicker">
               {isChecklistScreen
                 ? "Biblioteca de execução"
                 : "Planejamento operacional"}
@@ -254,7 +254,7 @@ export function SchedularManagement({ mode = "routines" }) {
             rows={10}
             emptyMessage="Nenhuma rotina cadastrada."
             responsiveLayout="scroll"
-            className="schedular-table"
+            className="tm-ops-table"
           >
             <Column field="nome" header="Nome" sortable />
             <Column field="colaborador" header="Responsável" />
@@ -289,7 +289,7 @@ export function SchedularManagement({ mode = "routines" }) {
             <Column
               header="Ações"
               body={(row) => (
-                <div className="schedular-row-actions">
+                <div className="tm-ops-row-actions">
                   <Button
                     icon="pi pi-link"
                     text
@@ -333,7 +333,7 @@ export function SchedularManagement({ mode = "routines" }) {
             rows={10}
             emptyMessage="Nenhum checklist cadastrado."
             responsiveLayout="scroll"
-            className="schedular-table"
+            className="tm-ops-table"
           >
             <Column field="nome" header="Nome" sortable />
             <Column field="descricao" header="Descrição" />
@@ -341,7 +341,7 @@ export function SchedularManagement({ mode = "routines" }) {
             <Column
               header="Ações"
               body={(row) => (
-                <div className="schedular-row-actions">
+                <div className="tm-ops-row-actions">
                   <Button
                     icon="pi pi-pencil"
                     text
@@ -383,9 +383,9 @@ export function SchedularManagement({ mode = "routines" }) {
         visible={checklistDialog}
         onHide={() => setChecklistDialog(false)}
         modal
-        className="schedular-checklist-dialog"
+        className="tm-ops-checklist-dialog"
       >
-        <div className="schedular-form-grid">
+        <div className="tm-ops-form-grid">
           <label className="is-wide">
             Nome
             <InputText
@@ -480,7 +480,7 @@ export function SchedularManagement({ mode = "routines" }) {
               ))}
             </div>
           ))}
-          <div className="is-wide schedular-dialog-actions">
+          <div className="is-wide tm-ops-dialog-actions">
             <Button
               label="Cancelar"
               severity="secondary"

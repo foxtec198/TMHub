@@ -1,4 +1,4 @@
-.schedular-management {
+.tm-ops-management {
   display: flex;
   min-height: 100%;
   flex-direction: column;
@@ -8,12 +8,12 @@
   color: var(--text-color);
   overflow: auto;
 }
-.schedular-task-cards {
+.tm-ops-task-cards {
   display: grid;
   grid-template-columns: repeat(5, minmax(120px, 1fr));
   gap: 0.8rem;
 }
-.schedular-task-cards > div {
+.tm-ops-task-cards > div {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
   background: var(--surface-card);
   overflow: hidden;
 }
-.schedular-task-cards > div:before {
+.tm-ops-task-cards > div:before {
   position: absolute;
   top: 1rem;
   left: 1rem;
@@ -36,85 +36,85 @@
   font-family: "primeicons";
   font-size: 0.85rem;
 }
-.schedular-task-cards > div:nth-child(1):before {
+.tm-ops-task-cards > div:nth-child(1):before {
   content: "\e93e";
   color: #1d6f45;
   background: #dff6e8;
 }
-.schedular-task-cards > div:nth-child(2):before {
+.tm-ops-task-cards > div:nth-child(2):before {
   content: "\e925";
   color: #1877b9;
   background: #e0f2ff;
 }
-.schedular-task-cards > div:nth-child(3):before {
+.tm-ops-task-cards > div:nth-child(3):before {
   content: "\e923";
   color: #c43e3e;
   background: #ffe4e4;
 }
-.schedular-task-cards > div:nth-child(4):before {
+.tm-ops-task-cards > div:nth-child(4):before {
   content: "\e91d";
   color: #a27012;
   background: #fff0cc;
 }
-.schedular-task-cards > div:nth-child(5):before {
+.tm-ops-task-cards > div:nth-child(5):before {
   content: "\e909";
   color: #167343;
   background: #dff6e8;
 }
-.schedular-task-cards > div:nth-child(3) {
+.tm-ops-task-cards > div:nth-child(3) {
   border-color: #f3b8b8;
 }
-.schedular-task-cards > div:nth-child(4) {
+.tm-ops-task-cards > div:nth-child(4) {
   border-color: #f2d28b;
 }
-.schedular-task-cards b {
+.tm-ops-task-cards b {
   font-size: 1.5rem;
   color: var(--text-color);
 }
-.schedular-task-cards span {
+.tm-ops-task-cards span {
   color: var(--text-color-secondary);
   font-size: 0.8rem;
   font-weight: 700;
 }
-:root[data-theme="dark"] .schedular-task-cards > div {
+:root[data-theme="dark"] .tm-ops-task-cards > div {
   border-color: #31543a;
   background: #111a14;
 }
-:root[data-theme="dark"] .schedular-task-cards b {
+:root[data-theme="dark"] .tm-ops-task-cards b {
   color: #f0f8f2;
 }
-.schedular-content-card {
+.tm-ops-content-card {
   padding: 1.25rem;
   border: 1px solid var(--surface-border);
   border-radius: 16px;
   background: var(--surface-card);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
-.schedular-toolbar {
+.tm-ops-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
 }
-.schedular-toolbar h2 {
+.tm-ops-toolbar h2 {
   margin: 0.15rem 0 0;
   font-size: 1.05rem;
   color: var(--text-color);
 }
-.schedular-section-kicker {
+.tm-ops-section-kicker {
   color: var(--primary-color);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.schedular-form-grid {
+.tm-ops-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
-.schedular-form-grid label {
+.tm-ops-form-grid label {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -122,13 +122,13 @@
   color: var(--text-color);
   font-weight: 700;
 }
-.schedular-form-grid label.is-wide,
-.schedular-form-grid .is-wide {
+.tm-ops-form-grid label.is-wide,
+.tm-ops-form-grid .is-wide {
   grid-column: 1/-1;
 }
-.schedular-form-grid .p-dropdown,
-.schedular-form-grid .p-inputtext,
-.schedular-form-grid .p-inputtextarea {
+.tm-ops-form-grid .p-dropdown,
+.tm-ops-form-grid .p-inputtext,
+.tm-ops-form-grid .p-inputtextarea {
   width: 100%;
 }
 .checklist-items-header {
@@ -168,28 +168,28 @@
   font-size: 0.72rem;
   text-align: right;
 }
-.schedular-row-actions,
-.schedular-dialog-actions {
+.tm-ops-row-actions,
+.tm-ops-dialog-actions {
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
-.schedular-dialog-actions {
+.tm-ops-dialog-actions {
   justify-content: flex-end;
   gap: 0.6rem;
   padding-top: 0.25rem;
 }
-.schedular-checklist-dialog {
+.tm-ops-checklist-dialog {
   width: min(94vw, 720px);
 }
-.schedular-task-history-dialog {
+.tm-ops-task-history-dialog {
   width: min(94vw, 760px);
 }
-.schedular-response-timeline {
+.tm-ops-response-timeline {
   display: grid;
   gap: 0.25rem;
 }
-.schedular-response-summary {
+.tm-ops-response-summary {
   display: grid;
   gap: 0.25rem;
   margin-bottom: 0.8rem;
@@ -198,19 +198,19 @@
   border-radius: 12px;
   background: var(--surface-ground);
 }
-.schedular-response-summary span,
-.schedular-response-event small {
+.tm-ops-response-summary span,
+.tm-ops-response-event small {
   color: var(--text-color-secondary);
   font-size: 0.8rem;
 }
-.schedular-response-event {
+.tm-ops-response-event {
   position: relative;
   display: grid;
   grid-template-columns: 2.1rem minmax(0, 1fr);
   gap: 0.8rem;
   padding: 0.35rem 0 1rem;
 }
-.schedular-response-event:not(:last-child)::before {
+.tm-ops-response-event:not(:last-child)::before {
   position: absolute;
   top: 2.45rem;
   bottom: -0.25rem;
@@ -219,7 +219,7 @@
   background: var(--surface-border);
   content: "";
 }
-.schedular-response-marker {
+.tm-ops-response-marker {
   z-index: 1;
   display: grid;
   width: 2rem;
@@ -231,25 +231,25 @@
   font-size: 0.8rem;
   font-weight: 800;
 }
-.schedular-response-event > div {
+.tm-ops-response-event > div {
   min-width: 0;
   padding: 0.65rem 0.8rem;
   border: 1px solid var(--surface-border);
   border-radius: 12px;
   background: var(--surface-card);
 }
-.schedular-response-event p {
+.tm-ops-response-event p {
   margin: 0.45rem 0;
   color: var(--text-color);
   white-space: pre-wrap;
 }
-.schedular-response-evidences {
+.tm-ops-response-evidences {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
   margin-top: 0.65rem;
 }
-.schedular-response-evidences span {
+.tm-ops-response-evidences span {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -259,23 +259,23 @@
   color: var(--primary-color);
   font-size: 0.78rem;
 }
-.schedular-response-evidences a,
-.schedular-response-evidences b {
+.tm-ops-response-evidences a,
+.tm-ops-response-evidences b {
   color: inherit;
   font-weight: 700;
   text-decoration: none;
 }
-:root[data-theme="dark"] .schedular-management {
+:root[data-theme="dark"] .tm-ops-management {
   background: #090d0a !important;
   color: #eef7f0 !important;
 }
-:root[data-theme="dark"] .schedular-content-card,
-:root[data-theme="dark"] .schedular-checklist-dialog .p-dialog-header,
-:root[data-theme="dark"] .schedular-checklist-dialog .p-dialog-content,
-:root[data-theme="dark"] .schedular-task-history-dialog .p-dialog-header,
-:root[data-theme="dark"] .schedular-task-history-dialog .p-dialog-content,
-:root[data-theme="dark"] .schedular-response-event > div,
-:root[data-theme="dark"] .schedular-response-summary {
+:root[data-theme="dark"] .tm-ops-content-card,
+:root[data-theme="dark"] .tm-ops-checklist-dialog .p-dialog-header,
+:root[data-theme="dark"] .tm-ops-checklist-dialog .p-dialog-content,
+:root[data-theme="dark"] .tm-ops-task-history-dialog .p-dialog-header,
+:root[data-theme="dark"] .tm-ops-task-history-dialog .p-dialog-content,
+:root[data-theme="dark"] .tm-ops-response-event > div,
+:root[data-theme="dark"] .tm-ops-response-summary {
   background: #111a14 !important;
   color: #eef7f0 !important;
   border-color: #31543a !important;
@@ -285,36 +285,36 @@
   background: #111a14;
   color: #eef7f0;
 }
-:root[data-theme="dark"] .schedular-content-card {
+:root[data-theme="dark"] .tm-ops-content-card {
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 }
-:root[data-theme="dark"] .schedular-toolbar h2,
-:root[data-theme="dark"] .schedular-form-grid label {
+:root[data-theme="dark"] .tm-ops-toolbar h2,
+:root[data-theme="dark"] .tm-ops-form-grid label {
   color: #eef7f0 !important;
 }
-:root[data-theme="dark"] .schedular-table .p-datatable-wrapper,
-:root[data-theme="dark"] .schedular-table .p-datatable-table {
+:root[data-theme="dark"] .tm-ops-table .p-datatable-wrapper,
+:root[data-theme="dark"] .tm-ops-table .p-datatable-table {
   background: #111a14 !important;
 }
 @media (max-width: 700px) {
-  .schedular-management {
+  .tm-ops-management {
     padding: 1rem;
   }
-  .schedular-content-card {
+  .tm-ops-content-card {
     padding: 1rem;
   }
-  .schedular-toolbar {
+  .tm-ops-toolbar {
     align-items: flex-start;
     flex-direction: column;
   }
-  .schedular-toolbar > .p-button {
+  .tm-ops-toolbar > .p-button {
     width: 100%;
   }
-  .schedular-form-grid {
+  .tm-ops-form-grid {
     grid-template-columns: 1fr;
   }
-  .schedular-form-grid label.is-wide,
-  .schedular-form-grid .is-wide {
+  .tm-ops-form-grid label.is-wide,
+  .tm-ops-form-grid .is-wide {
     grid-column: auto;
   }
   .checklist-item-editor {
