@@ -1,0 +1,435 @@
+.termination-dashboard {
+    min-height: 100%;
+    padding: clamp(1rem, 2.5vw, 2rem);
+    color: var(--text-color, #26332a);
+}
+
+.termination-dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+    gap: .8rem;
+    margin-bottom: 1rem;
+}
+
+.termination-dashboard-card {
+    --card-accent: #355044;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: .75rem;
+    min-width: 0;
+    padding: 1rem;
+    background: var(--surface-card, #fff);
+    border: 1px solid var(--surface-border, #dce7df);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(15, 63, 30, .06);
+}
+
+.termination-dashboard-card.is-primary { --card-accent: #268f50; }
+.termination-dashboard-card.is-success { --card-accent: #31a95a; }
+.termination-dashboard-card.is-danger { --card-accent: #d64b50; }
+.termination-dashboard-card.is-warning { --card-accent: #c78224; }
+
+.termination-dashboard-card__icon {
+    display: grid;
+    width: 2.6rem;
+    height: 2.6rem;
+    place-items: center;
+    color: var(--card-accent);
+    background: color-mix(in srgb, var(--card-accent) 11%, transparent);
+    border-radius: 11px;
+    font-size: 1.05rem;
+}
+
+.termination-dashboard-card > span:last-child {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.termination-dashboard-card small {
+    color: var(--text-color-secondary);
+    font-weight: 700;
+}
+
+.termination-dashboard-card strong {
+    overflow: hidden;
+    color: var(--card-accent);
+    font-size: clamp(1rem, 1.35vw, 1.4rem);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.025em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.termination-dashboard-card em {
+    overflow: hidden;
+    color: var(--text-color-secondary);
+    font-size: .72rem;
+    font-style: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.termination-dashboard-charts {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(21rem, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.termination-dashboard-panel,
+.termination-dashboard-table-panel {
+    min-width: 0;
+    background: var(--surface-card, #fff);
+    border: 1px solid var(--surface-border, #dce7df);
+    border-radius: 16px;
+    box-shadow: 0 12px 34px rgba(15, 63, 30, .06);
+}
+
+.termination-dashboard-panel {
+    padding: 1.2rem;
+}
+
+.termination-dashboard-panel > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.termination-dashboard-panel header span {
+    color: var(--primary-color);
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .11em;
+}
+
+.termination-dashboard-panel h2 {
+    margin: .2rem 0 0;
+    font-size: 1.05rem;
+}
+
+.termination-dashboard-chart {
+    height: 22rem;
+    margin-top: .75rem;
+}
+
+.termination-dashboard-chart > .p-chart,
+.termination-dashboard-chart > .p-chart > canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.termination-dashboard-empty-chart {
+    display: grid;
+    height: 100%;
+    place-content: center;
+    justify-items: center;
+    gap: .65rem;
+    color: var(--text-color-secondary);
+    text-align: center;
+}
+
+.termination-dashboard-empty-chart i {
+    color: var(--primary-color);
+    font-size: 2rem;
+    opacity: .65;
+}
+
+.termination-dashboard-insight {
+    display: grid;
+    align-content: start;
+    gap: .8rem;
+    background: linear-gradient(
+        155deg,
+        color-mix(in srgb, var(--primary-color) 10%, var(--surface-card, #fff)),
+        var(--surface-card, #fff)
+    );
+}
+
+.termination-dashboard-insight > span {
+    color: var(--primary-color);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.termination-dashboard-insight h2 {
+    margin: 0;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+.termination-dashboard-insight p {
+    margin: 0;
+    color: var(--text-color-secondary);
+    line-height: 1.55;
+}
+
+.termination-dashboard-insight > div:not(.termination-dashboard-status-strip) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .8rem;
+    background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    border-radius: 12px;
+}
+
+.termination-dashboard-insight > div:not(.termination-dashboard-status-strip) > span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.termination-dashboard-insight small,
+.termination-dashboard-insight em {
+    color: var(--text-color-secondary);
+    font-size: .72rem;
+    font-style: normal;
+}
+
+.termination-dashboard-insight > div:not(.termination-dashboard-status-strip) strong {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--primary-color);
+    font-size: 1.15rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.termination-dashboard-insight > div:not(.termination-dashboard-status-strip) em {
+    flex: 0 0 auto;
+    max-width: 9.5rem;
+    text-align: right;
+}
+
+.termination-dashboard-status-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+    width: 100%;
+    margin-top: .2rem;
+}
+
+.termination-dashboard-status-strip > div {
+    --status-color: #31b765;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: .35rem;
+    padding: .65rem .7rem;
+    background: color-mix(in srgb, var(--status-color) 9%, var(--surface-card, #fff));
+    border: 1px solid color-mix(in srgb, var(--status-color) 34%, transparent);
+    border-radius: 10px;
+}
+
+.termination-dashboard-status-strip .is-earnings {
+    --status-color: #268f50;
+}
+
+.termination-dashboard-status-strip .is-discounts {
+    --status-color: #e5484d;
+}
+
+.termination-dashboard-status-strip .is-cost {
+    --status-color: #d59b19;
+}
+
+.termination-dashboard-status-strip span {
+    overflow: hidden;
+    color: var(--text-color-secondary);
+    font-size: .66rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.termination-dashboard-status-strip strong {
+    overflow: hidden;
+    flex: 0 1 auto;
+    color: var(--status-color);
+    font-size: .9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.termination-dashboard-table-panel {
+    overflow: hidden;
+}
+
+.termination-dashboard-tabs {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .75rem;
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card, #fff));
+    border-bottom: 1px solid var(--surface-border, #dce7df);
+}
+
+.termination-dashboard-tabs button {
+    display: inline-flex;
+    min-height: 2.6rem;
+    align-items: center;
+    gap: .55rem;
+    padding: 0 .9rem;
+    color: var(--text-color-secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.termination-dashboard-tabs button:hover {
+    color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+}
+
+.termination-dashboard-tabs button.is-active {
+    color: var(--primary-color);
+    background: var(--surface-card, #fff);
+    border-color: color-mix(in srgb, var(--primary-color) 28%, var(--surface-border, #dce7df));
+    box-shadow: 0 3px 10px rgba(15, 63, 30, .08);
+}
+
+.termination-dashboard-table-content {
+    padding: 1rem 1.2rem 1.2rem;
+}
+
+.termination-dashboard-table-panel .p-datatable {
+    box-shadow: none;
+}
+
+/* A estrutura visual da leitura reutiliza as classes globais do dashboard PCD. */
+.termination-dashboard .pcd-dashboard-status-strip .is-earnings {
+    --status-color: #31b765;
+}
+
+.termination-dashboard .pcd-dashboard-status-strip .is-discounts {
+    --status-color: #e5484d;
+}
+
+.termination-dashboard .pcd-dashboard-status-strip .is-cost {
+    --status-color: #d59b19;
+}
+
+.termination-dashboard-person {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.termination-dashboard-person strong,
+.termination-dashboard-person span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.termination-dashboard-person span {
+    color: var(--text-color-secondary);
+    font-size: .74rem;
+}
+
+:root[data-theme="dark"] .termination-dashboard {
+    color: #f2f6f3;
+}
+
+:root[data-theme="dark"] .termination-dashboard-card,
+:root[data-theme="dark"] .termination-dashboard-panel,
+:root[data-theme="dark"] .termination-dashboard-table-panel {
+    background: #292e2b;
+    border-color: #465149;
+}
+
+:root[data-theme="dark"] .termination-dashboard-card {
+    --card-accent: #b9c7be;
+}
+
+:root[data-theme="dark"] .termination-dashboard-card.is-primary,
+:root[data-theme="dark"] .termination-dashboard-card.is-success {
+    --card-accent: #61e990;
+}
+
+:root[data-theme="dark"] .termination-dashboard-card.is-danger {
+    --card-accent: #ff777b;
+}
+
+:root[data-theme="dark"] .termination-dashboard-card.is-warning {
+    --card-accent: #e6b35e;
+}
+
+:root[data-theme="dark"] .termination-dashboard-tabs {
+    background: #222724;
+    border-color: #465149;
+}
+
+:root[data-theme="dark"] .termination-dashboard-tabs button.is-active {
+    color: #61e990;
+    background: #303733;
+    border-color: #4d6756;
+    box-shadow: none;
+}
+
+:root[data-theme="dark"] .termination-dashboard-insight {
+    background: linear-gradient(155deg, #1c3b27, #292e2b 68%);
+}
+
+:root[data-theme="dark"] .termination-dashboard-insight > span,
+:root[data-theme="dark"] .termination-dashboard-insight > div:not(.termination-dashboard-status-strip) strong,
+:root[data-theme="dark"] .termination-dashboard-empty-chart i {
+    color: #61e990;
+}
+
+:root[data-theme="dark"] .termination-dashboard-status-strip > div {
+    background: color-mix(in srgb, var(--status-color) 10%, #222724);
+}
+
+@media (max-width: 920px) {
+    .termination-dashboard-charts {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 560px) {
+    .termination-dashboard {
+        padding: 1rem;
+    }
+
+    .termination-dashboard-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .termination-dashboard-tabs {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .termination-dashboard-tabs button {
+        justify-content: flex-start;
+    }
+
+    .termination-dashboard-chart {
+        height: 19rem;
+    }
+
+    .termination-dashboard-insight > div:not(.termination-dashboard-status-strip) {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .termination-dashboard-insight > div:not(.termination-dashboard-status-strip) em {
+        max-width: none;
+        text-align: left;
+    }
+}

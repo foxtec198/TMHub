@@ -46,6 +46,7 @@ import { Pcd } from "./pages/Indicators/pcd";
 import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
 import { ProjectDashboard } from "./pages/Dashboards/ProjectDashboard";
 import { GlosaDashboard } from "./pages/Dashboards/GlosaDashboard";
+import { TerminationDashboard } from "./pages/Dashboards/TerminationDashboard.jsx";
 import { Structure } from "./pages/Structure/index";
 import { Schedular } from "./pages/Schedular";
 import { SchedularManagement } from "./pages/Schedular/Management";
@@ -248,6 +249,14 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
+          <Route
+            path="/reports/rescisoes"
+            element={
+              <PermissionGate screen="dashboard_rescisoes">
+                <TerminationDashboard />
+              </PermissionGate>
+            }
+          />
           <Route path="/reports/projetos" element={<PermissionGate screen="dashboard_projetos"><ProjectDashboard /></PermissionGate>} />
           <Route path="/reports/glosas" element={<PermissionGate screen="dashboard_glosas"><GlosaDashboard /></PermissionGate>} />
           <Route
@@ -286,15 +295,6 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
-          <Route
-            path="/rescisoes"
-            element={
-              <PermissionGate screen="controle_rescisoes">
-                <TerminationControl />
-              </PermissionGate>
-            }
-          />
-
           {/* Reposicoes */}
           <Route
             path="/reposicoes/requisicoes"
@@ -343,6 +343,16 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="estoque_movimentos">
                 <Movements />
+              </PermissionGate>
+            }
+          />
+          
+          {/* Rescisões */}
+          <Route
+            path="/rescisoes"
+            element={
+              <PermissionGate screen="controle_rescisoes">
+                <TerminationControl />
               </PermissionGate>
             }
           />
