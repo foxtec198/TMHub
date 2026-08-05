@@ -1,4 +1,4 @@
-import './terminationDashboard.css';
+import './TerminationDashboard.css';
 import './pcdDashboard.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
