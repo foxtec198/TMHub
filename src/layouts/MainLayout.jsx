@@ -38,6 +38,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/estoque/movimentacoes": ["estoque.movimentos"],
   "/estrutura": ["estrutura"],
   "/projetos": ["projetos"],
+  "/reports/rescisoes": ["rescisoes", "colaboradores"],
 };
 
 export function MainLayout() {
@@ -140,7 +141,14 @@ export function MainLayout() {
           icon: 'pi pi-heart',
           visible: can("dashboard_pcd"),
           command: () => { navigateTo("/reports/pcd") }
-        }
+        },
+        {
+          label: "Rescisões",
+          icon: "pi pi-user-minus",
+          visible: can("dashboard_rescisoes"),
+          command: () => {
+          navigateTo("/reports/rescisoes");},
+        },
       ]
     },
     {

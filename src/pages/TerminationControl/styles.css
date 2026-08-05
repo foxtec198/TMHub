@@ -369,6 +369,56 @@
     background: var(--surface-card);
 }
 
+.termination-calculation-info {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .8rem .9rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    background: var(--surface-ground);
+}
+
+.termination-calculation-info > i {
+    margin-top: .15rem;
+    font-size: 1rem;
+}
+
+.termination-calculation-info > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .18rem;
+}
+
+.termination-calculation-info strong {
+    font-size: .8rem;
+}
+
+.termination-calculation-info span {
+    color: var(--text-color-secondary);
+    font-size: .75rem;
+    line-height: 1.4;
+}
+
+.termination-calculation-info.is-experience {
+    color: var(--green-700);
+    background: color-mix(in srgb, var(--green-500) 10%, var(--surface-card));
+    border-color: color-mix(in srgb, var(--green-500) 38%, var(--surface-border));
+}
+
+.termination-calculation-info.is-notice {
+    color: var(--blue-700);
+    background: color-mix(in srgb, var(--blue-500) 9%, var(--surface-card));
+    border-color: color-mix(in srgb, var(--blue-500) 35%, var(--surface-border));
+}
+
+.termination-calculation-info.is-restricted {
+    color: var(--orange-700);
+    background: color-mix(in srgb, var(--orange-500) 10%, var(--surface-card));
+    border-color: color-mix(in srgb, var(--orange-500) 38%, var(--surface-border));
+}
+
 .termination-calculation-result {
     display: flex;
     min-height: 31rem;
@@ -425,6 +475,52 @@
     text-overflow: ellipsis;
 }
 
+.termination-result-notice-date {
+    margin-top: .15rem;
+    color: var(--primary-color) !important;
+    font-weight: 800;
+}
+
+.termination-result-fgts-balance {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem 1rem;
+    border-bottom: 1px solid var(--surface-border);
+    background: color-mix(in srgb, var(--primary-color) 6%, var(--surface-card));
+}
+
+.termination-result-fgts-balance > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.termination-result-fgts-balance span,
+.termination-result-fgts-balance small {
+    color: var(--text-color-secondary);
+}
+
+.termination-result-fgts-balance span {
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.termination-result-fgts-balance strong {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.termination-result-fgts-balance small {
+    max-width: 52%;
+    font-size: .7rem;
+    line-height: 1.35;
+    text-align: right;
+}
+
 .termination-result-list {
     display: flex;
     flex: 1;
@@ -444,6 +540,46 @@
 .termination-result-list span {
     color: var(--text-color-secondary);
     text-transform: capitalize;
+}
+
+.termination-result-list .termination-result-section-title {
+    margin: .35rem -1rem 0;
+    padding: .55rem 1rem;
+    border-bottom-style: solid;
+    background: var(--surface-card);
+}
+
+.termination-result-list .termination-result-section-title:first-child {
+    margin-top: -.75rem;
+}
+
+.termination-result-list .termination-result-section-title span {
+    font-size: .7rem;
+    font-weight: 900;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.termination-result-list .is-earning-title span,
+.termination-result-list .is-earning strong {
+    color: var(--green-600);
+}
+
+.termination-result-list .is-discount-title span,
+.termination-result-list .is-discount strong {
+    color: var(--red-500);
+}
+
+.termination-result-list .is-employer-title span,
+.termination-result-list .is-employer-charge strong {
+    color: var(--orange-500);
+}
+
+.termination-result-list .is-earning strong,
+.termination-result-list .is-discount strong,
+.termination-result-list .is-employer-charge strong {
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .termination-result-list .is-discount strong {
@@ -485,6 +621,18 @@
 
 .termination-result-totals .is-primary strong {
     color: var(--primary-color);
+}
+
+.termination-result-totals .is-positive strong {
+    color: var(--green-600);
+}
+
+.termination-result-totals .is-negative strong {
+    color: var(--red-500);
+}
+
+.termination-result-totals .is-liquid strong {
+    color: var(--text-color);
 }
 
 .termination-result-notes {
@@ -534,6 +682,9 @@
 :root[data-theme="dark"] .termination-result-empty,
 :root[data-theme="dark"] .termination-result-employee small,
 :root[data-theme="dark"] .termination-result-employee span,
+:root[data-theme="dark"] .termination-calculation-info span,
+:root[data-theme="dark"] .termination-result-fgts-balance span,
+:root[data-theme="dark"] .termination-result-fgts-balance small,
 :root[data-theme="dark"] .termination-result-list span,
 :root[data-theme="dark"] .termination-result-totals span,
 :root[data-theme="dark"] .termination-result-notes {
@@ -648,10 +799,62 @@
     background: #111713;
 }
 
+:root[data-theme="dark"] .termination-calculation-info {
+    background: #151b17;
+    border-color: #304035;
+}
+
+:root[data-theme="dark"] .termination-calculation-info.is-experience {
+    color: #63e58b;
+    background: rgba(99, 229, 139, .08);
+    border-color: #315b3b;
+}
+
+:root[data-theme="dark"] .termination-calculation-info.is-notice {
+    color: #7eb8ff;
+    background: rgba(87, 155, 255, .09);
+    border-color: #31547a;
+}
+
+:root[data-theme="dark"] .termination-calculation-info.is-restricted {
+    color: #ffb45c;
+    background: rgba(255, 180, 92, .09);
+    border-color: #6d4a27;
+}
+
 :root[data-theme="dark"] .termination-calculation-result {
     color: #f3f6f4;
     background: #0b0e0c;
     border-color: #304035;
+}
+
+:root[data-theme="dark"] .termination-result-fgts-balance {
+    color: #f3f6f4;
+    background: #172019;
+    border-color: #304035;
+}
+
+:root[data-theme="dark"] .termination-result-fgts-balance strong,
+:root[data-theme="dark"] .termination-result-notice-date,
+:root[data-theme="dark"] .termination-result-list .is-earning-title span,
+:root[data-theme="dark"] .termination-result-list .is-earning strong,
+:root[data-theme="dark"] .termination-result-totals .is-positive strong {
+    color: #63e58b !important;
+}
+
+:root[data-theme="dark"] .termination-result-list .termination-result-section-title {
+    background: #111713;
+}
+
+:root[data-theme="dark"] .termination-result-list .is-discount-title span,
+:root[data-theme="dark"] .termination-result-list .is-discount strong,
+:root[data-theme="dark"] .termination-result-totals .is-negative strong {
+    color: #ff7777;
+}
+
+:root[data-theme="dark"] .termination-result-list .is-employer-title span,
+:root[data-theme="dark"] .termination-result-list .is-employer-charge strong {
+    color: #ffb45c;
 }
 
 :root[data-theme="dark"] .termination-result-list > div,
@@ -720,6 +923,16 @@
     .termination-result-totals > div + div {
         border-top: 1px solid var(--surface-border);
         border-left: 0;
+    }
+
+    .termination-result-fgts-balance {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .termination-result-fgts-balance small {
+        max-width: none;
+        text-align: left;
     }
 
     .termination-delete-content {
