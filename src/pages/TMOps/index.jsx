@@ -8,6 +8,7 @@ import tmOpsRequest from "../../utils/tmOpsRequest";
 import { useToast } from "../../contexts/ToastContext";
 import { TaskQrScanner } from "./TaskQrScanner";
 import { TaskEvidenceCapture } from "./TaskEvidenceCapture";
+import { TaskExecutionMetrics } from "../../components/TMOps/TaskExecutionMetrics";
 import "./styles.css";
 
 const elapsed = (start, now) => {
@@ -187,6 +188,19 @@ export function TMOps() {
         tmOpsRequest
           .post(`/tm-ops/tarefas/${active.id}/geolocalizacoes`, {
             geolocalizacao: location,
+          })
+          .then(({ data }) => {
+            if (disposed || !data?.metricas) return;
+            setSelected((current) =>
+              current?.id === active.id
+                ? { ...current, ...data.metricas }
+                : current,
+            );
+            setTasks((rows) =>
+              rows.map((row) =>
+                row.id === active.id ? { ...row, ...data.metricas } : row,
+              ),
+            );
           })
           .catch(() => {
             if (!disposed) lastExecutionLocation.current = previous || null;
@@ -495,11 +509,16 @@ export function TMOps() {
               #{active.rotina_id} ·{" "}
               {active.origem === "workflow" ? "Workflow" : "Rotina"}
             </small>
+            <TaskExecutionMetrics task={active} now={clock} />
             <div className="executor-status">
               <span
                 className={active.status === "em_andamento" ? "started" : ""}
               >
-                ● {active.status === "em_andamento" ? "Iniciada" : "Aberta"}
+                ● {active.status === "em_andamento"
+                  ? "Iniciada"
+                  : active.status === "pausada"
+                    ? "Pausada"
+                    : "Aberta"}
               </span>
               <b>
                 {active.status === "em_andamento"
@@ -551,6 +570,7 @@ export function TMOps() {
       {header}
       <section className="executor-checklist">
         <h1>{active.tarefa}</h1>
+        <TaskExecutionMetrics task={active} now={clock} />
         {(active.itens || []).map((item) => (
           <article key={item.id}>
             <strong>{item.pergunta}</strong>

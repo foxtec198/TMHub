@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -7,6 +7,8 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { PageHeader } from "../../components/PageHeader";
+import { TaskExecutionMetrics } from "../../components/TMOps/TaskExecutionMetrics";
+import { TaskGeolocationMap } from "../../components/TMOps/TaskGeolocationMap";
 import connect from "../../utils/request";
 import "./management.css";
 
@@ -14,27 +16,72 @@ export function TMOpsTasks() {
   const [tasks, setTasks] = useState([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState(null);
+  const [first, setFirst] = useState(0);
+  const [rows, setRows] = useState(10);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [selectedTask, setSelectedTask] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
+  const loadSequence = useRef(0);
   const load = useCallback(async () => {
-    const { data } = await connect.get("/tm-ops/tarefas");
-    setTasks(data || []);
-  }, []);
+    const sequence = ++loadSequence.current;
+    setLoading(true);
+    setLoadError("");
+    try {
+      const { data } = await connect.get("/tm-ops/tarefas", {
+        params: {
+          page: Math.floor(first / rows) + 1,
+          limit: rows,
+          q: query.trim() || undefined,
+          status: status || undefined,
+        },
+      });
+      if (sequence !== loadSequence.current) return;
+      setTasks(data?.items || []);
+      setTotalRecords(Number(data?.total) || 0);
+      setStats(data?.stats || {});
+    } catch (error) {
+      if (sequence !== loadSequence.current) return;
+      setTasks([]);
+      setTotalRecords(0);
+      setLoadError(
+        typeof error.response?.data === "string"
+          ? error.response.data
+          : "Não foi possível carregar as tarefas.",
+      );
+    } finally {
+      if (sequence === loadSequence.current) setLoading(false);
+    }
+  }, [first, query, rows, status]);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    load();
+    const timer = setTimeout(load, 350);
+    return () => clearTimeout(timer);
   }, [load]);
-  const filtered = useMemo(
-    () =>
-      tasks.filter(
-        (task) =>
-          (!status || task.status === status) &&
-          `${task.tarefa} ${task.local} ${task.colaborador}`
-            .toLowerCase()
-            .includes(query.toLowerCase()),
-      ),
-    [tasks, query, status],
-  );
-  const count = (predicate) => tasks.filter(predicate).length;
+  const openTaskDetail = async (task) => {
+    setSelectedTask(task);
+    setDetailLoading(true);
+    setDetailError("");
+    try {
+      const { data } = await connect.get(`/tm-ops/tarefas/${task.id}`);
+      setSelectedTask(data);
+    } catch (error) {
+      setDetailError(
+        typeof error.response?.data === "string"
+          ? error.response.data
+          : "Não foi possível carregar os detalhes da tarefa.",
+      );
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+  const closeTaskDetail = () => {
+    setSelectedTask(null);
+    setDetailLoading(false);
+    setDetailError("");
+  };
   const formatAnswer = (value) => {
     if (value === true) return "Sim";
     if (value === false) return "Não";
@@ -54,23 +101,23 @@ export function TMOpsTasks() {
       />
       <section className="tm-ops-task-cards">
         <div>
-          <b>{tasks.length}</b>
+          <b>{stats.total || 0}</b>
           <span>Total</span>
         </div>
         <div>
-          <b>{count((t) => t.status === "aberta")}</b>
+          <b>{stats.abertas || 0}</b>
           <span>Abertas</span>
         </div>
         <div>
-          <b>{count((t) => t.atrasada)}</b>
+          <b>{stats.atrasadas || 0}</b>
           <span>Atrasadas</span>
         </div>
         <div>
-          <b>{count((t) => t.status === "pausada")}</b>
+          <b>{stats.pausadas || 0}</b>
           <span>Pausadas</span>
         </div>
         <div>
-          <b>{count((t) => t.status === "concluida")}</b>
+          <b>{stats.concluidas || 0}</b>
           <span>Finalizadas</span>
         </div>
       </section>
@@ -78,7 +125,10 @@ export function TMOpsTasks() {
         <div className="tm-ops-toolbar">
           <InputText
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setFirst(0);
+            }}
             placeholder="Buscar tarefa, local ou colaborador"
           />
           <Dropdown
@@ -92,15 +142,27 @@ export function TMOpsTasks() {
               "concluida",
               "cancelada",
             ].map((value) => ({ label: value.replace("_", " "), value }))}
-            onChange={(e) => setStatus(e.value)}
+            onChange={(e) => {
+              setStatus(e.value);
+              setFirst(0);
+            }}
           />
         </div>
         <DataTable
-          value={filtered}
+          value={tasks}
+          lazy
+          loading={loading}
           paginator
-          rows={10}
+          first={first}
+          rows={rows}
+          totalRecords={totalRecords}
+          rowsPerPageOptions={[10, 20, 50]}
+          onPage={(event) => {
+            setFirst(event.first);
+            setRows(event.rows);
+          }}
           responsiveLayout="scroll"
-          emptyMessage="Nenhuma tarefa encontrada."
+          emptyMessage={loadError || "Nenhuma tarefa encontrada."}
         >
           <Column field="tarefa" header="Tarefa" />
           <Column field="local" header="Estrutura" />
@@ -155,7 +217,7 @@ export function TMOpsTasks() {
                 rounded
                 tooltip="Ver checklist respondido"
                 disabled={row.status !== "concluida"}
-                onClick={() => setSelectedTask(row)}
+                onClick={() => openTaskDetail(row)}
               />
             )}
           />
@@ -166,11 +228,24 @@ export function TMOpsTasks() {
           selectedTask ? `Checklist · ${selectedTask.tarefa}` : "Checklist"
         }
         visible={Boolean(selectedTask)}
-        onHide={() => setSelectedTask(null)}
+        onHide={closeTaskDetail}
         className="tm-ops-task-history-dialog"
         modal
       >
-        {selectedTask && (
+        {detailLoading && (
+          <div className="tm-ops-task-detail-state">
+            <i className="pi pi-spin pi-spinner" />
+            <span>Carregando checklist, percurso e indicadores...</span>
+          </div>
+        )}
+        {!detailLoading && detailError && (
+          <div className="tm-ops-task-detail-state is-error">
+            <i className="pi pi-exclamation-triangle" />
+            <span>{detailError}</span>
+            <Button label="Tentar novamente" onClick={() => openTaskDetail(selectedTask)} />
+          </div>
+        )}
+        {!detailLoading && !detailError && selectedTask && (
           <div className="tm-ops-response-timeline">
             <div className="tm-ops-response-summary">
               <strong>{selectedTask.local || "Estrutura não informada"}</strong>
@@ -181,6 +256,10 @@ export function TMOpsTasks() {
                   : "—"}
               </span>
             </div>
+            <TaskExecutionMetrics task={selectedTask} />
+            <TaskGeolocationMap
+              geolocations={selectedTask.geolocalizacoes || []}
+            />
             {(selectedTask.itens || []).map((item, index) => {
               const response = item.resposta;
               return (

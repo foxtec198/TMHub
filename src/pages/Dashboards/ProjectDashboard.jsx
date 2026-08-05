@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
-import { Tag } from "primereact/tag";
 
 import { DashboardFilterButton, DashboardFilterPanel } from "../../components/DashboardFilterPanel";
 import { PageHeader } from "../../components/PageHeader";
@@ -15,13 +14,48 @@ const defaultFilters = () => ({ periodo: [monthStart(), new Date()], projeto: []
 const asDate = (value) => value ? `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}` : null;
 const asParam = (values) => values?.length ? values.join(",") : undefined;
 const formatHours = (value) => value == null ? "—" : value >= 24 ? `${Math.round(value / 24)}d` : `${Math.round(value)}h`;
+const percentage = (value, total) => total ? Math.round((Number(value || 0) / total) * 100) : 0;
 
-function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
+const parseCardDate = (value) => {
+  if (!value) return null;
+  const raw = String(value);
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(raw) ? `${raw}T12:00:00` : raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatCardDate = (value, compact = false) => {
+  const date = parseCardDate(value);
+  if (!date) return "Sem data";
+  return new Intl.DateTimeFormat("pt-BR", compact
+    ? { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }
+    : { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
+  ).format(date).replace(",", " ·");
+};
+
+function useDarkMode() {
+  const [isDark, setIsDark] = useState(
+    () => document.documentElement.dataset.theme === "dark",
+  );
+  useEffect(() => {
+    const root = document.documentElement;
+    const observer = new MutationObserver(() => {
+      setIsDark(root.dataset.theme === "dark");
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+  return isDark;
+}
+
+function MemberAvatar({ member, small = false }) {
   return (
-    <article className={`project-dashboard-summary-card is-${tone}`}>
-      <span className="project-dashboard-summary-card__icon"><i className={icon} /></span>
-      <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
-    </article>
+    <span
+      className={`project-member-avatar ${small ? "is-small" : ""}`}
+      style={{ "--member-color": member.avatarColor || "#168447" }}
+      title={member.nome}
+    >
+      {member.iniciais || member.nome?.slice(0, 2).toUpperCase() || "?"}
+    </span>
   );
 }
 
@@ -37,6 +71,7 @@ export function ProjectDashboard() {
   const filterPanel = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
+  const isDarkMode = useDarkMode();
 
   useEffect(() => {
     connect.get("/projetos").then(({ data: rows }) => setProjects(rows || [])).catch(() => setProjects([]));
@@ -74,26 +109,48 @@ export function ProjectDashboard() {
   const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
   const clearFilters = () => setFilters(defaultFilters());
 
-  const performance = useMemo(() => ({
-    labels: (data?.performance_colaboradores || []).map((item) => item.colaborador),
-    datasets: [{ label: "Cards concluídos", data: (data?.performance_colaboradores || []).map((item) => item.concluidos), backgroundColor: "#45d66f", borderRadius: 8, maxBarThickness: 34 }],
-  }), [data]);
   const statusChart = useMemo(() => ({
-    labels: ["Abertos", "Concluídos", "Atrasados"],
-    datasets: [{ data: [summary.abertos || 0, summary.concluidos || 0, summary.atrasados || 0], backgroundColor: ["#f2b44c", "#45d66f", "#ef5350"], borderWidth: 0, hoverOffset: 5 }],
-  }), [summary.abertos, summary.atrasados, summary.concluidos]);
-  const chartOptions = useMemo(() => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { grid: { display: false }, border: { display: false }, ticks: { color: "#91a098" } },
-      y: { beginAtZero: true, grid: { color: "rgba(130,145,135,.14)" }, border: { display: false }, ticks: { color: "#91a098", precision: 0 } },
+    labels: ["Abertas", "Em andamento", "Concluídas"],
+    datasets: [{
+      data: [summary.status_abertas || 0, summary.status_andamento || 0, summary.status_concluidas || 0],
+      backgroundColor: ["#b8d9c3", "#f4c53e", "#2ebd67"],
+      borderWidth: 0,
+      hoverOffset: 5,
+    }],
+  }), [summary.status_abertas, summary.status_andamento, summary.status_concluidas]);
+  const doughnutOptions = useMemo(() => ({
+    maintainAspectRatio: false,
+    cutout: "72%",
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          color: isDarkMode ? "#dce8df" : "#526258",
+          usePointStyle: true,
+          boxWidth: 8,
+          padding: 18,
+        },
+      },
     },
-  }), []);
+  }), [isDarkMode]);
   const upcomingCards = useMemo(() => [...(data?.cards || [])]
     .filter((card) => card.atrasado || card.data_fim)
-    .sort((left, right) => String(left.data_fim || "9999").localeCompare(String(right.data_fim || "9999")))
+    .sort((left, right) => {
+      if (left.atrasado !== right.atrasado) return left.atrasado ? -1 : 1;
+      return (parseCardDate(left.data_fim)?.getTime() || Infinity)
+        - (parseCardDate(right.data_fim)?.getTime() || Infinity);
+    })
     .slice(0, 8), [data]);
+  const timelineCards = useMemo(() => [...(data?.timeline || [])]
+    .sort((left, right) => (parseCardDate(left.data_inicio || left.data_fim)?.getTime() || Infinity)
+      - (parseCardDate(right.data_inicio || right.data_fim)?.getTime() || Infinity))
+    .slice(0, 8), [data]);
+  const totalCards = Number(summary.cards || 0);
+  const statusProgress = [
+    { key: "done", label: "Concluídas", value: summary.status_concluidas || 0, tone: "success" },
+    { key: "progress", label: "Em andamento", value: summary.status_andamento || 0, tone: "warning" },
+    { key: "open", label: "Não iniciadas", value: summary.status_abertas || 0, tone: "neutral" },
+  ];
 
   return (
     <main className="project-dashboard">
@@ -108,42 +165,101 @@ export function ProjectDashboard() {
         </>}
       />
 
-      <section className="project-dashboard-summary">
-        <SummaryCard icon="pi pi-folder" label="Projetos" value={summary.projetos || 0} detail={`${summary.projetos_no_prazo || 0} no prazo`} />
-        <SummaryCard icon="pi pi-clone" label="Cards" value={summary.cards || 0} detail={`${summary.abertos || 0} em aberto`} tone="violet" />
-        <SummaryCard icon="pi pi-check-circle" label="Concluídos" value={summary.concluidos || 0} detail={`${summary.concluidos_no_prazo || 0} no prazo`} tone="success" />
-        <SummaryCard icon="pi pi-exclamation-triangle" label="Atrasados" value={summary.atrasados || 0} detail={`${summary.concluidos_atraso || 0} concluídos com atraso`} tone="danger" />
-        <SummaryCard icon="pi pi-chart-pie" label="Conclusão" value={`${summary.percentual_conclusao || 0}%`} detail="do recorte selecionado" tone="info" />
-        <SummaryCard icon="pi pi-stopwatch" label="Tempo médio" value={formatHours(summary.tempo_medio_horas)} detail="entre início e conclusão" tone="warning" />
+      <section className="project-progress-overview">
+        <div>
+          <span className="project-dashboard-eyebrow">Progresso dos cards</span>
+          <h2>Visão geral do portfólio</h2>
+        </div>
+        <div className="project-progress-segments">
+          {statusProgress.map((item) => (
+            <div className={`is-${item.tone}`} key={item.key}>
+              <span>{item.label}</span>
+              <strong>{percentage(item.value, totalCards)}%</strong>
+              <small>{item.value} cards</small>
+            </div>
+          ))}
+        </div>
+        <div className="project-progress-totals">
+          <span><i className="pi pi-users" /><strong>{summary.participantes || 0}</strong><small>Participantes</small></span>
+          <span><i className="pi pi-folder-open" /><strong>{summary.projetos || 0}</strong><small>Projetos</small></span>
+        </div>
       </section>
 
-      <section className="project-dashboard-analysis">
-        <article className="project-dashboard-panel project-dashboard-performance">
-          <header><div><span>Execução por membro</span><h2>Cards concluídos</h2></div><Tag value={`${data?.performance_colaboradores?.length || 0} membros`} severity="success" rounded /></header>
-          <div className="project-dashboard-chart">{data?.performance_colaboradores?.length ? <Chart type="bar" data={performance} options={chartOptions} /> : <EmptyChart text="Nenhuma execução no período." />}</div>
+      <section className="project-command-grid">
+        <article className="project-command-card project-participants-card">
+          <header><span>Pessoas</span><h2>Times por projeto</h2></header>
+          <div className="project-participant-groups">
+            {(data?.participantes_por_projeto || []).map((group) => (
+              <div className="project-participant-group" key={group.projeto_id}>
+                <div>
+                  <i style={{ "--project-color": group.cor || "#168447" }} />
+                  <span><strong>{group.projeto}</strong><small>{group.membros.length} participante(s)</small></span>
+                </div>
+                <div className="project-member-stack">
+                  {group.membros.slice(0, 6).map((member) => <MemberAvatar member={member} key={member.id} />)}
+                  {group.membros.length > 6 && <span className="project-member-more">+{group.membros.length - 6}</span>}
+                </div>
+              </div>
+            ))}
+            {!data?.participantes_por_projeto?.length && <EmptyChart text="Nenhum participante no recorte." />}
+          </div>
         </article>
-        <article className="project-dashboard-panel project-dashboard-insight">
-          <span>Leitura executiva</span>
-          <h2>{summary.atrasados ? "Existem cards que exigem atenção" : "Todos os cards estão dentro do prazo"}</h2>
-          <p>O indicador combina a data final do card com o status atual do quadro.</p>
-          <div><span><small>Projetos em atraso</small><strong>{summary.projetos_atrasados || 0}</strong></span><em>{summary.projetos_no_prazo || 0} no prazo</em></div>
-          <div><span><small>Cards próximos do vencimento</small><strong>{upcomingCards.filter((card) => !card.atrasado).length}</strong></span><em>{summary.atrasados || 0} em atraso</em></div>
-        </article>
-      </section>
 
-      <section className="project-dashboard-detail-grid">
-        <article className="project-dashboard-panel project-dashboard-status">
-          <header><div><span>Andamento</span><h2>Distribuição dos cards</h2></div></header>
-          <div className="project-dashboard-doughnut">{summary.cards ? <Chart type="doughnut" data={statusChart} options={{ maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8 } } } }} /> : <EmptyChart text="Sem cards no período." />}</div>
+        <article className="project-command-card project-performance-card">
+          <header><span>Performance</span><h2>Entrega contra o prazo</h2></header>
+          <div className="project-performance-content">
+            <div
+              className="project-performance-ring"
+              style={{ "--deadline-progress": `${Math.min(100, Number(summary.percentual_dentro_prazo || 0)) * 3.6}deg` }}
+            >
+              <span><strong>{summary.percentual_dentro_prazo || 0}%</strong><small>dentro do prazo</small></span>
+            </div>
+            <div className="project-performance-breakdown">
+              <div className="is-on-time"><span>Dentro do prazo</span><strong>{summary.dentro_prazo || 0}</strong><small>{summary.percentual_dentro_prazo || 0}% do total</small></div>
+              <div className="is-late"><span>Fora do prazo</span><strong>{summary.fora_prazo || 0}</strong><small>{summary.percentual_fora_prazo || 0}% do total</small></div>
+              <div className="is-average"><span>Tempo médio</span><strong>{formatHours(summary.tempo_medio_horas)}</strong><small>até a conclusão</small></div>
+            </div>
+          </div>
         </article>
-        <article className="project-dashboard-panel project-dashboard-deadlines">
-          <header><div><span>Prioridade</span><h2>Próximos vencimentos e atrasos</h2></div></header>
-          <div className="project-dashboard-list">
-            {upcomingCards.map((card) => <div key={card.id}>
-              <span><strong>{card.titulo}</strong><small>{card.projeto || "Projeto não informado"}</small></span>
-              <Tag value={card.data_fim ? new Date(`${String(card.data_fim).slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR") : "Sem prazo"} severity={card.atrasado ? "danger" : "success"} rounded />
-            </div>)}
-            {!upcomingCards.length && <EmptyChart text="Nenhum card com prazo." />}
+
+        <article className="project-command-card project-deadlines-card">
+          <header><span>Agenda</span><h2>Próximos vencimentos</h2></header>
+          <div className="project-deadline-feed">
+            {upcomingCards.map((card) => (
+              <div className={card.atrasado ? "is-late" : ""} key={card.id}>
+                <span className="project-deadline-day">{parseCardDate(card.data_fim)?.getDate().toString().padStart(2, "0") || "—"}</span>
+                <span><strong>{card.titulo}</strong><small>{card.projeto || "Projeto não informado"}</small></span>
+                <time>{formatCardDate(card.data_fim, true)}</time>
+              </div>
+            ))}
+            {!upcomingCards.length && <EmptyChart text="Nenhum vencimento no período." />}
+          </div>
+        </article>
+
+        <article className="project-command-card project-timeline-card">
+          <header><span>Planejamento</span><h2>Timeline dos cards</h2></header>
+          <div className="project-card-timeline">
+            {timelineCards.map((card) => (
+              <div className={`is-${card.status}`} key={card.id}>
+                <time>{formatCardDate(card.data_inicio || card.data_fim)}</time>
+                <span className="project-timeline-marker" />
+                <div>
+                  <span><strong>{card.titulo}</strong><small>{card.projeto}</small></span>
+                  <span className="project-member-stack is-compact">
+                    {(card.membros || []).slice(0, 4).map((member) => <MemberAvatar member={member} small key={member.id} />)}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {!timelineCards.length && <EmptyChart text="Nenhum card com data no período." />}
+          </div>
+        </article>
+
+        <article className="project-command-card project-status-card">
+          <header><span>Status</span><h2>Distribuição atual</h2></header>
+          <div className="project-dashboard-doughnut">
+            {totalCards ? <Chart type="doughnut" data={statusChart} options={doughnutOptions} /> : <EmptyChart text="Sem cards no período." />}
+            {!!totalCards && <div className="project-dashboard-doughnut__total"><strong>{totalCards}</strong><span>cards</span></div>}
           </div>
         </article>
       </section>
