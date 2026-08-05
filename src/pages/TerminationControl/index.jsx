@@ -25,8 +25,14 @@ const REASON_OPTIONS = [
   { label: "Pedido de demissão", value: "pedido_demissao" },
   { label: "Extinção por acordo", value: "acordo" },
   { label: "Dispensa por justa causa", value: "justa_causa" },
-  { label: "Término de contrato por prazo determinado", value: "termino_contrato" },
+  { label: "Término de experiência / contrato determinado", value: "termino_contrato" },
 ];
+
+const EXPERIENCE_REASON_OPTIONS = REASON_OPTIONS.filter(({ value }) =>
+  ["pedido_demissao", "termino_contrato"].includes(value),
+);
+const EXPERIENCE_DAYS = 90;
+const FGTS_BALANCE_DISABLED_REASONS = new Set(["pedido_demissao", "justa_causa"]);
 
 const NOTICE_OPTIONS = [
   { label: "Indenizado", value: "indenizado" },
@@ -42,11 +48,31 @@ const EMPTY_CALCULATION = {
   data_demissao: null,
   motivo: "sem_justa_causa",
   tipo_aviso: "indenizado",
-  saldo_fgts: 0,
+  saldo_fgts: null,
   ferias_integrais: 0,
   ferias_em_dobro: 0,
   outras_verbas: 0,
   descontos: 0,
+};
+
+const EARNING_LABELS = {
+  saldo_salario: "Saldo de salário",
+  decimo_terceiro_proporcional: "13º proporcional",
+  ferias_proporcionais: "Férias proporcionais",
+  terco_ferias_proporcionais: "1/3 de férias proporcionais",
+  ferias_integrais: "Férias integrais",
+  terco_ferias_integrais: "1/3 de férias integrais",
+  ferias_em_dobro: "Férias em dobro",
+  terco_ferias_em_dobro: "1/3 de férias em dobro",
+  aviso_previo_indenizado: "Aviso prévio indenizado",
+  outras_verbas: "Outras verbas",
+};
+
+const DISCOUNT_LABELS = {
+  descontos_informados: "Descontos informados",
+  desconto_aviso_previo: "Desconto de aviso prévio",
+  fgts_sobre_rescisao: "FGTS sobre verbas rescisórias",
+  fgts_sobre_decimo_terceiro: "FGTS sobre o 13º proporcional",
 };
 
 function defaultPeriod() {
@@ -59,9 +85,39 @@ function isoDate(value) {
   return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
 }
 
+function localDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+  const raw = String(value).slice(0, 10);
+  const [year, month, day] = raw.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
+}
+
+function addDays(value, days) {
+  const result = localDate(value);
+  if (!result) return null;
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function completeYears(startValue, endValue) {
+  const start = localDate(startValue);
+  const end = localDate(endValue);
+  if (!start || !end) return 0;
+  let years = end.getFullYear() - start.getFullYear();
+  if (
+    end.getMonth() < start.getMonth()
+    || (end.getMonth() === start.getMonth() && end.getDate() < start.getDate())
+  ) years -= 1;
+  return Math.max(0, years);
+}
+
 function dateLabel(value) {
   if (!value) return "—";
-  return new Date(`${String(value).slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR");
+  return localDate(value)?.toLocaleDateString("pt-BR") || "—";
 }
 
 function money(value) {
@@ -99,6 +155,56 @@ function TerminationControlContent() {
   const canImport = can("controle_rescisoes", "create");
   const canEdit = can("controle_rescisoes", "edit");
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
+
+  const admissionDate = useMemo(
+    () => localDate(calculationForm.colaborador?.data_admissao),
+    [calculationForm.colaborador?.data_admissao],
+  );
+  const experienceEndDate = useMemo(
+    () => addDays(admissionDate, EXPERIENCE_DAYS - 1),
+    [admissionDate],
+  );
+  const inExperiencePeriod = useMemo(() => {
+    const dismissalDate = localDate(calculationForm.data_demissao);
+    if (!admissionDate || !dismissalDate || !experienceEndDate) return false;
+    return dismissalDate >= admissionDate && dismissalDate <= experienceEndDate;
+  }, [admissionDate, calculationForm.data_demissao, experienceEndDate]);
+  const reasonOptions = inExperiencePeriod ? EXPERIENCE_REASON_OPTIONS : REASON_OPTIONS;
+  const fgtsBalanceDisabled = FGTS_BALANCE_DISABLED_REASONS.has(calculationForm.motivo);
+  const noticeDaysPreview = useMemo(() => {
+    if (!admissionDate || !calculationForm.data_demissao) return 30;
+    return Math.min(90, 30 + (3 * completeYears(admissionDate, calculationForm.data_demissao)));
+  }, [admissionDate, calculationForm.data_demissao]);
+  const workedNoticeEndDate = useMemo(() => {
+    const isEmployerDismissal = ["sem_justa_causa", "acordo"].includes(calculationForm.motivo);
+    if (
+      calculationForm.tipo_aviso !== "trabalhado"
+      || !isEmployerDismissal
+      || inExperiencePeriod
+      || !calculationForm.data_demissao
+    ) return null;
+    return addDays(calculationForm.data_demissao, Math.max(0, noticeDaysPreview - 7));
+  }, [calculationForm.data_demissao, calculationForm.motivo, calculationForm.tipo_aviso, inExperiencePeriod, noticeDaysPreview]);
+
+  useEffect(() => {
+    if (!inExperiencePeriod) return;
+    setCalculationForm((current) => {
+      const nextReason = ["pedido_demissao", "termino_contrato"].includes(current.motivo)
+        ? current.motivo
+        : "termino_contrato";
+      if (current.motivo === nextReason && current.tipo_aviso === "nao_aplicavel") return current;
+      return { ...current, motivo: nextReason, tipo_aviso: "nao_aplicavel" };
+    });
+    setCalculation(null);
+  }, [inExperiencePeriod]);
+
+  useEffect(() => {
+    if (!fgtsBalanceDisabled) return;
+    setCalculationForm((current) => (
+      current.saldo_fgts === null ? current : { ...current, saldo_fgts: null }
+    ));
+    setCalculation(null);
+  }, [fgtsBalanceDisabled]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 300);
@@ -197,9 +303,18 @@ function TerminationControlContent() {
   }
 
   function openCalculation() {
-    setCalculationForm(EMPTY_CALCULATION);
+    setCalculationForm({ ...EMPTY_CALCULATION });
     setCalculation(null);
     setCalculationOpen(true);
+  }
+
+  function changeCalculationEmployee(employeeId, employee) {
+    setCalculationForm((current) => ({
+      ...current,
+      colaborador_id: employeeId,
+      colaborador: employee || null,
+    }));
+    setCalculation(null);
   }
 
   function changeCalculation(field, value) {
@@ -371,14 +486,64 @@ function TerminationControlContent() {
                 value={calculationForm.colaborador_id}
                 selectedOption={calculationForm.colaborador}
                 queryParams={{ com_local: true }}
-                onChange={(employeeId, employee) => setCalculationForm((current) => ({ ...current, colaborador_id: employeeId, colaborador: employee || null }))}
+                onChange={changeCalculationEmployee}
                 placeholder="Pesquise por nome ou matrícula"
               />
             </label>
-            <label><span>Data prevista da demissão</span><Calendar value={calculationForm.data_demissao} onChange={(event) => changeCalculation("data_demissao", event.value)} dateFormat="dd/mm/yy" showIcon /></label>
-            <label><span>Motivo</span><Dropdown value={calculationForm.motivo} options={REASON_OPTIONS} onChange={(event) => changeCalculation("motivo", event.value)} /></label>
-            <label><span>Aviso prévio</span><Dropdown value={calculationForm.tipo_aviso} options={NOTICE_OPTIONS} onChange={(event) => changeCalculation("tipo_aviso", event.value)} /></label>
-            <label><span>Saldo atual do FGTS</span><InputNumber value={calculationForm.saldo_fgts} onValueChange={(event) => changeCalculation("saldo_fgts", event.value || 0)} mode="currency" currency="BRL" locale="pt-BR" min={0} /></label>
+            <label>
+              <span>{calculationForm.tipo_aviso === "trabalhado" ? "Data de início do aviso" : "Data prevista da demissão"}</span>
+              <Calendar value={calculationForm.data_demissao} onChange={(event) => changeCalculation("data_demissao", event.value)} dateFormat="dd/mm/yy" showIcon />
+            </label>
+            <label><span>Motivo</span><Dropdown value={calculationForm.motivo} options={reasonOptions} onChange={(event) => changeCalculation("motivo", event.value)} /></label>
+            <label>
+              <span>Aviso prévio</span>
+              <Dropdown
+                value={calculationForm.tipo_aviso}
+                options={NOTICE_OPTIONS}
+                onChange={(event) => changeCalculation("tipo_aviso", event.value)}
+                disabled={inExperiencePeriod}
+              />
+            </label>
+            <label>
+              <span>Saldo atual do FGTS</span>
+              <InputNumber
+                value={calculationForm.saldo_fgts}
+                onValueChange={(event) => changeCalculation("saldo_fgts", event.value)}
+                mode="currency"
+                currency="BRL"
+                locale="pt-BR"
+                min={0}
+                disabled={fgtsBalanceDisabled}
+                placeholder={fgtsBalanceDisabled ? "Não aplicável ao motivo" : "Calculado automaticamente"}
+              />
+            </label>
+            {inExperiencePeriod && (
+              <div className="termination-calculation-info is-wide is-experience">
+                <i className="pi pi-clock" />
+                <div>
+                  <strong>Colaborador em período de experiência</strong>
+                  <span>Até {dateLabel(experienceEndDate)}. O motivo fica limitado a pedido de demissão ou término de experiência, sem aviso prévio.</span>
+                </div>
+              </div>
+            )}
+            {workedNoticeEndDate && (
+              <div className="termination-calculation-info is-wide is-notice">
+                <i className="pi pi-calendar" />
+                <div>
+                  <strong>Término previsto do aviso: {dateLabel(workedNoticeEndDate)}</strong>
+                  <span>{noticeDaysPreview} dias de aviso − 7 dias de redução = {Math.max(0, noticeDaysPreview - 7)} dias trabalhados.</span>
+                </div>
+              </div>
+            )}
+            {fgtsBalanceDisabled && (
+              <div className="termination-calculation-info is-wide is-restricted">
+                <i className="pi pi-lock" />
+                <div>
+                  <strong>Saldo do FGTS não aplicável</strong>
+                  <span>Para pedido de demissão ou justa causa, o saldo não participa do cálculo da multa.</span>
+                </div>
+              </div>
+            )}
             <label><span>Férias integrais não gozadas</span><InputNumber value={calculationForm.ferias_integrais} onValueChange={(event) => changeCalculation("ferias_integrais", event.value || 0)} min={0} max={10} showButtons /></label>
             <label><span>Férias vencidas em dobro</span><InputNumber value={calculationForm.ferias_em_dobro} onValueChange={(event) => changeCalculation("ferias_em_dobro", event.value || 0)} min={0} max={10} showButtons /></label>
             <label><span>Outras verbas estimadas</span><InputNumber value={calculationForm.outras_verbas} onValueChange={(event) => changeCalculation("outras_verbas", event.value || 0)} mode="currency" currency="BRL" locale="pt-BR" min={0} /></label>
@@ -388,15 +553,59 @@ function TerminationControlContent() {
 
           <div className={`termination-calculation-result ${calculation ? "has-result" : ""}`}>
             {!calculation ? <div className="termination-result-empty"><i className="pi pi-calculator" /><strong>Memória de cálculo</strong><span>Preencha os dados para visualizar a provisão detalhada.</span></div> : <>
-              <div className="termination-result-employee"><div><small>Colaborador</small><strong>{calculation.colaborador?.nome}</strong><span>Matrícula {calculation.colaborador?.matricula} · salário {money(calculation.colaborador?.salario)}</span></div><Tag value="ESTIMATIVA" severity="warning" /></div>
+              <div className="termination-result-employee">
+                <div>
+                  <small>Colaborador</small>
+                  <strong>{calculation.colaborador?.nome}</strong>
+                  <span>Matrícula {calculation.colaborador?.matricula} · salário {money(calculation.colaborador?.salario)}</span>
+                  {calculation.parametros?.periodo_experiencia && <span>Experiência até {dateLabel(calculation.parametros?.data_fim_experiencia)}</span>}
+                  {calculation.parametros?.data_termino_aviso_trabalhado && (
+                    <span className="termination-result-notice-date">
+                      Término previsto do aviso: {dateLabel(calculation.parametros.data_termino_aviso_trabalhado)}
+                    </span>
+                  )}
+                </div>
+                <Tag value="ESTIMATIVA" severity="warning" />
+              </div>
+              <div className="termination-result-fgts-balance">
+                <div>
+                  <span>Saldo de FGTS utilizado</span>
+                  <strong>{money(calculation.fgts?.saldo_utilizado)}</strong>
+                </div>
+                <small>
+                  {calculation.fgts?.saldo_origem === "informado" ? "Saldo informado manualmente" : calculation.fgts?.saldo_origem === "desabilitado" ? "Saldo desabilitado para este motivo" : `${calculation.fgts?.meses_trabalhados_estimados || 0} meses estimados + FGTS proporcional do 13º`}
+                </small>
+              </div>
               <div className="termination-result-list">
-                {Object.entries(calculation.verbas || {}).filter(([, value]) => Number(value) !== 0).map(([key, value]) => <div key={key}><span>{key.replaceAll("_", " ")}</span><strong>{money(value)}</strong></div>)}
-                <div><span>FGTS rescisório estimado</span><strong>{money(calculation.fgts_rescisorio_estimado)}</strong></div>
-                <div><span>Multa do FGTS ({calculation.parametros?.percentual_multa_fgts || 0}%)</span><strong>{money(calculation.multa_fgts_estimada)}</strong></div>
-                {Number(calculation.descontos) > 0 && <div className="is-discount"><span>Descontos do colaborador</span><strong>- {money(calculation.descontos)}</strong></div>}
+                <div className="termination-result-section-title is-earning-title"><span>Proventos do colaborador</span></div>
+                {Object.entries(calculation.verbas || {})
+                  .filter(([, value]) => Number(value) !== 0)
+                  .map(([key, value]) => (
+                    <div className="is-earning" key={key}>
+                      <span>{EARNING_LABELS[key] || key.replaceAll("_", " ")}</span>
+                      <strong>+ {money(value)}</strong>
+                    </div>
+                  ))}
+
+                {Number(calculation.descontos) > 0 && <div className="termination-result-section-title is-discount-title"><span>Descontos do colaborador</span></div>}
+                {Object.entries(calculation.descontos_detalhados || {})
+                  .filter(([, value]) => Number(value) !== 0)
+                  .map(([key, value]) => (
+                    <div className="is-discount" key={key}>
+                      <span>{DISCOUNT_LABELS[key] || key.replaceAll("_", " ")}</span>
+                      <strong>− {money(value)}</strong>
+                    </div>
+                  ))}
+
+                {Number(calculation.multa_fgts_estimada) > 0 && <>
+                  <div className="termination-result-section-title is-employer-title"><span>Encargos adicionais da empresa</span></div>
+                  <div className="is-employer-charge"><span>Multa do FGTS ({calculation.parametros?.percentual_multa_fgts || 0}%)</span><strong>+ {money(calculation.multa_fgts_estimada)}</strong></div>
+                </>}
               </div>
               <div className="termination-result-totals">
-                <div><span>Líquido estimado</span><strong>{money(calculation.liquido_estimado)}</strong></div>
+                <div className="is-positive"><span>Proventos</span><strong>+ {money(calculation.proventos)}</strong></div>
+                <div className="is-negative"><span>Descontos</span><strong>− {money(calculation.descontos)}</strong></div>
+                <div className="is-liquid"><span>Líquido estimado</span><strong>{money(calculation.liquido_estimado)}</strong></div>
                 <div className="is-primary"><span>Custo estimado para a empresa</span><strong>{money(calculation.custo_empresa_estimado)}</strong></div>
               </div>
               <ul className="termination-result-notes">{(calculation.observacoes || []).map((note) => <li key={note}>{note}</li>)}</ul>
