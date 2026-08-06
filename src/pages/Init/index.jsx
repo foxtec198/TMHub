@@ -38,7 +38,7 @@ export function Init() {
 
   return (
     <main className="init-support-page">
-      <div className="flex justify-content-between">
+      <div className="flex justify-content-between gap-4">
         <section className="init-support-hero">
           <div className="init-support-hero-content">
             <span className="init-support-eyebrow">TM HUB · CENTRAL DE AJUDA</span>

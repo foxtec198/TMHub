@@ -427,6 +427,7 @@ const MainCard = styled.div`
   grid-template-columns: 92px 1fr auto;
   align-items: center;
   min-height: 130px;
+  color: #fff;
   padding: 18px;
   overflow: hidden;
   border: 1px solid var(--widget-border);
@@ -644,6 +645,11 @@ const DetailsCard = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background: ghostwhite;
+
+  :root[data-theme='dark'] & {
+    background: linear-gradient(135deg, #111, #222);
+  }
 `;
 
 const PrimaryDetails = styled.div`
@@ -651,7 +657,7 @@ const PrimaryDetails = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   padding-bottom: 14px;
-`;
+  `;
 
 const SecondaryDetails = styled.div`
   display: grid;
@@ -659,7 +665,7 @@ const SecondaryDetails = styled.div`
   gap: 8px;
   padding: 14px 0;
   border-top: 1px solid var(--widget-border);
-`;
+  `;
 
 const Metric = styled.div`
   display: grid;
@@ -685,6 +691,7 @@ const Metric = styled.div`
     grid-column: 2;
     font-size: 0.78rem;
     color: var(--widget-text);
+    
   }
 `;
 
@@ -720,6 +727,12 @@ const StateBox = styled.div`
   background: var(--surface-card, #ffffff);
   color: var(--text-color, #1f2937);
   text-align: center;
+  
+  :root[data-theme='dark'] & {
+    background: black;
+    border: 1px solid var(--accent);
+    color: var(--text-color, #f1f1f1);
+  }
 
   span {
     max-width: 280px;
