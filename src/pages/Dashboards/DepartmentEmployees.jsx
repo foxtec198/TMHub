@@ -24,6 +24,7 @@ const EMPTY_FILTERS = {
     cidades: [],
     situacoes: [],
     cargos: [],
+    colaboradores: [],
 };
 
 function uniqueOptions(items, valueKey, labelKey = valueKey) {
@@ -38,6 +39,14 @@ function uniqueOptions(items, valueKey, labelKey = valueKey) {
     });
 
     return [...options.values()].sort((a, b) => a.label.localeCompare(b.label, "pt-BR", { numeric: true }));
+}
+
+function collaboratorOptions(items) {
+    return [...new Map(items.map((employee) => [employee.id, {
+        value: employee.id,
+        label: `${employee.matricula || "Sem matrícula"} - ${employee.nome || "Colaborador"}`,
+    }])).values()]
+        .sort((a, b) => a.label.localeCompare(b.label, "pt-BR", { numeric: true }));
 }
 
 function formatAdmission(value) {
@@ -111,6 +120,7 @@ export function DepartmentEmployeesDashboard() {
         cidades: uniqueOptions(employees, "cidade_id", "cidade"),
         situacoes: uniqueOptions(employees, "situacao_id", "situacao"),
         cargos: uniqueOptions(employees, "cargo", "cargo"),
+        colaboradores: collaboratorOptions(employees),
     }), [employees]);
 
     const filteredEmployees = useMemo(() => employees.filter((employee) => (
@@ -120,6 +130,7 @@ export function DepartmentEmployeesDashboard() {
         && (!filters.cidades.length || filters.cidades.includes(employee.cidade_id))
         && (!filters.situacoes.length || filters.situacoes.includes(employee.situacao_id))
         && (!filters.cargos.length || filters.cargos.includes(employee.cargo))
+        && (!filters.colaboradores.length || filters.colaboradores.includes(employee.id))
     )), [employees, filters]);
 
     const departments = useMemo(() => {
@@ -208,6 +219,7 @@ export function DepartmentEmployeesDashboard() {
                     ["cidades", "Cidades"],
                     ["situacoes", "Situações"],
                     ["cargos", "Cargos"],
+                    ["colaboradores", "Colaboradores"],
                 ].map(([name, label]) => (
                     <label className="department-filter-field" key={name}>
                         <span>{label}</span>
