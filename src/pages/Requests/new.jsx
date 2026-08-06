@@ -111,7 +111,10 @@ export function Request() {
                     motivo: reason,
                     advertencia: warning,
                     data: selectedRequestDate(),
-                    obs: obs
+                    obs: obs,
+                    // Identifica o fluxo público no backend para que o
+                    // supervisor não limite os colaboradores atendidos.
+                    publico: true,
                 }
                 await connect.post("/repo/request", data)
                 showToast("success", "Sucesso na requisição", "Sua requisição foi criada com sucesso, aguarde novidades por email!")
