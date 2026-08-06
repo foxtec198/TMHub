@@ -761,6 +761,48 @@
 .branch-dialog {
   width: min(720px, 95vw);
 }
+.capacity-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+.capacity-centers-card,
+.capacity-departments-card {
+  min-width: 0;
+}
+.capacity-departments-card > .p-button {
+  margin-top: 0.75rem;
+}
+.capacity-unset {
+  color: var(--text-color-secondary);
+  font-style: italic;
+}
+.capacity-dialog {
+  width: min(28rem, calc(100vw - 2rem));
+}
+.capacity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.capacity-form > small,
+.capacity-form > span {
+  color: var(--text-color-secondary);
+}
+.capacity-form > label {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.capacity-form .p-inputnumber,
+.capacity-form .p-inputnumber-input {
+  width: 100%;
+}
+@media (max-width: 900px) {
+  .capacity-settings-layout {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 900px) {
   .branch-settings-layout {
     grid-template-columns: 1fr;
@@ -968,4 +1010,22 @@
   border-color: #3c5b45;
   background: #111a14;
   color: #f3faf5;
+}
+:root[data-theme="dark"] .capacity-unset,
+:root[data-theme="dark"] .capacity-form > small,
+:root[data-theme="dark"] .capacity-form > span {
+  color: #aebfb3;
+}
+:root[data-theme="dark"] .capacity-dialog.p-dialog,
+:root[data-theme="dark"] .capacity-dialog .p-dialog-header,
+:root[data-theme="dark"] .capacity-dialog .p-dialog-content,
+:root[data-theme="dark"] .capacity-dialog .p-dialog-footer {
+  color: #edf7ef;
+  background: #121713 !important;
+  border-color: #385440;
+}
+:root[data-theme="dark"] .capacity-dialog .p-inputnumber-input {
+  color: #f3faf5;
+  border-color: #3c5b45;
+  background: #111a14;
 }

@@ -21,6 +21,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { PageHeader } from "../../components/PageHeader";
 import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
+import { CapacityDepartmentSettings } from "./CapacityDepartmentSettings";
 import { CollaboratorImportSettings } from "./EmployeeImportSettings";
 import { NewsSettings } from "./NewsSettings";
 import { TMOpsAccessSettings } from "./TMOpsAccessSettings";
@@ -180,6 +181,9 @@ export function Settings() {
       </TabPanel>}
       {isAdmin && <TabPanel header="Filiais" leftIcon="pi pi-building mr-2">
         <BranchSettings />
+      </TabPanel>}
+      {isAdmin && <TabPanel header="Planejamento" leftIcon="pi pi-sliders-h mr-2">
+        <CapacityDepartmentSettings />
       </TabPanel>}
       {isAdmin && <TabPanel header="Importar colaboradores" leftIcon="pi pi-upload mr-2">
         <CollaboratorImportSettings />

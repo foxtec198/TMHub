@@ -32,7 +32,9 @@ import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 // Styles
 import "./styles.css";
 
-const REASONS = ["ATESTADO", "AFASTAMENTO", "DECLARAÇÃO", "INJUSTIFICADA", "POSTO VAGO", "REMANEJAMENTO", "OUTROS"];
+// Remanejamento é uma alteração de alocação; não deve gerar nem ser tratado
+// como falta neste módulo.
+const REASONS = ["ATESTADO", "AFASTAMENTO", "DECLARAÇÃO", "INJUSTIFICADA", "POSTO VAGO", "OUTROS"];
 const CLASSIFICATIONS = [
   { label: "Justificada", value: "justificada" },
   { label: "Injustificada", value: "injustificada" },

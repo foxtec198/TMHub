@@ -74,10 +74,10 @@ export function Request() {
         "AFASTAMENTO",
         "ATESTADO",
         "DECLARAÇÃO",
+        "FÉRIAS",
         "POSTO VAGO",
         "REMANEJAMENTO",
         "INJUSTIFICADA",
-        "OUTROS",
     ]
 
     const stepperRef = useRef(null)

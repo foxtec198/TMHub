@@ -10,7 +10,7 @@ import connect from "../../utils/request";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 
-const REASONS = ["AFASTAMENTO", "ATESTADO", "DECLARAÇÃO", "POSTO VAGO", "REMANEJAMENTO", "INJUSTIFICADA", "OUTROS"];
+const REASONS = ["AFASTAMENTO", "ATESTADO", "DECLARAÇÃO", "FÉRIAS", "POSTO VAGO", "REMANEJAMENTO", "INJUSTIFICADA", "OUTROS"];
 const initialForm = () => ({ supervisor: null, absent: null, reservation: null, center: null, reason: null, warning: null, obs: "", noCoverage: false, date: new Date() });
 const centerLabel = (center) => {
   const local = String(center.local || "").trim();
@@ -101,7 +101,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
       <InputText value={form.obs} onChange={(e) => setForm({ ...form, obs: e.target.value })} placeholder="Observação (opcional)" />
       <Calendar value={form.date} onChange={(e) => e.value && setForm({ ...form, date: e.value })} dateFormat="dd/mm/yy" placeholder="Data da ausência" showIcon readOnlyInput />
       <label className="flex align-items-center gap-2"><Checkbox checked={form.noCoverage} onChange={(e) => setForm({ ...form, noCoverage: e.checked, reservation: e.checked ? null : form.reservation })} />Sem cobertura</label>
-      <div className="flex justify-content-end gap-2"><Button type="button" label="Cancelar" text onClick={onHide}/><Button type="submit" label="Criar requisição" icon="pi pi-check"/></div>
+      <div className="flex justify-content-end gap-2"><Button type="button" label="Cancelar" text onClick={onHide} /><Button type="submit" label="Criar requisição" icon="pi pi-check" /></div>
     </form>
   </Dialog>;
 }

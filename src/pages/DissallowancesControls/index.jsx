@@ -34,6 +34,7 @@ const COVERAGE_OPTIONS = [
   { label: "Parcialmente coberta", value: "parcial" },
   { label: "Descoberta", value: "descoberta" },
 ];
+
 const FILTER_DEFINITIONS = {
   cobertura: {
     getValue: (record) => record.cobertura,
