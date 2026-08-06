@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import connect from "../../utils/request";
 import { getInitials } from "../../utils/profile";
 import "./init.css";
+import WeatherWidget from "../../components/WeatherWidget";
 
 const documentation = [
   {
@@ -37,25 +38,29 @@ export function Init() {
 
   return (
     <main className="init-support-page">
-      <section className="init-support-hero">
-        <div className="init-support-hero-content">
-          <span className="init-support-eyebrow">TM HUB · CENTRAL DE AJUDA</span>
-          <h1>Suporte e documentação em um só lugar.</h1>
-          <p>
-            Encontre orientações técnicas, consulte os recursos do sistema e saiba
-            quais informações enviar para agilizar seu atendimento.
-          </p>
-          <div className="init-support-hero-tags">
-            <span><i className="pi pi-book" /> Documentação atualizada</span>
-            <span><i className="pi pi-comments" /> Suporte interno</span>
-            <span><i className="pi pi-shield" /> Acesso controlado</span>
+      <div className="flex justify-content-between">
+        <section className="init-support-hero">
+          <div className="init-support-hero-content">
+            <span className="init-support-eyebrow">TM HUB · CENTRAL DE AJUDA</span>
+            <h1>Suporte e documentação em um só lugar.</h1>
+            <p>
+              Encontre orientações técnicas, consulte os recursos do sistema e saiba
+              quais informações enviar para agilizar seu atendimento.
+            </p>
+            <div className="init-support-hero-tags">
+              <span><i className="pi pi-book" /> Documentação atualizada</span>
+              <span><i className="pi pi-comments" /> Suporte interno</span>
+              <span><i className="pi pi-shield" /> Acesso controlado</span>
+            </div>
           </div>
-        </div>
-        <div className="init-support-hero-mark" aria-hidden="true">
-          <img src="/brands/main_brand_white.svg" alt="" />
-          <i className="pi pi-headphones" />
-        </div>
-      </section>
+          <div className="init-support-hero-mark" aria-hidden="true">
+            <img src="/brands/main_brand_white.svg" alt="" />
+            <i className="pi pi-headphones" />
+          </div>
+        </section>
+
+        <WeatherWidget/>
+      </div>
 
       <section className="init-support-section">
         <header className="init-support-section-header">

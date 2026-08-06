@@ -21,6 +21,7 @@
     "fflate": "^0.8.3",
     "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
+    "lucide-react": "^1.29.0",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.8",
@@ -31,7 +32,8 @@
     "serve": "^14.2.6",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
-    "socketio": "^1.0.0"
+    "socketio": "^1.0.0",
+    "styled-components": "^6.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
