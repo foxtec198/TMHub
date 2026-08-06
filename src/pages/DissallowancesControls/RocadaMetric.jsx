@@ -43,12 +43,21 @@ function MonthChart({ month }) {
       },
       {
         type: "line",
-        label: "Meta",
+        label: "Média contratual",
         data: days.map(() => month.meta),
         borderColor: "#a6b0ad",
         borderWidth: 1,
         pointRadius: 0,
         borderDash: [2, 3],
+      },
+      {
+        type: "line",
+        label: "Quadro médio",
+        data: days.map(() => month.media_quadro),
+        borderColor: "#5ca9e6",
+        borderWidth: 1.5,
+        pointRadius: 0,
+        borderDash: [6, 3],
       },
     ],
   };
@@ -122,9 +131,9 @@ export function RocadaMetric({ endpoint = "/glosas/rocada" }) {
       {months.map((month) => <article className={`rocada-month-card ${month.futuro ? "is-future" : month.glosado == null ? "is-empty" : month.glosado ? "is-risk" : "is-safe"}`} key={month.competencia}>
         <div className="rocada-month-card__top"><span>{monthName(month.competencia)}</span><Tag value={month.situacao} severity={month.futuro ? "secondary" : month.glosado == null ? "info" : month.glosado ? "danger" : "success"} /></div>
         <strong>{month.tem_dados ? month.media_trabalhados.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : "—"}</strong>
-        <span className="rocada-month-card__target">{month.tem_dados ? `média trabalhada · meta ${month.meta}` : month.futuro ? "o indicador será definido no mês" : "aguardando histórico do período"}</span>
+        <span className="rocada-month-card__target">{month.tem_dados ? `média trabalhada · média contratual ${month.meta}` : month.futuro ? "o indicador será definido no mês" : "aguardando histórico do período"}</span>
         <MonthChart month={month} />
-        <div className="rocada-month-card__stats"><span><i className="pi pi-calendar" /> {month.dias_operacionais} dias</span><span><i className="pi pi-user-minus" /> {month.media_faltantes} faltantes/dia</span></div>
+        <div className="rocada-month-card__stats"><span><i className="pi pi-calendar" /> {month.dias_operacionais} dias</span><span><i className="pi pi-chart-line" /> base {month.meta_padrao || 72}</span><span><i className="pi pi-user-minus" /> {month.media_faltantes} faltantes/dia</span></div>
         <Button label={month.futuro ? "Aguardando mês" : "Visualizar"} icon={month.futuro ? "pi pi-clock" : "pi pi-table"} text onClick={() => openDetail(month.competencia)} loading={loadingDetail} disabled={month.futuro} />
       </article>)}
     </div>
@@ -134,6 +143,7 @@ export function RocadaMetric({ endpoint = "/glosas/rocada" }) {
         <div className="rocada-detail-summary">
           <span><small>Média de trabalhados</small><strong>{summary.media_trabalhados}</strong></span>
           <span><small>Média de faltantes</small><strong>{summary.media_faltantes}</strong></span>
+          <span><small>Média contratual</small><strong>{summary.meta}</strong></span>
           <span><small>Dias operacionais</small><strong>{summary.dias_operacionais}</strong></span>
           <Tag value={summary.situacao} severity={summary.glosado ? "danger" : "success"} />
         </div>
