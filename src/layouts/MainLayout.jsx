@@ -38,7 +38,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/estoque/produtos": ["estoque.produtos"],
   "/estoque/codigos-de-barras": ["estoque.produtos"],
   "/estoque/movimentacoes": ["estoque.movimentos"],
-  "/estrutura": ["estrutura"],
+  "/estrutura": ["estrutura", "estoque.movimentos"],
   "/projetos": ["projetos"],
   "/reports/rescisoes": ["rescisoes", "colaboradores"],
 };
