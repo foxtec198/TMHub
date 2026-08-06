@@ -296,7 +296,8 @@ function AbsenceControlPage() {
     </div>
     <div className="absence-panel">
       <div className="absence-filters">
-        <span className="p-input-icon-left"><i className="pi pi-search" /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador, matrícula ou contrato" /></span>
+        <span className="p-input-icon-left"><i className="pi pi-search" />
+        <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador, matrícula ou contrato" /></span>
       </div>
       <DataTable value={filtered} paginator rows={10} rowsPerPageOptions={[10, 25, 50, 100]} stripedRows emptyMessage="Nenhuma falta encontrada." dataKey="id" size="small">
         <Column field="data_falta" header="Data" sortable body={(record) => new Date(record.data_falta).toLocaleDateString("pt-BR")} />
