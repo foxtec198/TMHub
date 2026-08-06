@@ -99,7 +99,7 @@
 }
 
 .absence-filters .p-input-icon-left {
-    flex: 1
+    flex: 1;
 }
 
 .absence-filters .p-inputtext {
@@ -107,7 +107,7 @@
 }
 
 .absence-filters .p-input-icon-left>.p-inputtext {
-    padding-left: 5rem
+    padding-left: 3rem;
 }
 
 .absence-person {
