@@ -74,6 +74,195 @@
     font-weight: 600;
 }
 
+.movement-radio-inputs {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-self: flex-start;
+    box-sizing: border-box;
+    width: min(300px, 100%);
+    padding: .25rem;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 42%, var(--surface-border));
+    border-radius: .45rem;
+    background: color-mix(in srgb, var(--primary-color) 16%, var(--surface-card));
+    box-shadow: 0 1px 4px rgba(7, 16, 9, .08);
+    font-size: .875rem;
+}
+
+.movement-radio {
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.movement-radio input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.movement-radio-name {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    min-height: 36px;
+    padding: .5rem .75rem;
+    border: none;
+    border-radius: .38rem;
+    color: var(--text-color);
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.movement-radio-name i {
+    color: var(--primary-color);
+    font-size: .86rem;
+}
+
+.movement-radio input:checked + .movement-radio-name {
+    color: #071009;
+    background: var(--primary-color);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color) 28%, transparent);
+    font-weight: 600;
+}
+
+.movement-radio input:checked + .movement-radio-name i {
+    color: #071009;
+}
+
+.movement-radio input:focus-visible + .movement-radio-name {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.movement-table-area {
+    min-height: 420px;
+}
+
+.movement-speed-dial {
+    position: fixed;
+    z-index: 20;
+    right: 1.5rem;
+    bottom: 1.5rem;
+}
+
+.movement-speed-dial .p-speeddial {
+    position: relative;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.movement-speed-dial .p-speeddial.p-component,
+.movement-speed-dial .p-speeddial-button-wrapper {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.movement-speed-dial .p-speeddial-list,
+.movement-speed-dial .p-speeddial-list.p-component {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.movement-speed-dial .p-speeddial-action {
+    width: 3.25rem;
+    height: 3.25rem;
+    color: #fff;
+    background: #000 !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 50%;
+    box-shadow: var(--shadow-md);
+}
+
+.movement-speed-dial .p-speeddial-action:hover {
+    color: #fff;
+    background: #171717 !important;
+}
+
+.movement-speed-dial .p-speeddial-action.p-disabled,
+.movement-speed-dial .p-speeddial-action[aria-disabled="true"] {
+    opacity: .5;
+    pointer-events: none;
+}
+
+.movement-speed-dial .p-speeddial-button {
+    width: 4rem;
+    height: 4rem;
+    color: #fff !important;
+    background: #000 !important;
+    border: 3px solid var(--accent-light) !important;
+    box-shadow: var(--shadow-md);
+}
+
+.movement-speed-dial .p-speeddial-button:hover,
+.movement-speed-dial .p-speeddial-button:focus,
+.movement-speed-dial .p-speeddial-opened .p-speeddial-button {
+    color: #fff !important;
+    background: #000 !important;
+}
+
+.asset-movement-item,
+.asset-movement-place {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .2rem;
+}
+
+.asset-movement-item strong,
+.asset-movement-place strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.asset-movement-item span,
+.asset-movement-place span {
+    color: var(--text-color-secondary);
+    font-size: .76rem;
+}
+
+.asset-movement-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    padding-top: 1rem;
+}
+
+.asset-current-location {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+    padding: .85rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    background: var(--surface-ground);
+}
+
+.asset-current-location span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.asset-current-location small {
+    color: var(--text-color-secondary);
+    font-size: .72rem;
+}
+
+.asset-current-location strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .movement-dialog {
     width: min(94vw, 620px);
 }
@@ -201,7 +390,67 @@
     border-color: #304b37;
 }
 
+:root[data-theme="dark"] .asset-current-location {
+    border-color: #304b37;
+    background: #111713;
+}
+
+:root[data-theme="dark"] .asset-current-location strong,
+:root[data-theme="dark"] .asset-movement-item strong,
+:root[data-theme="dark"] .asset-movement-place strong {
+    color: var(--text-primary, #f1f5f2);
+}
+
+:root[data-theme="dark"] .movement-radio-inputs {
+    border-color: #31563a;
+    background: #132219;
+}
+
+:root[data-theme="dark"] .movement-radio-name {
+    color: var(--text-primary, #f1f5f2);
+}
+
+:root[data-theme="dark"] .movement-radio input:checked + .movement-radio-name,
+:root[data-theme="dark"] .movement-radio input:checked + .movement-radio-name i {
+    color: #071009;
+}
+
+:root[data-theme="dark"] .movement-speed-dial .p-speeddial-action,
+:root[data-theme="dark"] .movement-speed-dial .p-speeddial-button,
+:root[data-theme="dark"] .movement-speed-dial .p-speeddial-button:hover,
+:root[data-theme="dark"] .movement-speed-dial .p-speeddial-button:focus,
+:root[data-theme="dark"] .movement-speed-dial .p-speeddial-opened .p-speeddial-button {
+    color: #071009 !important;
+    background: #58d47c !important;
+}
+
 @media (max-width: 560px) {
+    .movements-page {
+        padding: 16px;
+    }
+
+    .movement-radio-inputs {
+        width: 100%;
+    }
+
+    .movement-radio-name {
+        padding-inline: .5rem;
+    }
+
+    .asset-current-location {
+        grid-template-columns: 1fr;
+    }
+
+    .movement-speed-dial {
+        right: 1rem;
+        bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    .movement-speed-dial .p-speeddial-action {
+        width: 3rem;
+        height: 3rem;
+    }
+
     .movement-detail-summary {
         grid-template-columns: 1fr;
     }

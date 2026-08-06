@@ -10,6 +10,8 @@ import { FloatLabel } from 'primereact/floatlabel';
 import { Tag } from 'primereact/tag';
 import { SelectButton } from 'primereact/selectbutton';
 import { MultiSelect } from 'primereact/multiselect';
+import { SpeedDial } from 'primereact/speeddial';
+import { Tooltip } from 'primereact/tooltip';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import connect from '../../utils/request';
@@ -22,6 +24,7 @@ import { isProductBarcode, productIdFromBarcode } from './barcode';
 import { can } from '../../utils/permissions';
 
 const MOVEMENTS_ENDPOINT = '/estoque/movimentos';
+const ASSET_MOVEMENTS_ENDPOINT = '/estoque/movimentos/ativos';
 const PRODUCTS_ENDPOINT = '/estoque/produtos';
 const CATEGORIES_ENDPOINT = '/estoque/categorias';
 
@@ -39,17 +42,36 @@ const emptyForm = {
     destinatarios: [],
 };
 
+const emptyAssetMovementForm = {
+    ativo_id: null,
+    centro_custo_destino_id: null,
+    local_destino_id: null,
+    observacao: '',
+};
+
+const movementViewOptions = [
+    { label: 'Estoque', value: 'estoque', icon: 'pi pi-box' },
+    { label: 'Ativos', value: 'ativos', icon: 'pi pi-building' },
+];
+
 export function Movements() {
     const [movements, setMovements] = useState([]);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [employeeOptions, setEmployeeOptions] = useState([]);
+    const [assetMovements, setAssetMovements] = useState([]);
+    const [assetOptions, setAssetOptions] = useState([]);
+    const [costCenterOptions, setCostCenterOptions] = useState([]);
+    const [structureLocations, setStructureLocations] = useState([]);
     const [refresh, setRefresh] = useState(false);
+    const [movementView, setMovementView] = useState('estoque');
 
     const [dialogVisible, setDialogVisible] = useState(false);
     const [form, setForm] = useState(emptyForm);
     const [scannerVisible, setScannerVisible] = useState(false);
     const [movementDetail, setMovementDetail] = useState(null);
+    const [assetMovementDialogVisible, setAssetMovementDialogVisible] = useState(false);
+    const [assetMovementForm, setAssetMovementForm] = useState(emptyAssetMovementForm);
     const scanBufferRef = useRef('');
     const lastScanKeyRef = useRef(0);
     const employeeSearchTimer = useRef(null);
@@ -59,10 +81,15 @@ export function Movements() {
 
     const role = localStorage.getItem('role');
     const isAdmin = role === 'ADMIN';
+    const canCreate = can('estoque_movimentos', 'create');
     const canEdit = can('estoque_movimentos', 'edit');
     const selectedProduct = products.find((product) => product.id === form.item_id);
     const isEpi = categories.find((category) => category.id === selectedProduct?.categoria_id)
         ?.nome?.trim()?.toUpperCase() === 'EPI';
+    const selectedAsset = assetOptions.find((asset) => asset.id === assetMovementForm.ativo_id);
+    const destinationLocations = structureLocations.filter(
+        (location) => location.centro_custo_id === assetMovementForm.centro_custo_destino_id,
+    );
 
     const handleDeleteMovement = async (movement) => {
         setLoading(true);
@@ -121,6 +148,26 @@ export function Movements() {
         }
         getProducts();
     }, [refresh]);
+
+    useEffect(() => {
+        async function getAssetMovements() {
+            try {
+                const { data } = await connect.get(ASSET_MOVEMENTS_ENDPOINT);
+                setAssetMovements(data?.movimentacoes ?? []);
+                setAssetOptions(data?.ativos ?? []);
+                setCostCenterOptions(data?.centros_custo ?? []);
+                setStructureLocations(data?.locais ?? []);
+            } catch (err) {
+                console.warn(err);
+                showToast(
+                    'error',
+                    'Movimentações de ativos',
+                    err.response?.data ?? 'Não foi possível carregar as movimentações de ativos.',
+                );
+            }
+        }
+        getAssetMovements();
+    }, [refresh, showToast]);
 
     const productName = (id) => products.find((p) => p.id === id)?.nome ?? `#${id}`;
 
@@ -260,10 +307,73 @@ export function Movements() {
         }] : []),
     ]), [products, isAdmin, canEdit]);
 
+    const assetTableItems = useMemo(() => ([
+        {
+            field: 'data_hora',
+            header: 'Data',
+            class: 'text-truncate',
+            body: (row) => new Date(row.data_hora).toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }),
+        },
+        {
+            field: 'ativo',
+            header: 'Ativo',
+            body: (row) => (
+                <div className="asset-movement-item">
+                    <strong>{row.ativo}</strong>
+                    <span>{row.patrimonio} · {row.categoria}</span>
+                </div>
+            ),
+        },
+        {
+            field: 'tipo',
+            header: 'Movimento',
+            body: (row) => (
+                <Tag
+                    value={row.tipo === 'carga_inicial' ? 'Carga inicial' : 'Transferência'}
+                    severity={row.tipo === 'carga_inicial' ? 'info' : 'success'}
+                    rounded
+                />
+            ),
+        },
+        {
+            field: 'origem',
+            header: 'Origem',
+            body: (row) => (
+                <div className="asset-movement-place">
+                    <strong>{row.origem || 'Carga inicial'}</strong>
+                    {row.local_origem && <span>{row.local_origem}</span>}
+                </div>
+            ),
+        },
+        {
+            field: 'destino',
+            header: 'Destino',
+            body: (row) => (
+                <div className="asset-movement-place">
+                    <strong>{row.destino}</strong>
+                    {row.local_destino && <span>{row.local_destino}</span>}
+                </div>
+            ),
+        },
+        { field: 'responsavel', header: 'Responsável', class: 'text-truncate' },
+        { field: 'observacao', header: 'Observação', class: 'text-truncate' },
+    ]), []);
+
     const openCreate = () => {
         setForm(emptyForm);
         setEmployeeOptions([]);
         setDialogVisible(true);
+    };
+
+    const openAssetMovement = () => {
+        setAssetMovementForm(emptyAssetMovementForm);
+        setAssetMovementDialogVisible(true);
     };
 
     const openQuickScanner = () => {
@@ -371,34 +481,100 @@ export function Movements() {
         }
     };
 
+    const handleAssetMovementSave = async () => {
+        if (!assetMovementForm.ativo_id || !assetMovementForm.centro_custo_destino_id) {
+            showToast('warn', 'Atenção!', 'Selecione o ativo e o contrato de destino.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const { data } = await connect.post(
+                ASSET_MOVEMENTS_ENDPOINT,
+                assetMovementForm,
+            );
+            showToast('success', 'Movimentação de ativo', data.message);
+            setAssetMovementDialogVisible(false);
+            setMovementView('ativos');
+            setRefresh((prev) => !prev);
+        } catch (err) {
+            console.warn(err);
+            showToast(
+                'error',
+                'Movimentação de ativo',
+                err.response?.data ?? 'Não foi possível movimentar o ativo.',
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const speedDialItems = [
+        {
+            label: 'Movimentar ativo',
+            icon: 'pi pi-building',
+            command: openAssetMovement,
+        },
+        {
+            label: 'Ler código',
+            icon: 'pi pi-barcode',
+            command: openQuickScanner,
+        },
+        {
+            label: 'Movimentar estoque',
+            icon: 'pi pi-box',
+            command: openCreate,
+        },
+    ];
+
     return (
         <main className="flex flex-column gap-3 movements-page">
             <ConfirmDialog />
-            <PageHeader section="Estoque" title="Movimentações" description="Acompanhe entradas e saídas e registre novas movimentações do estoque." />
-            <div className="flex flex-column">
-                <Table data={movements} tableClassName="w-full h-full" style={{ width: '100%', height: '100dvh' }} columns={table_itens} />
+            <PageHeader section="Estoque" title="Movimentações" description="Acompanhe entradas, saídas e transferências de ativos entre contratos." />
+            <div
+                className="movement-radio-inputs"
+                role="radiogroup"
+                aria-label="Tipo de movimentação exibida"
+            >
+                {movementViewOptions.map((option) => (
+                    <label className="movement-radio" key={option.value}>
+                        <input
+                            type="radio"
+                            name="movement-view"
+                            value={option.value}
+                            checked={movementView === option.value}
+                            onChange={() => setMovementView(option.value)}
+                        />
+                        <span className="movement-radio-name">
+                            <i className={option.icon} aria-hidden="true" />
+                            {option.label}
+                        </span>
+                    </label>
+                ))}
+            </div>
+            <div className="flex flex-column movement-table-area">
+                <Table
+                    data={movementView === 'estoque' ? movements : assetMovements}
+                    tableClassName="w-full h-full"
+                    style={{ width: '100%', height: 'calc(100dvh - 250px)' }}
+                    columns={movementView === 'estoque' ? table_itens : assetTableItems}
+                />
             </div>
 
-            <Button
-                icon="pi pi-plus"
-                size="large"
-                className="movement-add-fab"
-                rounded
-                onClick={openCreate}
-                aria-label="Nova movimentação"
-                tooltip="Nova movimentação"
-            />
-
-            <Button
-                icon="pi pi-barcode"
-                label="Ler código"
-                size="large"
-                className="movement-scan-fab"
-                rounded
-                onClick={openQuickScanner}
-                aria-label="Ler código e lançar movimentação"
-                tooltip="Ler código e lançar movimentação"
-            />
+            {canCreate && (
+                <div className="movement-speed-dial">
+                    <Tooltip target=".movement-speed-dial .p-speeddial-action" position="left" showDelay={150} />
+                    <SpeedDial
+                        model={speedDialItems}
+                        type="quarter-circle"
+                        direction="up-left"
+                        radius={132}
+                        showIcon="pi pi-plus"
+                        hideIcon="pi pi-times"
+                        aria-label="Ações de movimentação"
+                    />
+                </div>
+            )}
 
             <Dialog header={form.id ? 'Editar Movimentação' : 'Nova Movimentação'} visible={dialogVisible} className="movement-dialog" onHide={() => setDialogVisible(false)}>
                 <form className="flex flex-column gap-4 pt-3" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
@@ -498,6 +674,105 @@ export function Movements() {
                     </FloatLabel>
 
                     <Button type="submit" label={form.id ? 'Salvar alterações' : 'Registrar movimentação'} icon="pi pi-check" />
+                </form>
+            </Dialog>
+
+            <Dialog
+                header="Movimentar ativo"
+                visible={assetMovementDialogVisible}
+                className="movement-dialog asset-movement-dialog"
+                onHide={() => setAssetMovementDialogVisible(false)}
+            >
+                <form
+                    className="asset-movement-form"
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        handleAssetMovementSave();
+                    }}
+                >
+                    <FloatLabel>
+                        <Dropdown
+                            id="asset-movement-asset"
+                            value={assetMovementForm.ativo_id}
+                            options={assetOptions}
+                            optionLabel="label"
+                            optionValue="id"
+                            filter
+                            filterBy="label,categoria,origem"
+                            className="w-full"
+                            onChange={(event) => setAssetMovementForm({
+                                ...emptyAssetMovementForm,
+                                ativo_id: event.value,
+                            })}
+                            emptyFilterMessage="Nenhum ativo encontrado no escopo selecionado"
+                        />
+                        <label htmlFor="asset-movement-asset">Ativo</label>
+                    </FloatLabel>
+
+                    {selectedAsset && (
+                        <div className="asset-current-location">
+                            <span><small>Patrimônio</small><strong>{selectedAsset.patrimonio}</strong></span>
+                            <span><small>Origem atual</small><strong>{selectedAsset.origem}</strong></span>
+                            <span><small>Local atual</small><strong>{selectedAsset.local || 'Sem local definido'}</strong></span>
+                        </div>
+                    )}
+
+                    <FloatLabel>
+                        <Dropdown
+                            id="asset-movement-destination"
+                            value={assetMovementForm.centro_custo_destino_id}
+                            options={costCenterOptions}
+                            optionLabel="label"
+                            optionValue="id"
+                            filter
+                            className="w-full"
+                            onChange={(event) => setAssetMovementForm((current) => ({
+                                ...current,
+                                centro_custo_destino_id: event.value,
+                                local_destino_id: null,
+                            }))}
+                        />
+                        <label htmlFor="asset-movement-destination">Contrato de destino</label>
+                    </FloatLabel>
+
+                    <FloatLabel>
+                        <Dropdown
+                            id="asset-movement-location"
+                            value={assetMovementForm.local_destino_id}
+                            options={destinationLocations}
+                            optionLabel="nome"
+                            optionValue="id"
+                            showClear
+                            disabled={!assetMovementForm.centro_custo_destino_id}
+                            className="w-full"
+                            placeholder="Sem local definido"
+                            onChange={(event) => setAssetMovementForm((current) => ({
+                                ...current,
+                                local_destino_id: event.value,
+                            }))}
+                        />
+                        <label htmlFor="asset-movement-location">Local de destino</label>
+                    </FloatLabel>
+
+                    <FloatLabel>
+                        <InputTextarea
+                            id="asset-movement-observation"
+                            value={assetMovementForm.observacao}
+                            rows={3}
+                            className="w-full"
+                            onChange={(event) => setAssetMovementForm((current) => ({
+                                ...current,
+                                observacao: event.target.value,
+                            }))}
+                        />
+                        <label htmlFor="asset-movement-observation">Observação (opcional)</label>
+                    </FloatLabel>
+
+                    <Button
+                        type="submit"
+                        label="Confirmar movimentação"
+                        icon="pi pi-arrow-right-arrow-left"
+                    />
                 </form>
             </Dialog>
 

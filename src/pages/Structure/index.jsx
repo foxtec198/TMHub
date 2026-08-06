@@ -26,6 +26,12 @@ const EMPTY_FORM = {
     descricao: "",
 };
 
+const ASSET_CATEGORY_OPTIONS = [
+    { label: "Máquina ou equipamento", value: "MÁQUINA/EQUIPAMENTO" },
+    { label: "Móvel ou utensílio", value: "MÓVEL/UTENSÍLIO" },
+    { label: "Veículo", value: "VEÍCULO" },
+];
+
 export function Structure() {
     const [departments, setDepartments] = useState([]);
     const [supervisors, setSupervisors] = useState([]);
@@ -572,10 +578,13 @@ export function Structure() {
                             <>
                                 <label>
                                     Tipo/categoria *
-                                    <InputText
+                                    <Dropdown
                                         value={form.categoria}
-                                        onChange={(event) => setForm({ ...form, categoria: event.target.value })}
-                                        placeholder="Ex.: Carro, VAP, equipamento"
+                                        options={ASSET_CATEGORY_OPTIONS}
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Selecione o tipo do ativo"
+                                        onChange={(event) => setForm({ ...form, categoria: event.value })}
                                     />
                                 </label>
                                 <label>
