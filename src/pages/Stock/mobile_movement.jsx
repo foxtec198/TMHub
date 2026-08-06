@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
 import connect from "../../utils/request";
+import { clearAccessToken, getAccessToken, setAccessToken } from "../../utils/authSession";
 import { BarcodeScanner } from "./BarcodeScanner";
 
 // CSS
@@ -31,7 +32,7 @@ const tipoOptions = [
 
 export function MobileMovement() {
     // 'login' ou 'movimentacao'
-    const [step, setStep] = useState(sessionStorage.getItem("token") ? "movimentacao" : "login");
+    const [step, setStep] = useState(getAccessToken() ? "movimentacao" : "login");
 
     const [user, setUser] = useState("");
     const [pwd, setPwd] = useState("");
@@ -132,7 +133,7 @@ export function MobileMovement() {
             const res = await connect.post("/login", { username: user, password: pwd });
             setTentativas(0);
             localStorage.removeItem("tentativas");
-            sessionStorage.setItem("token", res.data.access_token);
+            setAccessToken(res.data.access_token);
             localStorage.setItem("display_name", res.data.display_name);
             localStorage.setItem("role", res.data.role);
             const requirements = {
@@ -175,7 +176,7 @@ export function MobileMovement() {
     }
 
     function logout() {
-        sessionStorage.removeItem("token");
+        clearAccessToken();
         localStorage.removeItem("auth_requirements");
         localStorage.removeItem("display_name");
         localStorage.removeItem("role");

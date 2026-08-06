@@ -7,6 +7,7 @@ import { getInitials, storeProfile } from "../../utils/profile";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
 import { socketio } from "../../utils/socketio";
+import { setAccessToken } from "../../utils/authSession";
 
 // Widgets
 import { Button } from "primereact/button";
@@ -64,7 +65,7 @@ export function Settings() {
     try {
       const { data } = await connect.patch("/usuarios/perfil", payload);
       if (data.access_token) {
-        sessionStorage.setItem("token", data.access_token);
+        setAccessToken(data.access_token);
         socketio.auth = { token: data.access_token };
         socketio.disconnect().connect();
       }

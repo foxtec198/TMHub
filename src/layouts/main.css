@@ -189,16 +189,52 @@
   width: 18rem;
   min-width: 18rem;
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* A barra existe somente quando o menu realmente precisar rolar. */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
   opacity: 1;
   transition: width 0.2s ease, min-width 0.2s ease, flex-basis 0.2s ease, opacity 0.15s ease;
 }
 
+.layout-sidebar:hover,
+.layout-sidebar:focus-within {
+  scrollbar-color: rgba(88, 220, 125, 0.72) transparent;
+}
+
+.layout-sidebar::-webkit-scrollbar {
+  width: 0.55rem;
+}
+
+.layout-sidebar::-webkit-scrollbar-track {
+  margin-block: 0.6rem;
+  background: transparent;
+}
+
+.layout-sidebar::-webkit-scrollbar-thumb {
+  min-height: 3.5rem;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  background-clip: content-box;
+}
+
+.layout-sidebar:hover::-webkit-scrollbar-thumb,
+.layout-sidebar:focus-within::-webkit-scrollbar-thumb {
+  background-color: rgba(88, 220, 125, 0.72);
+}
+
+.layout-sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: #74ea98;
+}
+
 .layout-panel-menu {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   padding: 1.25rem 0.75rem;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .menu-closed .layout-sidebar {

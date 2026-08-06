@@ -269,8 +269,44 @@ body, html, :root, #root {
     background:#1b211d;
     border-color:var(--dark-border);
 }
-:root[data-theme="dark"] ::-webkit-scrollbar-thumb { background:#333;border-radius:999px; }
-:root[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background:#376143; }
+/* Scrollbars do TM Hub: discretas no claro, verdes e legíveis no dark mode. */
+:root {
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: rgba(16, 130, 67, 0.48);
+    --scrollbar-thumb-hover: #08783d;
+}
+
+:root[data-theme="dark"] {
+    --scrollbar-track: rgba(4, 14, 8, 0.52);
+    --scrollbar-thumb: rgba(91, 223, 132, 0.5);
+    --scrollbar-thumb-hover: #74ea98;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+    width: 0.62rem;
+    height: 0.62rem;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+    min-height: 2.5rem;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-color: var(--scrollbar-thumb);
+    background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+}
 
 /* Backgrounds */
 .bg-primary{

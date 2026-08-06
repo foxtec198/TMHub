@@ -60,22 +60,43 @@ function MemberAvatar({ member, small = false }) {
 }
 
 function EmptyChart({ text }) {
-  return <div className="project-dashboard-empty"><i className="pi pi-chart-bar" /><span>{text}</span></div>;
+  return <div className="project-dashboard-empty">
+      <span>Is Here, endpoint</span>
+    <i className="pi pi-chart-bar" /><span>{text}</span></div>;
 }
+
+const projectDoughnutCenterPlugin = {
+  id: "projectDoughnutCenter",
+  afterDraw(chart, _args, options) {
+    const center = chart.getDatasetMeta(0)?.data?.[0];
+    if (!center) return;
+
+    const total = chart.data.datasets[0]?.data?.reduce(
+      (sum, value) => sum + Number(value || 0),
+      0,
+    );
+    const { ctx } = chart;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = options.textColor;
+    ctx.font = "700 24px Inter, Arial, sans-serif";
+    ctx.fillText(String(total), center.x, center.y - 7);
+    ctx.fillStyle = options.labelColor;
+    ctx.font = "500 11px Inter, Arial, sans-serif";
+    ctx.fillText("cards", center.x, center.y + 13);
+    ctx.restore();
+  },
+};
 
 export function ProjectDashboard() {
   const [data, setData] = useState(null);
-  const [projects, setProjects] = useState([]);
   const [filters, setFilters] = useState(defaultFilters);
   const [refresh, setRefresh] = useState(0);
   const filterPanel = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
   const isDarkMode = useDarkMode();
-
-  useEffect(() => {
-    connect.get("/projetos").then(({ data: rows }) => setProjects(rows || [])).catch(() => setProjects([]));
-  }, []);
 
   useEffect(() => {
     if (!filters.periodo?.[0] || !filters.periodo?.[1]) return;
@@ -94,17 +115,6 @@ export function ProjectDashboard() {
 
   const summary = data?.resumo || {};
   const proceduralOptions = data?.filtros || {};
-  const cards = useMemo(() => projects.flatMap((project) => (
-    (project.columns || []).flatMap((column) => (column.cards || []).map((card) => ({
-      label: `${project.nome} · ${card.titulo}`,
-      value: card.id,
-    })))
-  )), [projects]);
-  const collaborators = useMemo(() => {
-    const unique = new Map();
-    projects.forEach((project) => (project.members || []).forEach((member) => unique.set(member.id, { label: member.nome, value: member.id })));
-    return [...unique.values()].sort((left, right) => left.label.localeCompare(right.label));
-  }, [projects]);
   const activeFilterCount = ["projeto", "colaborador", "card", "status"].filter((key) => filters[key].length).length;
   const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
   const clearFilters = () => setFilters(defaultFilters());
@@ -130,6 +140,10 @@ export function ProjectDashboard() {
           boxWidth: 8,
           padding: 18,
         },
+      },
+      projectDoughnutCenter: {
+        textColor: isDarkMode ? "#edf4ef" : "#213127",
+        labelColor: isDarkMode ? "#aebbb2" : "#69776e",
       },
     },
   }), [isDarkMode]);
@@ -258,8 +272,7 @@ export function ProjectDashboard() {
         <article className="project-command-card project-status-card">
           <header><span>Status</span><h2>Distribuição atual</h2></header>
           <div className="project-dashboard-doughnut">
-            {totalCards ? <Chart type="doughnut" data={statusChart} options={doughnutOptions} /> : <EmptyChart text="Sem cards no período." />}
-            {!!totalCards && <div className="project-dashboard-doughnut__total"><strong>{totalCards}</strong><span>cards</span></div>}
+            {totalCards ? <Chart type="doughnut" data={statusChart} options={doughnutOptions} plugins={[projectDoughnutCenterPlugin]} /> : <EmptyChart text="Sem cards no período." />}
           </div>
         </article>
       </section>
@@ -270,9 +283,9 @@ export function ProjectDashboard() {
         onPeriodChange={(value) => setFilter("periodo", value)}
         onClear={clearFilters}
         fields={[
-          { name: "projeto", label: "Projetos", value: filters.projeto, options: proceduralOptions.projetos || projects.map((project) => ({ label: project.nome, value: project.id })), onChange: (value) => setFilter("projeto", value) },
-          { name: "colaborador", label: "Colaboradores", value: filters.colaborador, options: proceduralOptions.colaboradores || collaborators, onChange: (value) => setFilter("colaborador", value) },
-          { name: "card", label: "Cards", value: filters.card, options: proceduralOptions.cards || cards, onChange: (value) => setFilter("card", value), wide: true },
+          { name: "projeto", label: "Projetos", value: filters.projeto, options: proceduralOptions.projetos || [], onChange: (value) => setFilter("projeto", value) },
+          { name: "colaborador", label: "Colaboradores", value: filters.colaborador, options: proceduralOptions.colaboradores || [], onChange: (value) => setFilter("colaborador", value) },
+          { name: "card", label: "Cards", value: filters.card, options: proceduralOptions.cards || [], onChange: (value) => setFilter("card", value), wide: true },
           { name: "status", label: "Status", value: filters.status, options: (proceduralOptions.status || ["fazer", "andamento", "conclu"]).map((value) => ({ label: value.replace(/\b\w/g, (letter) => letter.toUpperCase()), value })), onChange: (value) => setFilter("status", value), wide: true, filter: false },
         ]}
       />

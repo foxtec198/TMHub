@@ -7,6 +7,7 @@ import connect from "../utils/request";
 import { useToast } from "../contexts/ToastContext";
 import { capitalize, deny_roles } from "../utils/ui";
 import { socketio } from "../utils/socketio";
+import { clearAccessToken, getAccessToken } from "../utils/authSession";
 
 // Widgets
 import { PanelMenu } from "primereact/panelmenu";
@@ -33,6 +34,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/reports/admissoes": ["admissao"],
   "/reports/faltas": ["controle_faltas"],
   "/reports/logistica": ["estoque.movimentos"],
+  "/reports/rocada": ["glosas"],
   "/estoque/produtos": ["estoque.produtos"],
   "/estoque/codigos-de-barras": ["estoque.produtos"],
   "/estoque/movimentacoes": ["estoque.movimentos"],
@@ -72,7 +74,7 @@ export function MainLayout() {
 
   const logout = () => {
     socketio.disconnect();
-    sessionStorage.removeItem("token");
+    clearAccessToken();
     localStorage.clear();
     navigateTo("/");
   };
@@ -135,6 +137,12 @@ export function MainLayout() {
           icon: 'pi pi-money-bill',
           visible: can("dashboard_glosas"),
           command: () => { navigateTo("/reports/glosas") }
+        },
+        {
+          label: 'Roçada',
+          icon: 'pi pi-bullseye',
+          visible: can("dashboard_glosas"),
+          command: () => { navigateTo("/reports/rocada") }
         },
         {
           label: 'PCD',
@@ -411,7 +419,7 @@ export function MainLayout() {
   };
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token");
+    const token = getAccessToken();
     socketio.auth = { token };
     if (token) {
       socketio.disconnect().connect();

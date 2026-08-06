@@ -5,7 +5,7 @@ import { Button } from 'primereact/button';
 import { AvatarGroup } from 'primereact/avatargroup';
 import ProjectMemberAvatar from './ProjectMemberAvatar';
 
-function ProjectRow({ projeto, ativo, todosUsuarios, currentUserId, onSelect, onRename, onOpenMembers }) {
+function ProjectRow({ projeto, ativo, currentUserId, onSelect, onRename, onOpenMembers }) {
   const [editando, setEditando] = useState(false);
   const [nomeTemp, setNomeTemp] = useState(projeto.nome);
 
@@ -16,7 +16,7 @@ function ProjectRow({ projeto, ativo, todosUsuarios, currentUserId, onSelect, on
     setEditando(false);
   }
 
-  const membros = projeto.memberIds.map((id) => todosUsuarios.find((u) => u.id === id)).filter(Boolean);
+  const membros = projeto.members || [];
   const canManage = projeto.donoId === currentUserId;
 
   return (
@@ -82,8 +82,8 @@ function ProjectRow({ projeto, ativo, todosUsuarios, currentUserId, onSelect, on
 
 export default function ProjectsSidebar({
   projetos,
+  title = 'Meus projetos',
   projetoAtivoId,
-  todosUsuarios,
   currentUserId,
   onSelect,
   onRename,
@@ -94,7 +94,7 @@ export default function ProjectsSidebar({
   return (
     <div className="projetos-sidebar">
       <div className="projetos-sidebar__header">
-        <span>Meus projetos</span>
+        <span>{title}</span>
         <div className="flex align-items-center gap-1">
           <Button icon="pi pi-plus" rounded text size="small" onClick={onNovoProjeto} title="Novo projeto" />
           <Button
@@ -120,7 +120,6 @@ export default function ProjectsSidebar({
             key={projeto.id}
             projeto={projeto}
             ativo={projeto.id === projetoAtivoId}
-            todosUsuarios={todosUsuarios}
             currentUserId={currentUserId}
             onSelect={onSelect}
             onRename={onRename}

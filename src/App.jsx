@@ -12,6 +12,7 @@ import { LoadingProvider } from "./contexts/LoadingContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { PermissionGate } from "./components/PermissionGate";
 import { AuthRequirementsGate } from "./components/AuthRequirementsGate";
+import { clearAccessToken, getAccessToken } from "./utils/authSession";
 
 // Styles
 import "primeicons/primeicons.css";
@@ -46,6 +47,7 @@ import { Pcd } from "./pages/Indicators/pcd";
 import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
 import { ProjectDashboard } from "./pages/Dashboards/ProjectDashboard";
 import { GlosaDashboard } from "./pages/Dashboards/GlosaDashboard";
+import { RocadaDashboard } from "./pages/Dashboards/RocadaDashboard";
 import { TerminationDashboard } from "./pages/Dashboards/TerminationDashboard.jsx";
 import { Structure } from "./pages/Structure/index";
 import { TMOps } from "./pages/TMOps";
@@ -108,7 +110,7 @@ function LegacyTMOpsRedirect() {
 
 export function AppRoutes() {
   const token = function () {
-    return !!sessionStorage.getItem("token");
+    return !!getAccessToken();
   };
 
   useEffect(() => {
@@ -121,10 +123,12 @@ export function AppRoutes() {
           "/login",
         );
         const requestToken = error.config?.__tmhubAccessToken;
-        const currentToken = sessionStorage.getItem("token");
+        const currentToken = getAccessToken();
         const isCurrentAuthenticatedRequest = Boolean(
           requestToken && currentToken && requestToken === currentToken,
         );
+        const authError = String(error.response?.data || "").toLocaleLowerCase("pt-BR");
+        const isInvalidSession = /token.+(expirado|inv[aá]lido)|sess[aã]o.+(invalidada|n[aã]o encontrado)/i.test(authError);
         if (
           error.response?.status === 428 &&
           error.response?.data?.code === "AUTH_REQUIREMENTS_PENDING"
@@ -144,9 +148,10 @@ export function AppRoutes() {
           error.response?.status === 401
           && !isLoginRequest
           && isCurrentAuthenticatedRequest
+          && isInvalidSession
           && window.location.pathname !== "/login"
         ) {
-          sessionStorage.removeItem("token");
+          clearAccessToken();
           localStorage.removeItem("auth_requirements");
           window.location.href = "/login";
         }
@@ -263,6 +268,7 @@ export function AppRoutes() {
           />
           <Route path="/reports/projetos" element={<PermissionGate screen="dashboard_projetos"><ProjectDashboard /></PermissionGate>} />
           <Route path="/reports/glosas" element={<PermissionGate screen="dashboard_glosas"><GlosaDashboard /></PermissionGate>} />
+          <Route path="/reports/rocada" element={<PermissionGate screen="dashboard_glosas"><RocadaDashboard /></PermissionGate>} />
           <Route
             path="/reports/pcd"
             element={

@@ -6,6 +6,7 @@ import { Password } from "primereact/password";
 
 import connect from "../utils/request";
 import { socketio } from "../utils/socketio";
+import { clearAccessToken, getAccessToken, setAccessToken } from "../utils/authSession";
 import { useLoading } from "../contexts/LoadingContext";
 import { useToast } from "../contexts/ToastContext";
 import "./AuthRequirementsGate.css";
@@ -48,7 +49,7 @@ export function AuthRequirementsGate() {
     const next = persistRequirements(data?.requirements || data);
     setRequirements(next);
     if (!next.interacao_pendente) {
-      socketio.auth = { token: sessionStorage.getItem("token") };
+      socketio.auth = { token: getAccessToken() };
       socketio.disconnect().connect();
       if (data?.foto_perfil) {
         window.dispatchEvent(new CustomEvent("tmhub:profile", {
@@ -62,7 +63,7 @@ export function AuthRequirementsGate() {
   }, []);
 
   useEffect(() => {
-    if (sessionStorage.getItem("token")) {
+    if (getAccessToken()) {
       connect.get("/usuarios/pendencias")
         .then(({ data }) => applyResponse(data))
         .catch(() => {});
@@ -113,7 +114,7 @@ export function AuthRequirementsGate() {
     setLoading(true);
     try {
       const { data } = await connect.post("/usuarios/onboarding/senha", { nova_senha: newPassword });
-      sessionStorage.setItem("token", data.access_token);
+      setAccessToken(data.access_token);
       setNewPassword("");
       setConfirmPassword("");
       applyResponse(data);
@@ -139,7 +140,7 @@ export function AuthRequirementsGate() {
 
   const logout = () => {
     socketio.disconnect();
-    sessionStorage.removeItem("token");
+    clearAccessToken();
     localStorage.removeItem("auth_requirements");
     window.location.href = "/login";
   };
@@ -149,7 +150,7 @@ export function AuthRequirementsGate() {
 
   return (
     <Dialog
-      visible={Boolean(sessionStorage.getItem("token") && requirements.interacao_pendente)}
+      visible={Boolean(getAccessToken() && requirements.interacao_pendente)}
       onHide={() => {}}
       closable={false}
       closeOnEscape={false}

@@ -1,0 +1,50 @@
+.rocada-metric { display: flex; flex-direction: column; gap: 1.25rem; }
+.rocada-metric__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.3rem; border: 1px solid var(--surface-border); border-radius: 18px; background: var(--surface-card); }
+.rocada-metric__heading span { color: var(--primary-color); font-size: .75rem; font-weight: 800; letter-spacing: .1em; }
+.rocada-metric__heading h2 { margin: .2rem 0; color: var(--text-color); }
+.rocada-metric__heading p { margin: 0; color: var(--text-color-secondary); }
+.rocada-metric__actions { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; }
+.rocada-month-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.rocada-month-card { display: flex; flex-direction: column; gap: .65rem; padding: 1.15rem; border: 1px solid var(--surface-border); border-radius: 18px; background: var(--surface-card); box-shadow: 0 8px 20px rgba(0,0,0,.05); }
+.rocada-month-card.is-safe { border-top: 4px solid var(--green-500); }
+.rocada-month-card.is-risk { border-top: 4px solid var(--red-500); }
+.rocada-month-card.is-empty { border-top: 4px solid var(--blue-400); opacity: .86; }
+.rocada-month-card.is-future { border-top: 4px solid #7b8583; background: color-mix(in srgb, var(--surface-card) 86%, #7b8583); }
+.rocada-month-card.is-future .p-tag { background: #59615f; color: #f1f5f2; }
+.rocada-month-card__top { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-weight: 700; text-transform: capitalize; }
+.rocada-month-card > strong { color: var(--text-color); font-size: 2rem; line-height: 1; }
+.rocada-month-card__target { color: var(--text-color-secondary); font-size: .78rem; }
+.rocada-month-card__stats { display: flex; flex-direction: column; gap: .25rem; color: var(--text-color-secondary); font-size: .8rem; }
+.rocada-month-card .p-button { align-self: flex-start; padding-left: 0; }
+.rocada-month-chart { height: 76px; margin: .1rem 0; }
+.rocada-month-chart__empty { display: grid; height: 76px; place-items: center; padding: 0 .5rem; border: 1px dashed var(--surface-border); border-radius: 9px; color: var(--text-color-secondary); font-size: .75rem; text-align: center; }
+.rocada-metric__empty { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 4rem 1rem; border: 1px dashed var(--surface-border); border-radius: 18px; color: var(--text-color-secondary); text-align: center; }
+.rocada-metric__empty > i { color: var(--primary-color); font-size: 2rem; }
+.rocada-detail-dialog { width: min(1500px, 96vw); }
+.rocada-detail-summary { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.rocada-detail-summary > span { display: flex; min-width: 9rem; flex-direction: column; padding: .7rem .9rem; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-ground); }
+.rocada-detail-summary small { color: var(--text-color-secondary); }
+.rocada-detail-summary strong { color: var(--text-color); font-size: 1.2rem; }
+.rocada-day--worked { color: var(--green-500); }
+.rocada-day--absent { color: var(--red-500); }
+.rocada-day--off { color: var(--text-color-secondary); opacity: .5; }
+:root[data-theme="dark"] .rocada-metric__heading,
+:root[data-theme="dark"] .rocada-month-card,
+:root[data-theme="dark"] .rocada-detail-summary > span { border-color: #314139; background: #151c18; color: #edf5ef; box-shadow: 0 10px 24px rgba(0, 0, 0, .2); }
+:root[data-theme="dark"] .rocada-metric__heading h2,
+:root[data-theme="dark"] .rocada-month-card > strong,
+:root[data-theme="dark"] .rocada-detail-summary strong { color: #edf5ef; }
+:root[data-theme="dark"] .rocada-metric__heading p,
+:root[data-theme="dark"] .rocada-month-card__target,
+:root[data-theme="dark"] .rocada-month-card__stats,
+:root[data-theme="dark"] .rocada-detail-summary small { color: #aebbb2; }
+:root[data-theme="dark"] .rocada-month-card.is-future { background: #202625; border-top-color: #7b8583; }
+:root[data-theme="dark"] .rocada-detail-dialog .p-dialog-content,
+:root[data-theme="dark"] .rocada-detail-dialog .p-dialog-header { background: #101613; color: #edf5ef; }
+:root[data-theme="dark"] .rocada-detail-dialog .p-datatable-wrapper,
+:root[data-theme="dark"] .rocada-detail-dialog .p-datatable-table { background: #151c18; color: #edf5ef; }
+:root[data-theme="dark"] .rocada-detail-dialog .p-datatable-thead > tr > th { background: #1d2822; color: #dce8df; border-color: #314139; }
+:root[data-theme="dark"] .rocada-detail-dialog .p-datatable-tbody > tr > td { background: #151c18; color: #edf5ef; border-color: #2d3931; }
+@media (max-width: 1200px) { .rocada-month-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .rocada-month-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .rocada-metric__heading { flex-direction: column; } .rocada-metric__actions { width: 100%; justify-content: stretch; } .rocada-metric__actions .p-dropdown, .rocada-metric__actions .p-button { flex: 1; } .rocada-month-grid { grid-template-columns: 1fr; } }

@@ -4,7 +4,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import KanbanColumn from '../pages/Projects/KanbanColumn';
 
-export default function KanbanBoard({ projeto, todosUsuarios, onUpdateProjeto, onOpenCard }) {
+export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
   // Estados transitórios de drag-and-drop e criação de coluna.
   const [draggingCardId, setDraggingCardId] = useState(null);
   const [draggingColumnId, setDraggingColumnId] = useState(null);
@@ -14,9 +14,7 @@ export default function KanbanBoard({ projeto, todosUsuarios, onUpdateProjeto, o
 
   // Converte IDs persistidos nos objetos usados pelos avatares.
   function membrosPorCard(card) {
-    return (card.memberIds || [])
-      .map((id) => todosUsuarios.find((u) => u.id === id))
-      .filter(Boolean);
+    return card.members || [];
   }
 
   function handleDragStart(e, cardId) {

@@ -18,8 +18,10 @@ import { exportDisallowancesXlsx } from "../../utils/exportDisallowancesXlsx";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
+import { RocadaMetric } from "./RocadaMetric";
 import "./styles.css";
 import "./contrast.css";
+import "./rocada.css";
 import {
   CombinedFiltersProvider,
   CombinedMultiSelect,
@@ -160,6 +162,7 @@ function DisallowanceControlContent() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [evidenceFile, setEvidenceFile] = useState(null);
   const [refresh, setRefresh] = useState(0);
+  const [section, setSection] = useState("glosas");
   const filterPanel = useRef(null);
   const fileInput = useRef(null);
   const setLoading = useLoading();
@@ -416,13 +419,17 @@ function DisallowanceControlContent() {
       title="Controle de Glosas"
       description="Acompanhe coberturas, valores em análise e perdas por competência."
       actions={<>
-        <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => filterPanel.current?.toggle(event)} />
-        <Button label="Exportar XLSX" icon="pi pi-file-excel" outlined onClick={exportSpreadsheet} />
-        <Button label="Atualizar" icon="pi pi-refresh" outlined onClick={() => setRefresh((value) => value + 1)} />
-        {canCreate && <Button label="Nova glosa" icon="pi pi-plus" onClick={openCreate} />}
+        <Button label={section === "glosas" ? "Roçada · DPTO 92" : "Glosas gerais"} icon={section === "glosas" ? "pi pi-chart-line" : "pi pi-list"} outlined onClick={() => setSection((current) => current === "glosas" ? "rocada" : "glosas")} />
+        {section === "glosas" && <>
+          <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => filterPanel.current?.toggle(event)} />
+          <Button label="Exportar XLSX" icon="pi pi-file-excel" outlined onClick={exportSpreadsheet} />
+          <Button label="Atualizar" icon="pi pi-refresh" outlined onClick={() => setRefresh((value) => value + 1)} />
+          {canCreate && <Button label="Nova glosa" icon="pi pi-plus" onClick={openCreate} />}
+        </>}
       </>}
     />
 
+    {section === "rocada" ? <RocadaMetric /> : <>
     <div className="glosa-summary">
       <article><i className="pi pi-file" /><div><small>Registros</small><strong>{summary.total_registros || 0}</strong><span>{summary.dias || 0} dia(s)</span></div></article>
       <article><i className="pi pi-wallet" /><div><small>Valor apontado</small><strong>{money(summary.valor_total)}</strong><span>no período</span></div></article>
@@ -450,6 +457,7 @@ function DisallowanceControlContent() {
         {canEdit && <Column header="Ações" body={(row) => <div className="glosa-actions"><Button icon="pi pi-pencil" rounded text aria-label="Editar glosa" onClick={() => openEdit(row)} /><Button icon="pi pi-trash" severity="danger" rounded text aria-label="Excluir glosa" onClick={() => remove(row)} /></div>} />}
       </DataTable>
     </article>
+    </>}
 
     <OverlayPanel ref={filterPanel} className="glosa-filter-panel">
       <div className="glosa-filter-title">

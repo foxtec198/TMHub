@@ -1,6 +1,7 @@
 // utils/request.js
 import axios from "axios";
 import { socketio } from "./socketio";
+import { getAccessToken } from "./authSession";
 
 export const server = import.meta.env.VITE_SERVER;
 
@@ -9,7 +10,7 @@ const connect = axios.create({
 });
 
 connect.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("token");
+  const token = config.skipAuth ? null : getAccessToken();
 
   if (token) {
     config.headers["Access-Token"] = token;

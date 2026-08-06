@@ -11,6 +11,7 @@ import { useNavigate } from "react-router";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
+import { setAccessToken } from "../../utils/authSession";
 import { LOGIN_INFORMATIVES } from "./informativos";
 
 // CSS
@@ -61,13 +62,35 @@ export function Auth() {
     }, [bloqueadoAte]);
 
     useEffect(() => {
-        Promise.allSettled([
-            connect.get("/updates/github"),
-            connect.get("/updates/noticias"),
-        ]).then(([commitsResult, newsResult]) => {
-            setGithubCommits(commitsResult.status === "fulfilled" && Array.isArray(commitsResult.value.data?.commits) ? commitsResult.value.data.commits : []);
-            setConfiguredNews(newsResult.status === "fulfilled" && Array.isArray(newsResult.value.data) ? newsResult.value.data : []);
-        });
+        let active = true;
+        let retryTimer;
+
+        const loadGithubUpdates = async (retry = false) => {
+            try {
+                const { data } = await connect.get("/updates/github", { skipAuth: true });
+                if (active) setGithubCommits(Array.isArray(data?.commits) ? data.commits : []);
+            } catch {
+                // A API responde rápido com o último cache quando o GitHub oscila.
+                // Uma tentativa adicional cobre inicialização fria em produção.
+                if (!retry && active) retryTimer = window.setTimeout(() => loadGithubUpdates(true), 3500);
+            }
+        };
+
+        const loadNews = async () => {
+            try {
+                const { data } = await connect.get("/updates/noticias", { skipAuth: true });
+                if (active) setConfiguredNews(Array.isArray(data) ? data : []);
+            } catch {
+                if (active) setConfiguredNews([]);
+            }
+        };
+
+        loadGithubUpdates();
+        loadNews();
+        return () => {
+            active = false;
+            window.clearTimeout(retryTimer);
+        };
     }, []);
 
     async function setAuth(e) {
@@ -92,7 +115,7 @@ export function Auth() {
             const theme = res.data.tema === "dark" ? "dark" : "light";
             localStorage.setItem("theme", theme);
             document.documentElement.dataset.theme = theme;
-            sessionStorage.setItem("token", res.data.access_token);
+            setAccessToken(res.data.access_token);
             const requirements = {
                 primeiro_acesso: res.data.primeiro_acesso,
                 cpf_pendente: res.data.cpf_pendente,

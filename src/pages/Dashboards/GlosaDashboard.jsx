@@ -22,6 +22,10 @@ function MetricList({ rows = [], label }) {
   return <div className="project-dashboard-list">{rows.slice(0, 8).map((row) => <div key={row[label]}><span><strong>{row[label]}</strong><small>{row.quantidade} registro(s)</small></span><strong>{money(row.valor)}</strong></div>) || null}</div>;
 }
 
+function Summary({ icon, label, value, detail, tone = "neutral" }) {
+  return <article className={`project-dashboard-summary-card is-${tone}`}><span className="project-dashboard-summary-card__icon"><i className={icon} /></span><span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span></article>;
+}
+
 export function GlosaDashboard() {
   const [data, setData] = useState(null);
   const [filters, setFilters] = useState(initialFilters);
@@ -29,6 +33,7 @@ export function GlosaDashboard() {
   const filterPanel = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
+
   useEffect(() => {
     if (!filters.periodo?.[0] || !filters.periodo?.[1]) return undefined;
     setLoading(true);
@@ -37,12 +42,15 @@ export function GlosaDashboard() {
       .catch((error) => showToast("error", "Dashboard de Glosas", error.response?.data || "Não foi possível carregar as glosas."))
       .finally(() => setLoading(false));
   }, [filters, refresh, setLoading, showToast]);
+
   const summary = data?.resumo || {};
   const options = data?.filtros || {};
   const activeFilterCount = ["cobertura", "departamento", "contrato", "colaborador"].filter((key) => filters[key]?.length).length;
   const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
   const chart = useMemo(() => ({ labels: (data?.evolucao_mensal || []).map((row) => row.competencia), datasets: [{ label: "Valor", data: (data?.evolucao_mensal || []).map((row) => row.valor), backgroundColor: "#ef5350", borderRadius: 8 }] }), [data]);
-  return <main className="project-dashboard"><PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>} />
+
+  return <main className="project-dashboard">
+    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>} />
     <section className="project-dashboard-summary">
       <Summary icon="pi pi-file" label="Glosas" value={summary.total_registros || 0} detail="registros no período" />
       <Summary icon="pi pi-money-bill" label="Valor total" value={money(summary.valor_total)} detail="valor apontado" tone="violet" />
@@ -60,4 +68,3 @@ export function GlosaDashboard() {
     ]} />
   </main>;
 }
-function Summary({ icon, label, value, detail, tone = "neutral" }) { return <article className={`project-dashboard-summary-card is-${tone}`}><span className="project-dashboard-summary-card__icon"><i className={icon} /></span><span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span></article>; }

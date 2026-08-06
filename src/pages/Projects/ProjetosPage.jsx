@@ -20,6 +20,7 @@ export function ProjetosPage() {
     const storedId = Number(localStorage.getItem('current_id'));
     return Number.isInteger(storedId) && storedId > 0 ? storedId : null;
   });
+  const [isAdmin] = useState(() => String(localStorage.getItem('role') || '').toUpperCase() === 'ADMIN');
   const [usuarios, setUsuarios] = useState([]);
   const [projetoAtivoId, setProjetoAtivoId] = useState(null);
   const [cardSelecionado, setCardSelecionado] = useState(null);
@@ -33,10 +34,12 @@ export function ProjetosPage() {
     ? projetos.find((p) => p.id === projetoParaMembrosId) || null
     : null;
 
-  // O usuário enxerga somente projetos dos quais participa.
+  // Administradores possuem a visão completa; os demais veem apenas projetos próprios ou compartilhados.
   const meusProjetos = useMemo(
-    () => projetos.filter((p) => (p.memberIds || []).includes(currentUserId)),
-    [projetos, currentUserId]
+    () => isAdmin
+      ? projetos
+      : projetos.filter((p) => p.donoId === currentUserId || (p.memberIds || []).includes(currentUserId)),
+    [isAdmin, projetos, currentUserId]
   );
 
   const projetoAtivo = useMemo(() => {
@@ -152,19 +155,40 @@ export function ProjetosPage() {
     setCardSelecionado(null);
   }
 
-  const membrosDoProjetoAtivo = projetoAtivo
-    ? projetoAtivo.memberIds.map((id) => usuarios.find((u) => u.id === id)).filter(Boolean)
-    : [];
+  const membrosDoProjetoAtivo = projetoAtivo?.members || [];
 
-  // Usuários e projetos são independentes e podem ser carregados em paralelo.
+  async function carregarUsuariosSeNecessario() {
+    if (usuarios.length) return;
+    const users = await getUsers();
+    setUsuarios(users);
+  }
+
+  async function abrirMembros(projetoId) {
+    try {
+      await carregarUsuariosSeNecessario();
+      setProjetoParaMembrosId(projetoId);
+    } catch {
+      showToast('error', 'Membros', 'Não foi possível carregar os usuários.');
+    }
+  }
+
+  async function abrirNovoProjeto() {
+    try {
+      await carregarUsuariosSeNecessario();
+      setNovoProjetoAberto(true);
+    } catch {
+      showToast('error', 'Novo projeto', 'Não foi possível carregar os usuários.');
+    }
+  }
+
+  // A lista de usuários pode ser muito grande e só é necessária nos diálogos de membros.
   useEffect(() => {
     let active = true;
 
     async function loadProjects() {
-      const [users, data] = await Promise.all([getUsers(), getProjects()]);
+      const data = await getProjects();
       if (!active) return;
 
-      setUsuarios(users);
       setProjetos(data);
     }
 
@@ -181,13 +205,13 @@ export function ProjetosPage() {
       <ConfirmDialog />
       <ProjectsSidebar
         projetos={meusProjetos}
+        title={isAdmin ? 'Todos os projetos' : 'Meus projetos'}
         projetoAtivoId={projetoAtivo?.id}
-        todosUsuarios={usuarios}
         currentUserId={currentUserId}
         onSelect={selecionarProjeto}
         onRename={renomearProjeto}
-        onOpenMembers={(id) => setProjetoParaMembrosId(id)}
-        onNovoProjeto={() => setNovoProjetoAberto(true)}
+        onOpenMembers={abrirMembros}
+        onNovoProjeto={abrirNovoProjeto}
         onClose={() => setSidebarOpen(false)}
       />
 
@@ -221,7 +245,7 @@ export function ProjetosPage() {
                 icon="pi pi-users"
                 label="Membros"
                 text
-                onClick={() => setProjetoParaMembrosId(projetoAtivo.id)}
+                onClick={() => abrirMembros(projetoAtivo.id)}
               />
             )}
             {projetoAtivo && projetoAtivo.donoId === currentUserId && (
@@ -240,7 +264,6 @@ export function ProjetosPage() {
         {projetoAtivo ? (
           <KanbanBoard
             projeto={projetoAtivo}
-            todosUsuarios={usuarios}
             onUpdateProjeto={atualizarProjeto}
             onOpenCard={setCardSelecionado}
           />
@@ -250,7 +273,7 @@ export function ProjetosPage() {
             <p className="text-color-secondary m-0">
               Voce ainda nao tem projetos. Crie o primeiro ao lado.
             </p>
-            <Button label="Novo projeto" icon="pi pi-plus" onClick={() => setNovoProjetoAberto(true)} />
+            <Button label="Novo projeto" icon="pi pi-plus" onClick={abrirNovoProjeto} />
           </div>
         )}
       </div>
