@@ -201,9 +201,9 @@ export function PcdDashboard() {
     const cards = [
         {
             icon: "pi pi-users",
-            label: "Colaboradores",
+            label: "Colaboradores ativos",
             value: summary.total_colaboradores ?? 0,
-            detail: "ativos e afastados",
+            detail: "afastados excluídos",
         },
         {
             icon: "pi pi-heart",
@@ -299,8 +299,8 @@ export function PcdDashboard() {
                     </h2>
                     <p>
                         O indicador considera os colaboradores PCD ativos e
-                        afastados sobre o total de colaboradores ativos e
-                        afastados no escopo selecionado.
+                        afastados sobre o total de colaboradores ativos no
+                        escopo selecionado.
                     </p>
 
                     <div>
@@ -354,7 +354,7 @@ export function PcdDashboard() {
                             <strong>{totalPcd}</strong>
                         </div>
                         <div className="is-base">
-                            <span>Base</span>
+                            <span>Base ativa</span>
                             <strong>{totalEmployees}</strong>
                         </div>
                     </div>
