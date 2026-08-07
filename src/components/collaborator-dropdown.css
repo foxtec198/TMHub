@@ -1,0 +1,35 @@
+.collaborator-dropdown-option {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .22rem;
+  line-height: 1.2;
+}
+
+.collaborator-dropdown-option strong {
+  overflow: hidden;
+  color: var(--text-primary, #18231c);
+  font-size: .86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collaborator-dropdown-option small {
+  overflow: hidden;
+  color: var(--text-secondary, #65766a);
+  font-size: .74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collaborator-dropdown .p-dropdown-label {
+  min-height: 3.4rem;
+  padding-block: .62rem;
+}
+
+.collaborator-dropdown .collaborator-dropdown-option.is-selected {
+  max-width: calc(100% - .25rem);
+}
+
+:root[data-theme="dark"] .collaborator-dropdown-option strong { color: #f1f7f3; }
+:root[data-theme="dark"] .collaborator-dropdown-option small { color: #a9b8ad; }

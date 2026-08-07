@@ -1,0 +1,219 @@
+.disciplinary-page {
+  --disciplinary-accent-light: #e7fbec;
+  --disciplinary-accent-dark: #2fae4f;
+  --disciplinary-border: var(--surface-border, #dfe7e1);
+  --disciplinary-shadow: 0 4px 14px rgba(16, 69, 29, .12);
+  min-height: 100%;
+  padding: 1.5rem;
+  color: var(--text-primary);
+}
+
+.disciplinary-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.disciplinary-summary article,
+.disciplinary-counts > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  background: var(--surface-card, #fff);
+  border: 1px solid var(--surface-border, #dfe7e1);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 54, 27, .06);
+}
+
+.disciplinary-summary span,
+.disciplinary-counts span {
+  color: var(--text-secondary);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.disciplinary-summary strong,
+.disciplinary-counts strong {
+  color: var(--primary-color);
+  font-size: 1.55rem;
+}
+
+.disciplinary-filter-panel .p-inputtext,
+.disciplinary-filter-panel .p-multiselect,
+.disciplinary-filter-panel .p-calendar,
+.disciplinary-search {
+  width: 100%;
+}
+
+.disciplinary-search .p-inputtext { width: 100%; }
+
+.disciplinary-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.disciplinary-speed-dial {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 20;
+}
+
+.disciplinary-speed-dial .p-speeddial,
+.disciplinary-speed-dial .p-speeddial.p-component,
+.disciplinary-speed-dial .p-speeddial-button-wrapper,
+.disciplinary-speed-dial .p-speeddial-list,
+.disciplinary-speed-dial .p-speeddial-list.p-component {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.disciplinary-speed-dial .p-speeddial { position: relative; }
+
+.disciplinary-speed-dial .p-speeddial-action {
+  width: 3.25rem;
+  height: 3.25rem;
+  color: #fff;
+  background: #000 !important;
+  border: 1px solid var(--disciplinary-border) !important;
+  border-radius: 50%;
+  box-shadow: var(--disciplinary-shadow);
+}
+
+.disciplinary-speed-dial .p-speeddial-action:hover {
+  color: #fff;
+  background: #171717 !important;
+}
+
+.disciplinary-speed-dial .p-speeddial-button {
+  width: 4rem;
+  height: 4rem;
+  color: #fff !important;
+  background: #000 !important;
+  border: 3px solid var(--disciplinary-accent-light) !important;
+  box-shadow: var(--disciplinary-shadow);
+}
+
+.disciplinary-speed-dial .p-speeddial-button:hover,
+.disciplinary-speed-dial .p-speeddial-button:focus,
+.disciplinary-speed-dial .p-speeddial-opened .p-speeddial-button {
+  color: #fff !important;
+  background: #000 !important;
+}
+
+.disciplinary-table {
+  overflow: hidden;
+  background: var(--surface-card, #fff);
+  border: 1px solid var(--surface-border, #dfe7e1);
+  border-radius: 14px;
+}
+
+.disciplinary-employee-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .2rem;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.disciplinary-employee-link:hover strong { color: var(--primary-color); }
+.disciplinary-employee-link small { color: var(--text-secondary); }
+
+.disciplinary-dialog { width: min(720px, 94vw); }
+.disciplinary-import-dialog { width: min(780px, 94vw); }
+
+.disciplinary-form,
+.disciplinary-import {
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+}
+
+.disciplinary-form label {
+  color: var(--text-primary);
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.disciplinary-form .p-dropdown,
+.disciplinary-form .p-calendar,
+.disciplinary-form .p-inputnumber,
+.disciplinary-form .p-inputnumber-input,
+.disciplinary-form textarea { width: 100%; }
+
+.disciplinary-form-grid,
+.disciplinary-counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.disciplinary-form-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.disciplinary-guidance-note { color: var(--text-secondary); }
+
+.disciplinary-import input[type="file"] {
+  padding: .85rem;
+  color: var(--text-primary);
+  border: 1px dashed var(--surface-border, #bdc9c0);
+  border-radius: 10px;
+}
+
+.disciplinary-import-report {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: .5rem;
+}
+
+:root[data-theme="dark"] .disciplinary-page { background: #090d0a; }
+:root[data-theme="dark"] .disciplinary-summary article,
+:root[data-theme="dark"] .disciplinary-counts > div,
+:root[data-theme="dark"] .disciplinary-table {
+  background: #141b16;
+  color: #edf4ef;
+  border-color: #34513b;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .28);
+}
+
+:root[data-theme="dark"] .disciplinary-summary strong,
+:root[data-theme="dark"] .disciplinary-counts strong,
+:root[data-theme="dark"] .disciplinary-employee-link:hover strong { color: #70e38d; }
+
+:root[data-theme="dark"] .disciplinary-import input[type="file"] {
+  background: #101610;
+  color: #edf4ef;
+  border-color: #3b5d46;
+}
+
+:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-action,
+:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-button,
+:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-button:hover,
+:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-button:focus,
+:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-opened .p-speeddial-button {
+  color: #071009 !important;
+  background: #58d47c !important;
+}
+
+@media (max-width: 720px) {
+  .disciplinary-page { padding: 1rem; }
+  .disciplinary-summary,
+  .disciplinary-counts,
+  .disciplinary-form-grid { grid-template-columns: 1fr; }
+  .disciplinary-speed-dial { right: 1rem; bottom: 1rem; }
+  .disciplinary-speed-dial .p-speeddial-action { width: 3rem; height: 3rem; }
+}

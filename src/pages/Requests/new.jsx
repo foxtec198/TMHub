@@ -103,7 +103,8 @@ export function Request() {
     async function createRequest() {
         setLoading(true);
         try {
-            if(user && absent && reason && (checked || replace)){
+            const disciplinaryMeasureInformed = reason !== "INJUSTIFICADA" || Boolean(warning);
+            if(user && absent && reason && disciplinaryMeasureInformed && (checked || replace)){
                 const data = {
                     supervisor_id: user.id,
                     ausente_id: absent,
@@ -116,8 +117,19 @@ export function Request() {
                     // supervisor não limite os colaboradores atendidos.
                     publico: true,
                 }
-                await connect.post("/repo/request", data)
+                const response = await connect.post("/repo/request", data)
                 showToast("success", "Sucesso na requisição", "Sua requisição foi criada com sucesso, aguarde novidades por email!")
+                const disciplinarySummary = response.data?.resumo_disciplinar;
+                if (disciplinarySummary) {
+                    showToast(
+                        "info",
+                        "Histórico disciplinar",
+                        `${disciplinarySummary.advertencias || 0} advertência(s) e ${disciplinarySummary.suspensoes || 0} suspensão(ões) registradas.`,
+                    );
+                }
+                (response.data?.avisos || []).forEach((message) => {
+                    showToast("warn", "Orientação do RH", message);
+                });
                 selectedReplace(null); selectedAbsent(null); setAbsentDetails(null); selectedReason(null); setObs(""); selectedWarning(null); setDateChoice("today")
             }
             else{showToast("warn", "Atenção!", "Preencha todos os dados")}
@@ -280,7 +292,10 @@ export function Request() {
                                     panelStyle={{ maxWidth: '100%' }}
                                     className="w-full mb-3"
                                     value={reason}
-                                    onChange={(e) => selectedReason(e.value)}
+                                    onChange={(e) => {
+                                        selectedReason(e.value);
+                                        if (e.value !== "INJUSTIFICADA") selectedWarning(null);
+                                    }}
                                     options={reasonOptions}
                                     placeholder="Selecione o Motivo"
                                     optionLabel="name"
@@ -293,7 +308,7 @@ export function Request() {
                                     value={warning}
                                     onChange={(e) => selectedWarning(e.value)}
                                     options={["Aplicado", "Não Aplicado"]}
-                                    placeholder="Advertencia"
+                                    placeholder="Medida disciplinar"
                                     optionLabel="name"
                                 />
 
