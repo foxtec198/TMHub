@@ -6,6 +6,20 @@
   padding: 1.25rem;
 }
 
+.init-support-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 22.5rem);
+  align-items: stretch;
+  gap: 1.25rem;
+}
+
+.init-weather-widget {
+  width: 100% !important;
+  min-width: 0;
+  max-width: 22.5rem;
+  justify-self: end;
+}
+
 .init-support-hero {
   position: relative;
   display: grid;
@@ -403,6 +417,10 @@
 }
 
 @media(max-width: 900px) {
+  .init-support-top {
+    grid-template-columns: 1fr;
+  }
+
   .init-support-hero {
     grid-template-columns: 1fr;
   }
@@ -414,11 +432,63 @@
   .init-support-grid {
     grid-template-columns: 1fr;
   }
+
+  .init-weather-widget {
+    width: min(100%, 26rem) !important;
+    height: clamp(18rem, 48dvh, 23rem) !important;
+    justify-self: center;
+  }
 }
 
 @media(max-width: 680px) {
   .init-support-page {
-    padding: .85rem;
+    gap: 1rem;
+    padding: .75rem;
+  }
+
+  .init-support-hero {
+    min-height: auto;
+    gap: 1.25rem;
+    padding: 1.35rem;
+    border-radius: 18px;
+  }
+
+  .init-support-hero h1 {
+    margin: .5rem 0 .75rem;
+    font-size: clamp(2rem, 10vw, 2.45rem);
+  }
+
+  .init-support-hero p {
+    font-size: .95rem;
+    line-height: 1.6;
+  }
+
+  .init-support-hero-tags {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .5rem;
+    margin-top: 1.2rem;
+  }
+
+  .init-support-hero-tags span {
+    width: 100%;
+    padding: .65rem .8rem;
+  }
+
+  .init-support-section,
+  .init-help-card,
+  .init-team-card {
+    padding: 1rem;
+    border-radius: 16px;
+  }
+
+  .init-support-section-header {
+    align-items: flex-start;
+  }
+
+  .init-support-section-header>i {
+    flex: 0 0 auto;
+    font-size: 1.65rem;
   }
 
   .init-docs-grid,
@@ -428,6 +498,22 @@
 
   .init-doc-card {
     grid-template-columns: auto minmax(0, 1fr);
+    gap: .2rem .75rem;
+    padding: 1rem;
+  }
+
+  .init-doc-icon {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .init-doc-card p {
+    margin-bottom: .7rem;
+  }
+
+  .init-doc-card a {
+    width: 100%;
+    justify-content: center;
   }
 
   .init-support-footer {
