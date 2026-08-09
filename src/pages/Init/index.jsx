@@ -38,7 +38,7 @@ export function Init() {
 
   return (
     <main className="init-support-page">
-      <div className="flex justify-content-between gap-4">
+      <div className="init-support-top">
         <section className="init-support-hero">
           <div className="init-support-hero-content">
             <span className="init-support-eyebrow">TM HUB · CENTRAL DE AJUDA</span>
@@ -59,7 +59,7 @@ export function Init() {
           </div>
         </section>
 
-        <WeatherWidget/>
+        <WeatherWidget className="init-weather-widget" />
       </div>
 
       <section className="init-support-section">
