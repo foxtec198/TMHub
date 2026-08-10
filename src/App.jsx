@@ -53,6 +53,7 @@ import { Structure } from "./pages/Structure/index";
 import { TMOps } from "./pages/TMOps";
 import { TMOpsManagement } from "./pages/TMOps/Management";
 import { TMOpsTasks } from "./pages/TMOps/Tasks";
+import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
 
 document.documentElement.dataset.theme =
   localStorage.getItem("theme") === "dark" ? "dark" : "light";
@@ -356,7 +357,18 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
-          
+
+          {/* Medidas Disciplinares */}
+
+          <Route
+            path="/controle-medidas-disciplinares"
+            element={
+              <PermissionGate screen="controle_medidas_disciplinares">
+                <DisciplinaryMeasures />
+              </PermissionGate>
+            }
+          />
+
           {/* Rescisões */}
           <Route
             path="/rescisoes"

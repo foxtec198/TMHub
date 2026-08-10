@@ -41,6 +41,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/estrutura": ["estrutura", "estoque.movimentos"],
   "/projetos": ["projetos"],
   "/reports/rescisoes": ["rescisoes", "colaboradores"],
+  "/controle-medidas-disciplinares": ["medidas_disciplinares"],
 };
 
 export function MainLayout() {
@@ -217,6 +218,11 @@ export function MainLayout() {
           icon: 'pi pi-money-bill',
           command: () => { navigateTo("/controle-glosas") }
         }] : []),
+        ...(can("controle_medidas_disciplinares") ? [{
+          label: 'Medidas Disciplinares',
+          icon: 'pi pi-file-edit',
+          command: () => { navigateTo("/controle-medidas-disciplinares") }
+        }] : []),
         {
           label: 'Requisições',
           icon: 'pi pi-question',
@@ -292,11 +298,12 @@ export function MainLayout() {
 
     // MENUITEMS SEM SUBITEMS
     {
-          label: 'Rescisões',
-          icon: 'pi pi-user-minus',
-          visible: can("controle_rescisoes"),
-          command: () => { navigateTo("/rescisoes") }
+      label: 'Rescisões',
+      icon: 'pi pi-user-minus',
+      visible: can("controle_rescisoes"),
+      command: () => { navigateTo("/rescisoes") }
     },
+  
     {
       label: 'Estrutura',
       icon: 'pi pi-building',
