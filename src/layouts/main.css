@@ -233,7 +233,7 @@
 .layout-panel-menu {
   width: 100%;
   min-height: 100%;
-  padding: 1.25rem 0.75rem;
+  padding: 1.25rem 0.15rem;
   overflow: visible;
 }
 

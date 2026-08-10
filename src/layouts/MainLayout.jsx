@@ -98,7 +98,7 @@ export function MainLayout() {
                   command: () => { navigateTo("/reports/reposicoes") }
                 },
                 {
-                  label: 'Reposições - ODS',
+                  label: 'Rep. ODS',
                   icon: 'pi pi-external-link',
                   visible: can("dashboard_reposicoes_ods"),
                   command: () => { navigateTo("/reports/reposicoes/ods") }
@@ -304,7 +304,6 @@ export function MainLayout() {
         },
       ]
     },
-
     {
       label: 'TM Ops',
       icon: 'pi pi-calendar-clock',
