@@ -22,24 +22,19 @@ import "./styles.css";
 
 const REASON_OPTIONS = [
   { label: "Dispensa sem justa causa", value: "sem_justa_causa" },
-  { label: "Pedido de demissão", value: "pedido_demissao" },
-  { label: "Extinção por acordo", value: "acordo" },
   { label: "Dispensa por justa causa", value: "justa_causa" },
   { label: "Término de experiência / contrato determinado", value: "termino_contrato" },
 ];
 
 const EXPERIENCE_REASON_OPTIONS = REASON_OPTIONS.filter(({ value }) =>
-  ["pedido_demissao", "termino_contrato"].includes(value),
+  ["termino_contrato"].includes(value),
 );
 const EXPERIENCE_DAYS = 90;
-const FGTS_BALANCE_DISABLED_REASONS = new Set(["pedido_demissao", "justa_causa"]);
+const FGTS_BALANCE_DISABLED_REASONS = new Set(["justa_causa"]);
 
 const NOTICE_OPTIONS = [
   { label: "Indenizado", value: "indenizado" },
   { label: "Trabalhado", value: "trabalhado" },
-  { label: "Descontado", value: "descontado" },
-  { label: "Dispensado", value: "dispensado" },
-  { label: "Não aplicável", value: "nao_aplicavel" },
 ];
 
 const EMPTY_CALCULATION = {
@@ -189,7 +184,7 @@ function TerminationControlContent() {
   useEffect(() => {
     if (!inExperiencePeriod) return;
     setCalculationForm((current) => {
-      const nextReason = ["pedido_demissao", "termino_contrato"].includes(current.motivo)
+      const nextReason = ["termino_contrato"].includes(current.motivo)
         ? current.motivo
         : "termino_contrato";
       if (current.motivo === nextReason && current.tipo_aviso === "nao_aplicavel") return current;
@@ -522,7 +517,7 @@ function TerminationControlContent() {
                 <i className="pi pi-clock" />
                 <div>
                   <strong>Colaborador em período de experiência</strong>
-                  <span>Até {dateLabel(experienceEndDate)}. O motivo fica limitado a pedido de demissão ou término de experiência, sem aviso prévio.</span>
+                  <span>Até {dateLabel(experienceEndDate)}. O motivo fica limitado a término de experiência, sem aviso prévio.</span>
                 </div>
               </div>
             )}
@@ -540,7 +535,7 @@ function TerminationControlContent() {
                 <i className="pi pi-lock" />
                 <div>
                   <strong>Saldo do FGTS não aplicável</strong>
-                  <span>Para pedido de demissão ou justa causa, o saldo não participa do cálculo da multa.</span>
+                  <span>Para justa causa, o saldo não participa do cálculo da multa.</span>
                 </div>
               </div>
             )}

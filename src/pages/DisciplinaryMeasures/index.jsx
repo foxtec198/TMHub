@@ -86,6 +86,15 @@ function errorMessage(error, fallback) {
   return typeof data === "string" ? data : data?.message || fallback;
 }
 
+function responsiveCell(label, content) {
+  return (
+    <div className="tm-table-cell">
+      <span className="tm-table-card-label">{label}</span>
+      <div className="tm-table-card-value">{content ?? "—"}</div>
+    </div>
+  );
+}
+
 export function DisciplinaryMeasures() {
   const [records, setRecords] = useState([]);
   const [summary, setSummary] = useState({ total: 0, advertencias: 0, suspensoes: 0 });
@@ -218,9 +227,11 @@ export function DisciplinaryMeasures() {
       showToast("warn", "Importação", "Selecione uma planilha .xlsx.");
       return;
     }
+
     const payload = new FormData();
     payload.append("arquivo", importFile);
     setLoading(true);
+
     try {
       const { data } = await connect.post("/medidas-disciplinares/importar", payload, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -303,11 +314,11 @@ export function DisciplinaryMeasures() {
             <span>Colaboradores</span>
             <MultiSelect value={filters.colaborador_id} options={employees} onChange={(event) => updateFilter("colaborador_id", event.value)} placeholder="Todos os colaboradores" display="chip" filter maxSelectedLabels={1} />
           </label>
-            <label>
+          <label>
             <span>Período</span>
             <Calendar value={filters.periodo} onChange={(event) => updateFilter("periodo", event.value)} selectionMode="range" dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar readOnlyInput />
           </label>
-            <label>
+          <label>
             <span>Departamentos</span>
             <MultiSelect value={filters.departamento} options={departments} onChange={(event) => updateFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter maxSelectedLabels={1} />
           </label>
@@ -332,14 +343,72 @@ export function DisciplinaryMeasures() {
         <article><span>Suspensões</span><strong>{summary.suspensoes}</strong></article>
       </div>
 
-      <DataTable value={records} loading={tableLoading} lazy paginator first={pagination.first} rows={pagination.rows} totalRecords={totalRecords} onPage={(event) => setPagination({ first: event.first, rows: event.rows })} rowsPerPageOptions={[10, 25, 50]} emptyMessage="Nenhuma medida disciplinar encontrada." stripedRows scrollable className="tm-responsive-table disciplinary-table">
-        <Column field="data_medida" header="Data" body={(row) => formatDate(row.data_medida)} />
-        <Column field="colaborador" header="Colaborador" body={(row) => <div className="disciplinary-employee"><strong>{row.colaborador}</strong><small>{row.matricula} · {row.centro_custo || "Sem contrato"}</small></div>} />
-        <Column field="supervisor" header="Supervisor da época" body={(row) => row.supervisor || "Sem supervisor"} />
-        <Column field="tipo_label" header="Medida" body={(row) => <Tag value={row.tipo_label} severity={row.tipo === "suspensao" ? "warning" : "info"} />} />
-        <Column field="motivo_label" header="Alínea / motivo" />
-        <Column field="quantidade_dias" header="Dias" body={(row) => row.quantidade_dias || "—"} />
-        <Column field="origem" header="Origem" body={(row) => row.origem === "importacao" ? "Planilha" : "Manual"} />
+      <DataTable
+        value={records}
+        loading={tableLoading}
+        lazy
+        paginator
+        first={pagination.first}
+        rows={pagination.rows}
+        totalRecords={totalRecords}
+        onPage={(event) => setPagination({ first: event.first, rows: event.rows })}
+        rowsPerPageOptions={[10, 25, 50]}
+        paginatorTemplate="RowsPerPageDropdown CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
+        currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} resultados"
+        emptyMessage="Nenhuma medida disciplinar encontrada."
+        stripedRows
+        scrollable
+        tableStyle={{ minWidth: "76rem" }}
+        className="tm-responsive-table disciplinary-table"
+      >
+        <Column
+          field="data_medida"
+          header="Data"
+          body={(row) => responsiveCell("Data", formatDate(row.data_medida))}
+        />
+        <Column
+          field="colaborador"
+          header="Colaborador"
+          body={(row) => responsiveCell("Colaborador", (
+            <div className="disciplinary-employee">
+              <strong>{row.colaborador || "Colaborador não identificado"}</strong>
+              <small>
+                <span>{row.matricula || "Sem matrícula"}</span>
+                <span>{row.centro_custo || "Sem contrato"}</span>
+              </small>
+            </div>
+          ))}
+        />
+        <Column
+          field="supervisor"
+          header="Supervisor da época"
+          body={(row) => responsiveCell("Supervisor", row.supervisor || "Sem supervisor")}
+        />
+        <Column
+          field="tipo_label"
+          header="Medida"
+          body={(row) => responsiveCell("Medida", (
+            <Tag
+              value={row.tipo_label}
+              severity={row.tipo === "suspensao" ? "warning" : "info"}
+            />
+          ))}
+        />
+        <Column
+          field="motivo_label"
+          header="Alínea / motivo"
+          body={(row) => responsiveCell("Alínea / motivo", row.motivo_label)}
+        />
+        <Column
+          field="quantidade_dias"
+          header="Dias"
+          body={(row) => responsiveCell("Dias", row.quantidade_dias || "—")}
+        />
+        <Column
+          field="origem"
+          header="Origem"
+          body={(row) => responsiveCell("Origem", row.origem === "importacao" ? "Planilha" : "Manual")}
+        />
       </DataTable>
 
       <Dialog visible={importVisible} onHide={() => setImportVisible(false)} header="Importar medidas disciplinares" modal className="disciplinary-import-dialog">
@@ -347,7 +416,20 @@ export function DisciplinaryMeasures() {
           <p>Selecione o relatório “Relação de Advertências e Suspensões”. A API padroniza as alíneas, vincula cada matrícula e grava o supervisor responsável no momento da importação.</p>
           <input ref={fileInput} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => { setImportFile(event.target.files?.[0] || null); setImportReport(null); }} />
           <Button label="Processar planilha" icon="pi pi-upload" disabled={!importFile} onClick={importSpreadsheet} />
-          {importReport && <div className="disciplinary-import-report"><div className="disciplinary-counts"><div><span>Importadas</span><strong>{importReport.importadas}</strong></div><div><span>Rejeitadas</span><strong>{importReport.rejeitadas}</strong></div></div>{importReport.linhas_rejeitadas?.length > 0 && <DataTable value={importReport.linhas_rejeitadas} size="small" paginator rows={5}><Column field="linha" header="Linha" /><Column field="motivo" header="Motivo da rejeição" /></DataTable>}</div>}
+          {importReport && (
+            <div className="disciplinary-import-report">
+              <div className="disciplinary-counts">
+                <div><span>Importadas</span><strong>{importReport.importadas}</strong></div>
+                <div><span>Rejeitadas</span><strong>{importReport.rejeitadas}</strong></div>
+              </div>
+              {importReport.linhas_rejeitadas?.length > 0 && (
+                <DataTable value={importReport.linhas_rejeitadas} size="small" paginator rows={5}>
+                  <Column field="linha" header="Linha" />
+                  <Column field="motivo" header="Motivo da rejeição" />
+                </DataTable>
+              )}
+            </div>
+          )}
         </div>
       </Dialog>
     </section>
