@@ -30,6 +30,31 @@ export function CapacityDepartmentSettings() {
       ));
   }, [refresh, showToast]);
 
+  const mergeSavedSettings = (response) => {
+    setData((current) => {
+      const changedCenters = new Map(
+        (response?.centros_custo || []).map((center) => [center.id, center]),
+      );
+      const changedDepartments = new Map(
+        (response?.departamentos || []).map((department) => [
+          department.departamento,
+          department,
+        ]),
+      );
+
+      return {
+        centros_custo: current.centros_custo.map((center) => ({
+          ...center,
+          ...(changedCenters.get(center.id) || {}),
+        })),
+        departamentos: current.departamentos.map((department) => ({
+          ...department,
+          ...(changedDepartments.get(department.departamento) || {}),
+        })),
+      };
+    });
+  };
+
   const saveCapacity = async () => {
     if (!editingCenter) return;
     setLoading(true);
@@ -40,7 +65,7 @@ export function CapacityDepartmentSettings() {
           capacidade_pessoas: capacity,
         }],
       });
-      setData(response);
+      mergeSavedSettings(response);
       setEditingCenter(null);
       showToast("success", "Capacidade atualizada", "O limite planejado do centro de custo foi salvo.");
     } catch (error) {
@@ -54,9 +79,9 @@ export function CapacityDepartmentSettings() {
     setLoading(true);
     try {
       const { data: response } = await connect.patch("/centro/configuracoes", {
-        departamentos: [{ departamento, ativo: active }],
+        departamentos: [{ departamento: department, ativo: active }],
       });
-      setData(response);
+      mergeSavedSettings(response);
       showToast("success", "Departamento atualizado", active ? "Departamento ativado." : "Departamento inativado.");
     } catch (error) {
       showToast("error", "Departamento", error.response?.data || "Não foi possível atualizar o departamento.");
