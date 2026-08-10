@@ -8,6 +8,13 @@
   color: var(--text-primary);
 }
 
+.disciplinary-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
 .disciplinary-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

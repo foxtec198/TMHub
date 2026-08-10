@@ -64,6 +64,7 @@ const emptyFilters = () => ({
   supervisor: [],
   tipo: [],
   motivo: [],
+  departamento: [],
   periodo: null,
 });
 
@@ -93,6 +94,7 @@ export function DisciplinaryMeasures() {
   const [pagination, setPagination] = useState({ first: 0, rows: 10 });
   const [employees, setEmployees] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [options, setOptions] = useState(DEFAULT_OPTIONS);
   const [refresh, setRefresh] = useState(0);
   const [importVisible, setImportVisible] = useState(false);
@@ -123,6 +125,7 @@ export function DisciplinaryMeasures() {
             supervisor: filters.supervisor.join(",") || undefined,
             tipo: filters.tipo.join(",") || undefined,
             motivo: filters.motivo.join(",") || undefined,
+            departamento: filters.departamento.join(",") || undefined,
             inicio: dateParam(filters.periodo?.[0]),
             fim: dateParam(filters.periodo?.[1]),
           },
@@ -157,6 +160,7 @@ export function DisciplinaryMeasures() {
           value: employee.id,
         })));
         setSupervisors(data.supervisores || []);
+        setDepartments(data.departamentos || []);
         filterOptionsLoaded.current = true;
         return true;
       })
@@ -239,6 +243,7 @@ export function DisciplinaryMeasures() {
     filters.supervisor.length > 0,
     filters.tipo.length > 0,
     filters.motivo.length > 0,
+    filters.departamento.length > 0,
     Boolean(filters.periodo?.[0]),
   ].filter(Boolean).length;
 
@@ -298,6 +303,14 @@ export function DisciplinaryMeasures() {
             <span>Colaboradores</span>
             <MultiSelect value={filters.colaborador_id} options={employees} onChange={(event) => updateFilter("colaborador_id", event.value)} placeholder="Todos os colaboradores" display="chip" filter maxSelectedLabels={1} />
           </label>
+            <label>
+            <span>Período</span>
+            <Calendar value={filters.periodo} onChange={(event) => updateFilter("periodo", event.value)} selectionMode="range" dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar readOnlyInput />
+          </label>
+            <label>
+            <span>Departamentos</span>
+            <MultiSelect value={filters.departamento} options={departments} onChange={(event) => updateFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter maxSelectedLabels={1} />
+          </label>
           <label>
             <span>Supervisores</span>
             <MultiSelect value={filters.supervisor} options={supervisors} onChange={(event) => updateFilter("supervisor", event.value)} placeholder="Todos os supervisores" display="chip" filter maxSelectedLabels={1} />
@@ -309,10 +322,6 @@ export function DisciplinaryMeasures() {
           <label>
             <span>Alíneas</span>
             <MultiSelect value={filters.motivo} options={options.motivos} onChange={(event) => updateFilter("motivo", event.value)} placeholder="Todas as alíneas" display="chip" filter maxSelectedLabels={1} />
-          </label>
-          <label>
-            <span>Período</span>
-            <Calendar value={filters.periodo} onChange={(event) => updateFilter("periodo", event.value)} selectionMode="range" dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar readOnlyInput />
           </label>
         </div>
       </OverlayPanel>
