@@ -17,6 +17,10 @@
 .timo-avatar--error { filter: drop-shadow(0 0 .35rem var(--status-danger)); }
 .timo-avatar--disabled { opacity: .64; filter: grayscale(.75); }
 .timo-avatar--idle.is-active, .timo-avatar--listening.is-active { animation: timo-idle 3.4s ease-in-out infinite; }
+.timo-assistant.is-dragging, .timo-assistant.is-dragging .timo-avatar { cursor: grabbing; user-select: none; }
+.timo-avatar--drag-joy { animation: timo-drag-joy .52s ease-in-out infinite !important; }.timo-avatar--drag-joy .timo-arm { animation-duration: .42s !important; }
+.timo-avatar--drag-tickle { animation: timo-drag-tickle .3s ease-in-out infinite !important; }.timo-avatar--drag-tickle .timo-arm-left { animation: timo-drag-tickle-left .34s ease-in-out infinite !important; }.timo-avatar--drag-tickle .timo-arm-right { animation: timo-drag-tickle-right .34s ease-in-out infinite !important; }
+.timo-avatar--drag-pain { animation: timo-drag-pain .18s linear infinite !important; filter: drop-shadow(0 0 .35rem var(--status-warning)); }.timo-avatar--drag-pain .timo-arm { animation: none !important; }
 .timo-avatar-microphone { position: absolute; z-index: 2; right: -.2rem; bottom: -.16rem; display: grid; width: 1rem; height: 1rem; place-items: center; border: 2px solid var(--surface-1); border-radius: 50%; color: var(--button-primary-text); background: var(--primary); font-size: .48rem; }
 .timo-avatar-dots { position: absolute; z-index: 3; bottom: -.16rem; display: inline-flex; gap: .12rem; align-items: center; padding: .16rem .26rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-1); }
 .timo-avatar-dots i { width: .22rem; height: .22rem; border-radius: 50%; background: var(--primary); animation: timo-dot .8s ease-in-out infinite; }
@@ -33,6 +37,11 @@
 @keyframes timo-dot { 0%, 100% { transform: translateY(0); opacity: .35; } 50% { transform: translateY(-2px); opacity: 1; } }
 @keyframes timo-bubble-in { from { opacity: 0; transform: translateY(.35rem) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes timo-bubble-mobile-in { from { opacity: 0; transform: translateX(-50%) translateY(.35rem) scale(.98); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+@keyframes timo-drag-joy { 0%, 100% { transform: translateY(0) rotate(-2deg) scale(1); } 50% { transform: translateY(-4px) rotate(2deg) scale(1.06); } }
+@keyframes timo-drag-tickle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes timo-drag-tickle-left { 50% { transform: rotate(18deg) translateY(-2px); } }
+@keyframes timo-drag-tickle-right { 50% { transform: rotate(-18deg) translateY(-2px); } }
+@keyframes timo-drag-pain { 0%, 100% { transform: translateX(-2px) rotate(-1deg); } 50% { transform: translateX(2px) rotate(1deg); } }
 @keyframes timo-arm-left { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(5deg) translateY(-1px); } }
 @keyframes timo-arm-right { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-5deg) translateY(-1px); } }
 @keyframes timo-arm-wave-left { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(16deg) translateY(-2px); } }
@@ -43,7 +52,7 @@
 }
 @media (max-width: 480px) { .timo-avatar { width: 2.55rem; height: 2.55rem; } }
 @media (min-width: 961px) {
-  .timo-assistant { position: fixed; z-index: 15; left: 5rem; bottom: 1rem; padding: .55rem; border: 0; border-radius: 1.8rem; background: transparent; box-shadow: none; }
+  .timo-assistant { position: fixed; z-index: 15; left: var(--timo-left, 5rem); bottom: var(--timo-bottom, 1rem); padding: .55rem; border: 0; border-radius: 1.8rem; background: transparent; box-shadow: none; touch-action: none; }
   .menu-closed .timo-assistant { opacity: 0; pointer-events: none; transform: translateX(-8rem); }
   .timo-avatar { width: 7.1rem; height: 7.1rem; padding: .35rem; border-radius: 1.35rem; background: transparent; }
   .timo-avatar-halo { inset: .25rem .65rem; filter: blur(.65rem); }

@@ -41,14 +41,14 @@ function TimoIllustration() {
   );
 }
 
-export function TimoAvatar({ state, enabled, manualDisabled, onToggle }) {
+export function TimoAvatar({ state, enabled, manualDisabled, dragReaction, onToggle }) {
   const isActive = enabled && state !== "disabled";
   const symbol = visorSymbol(state, manualDisabled);
 
   return (
     <button
       type="button"
-      className={`timo-avatar timo-avatar--${state} ${isActive ? "is-active" : ""}`}
+      className={`timo-avatar timo-avatar--${state} ${dragReaction ? `timo-avatar--drag-${dragReaction}` : ""} ${isActive ? "is-active" : ""}`}
       onClick={onToggle}
       aria-label={isActive ? "Pausar escuta do Timo" : "Ativar escuta do Timo"}
       title={STATE_LABELS[state] || "Timo"}
