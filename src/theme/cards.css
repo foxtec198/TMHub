@@ -1,0 +1,242 @@
+
+:root[data-theme] {
+  --card-bg: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--surface-1) 96%, var(--primary)),
+    var(--surface-1)
+  );
+  --card-border: var(--border);
+  --card-border-hover: color-mix(in srgb, var(--primary) 46%, var(--border));
+  --card-radius: 15px;
+  --card-padding: 1rem;
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-icon-size: 2.7rem;
+  --card-accent: var(--primary);
+}
+
+:root[data-theme] :where(
+  .tm-card,
+  .p-card,
+  .settings-card,
+  .init-doc-card,
+  .init-help-card,
+  .init-team-card,
+  .structure-item-card,
+  .tm-ops-content-card,
+  .executor-list-card,
+  .floater-card,
+  .glosa-colab-card,
+  .rocada-month-card,
+  .movimentacao-card,
+  .kanban-card,
+  .project-command-card,
+  .project-dashboard-progress-card,
+  .admission-panel,
+  .admission-table-panel,
+  .pcd-dashboard-panel,
+  .project-dashboard-panel,
+  .termination-dashboard-panel,
+  .termination-dashboard-table-panel,
+  .ponto48-panel,
+  .ponto48-table-panel,
+  .ponto48-records article,
+  .ponto48-mirror-records article,
+  .ponto48-adjustment-detail > section,
+  .ponto48-detail-summary > div,
+  .dashboard-chart-card,
+  .dashboard-table,
+  .dashboard-status
+) {
+  color: var(--text-primary);
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+  border-style: solid !important;
+  border-width: 1px !important;
+  border-radius: var(--card-radius) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+:root[data-theme] .p-card :where(.p-card-body, .p-card-content) {
+  color: inherit !important;
+  background: transparent !important;
+}
+
+:root[data-theme] :where(
+  button.tm-card,
+  .init-doc-card,
+  .structure-item-card,
+  .executor-list-card,
+  .floater-card,
+  .kanban-card
+) {
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+:root[data-theme] :where(
+  button.tm-card,
+  .init-doc-card,
+  .structure-item-card,
+  .executor-list-card,
+  .floater-card,
+  .kanban-card
+):hover {
+  border-color: var(--card-border-hover);
+  box-shadow: var(--card-shadow-hover) !important;
+}
+
+/* Executive metric cards follow the compact visual used by the dashboards. */
+:root[data-theme] :where(
+  .tm-metric-card,
+  .admission-summary-card,
+  .pcd-dashboard-summary-card,
+  .termination-dashboard-card,
+  .project-dashboard-summary-card,
+  .ponto48-card,
+  .pcd-summary-card,
+  .floater-summary-card,
+  .admission-status-card
+) {
+  color: var(--text-primary);
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: var(--card-radius) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+.tm-metric-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: .8rem;
+  min-width: 0;
+  min-height: 5.4rem;
+  padding: var(--card-padding) !important;
+}
+
+.tm-metric-card:not(:has(.tm-metric-card__icon)) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tm-metric-card.is-success { --card-accent: var(--status-success); }
+.tm-metric-card.is-danger { --card-accent: var(--status-danger); }
+.tm-metric-card.is-warning { --card-accent: var(--status-warning); }
+.tm-metric-card.is-info { --card-accent: var(--status-info); }
+.tm-metric-card.is-violet { --card-accent: var(--chart-6); }
+.tm-metric-card.is-neutral { --card-accent: var(--text-secondary); }
+
+:root[data-theme] .ponto48-card.is-active {
+  border-color: var(--card-accent) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--card-accent) 14%, transparent), var(--card-shadow) !important;
+}
+
+/* Status remains semantic even though every month uses the same surface. */
+:root[data-theme] .rocada-month-card.is-safe { border-top: 4px solid var(--status-success) !important; }
+:root[data-theme] .rocada-month-card.is-risk { border-top: 4px solid var(--status-danger) !important; }
+:root[data-theme] .rocada-month-card.is-empty { border-top: 4px solid var(--status-info) !important; }
+:root[data-theme] .rocada-month-card.is-future { border-top: 4px solid var(--text-muted) !important; }
+
+.tm-metric-card__icon,
+:root[data-theme] :where(
+  .admission-summary-card__icon,
+  .pcd-dashboard-summary-card__icon,
+  .termination-dashboard-card__icon,
+  .project-dashboard-summary-card__icon,
+  .ponto48-card__icon,
+  .settings-card-title > i,
+  .init-help-card-title > i,
+  .init-doc-icon
+) {
+  display: grid;
+  width: var(--card-icon-size);
+  height: var(--card-icon-size);
+  flex: 0 0 var(--card-icon-size);
+  place-items: center;
+  padding: 0;
+  color: var(--card-accent);
+  background: color-mix(in srgb, var(--card-accent) 13%, transparent);
+  border-radius: 12px;
+  font-size: 1.15rem;
+}
+
+.tm-metric-card__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.tm-metric-card__content small,
+:root[data-theme] :where(
+  .admission-summary-card,
+  .pcd-dashboard-summary-card,
+  .termination-dashboard-card,
+  .project-dashboard-summary-card,
+  .ponto48-card,
+  .pcd-summary-card
+) small {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tm-metric-card__value-row {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: .45rem;
+}
+
+.tm-metric-card__value-row strong,
+:root[data-theme] :where(
+  .admission-summary-card,
+  .pcd-dashboard-summary-card,
+  .termination-dashboard-card,
+  .project-dashboard-summary-card,
+  .ponto48-card,
+  .pcd-summary-card
+) strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: clamp(1.15rem, 1.8vw, 1.65rem) !important;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tm-metric-card__content em,
+:root[data-theme] :where(
+  .admission-summary-card,
+  .pcd-dashboard-summary-card,
+  .termination-dashboard-card,
+  .project-dashboard-summary-card,
+  .ponto48-card
+) em {
+  overflow: hidden;
+  margin-top: .15rem;
+  color: var(--text-secondary);
+  font-size: .72rem;
+  font-style: normal;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] :where(
+    button.tm-card,
+    .init-doc-card,
+    .structure-item-card,
+    .executor-list-card,
+    .floater-card,
+    .kanban-card
+  ) {
+    transition: none;
+  }
+}

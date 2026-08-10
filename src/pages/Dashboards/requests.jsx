@@ -589,12 +589,8 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-verified"
                         title="Total"
-                        className="border-round-lg flex-grow-1"
-                        style={{
-                            backgroundColor: 'var(--primary)',
-                            height: "5rem",
-                            color: "#fff",
-                        }}
+                        className="flex-grow-1"
+                        detail="no período filtrado"
                         value={totalRequisicoes}
                         cont="100%"
                         contSeverity="info"
@@ -603,12 +599,9 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-folder-open "
                         title="Abertas"
-                        className="border-round-lg flex-grow-1"
-                        style={{
-                            backgroundColor: 'var(--chart-1)',
-                            height: "5rem",
-                            color: "#fff",
-                        }}
+                        className="flex-grow-1"
+                        detail="aguardando atendimento"
+                        tone="warning"
                         value={abertas}
                         cont={`${percentageOfTotal(abertas)}%`}
                         contSeverity="warning"
@@ -617,12 +610,9 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-calendar "
                         title="Cobertas"
-                        className="border-round-lg flex-grow-1"
-                        style={{
-                            backgroundColor: 'var(--secondary)',
-                            height: "5rem",
-                            color: "#fff",
-                        }}
+                        className="flex-grow-1"
+                        detail="postos com cobertura"
+                        tone="success"
                         value={postosCobertos}
                         cont={`${percentageOfTotal(postosCobertos)}%`}
                         contSeverity="success"
@@ -631,12 +621,9 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-paperclip"
                         title="Descobertas"
-                        className="border-round-lg flex-grow-1"
-                        style={{
-                            backgroundColor: 'var(--accent)',
-                            height: "5rem",
-                            color: "#fff",
-                        }}
+                        className="flex-grow-1"
+                        detail="postos sem cobertura"
+                        tone="danger"
                         value={postosDescobertos}
                         cont={`${percentageOfTotal(postosDescobertos)}%`}
                         contSeverity="danger"
@@ -645,30 +632,23 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-dollar"
                         title="Custo Total"
-                        className="dashboard-financial-card border-round-lg flex-grow-1"
-                        style={{
-                            backgroundColor: 'var(--surface-3)',
-                            height: "5rem",
-                            color: "#fff",
-                        }}
+                        className="dashboard-financial-card flex-grow-1"
+                        detail="multas no período"
+                        tone="info"
                         value={to_real(totalDeMultas)}
                         valueClassName="text-2xl"
                     />
                     <DashCard
                         icon="pi pi-chart-line"
                         title="Média por dia"
-                        className="dashboard-financial-card border-round-lg flex-grow-1"
-                        style={{
-                            backgroundColor: 'var(--chart-7)',
-                            height: "5rem",
-                            color: "#fff",
-                        }}
+                        className="dashboard-financial-card flex-grow-1"
+                        detail="custo médio diário"
+                        tone="violet"
                         value={to_real(averageDailyCost)}
                         valueClassName="text-2xl"
                     />
                     <div
-                        className="dashboard-highlight flex justify-content-center flex-grow-1 gap-2 align-items-center border-round-lg shadow-6 p-3"
-                        style={{ backgroundColor: 'var(--surface-1)', height: "5rem", color: 'var(--text-primary)' }}>
+                        className="tm-card dashboard-highlight flex justify-content-center flex-grow-1 gap-2 align-items-center p-3">
                         <Knob
                             value={valorDoLocalComMaisFaltas}
                             valueTemplate="{value}%"
@@ -809,7 +789,7 @@ export function RequestReport() {
                 <div className="dashboard-main flex flex-column flex-grow-1 gap-4">
                     {/* CHARTS FRAME */}
                     <div className="dashboard-charts flex flex-grow-1 gap-4 max-h-15rem">
-                        <div className="dashboard-chart-card border-round-lg p-3 gap-2 flex flex-column justify-content-center align-items-center shadow-6 flex-grow-1">
+                        <div className="tm-card dashboard-chart-card p-3 gap-2 flex flex-column justify-content-center align-items-center flex-grow-1">
                             <Chart data={dataRepos}
                                 options={{
                                     aspectRatio: 2.5,
@@ -843,7 +823,7 @@ export function RequestReport() {
                                 className="dashboard-chart flex align-items-center justify-content-center h-full"
                             />
                         </div>
-                        <div className="dashboard-chart-card border-round-lg p-4 flex flex-column justify-content-center align-items-center shadow-6 flex-grow-1">
+                        <div className="tm-card dashboard-chart-card p-4 flex flex-column justify-content-center align-items-center flex-grow-1">
                             <Chart data={dataMults}
                                 className="w-full h-full"
                                 options={{
@@ -877,7 +857,7 @@ export function RequestReport() {
                     </div>
 
                     {/* TABLE FRAME */}
-                    <div className="dashboard-table flex overflow-hidden flex-grow-1 p-2 border-round-lg shadow-6">
+                    <div className="tm-card dashboard-table flex overflow-hidden flex-grow-1 p-2">
                         <Table
                             tableClassName="w-full"
                             columns={columns}
@@ -893,7 +873,7 @@ export function RequestReport() {
                 </div>
 
                 {/* STATUS CARD */}
-                <div className="dashboard-status flex flex-column p-4 flex-grow-1 border-round-lg shadow-6">
+                <div className="tm-card dashboard-status flex flex-column p-4 flex-grow-1">
                     <TabView className="h-full">
                         <TabPanel header="Departamentos">
                             <div className="flex flex-column h-full">
@@ -911,7 +891,7 @@ export function RequestReport() {
                                         };
 
                                         return (
-                                            <div key={item} className="dashboard-department-card flex flex-column flex-grow-1 justify-content-center align-items-center text-center shadow-6 border-round-lg" style={{ flexBasis: "100px" }}>
+                                            <div key={item} className="dashboard-department-card flex flex-column flex-grow-1 justify-content-center align-items-center text-center" style={{ flexBasis: "100px" }}>
                                                 <Chart className="flex-grow-1" type="doughnut" data={testeData} options={optionsDptos} style={{
                                                     width: '70px',
                                                 }} />

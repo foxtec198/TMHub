@@ -109,6 +109,20 @@
   flex: 1;
 }
 
+.settings-inline--preference {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-inline--preference > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.settings-inline--preference small {
+  color: var(--text-color-secondary);
+}
+
 .theme-option {
   justify-content: space-between;
   background: var(--surface-2);

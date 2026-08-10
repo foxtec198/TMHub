@@ -15,6 +15,7 @@ import { Avatar } from "primereact/avatar";
 import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
 import { ThemeLogo } from "../components/ThemeLogo";
+import { TimoAssistant } from "../components/Timo/TimoAssistant";
 
 // Styles
 import './main.css'
@@ -55,6 +56,10 @@ export function MainLayout() {
     const storedRole = localStorage.getItem("role");
     return storedRole ? capitalize(storedRole) : "";
   });
+  const [timoEnabled, setTimoEnabled] = useState(
+    () => String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN"
+      && String(localStorage.getItem("timo_ativo")) === "true"
+  );
   const [isMenuVisible, setIsMenuVisible] = useState(
     () => !window.matchMedia("(max-width: 960px)").matches
   );
@@ -371,6 +376,7 @@ export function MainLayout() {
 
       const profileRole = String(profile.role || "").toUpperCase();
       const isProfileAdmin = profileRole === "ADMIN";
+      setTimoEnabled(isProfileAdmin && profile.timo_ativo === true);
       const isMatrixUser = Array.isArray(profile.filiais)
         && profile.filiais.some((filial) => Number(filial.id) === 1);
 
@@ -517,6 +523,7 @@ export function MainLayout() {
         </div>
 
         <div className="flex gap-2 align-items-center flipup animation-duration-500">
+          {timoEnabled ? <TimoAssistant /> : null}
           <div className="layout-user-info flex flex-column text-right">
             <span className="font-bold">{displayName}</span>
             <span className="text-700 font-italic">{role}</span>

@@ -75,9 +75,9 @@
 }
 
 .admission-summary-card.is-success { --card-accent: var(--status-success); }
-.admission-summary-card.is-warning { --card-accent: #d59b19; }
-.admission-summary-card.is-danger { --card-accent: #e5484d; }
-.admission-summary-card.is-violet { --card-accent: #815ac0; }
+.admission-summary-card.is-warning { --card-accent: var(--status-warning); }
+.admission-summary-card.is-danger { --card-accent: var(--status-danger); }
+.admission-summary-card.is-violet { --card-accent: var(--chart-6); }
 
 .admission-summary-card__icon {
     display: grid;

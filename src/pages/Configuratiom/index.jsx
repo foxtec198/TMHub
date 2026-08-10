@@ -218,6 +218,24 @@ export function Settings() {
               <p className="password-hint"><i className="pi pi-info-circle" /> Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial.</p>
               <Button label="Atualizar senha" icon="pi pi-shield" onClick={changePassword} />
             </article>
+
+            {isAdmin ? (
+              <article className="settings-card">
+                <div className="settings-card-title"><i className="pi pi-sparkles" /><div><h2>Timo</h2><p>Assistente visual com reconhecimento de voz contínuo.</p></div></div>
+                <div className="settings-inline settings-inline--preference">
+                  <div>
+                    <strong>{profile.timo_ativo ? "Timo ativado" : "Timo desativado"}</strong>
+                    <small>Quando ativado, o Timo aparece no cabeçalho e solicita acesso ao microfone.</small>
+                  </div>
+                  <Button
+                    label={profile.timo_ativo ? "Desativar" : "Ativar"}
+                    icon={profile.timo_ativo ? "pi pi-pause" : "pi pi-play"}
+                    outlined={Boolean(profile.timo_ativo)}
+                    onClick={() => save({ timo_ativo: !profile.timo_ativo }, profile.timo_ativo ? "Timo desativado." : "Timo ativado.")}
+                  />
+                </div>
+              </article>
+            ) : null}
           </div>
         </div>
       </TabPanel>

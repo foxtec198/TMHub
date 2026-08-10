@@ -3,25 +3,42 @@ import { Tag } from "primereact/tag";
 export function DashCard({
     title,
     icon,
-    className,
-    style,
+    className = "",
+    style = {},
     value,
     cont=0,
     contStyle={},
     contSeverity,
     contClassName="",
-    valueClassName="text-3xl"
+    valueClassName="text-3xl",
+    detail,
+    tone = "primary",
+    accentColor,
 }) {
+    // Legacy callers used a solid background as the card identity. Keep that
+    // color as an accent while the shared card system owns the surface itself.
+    const layoutStyle = { ...style };
+    const resolvedAccent = accentColor || layoutStyle.backgroundColor || layoutStyle.background;
+    delete layoutStyle.background;
+    delete layoutStyle.backgroundColor;
+    delete layoutStyle.color;
+    const cardStyle = resolvedAccent
+        ? { ...layoutStyle, "--card-accent": resolvedAccent }
+        : layoutStyle;
 
     return (
-        <div className={`shadow-5 ${className}`} style={style}>
-            <span className="flex gap-2 align-items-center text-truncate inter spaceg font-bold text-xl p-2">
-                {icon ? <i className={icon}></i> : null} {title} 
-            </span>
+        <article className={`tm-card tm-metric-card is-${tone} ${className}`.trim()} style={cardStyle}>
+            {icon ? (
+                <span className="tm-metric-card__icon" aria-hidden="true">
+                    <i className={icon}></i>
+                </span>
+            ) : null}
 
-            <div className="flex gap-2 justify-content-center inter align-items-start font-bold px-2">
-                <span className={valueClassName}>{value}</span>
-                {cont?
+            <span className="tm-metric-card__content">
+                <small>{title}</small>
+                <span className="tm-metric-card__value-row">
+                    <strong className={valueClassName}>{value}</strong>
+                    {cont ?
                     <Tag
                         value={cont}
                         severity={contSeverity}
@@ -33,8 +50,10 @@ export function DashCard({
                             ...contStyle,
                         }}
                     />
-                :null}
-            </div>
-        </div>
+                    : null}
+                </span>
+                {detail ? <em>{detail}</em> : null}
+            </span>
+        </article>
     )
 }

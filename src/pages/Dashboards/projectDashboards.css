@@ -49,19 +49,19 @@
 }
 
 .project-dashboard-summary-card.is-danger {
-  --card-accent: #e5484d;
+  --card-accent: var(--status-danger);
 }
 
 .project-dashboard-summary-card.is-warning {
-  --card-accent: #d59b19;
+  --card-accent: var(--status-warning);
 }
 
 .project-dashboard-summary-card.is-violet {
-  --card-accent: #815ac0;
+  --card-accent: var(--chart-6);
 }
 
 .project-dashboard-summary-card.is-info {
-  --card-accent: #369edb;
+  --card-accent: var(--status-info);
 }
 
 .project-dashboard-summary-card__icon {

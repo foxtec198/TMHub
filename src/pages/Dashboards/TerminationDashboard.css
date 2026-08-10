@@ -12,7 +12,7 @@
 }
 
 .termination-dashboard-card {
-    --card-accent: #355044;
+    --card-accent: var(--text-secondary);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
@@ -26,9 +26,9 @@
 }
 
 .termination-dashboard-card.is-primary { --card-accent: var(--primary); }
-.termination-dashboard-card.is-success { --card-accent: #31a95a; }
-.termination-dashboard-card.is-danger { --card-accent: #d64b50; }
-.termination-dashboard-card.is-warning { --card-accent: #c78224; }
+.termination-dashboard-card.is-success { --card-accent: var(--status-success); }
+.termination-dashboard-card.is-danger { --card-accent: var(--status-danger); }
+.termination-dashboard-card.is-warning { --card-accent: var(--status-warning); }
 
 .termination-dashboard-card__icon {
     display: grid;
@@ -352,7 +352,7 @@
 }
 
 :root[data-mode="dark"] .termination-dashboard-card {
-    --card-accent: #b9c7be;
+    --card-accent: var(--text-secondary);
 }
 
 :root[data-mode="dark"] .termination-dashboard-card.is-primary,
@@ -361,11 +361,11 @@
 }
 
 :root[data-mode="dark"] .termination-dashboard-card.is-danger {
-    --card-accent: #ff777b;
+    --card-accent: var(--status-danger);
 }
 
 :root[data-mode="dark"] .termination-dashboard-card.is-warning {
-    --card-accent: #e6b35e;
+    --card-accent: var(--status-warning);
 }
 
 :root[data-mode="dark"] .termination-dashboard-tabs {

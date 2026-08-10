@@ -154,7 +154,7 @@
   align-items: center;
   justify-content: space-between;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   background: var(--surface-card, #fff);
 }
 
