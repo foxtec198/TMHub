@@ -50,8 +50,8 @@ const emptyAssetMovementForm = {
 };
 
 const movementViewOptions = [
-    { label: 'Estoque', value: 'estoque', icon: 'pi pi-box' },
-    { label: 'Ativos', value: 'ativos', icon: 'pi pi-building' },
+    { label: 'Produtos', value: 'estoque' },
+    { label: 'Ativos', value: 'ativos' },
 ];
 
 export function Movements() {
@@ -531,26 +531,16 @@ export function Movements() {
         <main className="flex flex-column gap-3 movements-page">
             <ConfirmDialog />
             <PageHeader section="Estoque" title="Movimentações" description="Acompanhe entradas, saídas e transferências de ativos entre contratos." />
-            <div
-                className="movement-radio-inputs"
-                role="radiogroup"
-                aria-label="Tipo de movimentação exibida"
-            >
-                {movementViewOptions.map((option) => (
-                    <label className="movement-radio" key={option.value}>
-                        <input
-                            type="radio"
-                            name="movement-view"
-                            value={option.value}
-                            checked={movementView === option.value}
-                            onChange={() => setMovementView(option.value)}
-                        />
-                        <span className="movement-radio-name">
-                            <i className={option.icon} aria-hidden="true" />
-                            {option.label}
-                        </span>
-                    </label>
-                ))}
+            <div className="flex justify-content-end">
+                <SelectButton
+                    value={movementView}
+                    options={movementViewOptions}
+                    optionLabel="label"
+                    optionValue="value"
+                    allowEmpty={false}
+                    onChange={(event) => setMovementView(event.value)}
+                    aria-label="Alternar entre movimentações de produtos e ativos"
+                />
             </div>
             <div className="flex flex-column movement-table-area">
                 <Table
