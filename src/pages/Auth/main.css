@@ -78,12 +78,12 @@
   box-shadow: none !important;
 }
 
-:root[data-theme="dark"] .auth-showcase .auth-carousel,
-:root[data-theme="dark"] .auth-showcase .auth-carousel .p-carousel-content,
-:root[data-theme="dark"] .auth-showcase .auth-carousel .p-carousel-container,
-:root[data-theme="dark"] .auth-showcase .auth-carousel .p-carousel-items-content,
-:root[data-theme="dark"] .auth-showcase .auth-carousel .p-carousel-items-container,
-:root[data-theme="dark"] .auth-showcase .auth-carousel .p-carousel-indicators {
+:root[data-mode="dark"] .auth-showcase .auth-carousel,
+:root[data-mode="dark"] .auth-showcase .auth-carousel .p-carousel-content,
+:root[data-mode="dark"] .auth-showcase .auth-carousel .p-carousel-container,
+:root[data-mode="dark"] .auth-showcase .auth-carousel .p-carousel-items-content,
+:root[data-mode="dark"] .auth-showcase .auth-carousel .p-carousel-items-container,
+:root[data-mode="dark"] .auth-showcase .auth-carousel .p-carousel-indicators {
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
@@ -154,7 +154,8 @@
   box-shadow: 0 0 0 4rem rgba(255, 255, 255, .025), 0 0 0 8rem rgba(255, 255, 255, .015);
 }
 
-.auth-informative-visual img {
+.auth-informative-visual img,
+.auth-informative-visual .theme-logo {
   position: relative;
   z-index: 1;
   width: min(17rem, 44%);
@@ -173,7 +174,7 @@
   text-decoration: none;
 }
 
-.auth-informative-visual>span {
+.auth-informative-visual>span:not(.theme-logo) {
   position: absolute;
   z-index: 2;
   right: 20%;
@@ -386,7 +387,7 @@
   padding: clamp(1.2rem, 4vw, 3rem);
   background:
     radial-gradient(circle at 100% 0%, rgba(71, 213, 110, .1), transparent 28%),
-    #f5f8f6;
+    var(--auth-panel-bg, var(--app-bg));
 }
 
 .auth-login-card {
@@ -407,7 +408,8 @@
   text-align: left;
 }
 
-.auth-login-brand img {
+.auth-login-brand img,
+.auth-login-brand .theme-logo {
   display: block;
   width: 12rem;
   max-width: 75%;
@@ -464,37 +466,37 @@
 
 .auth-login-card .p-button {
   margin-top: .25rem;
-  background: linear-gradient(90deg, #155c27, #25a44e);
+  background: linear-gradient(90deg, var(--auth-primary, var(--primary)), var(--auth-primary-hover, #25a44e));
   border: 0;
   border-radius: 11px;
 }
 
 .auth-password-help {
-  color: #69766e;
+  color: var(--text-secondary);
   font-size: .74rem;
   text-align: center;
 }
 
-:root[data-theme="dark"] .auth-login-panel {
+:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-panel {
   background:
     radial-gradient(circle at 100% 0%, rgba(71, 213, 110, .12), transparent 28%),
-    #071009;
+    var(--accent-contrast);
 }
 
-:root[data-theme="dark"] .auth-login-card {
-  color: #eff6f1;
+:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-card {
+  color: var(--text-primary);
   background: #121813;
   border-color: #35453a;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .38);
 }
 
-:root[data-theme="dark"] .auth-login-brand h1 {
+:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-brand h1 {
   color: #f3f8f4;
 }
 
-:root[data-theme="dark"] .auth-login-brand p,
-:root[data-theme="dark"] .auth-login-card .text-accent,
-:root[data-theme="dark"] .auth-password-help {
+:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-brand p,
+:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-card .text-accent,
+:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-password-help {
   color: #aeb9b1;
 }
 
@@ -529,7 +531,7 @@
     min-height: 12rem;
   }
 
-  .auth-informative-visual>span {
+  .auth-informative-visual>span:not(.theme-logo) {
     width: 3.6rem;
     height: 3.6rem;
     font-size: 1.4rem;
@@ -554,7 +556,8 @@
     text-align: center;
   }
 
-  .auth-login-brand img {
+  .auth-login-brand img,
+  .auth-login-brand .theme-logo {
     width: 10.5rem;
     margin: 0 auto 1.1rem;
   }
@@ -580,7 +583,8 @@
     margin-bottom: .65rem;
   }
 
-  .auth-login-brand img {
+  .auth-login-brand img,
+  .auth-login-brand .theme-logo {
     width: 9rem;
     margin-bottom: .85rem;
   }
@@ -627,11 +631,12 @@
     min-height: 10rem;
   }
 
-  .auth-informative-visual img {
+  .auth-informative-visual img,
+  .auth-informative-visual .theme-logo {
     width: min(12rem, 48%);
   }
 
-  .auth-informative-visual>span {
+  .auth-informative-visual>span:not(.theme-logo) {
     right: 15%;
     bottom: 7%;
     width: 3rem;

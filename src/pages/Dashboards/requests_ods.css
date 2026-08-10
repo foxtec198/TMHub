@@ -1,7 +1,7 @@
 .requests-kds {
   --kds-bg: #eef4f0;
   --kds-panel: #fff;
-  --kds-panel-alt: #f7faf8;
+  --kds-panel-alt: var(--surface-2);
   --kds-border: #cfdcd3;
   --kds-text: #122218;
   --kds-muted: #657369;
@@ -18,7 +18,7 @@
   font-family: Inter, sans-serif;
 }
 
-:root[data-theme="dark"] .requests-kds {
+:root[data-mode="dark"] .requests-kds {
   --kds-bg: #050806;
   --kds-panel: #101713;
   --kds-panel-alt: #151f19;
@@ -40,7 +40,8 @@
 
 .requests-kds__header { justify-content: space-between; gap: 2rem; }
 .requests-kds__brand { gap: clamp(1rem, 1.4vw, 1.75rem); }
-.requests-kds__brand img { width: clamp(9rem, 12vw, 14rem); height: auto; }
+.requests-kds__brand img,
+.requests-kds__brand .theme-logo { width: clamp(9rem, 12vw, 14rem); height: auto; }
 .requests-kds__brand div { border-left: 1px solid var(--kds-border); padding-left: clamp(1rem, 1.4vw, 1.75rem); }
 .requests-kds__brand span { color: var(--kds-accent); font-size: clamp(.62rem, .75vw, .86rem); font-weight: 800; letter-spacing: .18em; }
 .requests-kds__brand h1 { margin: .18rem 0 0; font: 800 clamp(1.25rem, 2vw, 2.35rem)/1 Space Grotesk, sans-serif; letter-spacing: .03em; }

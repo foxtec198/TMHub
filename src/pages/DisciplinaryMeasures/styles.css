@@ -1,5 +1,5 @@
 .disciplinary-page {
-  --disciplinary-accent-light: #e7fbec;
+  --disciplinary-accent-light: var(--accent-soft);
   --disciplinary-accent-dark: #2fae4f;
   --disciplinary-border: var(--surface-border, #dfe7e1);
   --disciplinary-shadow: 0 4px 14px rgba(16, 69, 29, .12);
@@ -187,33 +187,33 @@
   margin-top: .5rem;
 }
 
-:root[data-theme="dark"] .disciplinary-page { background: #090d0a; }
-:root[data-theme="dark"] .disciplinary-summary article,
-:root[data-theme="dark"] .disciplinary-counts > div,
-:root[data-theme="dark"] .disciplinary-table {
-  background: #141b16;
-  color: #edf4ef;
-  border-color: #34513b;
+:root[data-mode="dark"] .disciplinary-page { background: var(--app-bg); }
+:root[data-mode="dark"] .disciplinary-summary article,
+:root[data-mode="dark"] .disciplinary-counts > div,
+:root[data-mode="dark"] .disciplinary-table {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
   box-shadow: 0 12px 28px rgba(0, 0, 0, .28);
 }
 
-:root[data-theme="dark"] .disciplinary-summary strong,
-:root[data-theme="dark"] .disciplinary-counts strong,
-:root[data-theme="dark"] .disciplinary-employee-link:hover strong { color: #70e38d; }
+:root[data-mode="dark"] .disciplinary-summary strong,
+:root[data-mode="dark"] .disciplinary-counts strong,
+:root[data-mode="dark"] .disciplinary-employee-link:hover strong { color: var(--accent-hover); }
 
-:root[data-theme="dark"] .disciplinary-import input[type="file"] {
-  background: #101610;
-  color: #edf4ef;
-  border-color: #3b5d46;
+:root[data-mode="dark"] .disciplinary-import input[type="file"] {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-action,
-:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-button,
-:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-button:hover,
-:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-button:focus,
-:root[data-theme="dark"] .disciplinary-speed-dial .p-speeddial-opened .p-speeddial-button {
-  color: #071009 !important;
-  background: #58d47c !important;
+:root[data-mode="dark"] .disciplinary-speed-dial .p-speeddial-action,
+:root[data-mode="dark"] .disciplinary-speed-dial .p-speeddial-button,
+:root[data-mode="dark"] .disciplinary-speed-dial .p-speeddial-button:hover,
+:root[data-mode="dark"] .disciplinary-speed-dial .p-speeddial-button:focus,
+:root[data-mode="dark"] .disciplinary-speed-dial .p-speeddial-opened .p-speeddial-button {
+  color: var(--accent-contrast) !important;
+  background: var(--primary-hover) !important;
 }
 
 @media (max-width: 720px) {

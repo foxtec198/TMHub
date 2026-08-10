@@ -10,6 +10,7 @@ import connect from "./utils/request";
 import { PrimeReactProvider } from "primereact/api";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { ThemeProvider } from "./theme/ThemeProvider";
 import { PermissionGate } from "./components/PermissionGate";
 import { AuthRequirementsGate } from "./components/AuthRequirementsGate";
 import { clearAccessToken, getAccessToken } from "./utils/authSession";
@@ -55,8 +56,8 @@ import { TMOpsManagement } from "./pages/TMOps/Management";
 import { TMOpsTasks } from "./pages/TMOps/Tasks";
 import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
 
-document.documentElement.dataset.theme =
-  localStorage.getItem("theme") === "dark" ? "dark" : "light";
+// Theme tokens and PrimeReact overrides must be the final stylesheet layer.
+import "./theme/theme.css";
 
 addLocale("pt-BR", {
   firstDayOfWeek: 0,
@@ -421,13 +422,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const root = createRoot(container);
     root.render(
       <PrimeReactProvider value={{ locale: "pt-BR" }}>
-        <LoadingProvider>
-          <BrowserRouter>
-            <ToastProvider>
-              <AppRoutes />
-            </ToastProvider>
-          </BrowserRouter>
-        </LoadingProvider>
+        <ThemeProvider>
+          <LoadingProvider>
+            <BrowserRouter>
+              <ToastProvider>
+                <AppRoutes />
+              </ToastProvider>
+            </BrowserRouter>
+          </LoadingProvider>
+        </ThemeProvider>
       </PrimeReactProvider>,
     );
   }

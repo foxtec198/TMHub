@@ -1,7 +1,7 @@
 .admission-dashboard {
     min-height: 100%;
     padding: clamp(1rem, 2.5vw, 2rem);
-    color: var(--text-color, #26332a);
+    color: var(--text-color, var(--text-primary));
 }
 
 .admission-heading,
@@ -61,7 +61,7 @@
 }
 
 .admission-summary-card {
-    --card-accent: #268f50;
+    --card-accent: var(--primary);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
@@ -69,12 +69,12 @@
     min-width: 0;
     padding: 1rem;
     background: var(--surface-card, #fff);
-    border: 1px solid var(--surface-border, #dce7df);
+    border: 1px solid var(--surface-border, var(--border));
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(15, 63, 30, .07);
 }
 
-.admission-summary-card.is-success { --card-accent: #31b765; }
+.admission-summary-card.is-success { --card-accent: var(--status-success); }
 .admission-summary-card.is-warning { --card-accent: #d59b19; }
 .admission-summary-card.is-danger { --card-accent: #e5484d; }
 .admission-summary-card.is-violet { --card-accent: #815ac0; }
@@ -129,7 +129,7 @@
     min-width: 0;
     padding: 1.2rem;
     background: var(--surface-card, #fff);
-    border: 1px solid var(--surface-border, #dce7df);
+    border: 1px solid var(--surface-border, var(--border));
     border-radius: 16px;
     box-shadow: 0 12px 34px rgba(15, 63, 30, .07);
 }
@@ -211,7 +211,7 @@
 .admission-status-card.is-certidao { --status-color: #a878e8; }
 .admission-status-card.is-aso { --status-color: #e3a72f; }
 .admission-status-card.is-unico { --status-color: #e47d55; }
-.admission-status-card.is-concluido { --status-color: #31b765; }
+.admission-status-card.is-concluido { --status-color: var(--status-success); }
 
 .admission-status-card span {
     overflow: hidden;
@@ -240,7 +240,7 @@
     gap: .35rem;
     padding: .75rem;
     background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card, #fff));
-    border-bottom: 1px solid var(--surface-border, #dce7df);
+    border-bottom: 1px solid var(--surface-border, var(--border));
 }
 
 .admission-table-tabs button {
@@ -268,7 +268,7 @@
 .admission-table-tabs button.is-active {
     color: var(--primary-color);
     background: var(--surface-card, #fff);
-    border-color: color-mix(in srgb, var(--primary-color) 28%, var(--surface-border, #dce7df));
+    border-color: color-mix(in srgb, var(--primary-color) 28%, var(--surface-border, var(--border)));
     box-shadow: 0 3px 10px rgba(15, 63, 30, .08);
 }
 
@@ -311,41 +311,41 @@
     color: #d4494f;
 }
 
-:root[data-theme="dark"] .admission-summary-card,
-:root[data-theme="dark"] .admission-panel,
-:root[data-theme="dark"] .admission-table-panel {
-    background: #292e2b;
-    border-color: #465149;
+:root[data-mode="dark"] .admission-summary-card,
+:root[data-mode="dark"] .admission-panel,
+:root[data-mode="dark"] .admission-table-panel {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .admission-dashboard {
-    --admission-dark-accent: #61e990;
+:root[data-mode="dark"] .admission-dashboard {
+    --admission-dark-accent: var(--accent-hover);
     color: #f2f6f3;
 }
 
-:root[data-theme="dark"] .admission-heading h1,
-:root[data-theme="dark"] .admission-heading > div:first-child > span,
-:root[data-theme="dark"] .admission-panel header span,
-:root[data-theme="dark"] .admission-insight > span,
-:root[data-theme="dark"] .admission-insight strong {
+:root[data-mode="dark"] .admission-heading h1,
+:root[data-mode="dark"] .admission-heading > div:first-child > span,
+:root[data-mode="dark"] .admission-panel header span,
+:root[data-mode="dark"] .admission-insight > span,
+:root[data-mode="dark"] .admission-insight strong {
     color: var(--admission-dark-accent);
 }
 
-:root[data-theme="dark"] .admission-insight {
-    background: linear-gradient(155deg, #1c3b27, #292e2b 68%);
+:root[data-mode="dark"] .admission-insight {
+    background: linear-gradient(155deg, var(--surface-hover), var(--surface-3) 68%);
 }
 
-:root[data-theme="dark"] .admission-status-card {
-    background: color-mix(in srgb, var(--status-color) 10%, #222724);
+:root[data-mode="dark"] .admission-status-card {
+    background: color-mix(in srgb, var(--status-color) 10%, var(--surface-3));
 }
 
-:root[data-theme="dark"] .admission-table-tabs {
-    background: #222724;
-    border-color: #465149;
+:root[data-mode="dark"] .admission-table-tabs {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .admission-table-tabs button.is-active {
-    color: #61e990;
+:root[data-mode="dark"] .admission-table-tabs button.is-active {
+    color: var(--accent-hover);
     background: #303733;
     border-color: #4d6756;
     box-shadow: none;

@@ -4,7 +4,7 @@
 .layout-sidebar .p-icon,
 .layout-sidebar .p-menuitem-text,
 .layout-sidebar .p-panelmenu-header-label {
-  color: white;
+  color: var(--sidebar-text);
 }
 
 .layout-sidebar .p-panelmenu,
@@ -29,44 +29,45 @@
 }
 
 .layout-sidebar .p-panelmenu-header-link:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--sidebar-hover-text) !important;
+  background: var(--sidebar-hover-bg) !important;
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transform: translateX(1px);
 }
 
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-header-link:hover,
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-content .p-menuitem-link:hover {
-  background: rgba(75, 214, 110, 0.14) !important;
-  box-shadow: inset 3px 0 #4bd66e, 0 3px 10px rgba(0, 0, 0, 0.28);
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-header-link:hover,
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-content .p-menuitem-link:hover {
+  background: var(--sidebar-hover-bg) !important;
+  box-shadow: inset 3px 0 var(--accent), 0 3px 10px rgba(0, 0, 0, 0.28);
 }
 
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-header-link[aria-expanded="true"],
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-header.p-highlight .p-panelmenu-header-link {
-  background: rgba(75, 214, 110, 0.1) !important;
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-header-link[aria-expanded="true"],
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-header.p-highlight .p-panelmenu-header-link {
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
 }
 
-:root[data-theme="dark"] .layout-menu-toggle {
-  color: #70e38d;
+:root[data-mode="dark"] .layout-menu-toggle {
+  color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .layout-menu-toggle:hover,
-:root[data-theme="dark"] .layout-menu-toggle:focus-visible {
+:root[data-mode="dark"] .layout-menu-toggle:hover,
+:root[data-mode="dark"] .layout-menu-toggle:focus-visible {
   color: #91efa7;
-  background: #203d29;
+  background: var(--surface-hover);
 }
 
 /* No tema escuro, o degradê da sidebar deve aparecer por trás dos itens. */
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu,
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-panel,
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-header,
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-header-content,
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-header-link,
-:root[data-theme="dark"] .layout-sidebar .p-panelmenu-content,
-:root[data-theme="dark"] .layout-sidebar .p-menuitem,
-:root[data-theme="dark"] .layout-sidebar .p-menuitem-content,
-:root[data-theme="dark"] .layout-sidebar .p-menuitem-link {
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu,
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-panel,
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-header,
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-header-content,
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-header-link,
+:root[data-mode="dark"] .layout-sidebar .p-panelmenu-content,
+:root[data-mode="dark"] .layout-sidebar .p-menuitem,
+:root[data-mode="dark"] .layout-sidebar .p-menuitem-content,
+:root[data-mode="dark"] .layout-sidebar .p-menuitem-link {
   background: transparent !important;
 }
 
@@ -79,7 +80,8 @@
 .layout-sidebar .p-panelmenu-header-link[aria-expanded="true"],
 .layout-sidebar .p-panelmenu-header.p-highlight .p-panelmenu-header-link,
 .layout-sidebar .p-panelmenu-header.p-panelmenu-header-active .p-panelmenu-header-link {
-  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--sidebar-active-text) !important;
+  background: var(--sidebar-active-bg) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
@@ -95,7 +97,8 @@
 
 /* Relevo ao passar o mouse sobre um subitem do menu */
 .layout-sidebar .p-panelmenu-content .p-menuitem-link:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--sidebar-hover-text) !important;
+  background: var(--sidebar-hover-bg) !important;
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -111,8 +114,28 @@
 /* Item atualmente ativo/selecionado permanece destacado */
 .layout-sidebar .p-panelmenu-content .p-menuitem-link.p-panelmenu-header-link[aria-expanded="true"],
 .layout-sidebar .p-panelmenu-content .router-link-active .p-menuitem-link {
-  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--sidebar-active-text) !important;
+  background: var(--sidebar-active-bg) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.layout-sidebar .p-panelmenu-header-link:hover .p-menuitem-text,
+.layout-sidebar .p-panelmenu-header-link:hover .p-menuitem-icon,
+.layout-sidebar .p-panelmenu-header-link:hover .p-submenu-icon,
+.layout-sidebar .p-panelmenu-content .p-menuitem-link:hover .p-menuitem-text,
+.layout-sidebar .p-panelmenu-content .p-menuitem-link:hover .p-menuitem-icon {
+  color: var(--sidebar-hover-text) !important;
+}
+
+.layout-sidebar .p-panelmenu-header-link[aria-expanded="true"] .p-menuitem-text,
+.layout-sidebar .p-panelmenu-header-link[aria-expanded="true"] .p-menuitem-icon,
+.layout-sidebar .p-panelmenu-header-link[aria-expanded="true"] .p-submenu-icon,
+.layout-sidebar .p-panelmenu-header.p-highlight .p-menuitem-text,
+.layout-sidebar .p-panelmenu-header.p-highlight .p-menuitem-icon,
+.layout-sidebar .p-panelmenu-header.p-highlight .p-submenu-icon,
+.layout-sidebar .p-menuitem-link.p-highlight .p-menuitem-text,
+.layout-sidebar .p-menuitem-link.p-highlight .p-menuitem-icon {
+  color: var(--sidebar-active-text) !important;
 }
 
 .app-layout {
@@ -149,7 +172,8 @@
   padding: 0.5rem;
 }
 
-.layout-brand img {
+.layout-brand img,
+.layout-brand .theme-logo {
   display: block;
   width: 10rem;
   max-width: 32vw;
@@ -201,7 +225,7 @@
 
 .layout-sidebar:hover,
 .layout-sidebar:focus-within {
-  scrollbar-color: rgba(88, 220, 125, 0.72) transparent;
+  scrollbar-color: color-mix(in srgb, var(--accent) 72%, transparent) transparent;
 }
 
 .layout-sidebar::-webkit-scrollbar {
@@ -223,11 +247,11 @@
 
 .layout-sidebar:hover::-webkit-scrollbar-thumb,
 .layout-sidebar:focus-within::-webkit-scrollbar-thumb {
-  background-color: rgba(88, 220, 125, 0.72);
+  background-color: color-mix(in srgb, var(--accent) 72%, transparent);
 }
 
 .layout-sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: #74ea98;
+  background-color: var(--accent-hover);
 }
 
 .layout-panel-menu {
@@ -272,7 +296,8 @@
     padding-inline: 0;
   }
 
-  .layout-brand img {
+  .layout-brand img,
+  .layout-brand .theme-logo {
     width: 8rem;
   }
 

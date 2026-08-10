@@ -1,19 +1,20 @@
 // Index of Config
 
 // Utils
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import connect from "../../utils/request";
 import { getInitials, storeProfile } from "../../utils/profile";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
 import { socketio } from "../../utils/socketio";
 import { setAccessToken } from "../../utils/authSession";
+import { useTheme } from "../../theme/useTheme";
+import { getAvailableThemeOptions, MODE_OPTIONS } from "../../theme/themes";
 
 // Widgets
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputOtp } from "primereact/inputotp";
-import { InputSwitch } from "primereact/inputswitch";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Avatar } from "primereact/avatar";
@@ -35,8 +36,12 @@ const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}
 export function Settings() {
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   // Perfil, preferência visual e estados dos fluxos de senha/e-mail.
-  const [profile, setProfile] = useState({ nome: "", email: "", foto_perfil: null, tema: "light" });
-  const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
+  const [profile, setProfile] = useState({ nome: "", email: "", foto_perfil: null, tema: "tmhub", modo_tema: "light" });
+  const { theme, mode, setTheme, setMode } = useTheme();
+  const availableThemes = useMemo(
+    () => getAvailableThemeOptions(profile.temas_disponiveis),
+    [profile.temas_disponiveis],
+  );
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,7 +56,6 @@ export function Settings() {
   useEffect(() => {
     connect.get("/usuarios/perfil").then(({ data }) => {
       setProfile(data);
-      setDark(data.tema === "dark");
       storeProfile(data);
     }).catch((error) => showToast(
       "error",
@@ -67,6 +71,7 @@ export function Settings() {
       const { data } = await connect.patch("/usuarios/perfil", payload);
       if (data.access_token) {
         setAccessToken(data.access_token);
+        // eslint-disable-next-line react-hooks/immutability -- Socket.IO requires updating auth before reconnecting.
         socketio.auth = { token: data.access_token };
         socketio.disconnect().connect();
       }
@@ -80,18 +85,21 @@ export function Settings() {
     } finally { setLoading(false); }
   };
 
-  // O atributo no elemento raiz ativa os seletores globais sem recarregar a página.
-  const applyTheme = (enabled) => {
-    setDark(enabled);
-    localStorage.setItem("theme", enabled ? "dark" : "light");
-    document.documentElement.dataset.theme = enabled ? "dark" : "light";
+  const changeTheme = async (nextTheme) => {
+    if (nextTheme === theme) return;
+    const previous = theme;
+    setTheme(nextTheme);
+    if (!(await save({ tema: nextTheme }, "Tema atualizado."))) {
+      setTheme(previous);
+    }
   };
 
-  const changeTheme = async (enabled) => {
-    const previous = dark;
-    applyTheme(enabled);
-    if (!(await save({ tema: enabled ? "dark" : "light" }, "Tema atualizado."))) {
-      applyTheme(previous);
+  const changeMode = async (nextMode) => {
+    if (nextMode === mode) return;
+    const previous = mode;
+    setMode(nextMode);
+    if (!(await save({ modo_tema: nextMode }, "Modo de exibição atualizado."))) {
+      setMode(previous);
     }
   };
 
@@ -162,8 +170,46 @@ export function Settings() {
 
           <div className="settings-column">
             <article className="settings-card">
-              <div className="settings-card-title"><i className="pi pi-palette" /><div><h2>Aparência</h2><p>Escolha o tema da interface</p></div></div>
-              <div className="theme-option"><div><strong>Modo escuro</strong><span>Preto como base e verde como destaque</span></div><InputSwitch checked={dark} onChange={(e) => changeTheme(e.value)} /></div>
+              <div className="settings-card-title"><i className="pi pi-palette" /><div><h2>Aparência</h2><p>Combine luminosidade e identidade visual</p></div></div>
+              <span className="appearance-label">Modo de exibição</span>
+              <div className="mode-grid" role="radiogroup" aria-label="Modo de exibição">
+                {MODE_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    className={`mode-card mode-card--${option.id}${mode === option.id ? " is-selected" : ""}`}
+                    onClick={() => changeMode(option.id)}
+                    role="radio"
+                    aria-checked={mode === option.id}
+                  >
+                    <i className={option.icon} />
+                    <span><strong>{option.label}</strong><small>{option.description}</small></span>
+                    {mode === option.id && <i className="pi pi-check-circle mode-card__check" aria-hidden="true" />}
+                  </button>
+                ))}
+              </div>
+              {isAdmin ?
+                <section>
+                  <span className="appearance-label">Identidade visual</span>
+                  <div className="theme-grid" role="radiogroup" aria-label="Identidade visual">
+                    {availableThemes.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={`theme-card theme-card--${option.id}${theme === option.id ? " is-selected" : ""}`}
+                        onClick={() => changeTheme(option.id)}
+                        role="radio"
+                        aria-checked={theme === option.id}
+                      >
+                        <span className="theme-card__heading"><i className={option.icon} /><strong>{option.label}</strong></span>
+                        <span className="theme-card__preview" aria-hidden="true"><i /><i /><i /><i /></span>
+                        <small>{option.description}</small>
+                        {theme === option.id && <i className="pi pi-check-circle theme-card__check" aria-hidden="true" />}
+                      </button>
+                    ))}
+                  </div>
+                </section> : null
+              }
             </article>
 
             <article className="settings-card password-card">

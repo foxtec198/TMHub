@@ -12,6 +12,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilterButton, DashboardFilterPanel } from '../../components/DashboardFilterPanel';
+import { useChartTheme } from '../../theme/useTheme';
 
 const STATUS_LABELS = {
     aberta: 'ABERTAS',
@@ -64,6 +65,7 @@ function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
 }
 
 export function AdmissionDashboard() {
+    const chartTheme = useChartTheme();
     const now = new Date();
     const [period, setPeriod] = useState([new Date(now.getFullYear(), now.getMonth() - 5, 1), now]);
     const [filters, setFilters] = useState({ departamento: [], status: [], contrato: [], responsavel: [], colaborador: [] });
@@ -107,11 +109,11 @@ export function AdmissionDashboard() {
     const monthlyChart = useMemo(() => ({
         labels: (data?.mensal || []).map((item) => monthLabel(item.mes)),
         datasets: [
-            { label: 'Vagas avisadas', data: (data?.mensal || []).map((item) => item.avisadas), backgroundColor: '#268f50', borderRadius: 6, maxBarThickness: 34, order: 2 },
-            { label: 'Vagas concluídas', data: (data?.mensal || []).map((item) => item.concluidas), backgroundColor: '#93d8aa', borderRadius: 6, maxBarThickness: 34, order: 2 },
-            { type: 'line', label: 'SLA primeira ação (h)', data: (data?.mensal || []).map((item) => item.sla_acao_horas), borderColor: '#d08a12', backgroundColor: '#d08a12', pointRadius: 4, pointHoverRadius: 5, tension: .35, yAxisID: 'sla', order: 1 },
+            { label: 'Vagas avisadas', data: (data?.mensal || []).map((item) => item.avisadas), backgroundColor: chartTheme.palette[0], borderRadius: 6, maxBarThickness: 34, order: 2 },
+            { label: 'Vagas concluídas', data: (data?.mensal || []).map((item) => item.concluidas), backgroundColor: chartTheme.palette[1], borderRadius: 6, maxBarThickness: 34, order: 2 },
+            { type: 'line', label: 'SLA primeira ação (h)', data: (data?.mensal || []).map((item) => item.sla_acao_horas), borderColor: chartTheme.warning, backgroundColor: chartTheme.warning, pointRadius: 4, pointHoverRadius: 5, tension: .35, yAxisID: 'sla', order: 1 },
         ],
-    }), [data]);
+    }), [data, chartTheme]);
 
     const chartOptions = {
         maintainAspectRatio: false,
@@ -119,7 +121,7 @@ export function AdmissionDashboard() {
         plugins: { legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } } },
         scales: {
             x: { grid: { display: false }, border: { display: false } },
-            y: { beginAtZero: true, grid: { color: 'rgba(120, 130, 125, .14)' }, border: { display: false }, ticks: { precision: 0 }, title: { display: true, text: 'Vagas' } },
+            y: { beginAtZero: true, grid: { color: chartTheme.grid }, border: { display: false }, ticks: { precision: 0, color: chartTheme.text }, title: { display: true, text: 'Vagas' } },
             sla: { position: 'right', beginAtZero: true, suggestedMax: 30, grid: { display: false }, border: { display: false }, title: { display: true, text: 'Horas' } },
         },
     };

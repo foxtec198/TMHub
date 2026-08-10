@@ -1,0 +1,14 @@
+.theme-logo {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 10rem;
+  height: auto;
+  aspect-ratio: 157.9212 / 48.6218;
+  background: var(--logo-gradient);
+  -webkit-mask: url("/brands/main_brand.svg") center / contain no-repeat;
+  mask: url("/brands/main_brand.svg") center / contain no-repeat;
+}
+
+.theme-logo--inverse {
+  background: var(--logo-inverse-gradient, var(--logo-gradient));
+}

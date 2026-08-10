@@ -10,16 +10,7 @@ import { socketio } from "../../utils/socketio";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
-
-const TYPE_COLORS = [
-    "#268f50",
-    "#4da3ff",
-    "#a878e8",
-    "#e3a72f",
-    "#e47d55",
-    "#5f6b64",
-    "#31b765",
-];
+import { useChartTheme } from "../../theme/useTheme";
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
     return (
@@ -46,6 +37,7 @@ function EmptyChart({ text }) {
 }
 
 export function PcdDashboard() {
+    const chartTheme = useChartTheme();
     const [data, setData] = useState(null);
     const [refresh, setRefresh] = useState(0);
     const setGlobalLoading = useLoading();
@@ -116,7 +108,7 @@ export function PcdDashboard() {
             {
                 label: "PCD ativos",
                 data: branches.map((branch) => branch.pcd_ativos),
-                backgroundColor: "#268f50",
+                backgroundColor: chartTheme.success,
                 borderRadius: 6,
                 maxBarThickness: 42,
                 categoryPercentage: .72,
@@ -125,14 +117,14 @@ export function PcdDashboard() {
             {
                 label: "PCD afastados",
                 data: branches.map((branch) => branch.pcd_afastados),
-                backgroundColor: "#d59b19",
+                backgroundColor: chartTheme.warning,
                 borderRadius: 6,
                 maxBarThickness: 42,
                 categoryPercentage: .72,
                 barPercentage: .96,
             },
         ],
-    }), [branches]);
+    }), [branches, chartTheme]);
 
     const statusOptions = useMemo(() => ({
         maintainAspectRatio: false,
@@ -151,12 +143,12 @@ export function PcdDashboard() {
             },
             y: {
                 beginAtZero: true,
-                grid: { color: "rgba(120, 130, 125, .14)" },
+                grid: { color: chartTheme.grid },
                 border: { display: false },
                 ticks: { precision: 0 },
             },
         },
-    }), []);
+    }), [chartTheme]);
 
     const typeChart = useMemo(() => ({
         labels: disabilityTypes.map((item) => item.tipo),
@@ -164,13 +156,13 @@ export function PcdDashboard() {
             label: "Colaboradores",
             data: disabilityTypes.map((item) => item.total),
             backgroundColor: disabilityTypes.map(
-                (_, index) => TYPE_COLORS[index % TYPE_COLORS.length],
+                (_, index) => chartTheme.palette[index % chartTheme.palette.length],
             ),
             borderWidth: 0,
             borderRadius: 6,
             maxBarThickness: 30,
         }],
-    }), [disabilityTypes]);
+    }), [disabilityTypes, chartTheme]);
 
     const typeOptions = useMemo(() => ({
         maintainAspectRatio: false,
@@ -181,7 +173,7 @@ export function PcdDashboard() {
         scales: {
             x: {
                 beginAtZero: true,
-                grid: { color: "rgba(120, 130, 125, .14)" },
+                grid: { color: chartTheme.grid },
                 border: { display: false },
                 ticks: { precision: 0 },
             },
@@ -190,7 +182,7 @@ export function PcdDashboard() {
                 border: { display: false },
             },
         },
-    }), []);
+    }), [chartTheme]);
 
     const scopeLabel = branches.length === 1
         ? branches[0].nome

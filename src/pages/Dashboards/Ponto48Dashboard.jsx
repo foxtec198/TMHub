@@ -14,6 +14,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Table } from "../../components/tables/Table";
 import { PageHeader } from "../../components/PageHeader";
 import { useToast } from "../../contexts/ToastContext";
+import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 import { Ponto48Adjustments } from "./Ponto48Adjustments";
 import { Ponto48Mirror } from "./Ponto48Mirror";
@@ -53,6 +54,7 @@ function SummaryCard({ active, icon, label, value, detail, tone, onClick }) {
 }
 
 export function Ponto48Dashboard() {
+  const chartTheme = useChartTheme();
   const filterPanel = useRef(null);
   const [data, setData] = useState(EMPTY_DATA);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,6 @@ export function Ponto48Dashboard() {
   const [clearing, setClearing] = useState(false);
   const { showToast } = useToast();
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
-  const isDarkMode = document.documentElement.dataset.theme === "dark";
 
   const loadDashboard = async (batchId) => {
     try {
@@ -189,28 +190,28 @@ export function Ponto48Dashboard() {
     plugins: {
       legend: {
         position: "bottom",
-        labels: { color: isDarkMode ? "#d7e0da" : "#66746b", padding: 18 },
+        labels: { color: chartTheme.text, padding: 18 },
       },
       tooltip: {
         titleColor: "#f7faf8",
         bodyColor: "#f7faf8",
-        backgroundColor: "#111713",
-        borderColor: isDarkMode ? "#4f6256" : "#d3ddd6",
+        backgroundColor: chartTheme.tooltipBackground,
+        borderColor: chartTheme.border,
         borderWidth: 1,
       },
     },
     scales: {
       x: {
         beginAtZero: true,
-        ticks: { precision: 0, color: isDarkMode ? "#c6d0ca" : "#66746b" },
-        grid: { color: isDarkMode ? "rgba(203, 220, 209, .14)" : "rgba(90, 112, 98, .14)" },
+        ticks: { precision: 0, color: chartTheme.text },
+        grid: { color: chartTheme.grid },
       },
       y: {
-        ticks: { color: isDarkMode ? "#d7e0da" : "#66746b", autoSkip: false },
+        ticks: { color: chartTheme.text, autoSkip: false },
         grid: { display: false },
       },
     },
-  }), [isDarkMode]);
+  }), [chartTheme]);
 
   const columns = useMemo(() => [
     { field: "nome", header: "Colaborador", class: "text-truncate" },

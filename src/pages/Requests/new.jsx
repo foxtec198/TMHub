@@ -13,6 +13,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import connect from "../../utils/request";
 import { InputText } from "primereact/inputtext";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+import { ThemeLogo } from "../../components/ThemeLogo";
 import "./new.css";
 
 function SelectedCollaborator({ title, collaborator, icon }) {
@@ -193,9 +194,8 @@ export function Request() {
             <div className="request-create-page flex min-h-screen px-4 py-6 flex-column justify-content-between align-items-center">
                 {/* HEADER */}
                 <div className="flex flex-column align-items-center justify-content-center text-center">
-                    <img
-                        src="/brands/main_brand.svg"
-                        alt="Logo"
+                    <ThemeLogo
+                        alt="TM Hub"
                         className="request-create-logo px-5 fadein animation-duration-2000"
                     />
 

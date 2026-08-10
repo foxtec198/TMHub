@@ -95,6 +95,8 @@ export default function WeatherWidget({
       mounted = false;
       controller.abort();
     };
+  // As callbacks não disparam uma nova consulta; o reload é controlado pelas coordenadas e pela chave.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     latitude,
     longitude,
@@ -244,6 +246,8 @@ export default function WeatherWidget({
   );
 }
 
+// Mantido para as variações meteorológicas que ainda serão reativadas no widget.
+// eslint-disable-next-line no-unused-vars
 const themeCss = (key) => {
   if (key === 'clear-day') return `
     --sky-start: #38bdf8;
@@ -396,7 +400,7 @@ const Widget = styled.section`
   --weather-text: var(--text-primary, #272323);
   --weather-muted: var(--text-secondary, #555);
   --weather-border: #dfe7e1;
-  --weather-accent: var(--accent, #4bd66e);
+  --weather-accent: var(--accent);
   --orb-color: #fbbf24;
   --weather-shadow: 0 12px 28px rgba(16, 69, 29, 0.12);
   
@@ -408,14 +412,14 @@ const Widget = styled.section`
   flex-direction: column;
   justify-content: space-between;
   
-  :root[data-theme='dark'] & {
+  :root[data-mode='dark'] & {
     --weather-surface: var(--dark-surface-1, #111);
     --weather-details-surface: var(--dark-surface-2, #222);
     --weather-text: var(--text-primary, #f3f6f4);
     --weather-muted: var(--text-secondary, #a9b0ab);
     --weather-border: var(--dark-border, #304035);
-    --weather-accent: var(--accent, #4bd66e);
-    --orb-color: var(--accent, #4bd66e);
+    --weather-accent: var(--accent);
+    --orb-color: var(--accent);
     --weather-shadow: 0 14px 36px rgba(240, 229, 229, 0.74);
   }
 `;
@@ -647,7 +651,7 @@ const DetailsCard = styled.div`
   justify-content: space-between;
   background: ghostwhite;
 
-  :root[data-theme='dark'] & {
+  :root[data-mode='dark'] & {
     background: linear-gradient(135deg, #111, #222);
   }
 `;
@@ -728,7 +732,7 @@ const StateBox = styled.div`
   color: var(--text-color, #1f2937);
   text-align: center;
   
-  :root[data-theme='dark'] & {
+  :root[data-mode='dark'] & {
     background: black;
     border: 1px solid var(--accent);
     color: var(--text-color, #f1f1f1);

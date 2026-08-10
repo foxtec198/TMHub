@@ -6,6 +6,7 @@ import { DashboardFilterButton, DashboardFilterPanel } from "../../components/Da
 import { PageHeader } from "../../components/PageHeader";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 import "./projectDashboards.css";
 
@@ -31,21 +32,6 @@ const formatCardDate = (value, compact = false) => {
     : { weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
   ).format(date).replace(",", " ·");
 };
-
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(
-    () => document.documentElement.dataset.theme === "dark",
-  );
-  useEffect(() => {
-    const root = document.documentElement;
-    const observer = new MutationObserver(() => {
-      setIsDark(root.dataset.theme === "dark");
-    });
-    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => observer.disconnect();
-  }, []);
-  return isDark;
-}
 
 function MemberAvatar({ member, small = false }) {
   return (
@@ -90,13 +76,13 @@ const projectDoughnutCenterPlugin = {
 };
 
 export function ProjectDashboard() {
+  const chartTheme = useChartTheme();
   const [data, setData] = useState(null);
   const [filters, setFilters] = useState(defaultFilters);
   const [refresh, setRefresh] = useState(0);
   const filterPanel = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
-  const isDarkMode = useDarkMode();
 
   useEffect(() => {
     if (!filters.periodo?.[0] || !filters.periodo?.[1]) return;
@@ -123,11 +109,11 @@ export function ProjectDashboard() {
     labels: ["Abertas", "Em andamento", "Concluídas"],
     datasets: [{
       data: [summary.status_abertas || 0, summary.status_andamento || 0, summary.status_concluidas || 0],
-      backgroundColor: ["#b8d9c3", "#f4c53e", "#2ebd67"],
+      backgroundColor: [chartTheme.palette[0], chartTheme.warning, chartTheme.success],
       borderWidth: 0,
       hoverOffset: 5,
     }],
-  }), [summary.status_abertas, summary.status_andamento, summary.status_concluidas]);
+  }), [summary.status_abertas, summary.status_andamento, summary.status_concluidas, chartTheme]);
   const doughnutOptions = useMemo(() => ({
     maintainAspectRatio: false,
     cutout: "72%",
@@ -135,18 +121,18 @@ export function ProjectDashboard() {
       legend: {
         position: "bottom",
         labels: {
-          color: isDarkMode ? "#dce8df" : "#526258",
+          color: chartTheme.text,
           usePointStyle: true,
           boxWidth: 8,
           padding: 18,
         },
       },
       projectDoughnutCenter: {
-        textColor: isDarkMode ? "#edf4ef" : "#213127",
-        labelColor: isDarkMode ? "#aebbb2" : "#69776e",
+        textColor: chartTheme.text,
+        labelColor: chartTheme.text,
       },
     },
-  }), [isDarkMode]);
+  }), [chartTheme]);
   const upcomingCards = useMemo(() => [...(data?.cards || [])]
     .filter((card) => card.atrasado || card.data_fim)
     .sort((left, right) => {

@@ -10,7 +10,7 @@
     overflow: hidden;
     border: 1px solid var(--surface-300, #d8ded9);
     border-radius: 14px;
-    background: #101612;
+    background: var(--surface-2);
 }
 
 .barcode-camera-target,
@@ -39,9 +39,9 @@
     left: 5%;
     height: 128px;
     transform: translateY(-50%);
-    border: 2px solid rgba(99, 229, 139, .9);
+    border: 2px solid color-mix(in srgb, var(--accent-hover) 90%, transparent);
     border-radius: 10px;
-    box-shadow: 0 0 0 999px rgba(0, 0, 0, .16), inset 0 0 18px rgba(75, 214, 110, .08);
+    box-shadow: 0 0 0 999px rgba(0, 0, 0, .16), inset 0 0 18px color-mix(in srgb, var(--accent) 8%, transparent);
     pointer-events: none;
 }
 
@@ -52,8 +52,8 @@
     right: 5%;
     left: 5%;
     height: 2px;
-    background: #63e58b;
-    box-shadow: 0 0 8px #4bd66e;
+    background: var(--accent-hover);
+    box-shadow: 0 0 8px var(--accent);
     animation: barcode-reader-pulse 1.6s ease-in-out infinite;
 }
 

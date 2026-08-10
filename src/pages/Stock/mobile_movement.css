@@ -42,8 +42,8 @@
 }
 
 .estoque-atual-box {
-    background: linear-gradient(135deg, var(--green-50, #f0fdf4), var(--surface-100, #f4f4f5));
-    border: 1px solid var(--green-200, #bbf7d0);
+    background: linear-gradient(135deg, var(--accent-soft), var(--surface-3));
+    border: 1px solid var(--border-strong);
     border-radius: 10px;
     padding: 0.65rem 0.9rem;
     animation: estoque-atual-fade-in 0.25s ease;

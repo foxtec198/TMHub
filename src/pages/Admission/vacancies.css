@@ -1,23 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap');
 
 .admissao-page {
-    --accent: #4BD66E;
-    --text-secondary: #555;
-    --text-primary: #272323;
-    --secondary-color: #10451D;
-    --primary-color: #155C27;
+    --text-secondary: var(--theme-text-secondary);
+    --text-primary: var(--theme-text-primary);
+    --secondary-color: var(--primary-hover);
+    --primary-color: var(--primary);
 
-    --primary-color-dark: #0D3E1C;
-    --primary-color-light: #1E7A38;
-    --accent-light: #E7FBEC;
-    --accent-dark: #2FAE4F;
+    --primary-color-dark: var(--primary-hover);
+    --primary-color-light: var(--primary);
+    --accent-light: var(--accent-soft);
+    --accent-dark: var(--accent);
 
-    --bg-page: #F4F6F5;
-    --bg-card: #FFFFFF;
-    --border-color: #E4E7E6;
-    --border-color-light: #EFF2F1;
+    --bg-page: var(--app-bg);
+    --bg-card: var(--surface-1);
+    --border-color: var(--border);
+    --border-color-light: var(--border);
 
-    --text-muted: #8A8F8D;
+    --text-muted: var(--theme-text-muted);
     --text-inverse: #FFFFFF;
 
     --danger: #D9534F;
@@ -33,27 +32,27 @@
     --radius-lg: 14px;
     --radius-pill: 999px;
 
-    --shadow-sm: 0 1px 2px rgba(16, 69, 29, 0.06);
-    --shadow-md: 0 4px 14px rgba(16, 69, 29, 0.08);
-    --shadow-lg: 0 8px 24px rgba(16, 69, 29, 0.12);
+    --shadow-sm: var(--theme-shadow-sm);
+    --shadow-md: var(--theme-shadow-sm);
+    --shadow-lg: var(--theme-shadow-md);
 
     --transition-fast: 0.15s ease;
     --transition-base: 0.25s ease;
 }
 
-:root[data-theme="dark"] .admissao-page {
-    --text-primary: #dce2de;
-    --text-secondary: #b5beb8;
-    --text-muted: #9da8a1;
+:root[data-mode="dark"] .admissao-page {
+    --text-primary: var(--theme-text-primary);
+    --text-secondary: var(--theme-text-secondary);
+    --text-muted: var(--theme-text-muted);
     --bg-page: transparent;
-    --bg-card: #292d2f;
-    --border-color: #465049;
-    --border-color-light: #39413c;
-    --accent-light: #25382b;
-    --accent-dark: #58d47c;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .2);
-    --shadow-md: 0 4px 14px rgba(0, 0, 0, .24);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, .3);
+    --bg-card: var(--surface-1);
+    --border-color: var(--border);
+    --border-color-light: var(--border);
+    --accent-light: var(--accent-soft);
+    --accent-dark: var(--primary);
+    --shadow-sm: var(--theme-shadow-sm);
+    --shadow-md: var(--theme-shadow-md);
+    --shadow-lg: var(--theme-shadow-md);
 }
 
 .admissao-page {
@@ -150,24 +149,24 @@
 }
 
 /* Overrides explícitos evitam que os tokens claros do PrimeReact vazem para o tema escuro. */
-:root[data-theme="dark"] .admissao-page .candidate-text-editor {
-    background: #27302a;
-    border-color: #405d49;
+:root[data-mode="dark"] .admissao-page .candidate-text-editor {
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .admissao-page .candidate-text-editor__heading > span {
-    color: #72e392;
+:root[data-mode="dark"] .admissao-page .candidate-text-editor__heading > span {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .admissao-page .candidate-text-editor .p-inputtext {
-    color: #e5ebe7;
-    background: #1d2320;
-    border-color: #46544b;
+:root[data-mode="dark"] .admissao-page .candidate-text-editor .p-inputtext {
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .admissao-page .candidate-text-editor .p-inputtext:enabled:focus {
-    border-color: #63dc85;
-    box-shadow: 0 0 0 1px #63dc85;
+:root[data-mode="dark"] .admissao-page .candidate-text-editor .p-inputtext:enabled:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 .15rem var(--focus-ring);
 }
 
 @media (max-width: 640px) {
@@ -212,77 +211,77 @@
     background: var(--accent-light);
 }
 
-:root[data-theme="dark"] .admissao-page .p-accordion .p-accordion-header .p-accordion-header-link {
-    color: #dce2de;
-    background: #303538;
-    border-color: #48514c;
+:root[data-mode="dark"] .admissao-page .p-accordion .p-accordion-header .p-accordion-header-link {
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .admissao-page .p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:hover {
-    color: #72e392;
-    background: #39413d;
-    border-color: #58bd76;
+:root[data-mode="dark"] .admissao-page .p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:hover {
+    color: var(--accent-hover);
+    background: var(--surface-hover);
+    border-color: var(--primary-hover);
 }
 
-:root[data-theme="dark"] .admissao-page .p-accordion .p-accordion-header.p-highlight .p-accordion-header-link {
-    color: #72e392;
-    background: #354039;
-    border-color: #58bd76;
+:root[data-mode="dark"] .admissao-page .p-accordion .p-accordion-header.p-highlight .p-accordion-header-link {
+    color: var(--accent-hover);
+    background: var(--surface-active);
+    border-color: var(--primary-hover);
 }
 
-:root[data-theme="dark"] .admissao-page .p-accordion .p-accordion-content {
-    color: #d7ddd9;
-    background: #25292b;
-    border-color: #48514c;
+:root[data-mode="dark"] .admissao-page .p-accordion .p-accordion-content {
+    color: var(--text-primary);
+    background: var(--surface-1);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .admissao-page .vaga-accordion .p-accordion-header .p-accordion-header-link {
-    background: #2b3032;
+:root[data-mode="dark"] .admissao-page .vaga-accordion .p-accordion-header .p-accordion-header-link {
+    background: var(--surface-2);
 }
 
-:root[data-theme="dark"] .admissao-page .text-500 {
-    color: #aeb7b1 !important;
+:root[data-mode="dark"] .admissao-page .text-500 {
+    color: var(--text-secondary) !important;
 }
 
-:root[data-theme="dark"] .admissao-page .interview-box {
-    color: #dce2de;
-    background: #27362c;
-    border-color: #58bd76;
+:root[data-mode="dark"] .admissao-page .interview-box {
+    color: var(--text-primary);
+    background: var(--surface-active);
+    border-color: var(--primary-hover);
 }
 
-:root[data-theme="dark"] .admissao-page .interview-box .pi-calendar-plus {
-    color: #72e392 !important;
+:root[data-mode="dark"] .admissao-page .interview-box .pi-calendar-plus {
+    color: var(--accent-hover) !important;
 }
 
-:root[data-theme="dark"] .admissao-page .matricula-suggestions {
-    color: #dce2de;
+:root[data-mode="dark"] .admissao-page .matricula-suggestions {
+    color: var(--text-primary);
     background: var(--bg-card);
     border-color: var(--border-color);
 }
 
-:root[data-theme="dark"] .admissao-page .matricula-suggestion-item {
+:root[data-mode="dark"] .admissao-page .matricula-suggestion-item {
     border-color: var(--border-color-light);
 }
 
-:root[data-theme="dark"] .admissao-page .matricula-suggestion-item:hover {
-    color: #e9f8ed;
-    background: #304438;
+:root[data-mode="dark"] .admissao-page .matricula-suggestion-item:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover);
 }
 
-:root[data-theme="dark"] .admissao-page .p-selectbutton .p-button {
-    color: #cbd2cd;
-    background: #2c3133;
-    border-color: #48514c;
+:root[data-mode="dark"] .admissao-page .p-selectbutton .p-button {
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .admissao-page .p-selectbutton .p-button.p-highlight {
-    color: #132218;
-    background: #63e58b;
-    border-color: #63e58b;
+:root[data-mode="dark"] .admissao-page .p-selectbutton .p-button.p-highlight {
+    color: var(--button-primary-text);
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
-:root[data-theme="dark"] .admissao-page .p-float-label label {
-    color: #aeb7b1;
+:root[data-mode="dark"] .admissao-page .p-float-label label {
+    color: var(--text-secondary);
 }
 
 .interview-history-dialog {
@@ -397,47 +396,47 @@
     color: var(--primary-color);
 }
 
-:root[data-theme="dark"] .candidate-history-item,
-:root[data-theme="dark"] .candidate-result-person {
-    color: #e5ebe7;
-    background: #202722;
-    border-color: #405048;
+:root[data-mode="dark"] .candidate-history-item,
+:root[data-mode="dark"] .candidate-result-person {
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .candidate-history-item footer {
-    border-color: #405048;
+:root[data-mode="dark"] .candidate-history-item footer {
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .candidate-result-person > .pi {
-    color: #72e392;
+:root[data-mode="dark"] .candidate-result-person > .pi {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .completion-dialog .p-dialog-header,
-:root[data-theme="dark"] .completion-dialog .p-dialog-content {
-    color: #e5ebe7;
-    background: #111513;
+:root[data-mode="dark"] .completion-dialog .p-dialog-header,
+:root[data-mode="dark"] .completion-dialog .p-dialog-content {
+    color: var(--text-primary);
+    background: var(--surface-1);
 }
 
-:root[data-theme="dark"] .completion-dialog .p-dialog-header {
-    border-bottom: 1px solid #35443a;
+:root[data-mode="dark"] .completion-dialog .p-dialog-header {
+    border-bottom: 1px solid var(--border);
 }
 
-:root[data-theme="dark"] .completion-dialog .completion-recruiter {
-    color: #b9c4bd;
-    background: #202722;
-    border-color: #405d49;
+:root[data-mode="dark"] .completion-dialog .completion-recruiter {
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .completion-dialog .completion-recruiter .pi {
-    color: #72e392;
+:root[data-mode="dark"] .completion-dialog .completion-recruiter .pi {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .completion-dialog .completion-recruiter strong {
-    color: #f0f5f1;
+:root[data-mode="dark"] .completion-dialog .completion-recruiter strong {
+    color: var(--text-primary);
 }
 
-:root[data-theme="dark"] .completion-dialog .completion-schedule-hint strong {
-    color: #c8f2d3;
+:root[data-mode="dark"] .completion-dialog .completion-schedule-hint strong {
+    color: var(--primary-hover);
 }
 
 @media (max-width: 700px) {

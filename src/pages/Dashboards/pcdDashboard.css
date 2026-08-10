@@ -1,7 +1,7 @@
 .pcd-dashboard {
     min-height: 100%;
     padding: clamp(1rem, 2.5vw, 2rem);
-    color: var(--text-color, #26332a);
+    color: var(--text-color, var(--text-primary));
 }
 
 .pcd-dashboard-summary {
@@ -12,7 +12,7 @@
 }
 
 .pcd-dashboard-summary-card {
-    --card-accent: #268f50;
+    --card-accent: var(--primary);
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
@@ -20,13 +20,13 @@
     min-width: 0;
     padding: 1rem;
     background: var(--surface-card, #fff);
-    border: 1px solid var(--surface-border, #dce7df);
+    border: 1px solid var(--surface-border, var(--border));
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(15, 63, 30, .07);
 }
 
 .pcd-dashboard-summary-card.is-success {
-    --card-accent: #31b765;
+    --card-accent: var(--status-success);
 }
 
 .pcd-dashboard-summary-card.is-warning {
@@ -92,7 +92,7 @@
     min-width: 0;
     padding: 1.2rem;
     background: var(--surface-card, #fff);
-    border: 1px solid var(--surface-border, #dce7df);
+    border: 1px solid var(--surface-border, var(--border));
     border-radius: 16px;
     box-shadow: 0 12px 34px rgba(15, 63, 30, .07);
 }
@@ -210,7 +210,7 @@
 }
 
 .pcd-dashboard-status-strip > div {
-    --status-color: #31b765;
+    --status-color: var(--status-success);
     display: flex;
     min-width: 0;
     align-items: center;
@@ -313,32 +313,32 @@
     width: 100%;
 }
 
-:root[data-theme="dark"] .pcd-dashboard-summary-card,
-:root[data-theme="dark"] .pcd-dashboard-panel {
-    background: #292e2b;
-    border-color: #465149;
+:root[data-mode="dark"] .pcd-dashboard-summary-card,
+:root[data-mode="dark"] .pcd-dashboard-panel {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .pcd-dashboard {
+:root[data-mode="dark"] .pcd-dashboard {
     color: #f2f6f3;
 }
 
-:root[data-theme="dark"] .pcd-dashboard-panel header span,
-:root[data-theme="dark"] .pcd-dashboard-insight > span,
-:root[data-theme="dark"] .pcd-dashboard-insight > div:not(.pcd-dashboard-status-strip) strong,
-:root[data-theme="dark"] .pcd-dashboard-empty i {
-    color: #61e990;
+:root[data-mode="dark"] .pcd-dashboard-panel header span,
+:root[data-mode="dark"] .pcd-dashboard-insight > span,
+:root[data-mode="dark"] .pcd-dashboard-insight > div:not(.pcd-dashboard-status-strip) strong,
+:root[data-mode="dark"] .pcd-dashboard-empty i {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .pcd-dashboard-insight {
-    background: linear-gradient(155deg, #1c3b27, #292e2b 68%);
+:root[data-mode="dark"] .pcd-dashboard-insight {
+    background: linear-gradient(155deg, var(--surface-hover), var(--surface-3) 68%);
 }
 
-:root[data-theme="dark"] .pcd-dashboard-status-strip > div {
+:root[data-mode="dark"] .pcd-dashboard-status-strip > div {
     background: color-mix(
         in srgb,
         var(--status-color) 10%,
-        #222724
+        var(--surface-3)
     );
 }
 

@@ -21,6 +21,7 @@ import { DashboardFilterButton } from "../../components/DashboardFilterPanel"
 import { useEffect, useState, useRef, useMemo } from "react"
 import { to_real } from "../../utils/ui"
 import connect from "../../utils/request"
+import { useChartTheme } from "../../theme/useTheme"
 
 // CSS
 import "./request.css"
@@ -120,8 +121,8 @@ const MOCK = {
 
 // Logic and UI
 export function RequestReport() {
+    const chartTheme = useChartTheme();
     // Filtros enviados ao backend e referência do painel flutuante de filtros.
-    const rootStyle = getComputedStyle(document.documentElement); // Obter cores setadas no CSS (ROOT)
     const op_filters = useRef(); // Overlay Panel Ref
 
     const defaultFilters = {
@@ -462,9 +463,8 @@ export function RequestReport() {
             type: 'line',
             tension: 0.4,
             label: 'Reposições',
-            borderWidth: 2,
-            borderColor: rootStyle.getPropertyValue("--teal-800").trim(),
-            pointBackgroundColor: rootStyle.getPropertyValue("--teal-800").trim(),
+            borderColor: chartTheme.palette[0],
+            pointBackgroundColor: chartTheme.palette[0],
             data: dadosReposicoes,
             borderWidth: 3,
             pointRadius: 5,
@@ -478,9 +478,9 @@ export function RequestReport() {
             maxBarThickness: 40,
             categoryPercentage: 0.6,
             barPercentage: 0.7,
-            backgroundColor: 'rgba(53, 141, 26, 0.6)',
+            backgroundColor: chartTheme.palette[1],
             data: dadosAusentes,
-            borderColor: 'white',
+            borderColor: chartTheme.surface,
             borderWidth: 2
         },]
     };
@@ -501,7 +501,7 @@ export function RequestReport() {
         labels: labelLocal,
         datasets: [{
             type: "bar",
-            backgroundColor: rootStyle.getPropertyValue("--green-400").trim(),
+            backgroundColor: chartTheme.palette[2],
             label: "Dados",
             data: dadosLocais,
             barPercentage: 0.7,
@@ -591,7 +591,7 @@ export function RequestReport() {
                         title="Total"
                         className="border-round-lg flex-grow-1"
                         style={{
-                            backgroundColor: 'var(--green-900)',
+                            backgroundColor: 'var(--primary)',
                             height: "5rem",
                             color: "#fff",
                         }}
@@ -605,7 +605,7 @@ export function RequestReport() {
                         title="Abertas"
                         className="border-round-lg flex-grow-1"
                         style={{
-                            backgroundColor: 'var(--green-500)',
+                            backgroundColor: 'var(--chart-1)',
                             height: "5rem",
                             color: "#fff",
                         }}
@@ -619,7 +619,7 @@ export function RequestReport() {
                         title="Cobertas"
                         className="border-round-lg flex-grow-1"
                         style={{
-                            backgroundColor: 'var(--green-800)',
+                            backgroundColor: 'var(--secondary)',
                             height: "5rem",
                             color: "#fff",
                         }}
@@ -633,7 +633,7 @@ export function RequestReport() {
                         title="Descobertas"
                         className="border-round-lg flex-grow-1"
                         style={{
-                            backgroundColor: 'var(--green-400)',
+                            backgroundColor: 'var(--accent)',
                             height: "5rem",
                             color: "#fff",
                         }}
@@ -647,7 +647,7 @@ export function RequestReport() {
                         title="Custo Total"
                         className="dashboard-financial-card border-round-lg flex-grow-1"
                         style={{
-                            backgroundColor: 'var(--gray-800)',
+                            backgroundColor: 'var(--surface-3)',
                             height: "5rem",
                             color: "#fff",
                         }}
@@ -659,7 +659,7 @@ export function RequestReport() {
                         title="Média por dia"
                         className="dashboard-financial-card border-round-lg flex-grow-1"
                         style={{
-                            backgroundColor: 'var(--teal-800)',
+                            backgroundColor: 'var(--chart-7)',
                             height: "5rem",
                             color: "#fff",
                         }}
@@ -668,7 +668,7 @@ export function RequestReport() {
                     />
                     <div
                         className="dashboard-highlight flex justify-content-center flex-grow-1 gap-2 align-items-center border-round-lg shadow-6 p-3"
-                        style={{ backgroundColor: 'var(--white-600)', height: "5rem", color: '#333' }}>
+                        style={{ backgroundColor: 'var(--surface-1)', height: "5rem", color: 'var(--text-primary)' }}>
                         <Knob
                             value={valorDoLocalComMaisFaltas}
                             valueTemplate="{value}%"

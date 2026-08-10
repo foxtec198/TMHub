@@ -53,9 +53,9 @@
 }
 
 /* Evita que o token claro do PrimeReact deixe as linhas brancas no dark mode. */
-:root[data-theme="dark"] .category-item {
+:root[data-mode="dark"] .category-item {
     color: var(--text-color);
-    background: #252a27;
+    background: var(--surface-3);
     border-color: #445048;
 }
 

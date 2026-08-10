@@ -31,5 +31,5 @@
   max-width: calc(100% - .25rem);
 }
 
-:root[data-theme="dark"] .collaborator-dropdown-option strong { color: #f1f7f3; }
-:root[data-theme="dark"] .collaborator-dropdown-option small { color: #a9b8ad; }
+:root[data-mode="dark"] .collaborator-dropdown-option strong { color: #f1f7f3; }
+:root[data-mode="dark"] .collaborator-dropdown-option small { color: #a9b8ad; }

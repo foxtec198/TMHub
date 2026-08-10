@@ -7,7 +7,7 @@
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
-  background: radial-gradient(circle at 50% 0%, rgba(75, 214, 110, .13), transparent 34%), #f7faf8;
+  background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 34%), var(--surface-2);
 }
 
 .request-create-logo {
@@ -23,9 +23,9 @@
 }
 
 .request-stepper-shell .p-stepper-panels {
-  border: 1px solid #dfe9e2;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  box-shadow: 0 18px 44px rgba(16, 69, 29, .1);
+  box-shadow: var(--shadow-md);
 }
 
 .request-reserve-option {
@@ -41,7 +41,7 @@
 }
 
 .request-reserve-available {
-  color: #238636;
+  color: var(--status-success);
 }
 
 .request-reserve-unavailable {
@@ -51,9 +51,9 @@
 .request-collaborator-summary {
   margin: -.15rem 0 1rem;
   padding: .85rem 1rem;
-  color: #173f25;
-  background: #effaf2;
-  border: 1px solid #bde5c8;
+  color: var(--text-primary);
+  background: var(--accent-soft);
+  border: 1px solid var(--border-strong);
   border-radius: 12px;
 }
 
@@ -62,7 +62,7 @@
   gap: .5rem;
   align-items: center;
   margin-bottom: .65rem;
-  color: #08733f;
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -79,7 +79,7 @@
 
 .request-collaborator-summary dt {
   margin-bottom: .15rem;
-  color: #63806b;
+  color: var(--text-secondary);
   font-size: .75rem;
   font-weight: 700;
   letter-spacing: .04em;
@@ -92,90 +92,90 @@
   font-weight: 600;
 }
 
-:root[data-theme="dark"] .request-create-page {
-  color: #edf7f0;
-  background: radial-gradient(circle at 50% -8%, rgba(75, 214, 110, .22), transparent 38%), linear-gradient(180deg, #07130b 0%, #050705 60%, #020302 100%);
+:root[data-mode="dark"] .request-create-page {
+  color: var(--text-primary);
+  background: radial-gradient(circle at 50% -8%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 38%), var(--app-bg);
 }
 
-:root[data-theme="dark"] .request-create-logo {
-  filter: drop-shadow(0 10px 24px rgba(75, 214, 110, .2));
+:root[data-mode="dark"] .request-create-logo {
+  filter: drop-shadow(0 10px 24px color-mix(in srgb, var(--accent) 20%, transparent));
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-stepper,
-:root[data-theme="dark"] .request-stepper-shell .p-stepper-nav {
+:root[data-mode="dark"] .request-stepper-shell .p-stepper,
+:root[data-mode="dark"] .request-stepper-shell .p-stepper-nav {
   background: transparent !important;
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-stepper-panels {
-  color: #edf7f0;
+:root[data-mode="dark"] .request-stepper-shell .p-stepper-panels {
+  color: var(--text-primary);
   background: transparent !important;
   border-color: transparent;
   box-shadow: none;
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-stepper-action {
-  color: #cfe8d6;
+:root[data-mode="dark"] .request-stepper-shell .p-stepper-action {
+  color: var(--text-secondary);
   background: transparent !important;
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-stepper-title {
-  color: #cfe8d6;
+:root[data-mode="dark"] .request-stepper-shell .p-stepper-title {
+  color: var(--text-secondary);
   background: transparent !important;
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-stepper-header.p-highlight .p-stepper-title {
-  color: #63e58b;
+:root[data-mode="dark"] .request-stepper-shell .p-stepper-header.p-highlight .p-stepper-title {
+  color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-stepper-number {
-  color: #071009;
-  background: #63e58b;
-  border-color: #63e58b;
+:root[data-mode="dark"] .request-stepper-shell .p-stepper-number {
+  color: var(--accent-contrast);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-stepper-separator {
-  background: #31513a;
+:root[data-mode="dark"] .request-stepper-shell .p-stepper-separator {
+  background: var(--border-strong);
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-dropdown,
-:root[data-theme="dark"] .request-stepper-shell .p-inputnumber-input,
-:root[data-theme="dark"] .request-stepper-shell .p-inputtext {
-  color: #f1f7f3;
-  background: #151c17;
-  border-color: #3e6548;
+:root[data-mode="dark"] .request-stepper-shell .p-dropdown,
+:root[data-mode="dark"] .request-stepper-shell .p-inputnumber-input,
+:root[data-mode="dark"] .request-stepper-shell .p-inputtext {
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-dropdown-trigger,
-:root[data-theme="dark"] .request-stepper-shell .p-dropdown-filter-icon {
-  color: #63e58b;
+:root[data-mode="dark"] .request-stepper-shell .p-dropdown-trigger,
+:root[data-mode="dark"] .request-stepper-shell .p-dropdown-filter-icon {
+  color: var(--status-success);
 }
 
-:root[data-theme="dark"] .request-reserve-available {
-  color: #63e58b;
+:root[data-mode="dark"] .request-reserve-available {
+  color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .request-reserve-unavailable {
+:root[data-mode="dark"] .request-reserve-unavailable {
   color: #ff8a80;
 }
 
-:root[data-theme="dark"] .request-collaborator-summary {
-  color: #edf7f0;
-  background: #13231a;
-  border-color: #315d3d;
+:root[data-mode="dark"] .request-collaborator-summary {
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .request-collaborator-summary__heading {
-  color: #63e58b;
+:root[data-mode="dark"] .request-collaborator-summary__heading {
+  color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .request-collaborator-summary dt {
-  color: #9cbca5;
+:root[data-mode="dark"] .request-collaborator-summary dt {
+  color: var(--text-secondary);
 }
 
-:root[data-theme="dark"] .request-stepper-shell .p-selectbutton {
+:root[data-mode="dark"] .request-stepper-shell .p-selectbutton {
   overflow: hidden;
   background: transparent !important;
-  border: 1px solid #3e6548;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
 }
 

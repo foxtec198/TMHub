@@ -4,7 +4,6 @@ import { Calendar } from 'primereact/calendar';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { Dropdown } from 'primereact/dropdown';
 import { MultiSelect } from 'primereact/multiselect';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { Tag } from 'primereact/tag';
@@ -14,6 +13,7 @@ import { DashboardFilterButton } from '../../components/DashboardFilterPanel';
 import { PageHeader } from '../../components/PageHeader';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useChartTheme } from '../../theme/useTheme';
 import connect from '../../utils/request';
 import './logistic.css';
 
@@ -35,6 +35,7 @@ function EmptyChart({ label }) {
 }
 
 export function DashboardLogistic() {
+    const chartTheme = useChartTheme();
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
     const [data, setData] = useState(null);
     const [refresh, setRefresh] = useState(0);
@@ -81,56 +82,56 @@ export function DashboardLogistic() {
             {
                 label: 'Entradas',
                 data: (data?.serie || []).map((item) => item.entrada),
-                borderColor: '#45d66f',
-                backgroundColor: 'rgba(69,214,111,.16)',
+                borderColor: chartTheme.palette[0],
+                backgroundColor: chartTheme.palette[0],
                 fill: true,
                 tension: .35,
             },
             {
                 label: 'Saídas',
                 data: (data?.serie || []).map((item) => item.saida),
-                borderColor: '#ef5350',
-                backgroundColor: 'rgba(239,83,80,.08)',
+                borderColor: chartTheme.danger,
+                backgroundColor: chartTheme.danger,
                 fill: true,
                 tension: .35,
             },
         ],
-    }), [data?.serie]);
+    }), [data?.serie, chartTheme]);
 
     const topProductsChart = useMemo(() => ({
         labels: (data?.mais_movimentados || []).map((item) => item.produto),
         datasets: [{
             data: (data?.mais_movimentados || []).map((item) => item.quantidade),
-            backgroundColor: '#45d66f',
+            backgroundColor: chartTheme.palette[0],
             borderRadius: 7,
         }],
-    }), [data?.mais_movimentados]);
+    }), [data?.mais_movimentados, chartTheme]);
 
     const collaboratorChart = useMemo(() => ({
         labels: (data?.produtos_por_colaborador || data?.epis_por_colaborador || []).map((item) => item.colaborador),
         datasets: [{
             data: (data?.produtos_por_colaborador || data?.epis_por_colaborador || []).map((item) => item.quantidade),
-            backgroundColor: '#2eafda',
+            backgroundColor: chartTheme.palette[4],
             borderRadius: 7,
         }],
-    }), [data?.produtos_por_colaborador, data?.epis_por_colaborador]);
+    }), [data?.produtos_por_colaborador, data?.epis_por_colaborador, chartTheme]);
 
     const localChart = useMemo(() => ({
         labels: (data?.produtos_por_local || data?.epis_por_local || []).map((item) => item.local),
         datasets: [{
             data: (data?.produtos_por_local || data?.epis_por_local || []).map((item) => item.quantidade),
-            backgroundColor: '#9b7de3',
+            backgroundColor: chartTheme.palette[5],
             borderRadius: 7,
         }],
-    }), [data?.produtos_por_local, data?.epis_por_local]);
+    }), [data?.produtos_por_local, data?.epis_por_local, chartTheme]);
 
     const axisOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-            x: { beginAtZero: true, grid: { color: 'rgba(130,145,135,.12)' }, ticks: { color: '#91a098', precision: 0 } },
-            y: { grid: { display: false }, ticks: { color: '#91a098' } },
+            x: { beginAtZero: true, grid: { color: chartTheme.grid }, ticks: { color: chartTheme.text, precision: 0 } },
+            y: { grid: { display: false }, ticks: { color: chartTheme.text } },
         },
     };
     const horizontalOptions = { ...axisOptions, indexAxis: 'y' };

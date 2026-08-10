@@ -3,6 +3,7 @@ import connect from "../../utils/request";
 import { getInitials } from "../../utils/profile";
 import "./init.css";
 import WeatherWidget from "../../components/WeatherWidget";
+import { ThemeLogo } from "../../components/ThemeLogo";
 
 const documentation = [
   {
@@ -54,7 +55,7 @@ export function Init() {
             </div>
           </div>
           <div className="init-support-hero-mark" aria-hidden="true">
-            <img src="/brands/main_brand_white.svg" alt="" />
+            <ThemeLogo variant="inverse" alt="" />
             <i className="pi pi-headphones" />
           </div>
         </section>
@@ -147,7 +148,7 @@ export function Init() {
       </section>
 
       <footer className="init-support-footer">
-        <img src="/brands/main_brand.svg" alt="TM Hub — Painel Executivo" />
+        <ThemeLogo />
         <span>Feito para conectar gestão, operação e tecnologia.</span>
       </footer>
     </main>

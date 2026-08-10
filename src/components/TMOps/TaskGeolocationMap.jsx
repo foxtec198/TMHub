@@ -39,15 +39,15 @@ function MapViewport({ positions }) {
 
 export function TaskGeolocationMap({ geolocations = [] }) {
   const [darkMode, setDarkMode] = useState(
-    () => document.documentElement.dataset.theme === "dark",
+    () => document.documentElement.dataset.mode === "dark",
   );
 
   useEffect(() => {
     const root = document.documentElement;
     const observer = new MutationObserver(() => {
-      setDarkMode(root.dataset.theme === "dark");
+      setDarkMode(root.dataset.mode === "dark");
     });
-    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    observer.observe(root, { attributes: true, attributeFilter: ["data-mode"] });
     return () => observer.disconnect();
   }, []);
 

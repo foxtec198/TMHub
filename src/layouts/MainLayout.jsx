@@ -14,6 +14,7 @@ import { PanelMenu } from "primereact/panelmenu";
 import { Avatar } from "primereact/avatar";
 import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
+import { ThemeLogo } from "../components/ThemeLogo";
 
 // Styles
 import './main.css'
@@ -63,7 +64,6 @@ export function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const deny = deny_roles.includes(role)
-  const canManageAbsences = can("controle_faltas");
 
   const navigateTo = (path) => {
     navigate(path);
@@ -512,7 +512,7 @@ export function MainLayout() {
             aria-label="Ir para a tela inicial"
             onClick={() => navigateTo("/init")}
           >
-            <img className="layout-brand-logo" src="/brands/main_brand.svg" alt="TM Hub — Painel Executivo" />
+            <ThemeLogo className="layout-brand-logo" />
           </button>
         </div>
 

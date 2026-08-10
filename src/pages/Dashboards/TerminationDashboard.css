@@ -1,7 +1,7 @@
 .termination-dashboard {
     min-height: 100%;
     padding: clamp(1rem, 2.5vw, 2rem);
-    color: var(--text-color, #26332a);
+    color: var(--text-color, var(--text-primary));
 }
 
 .termination-dashboard-summary {
@@ -20,12 +20,12 @@
     min-width: 0;
     padding: 1rem;
     background: var(--surface-card, #fff);
-    border: 1px solid var(--surface-border, #dce7df);
+    border: 1px solid var(--surface-border, var(--border));
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(15, 63, 30, .06);
 }
 
-.termination-dashboard-card.is-primary { --card-accent: #268f50; }
+.termination-dashboard-card.is-primary { --card-accent: var(--primary); }
 .termination-dashboard-card.is-success { --card-accent: #31a95a; }
 .termination-dashboard-card.is-danger { --card-accent: #d64b50; }
 .termination-dashboard-card.is-warning { --card-accent: #c78224; }
@@ -82,7 +82,7 @@
 .termination-dashboard-table-panel {
     min-width: 0;
     background: var(--surface-card, #fff);
-    border: 1px solid var(--surface-border, #dce7df);
+    border: 1px solid var(--surface-border, var(--border));
     border-radius: 16px;
     box-shadow: 0 12px 34px rgba(15, 63, 30, .06);
 }
@@ -216,7 +216,7 @@
 }
 
 .termination-dashboard-status-strip > div {
-    --status-color: #31b765;
+    --status-color: var(--status-success);
     display: flex;
     min-width: 0;
     align-items: center;
@@ -229,7 +229,7 @@
 }
 
 .termination-dashboard-status-strip .is-earnings {
-    --status-color: #268f50;
+    --status-color: var(--status-success);
 }
 
 .termination-dashboard-status-strip .is-discounts {
@@ -269,7 +269,7 @@
     gap: .35rem;
     padding: .75rem;
     background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-card, #fff));
-    border-bottom: 1px solid var(--surface-border, #dce7df);
+    border-bottom: 1px solid var(--surface-border, var(--border));
 }
 
 .termination-dashboard-tabs button {
@@ -296,7 +296,7 @@
 .termination-dashboard-tabs button.is-active {
     color: var(--primary-color);
     background: var(--surface-card, #fff);
-    border-color: color-mix(in srgb, var(--primary-color) 28%, var(--surface-border, #dce7df));
+    border-color: color-mix(in srgb, var(--primary-color) 28%, var(--surface-border, var(--border)));
     box-shadow: 0 3px 10px rgba(15, 63, 30, .08);
 }
 
@@ -310,7 +310,7 @@
 
 /* A estrutura visual da leitura reutiliza as classes globais do dashboard PCD. */
 .termination-dashboard .pcd-dashboard-status-strip .is-earnings {
-    --status-color: #31b765;
+    --status-color: var(--status-success);
 }
 
 .termination-dashboard .pcd-dashboard-status-strip .is-discounts {
@@ -340,58 +340,58 @@
     font-size: .74rem;
 }
 
-:root[data-theme="dark"] .termination-dashboard {
+:root[data-mode="dark"] .termination-dashboard {
     color: #f2f6f3;
 }
 
-:root[data-theme="dark"] .termination-dashboard-card,
-:root[data-theme="dark"] .termination-dashboard-panel,
-:root[data-theme="dark"] .termination-dashboard-table-panel {
-    background: #292e2b;
-    border-color: #465149;
+:root[data-mode="dark"] .termination-dashboard-card,
+:root[data-mode="dark"] .termination-dashboard-panel,
+:root[data-mode="dark"] .termination-dashboard-table-panel {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .termination-dashboard-card {
+:root[data-mode="dark"] .termination-dashboard-card {
     --card-accent: #b9c7be;
 }
 
-:root[data-theme="dark"] .termination-dashboard-card.is-primary,
-:root[data-theme="dark"] .termination-dashboard-card.is-success {
-    --card-accent: #61e990;
+:root[data-mode="dark"] .termination-dashboard-card.is-primary,
+:root[data-mode="dark"] .termination-dashboard-card.is-success {
+    --card-accent: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .termination-dashboard-card.is-danger {
+:root[data-mode="dark"] .termination-dashboard-card.is-danger {
     --card-accent: #ff777b;
 }
 
-:root[data-theme="dark"] .termination-dashboard-card.is-warning {
+:root[data-mode="dark"] .termination-dashboard-card.is-warning {
     --card-accent: #e6b35e;
 }
 
-:root[data-theme="dark"] .termination-dashboard-tabs {
-    background: #222724;
-    border-color: #465149;
+:root[data-mode="dark"] .termination-dashboard-tabs {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .termination-dashboard-tabs button.is-active {
-    color: #61e990;
+:root[data-mode="dark"] .termination-dashboard-tabs button.is-active {
+    color: var(--accent-hover);
     background: #303733;
     border-color: #4d6756;
     box-shadow: none;
 }
 
-:root[data-theme="dark"] .termination-dashboard-insight {
-    background: linear-gradient(155deg, #1c3b27, #292e2b 68%);
+:root[data-mode="dark"] .termination-dashboard-insight {
+    background: linear-gradient(155deg, var(--surface-hover), var(--surface-3) 68%);
 }
 
-:root[data-theme="dark"] .termination-dashboard-insight > span,
-:root[data-theme="dark"] .termination-dashboard-insight > div:not(.termination-dashboard-status-strip) strong,
-:root[data-theme="dark"] .termination-dashboard-empty-chart i {
-    color: #61e990;
+:root[data-mode="dark"] .termination-dashboard-insight > span,
+:root[data-mode="dark"] .termination-dashboard-insight > div:not(.termination-dashboard-status-strip) strong,
+:root[data-mode="dark"] .termination-dashboard-empty-chart i {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .termination-dashboard-status-strip > div {
-    background: color-mix(in srgb, var(--status-color) 10%, #222724);
+:root[data-mode="dark"] .termination-dashboard-status-strip > div {
+    background: color-mix(in srgb, var(--status-color) 10%, var(--surface-3));
 }
 
 @media (max-width: 920px) {

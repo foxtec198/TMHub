@@ -12,6 +12,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilterButton, DashboardFilterPanel } from '../../components/DashboardFilterPanel';
+import { useChartTheme } from '../../theme/useTheme';
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
@@ -69,6 +70,7 @@ function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
 }
 
 export function TerminationDashboard() {
+    const chartTheme = useChartTheme();
     const now = new Date();
     const defaultPeriod = () => [new Date(now.getFullYear(), 0, 1), new Date(now.getFullYear(), 11, 31)];
     const emptyFilters = () => ({ departamento: [], motivo: [], contrato: [], supervisor: [], aviso: [] });
@@ -123,7 +125,7 @@ export function TerminationDashboard() {
             {
                 label: 'Rescisões',
                 data: monthsWithData.map((item) => item.quantidade),
-                backgroundColor: '#2fac55',
+                backgroundColor: chartTheme.palette[0],
                 borderRadius: 5,
                 maxBarThickness: 36,
                 categoryPercentage: .72,
@@ -135,8 +137,8 @@ export function TerminationDashboard() {
                 type: 'line',
                 label: 'Custo total',
                 data: monthsWithData.map((item) => item.custo_total),
-                borderColor: '#c78224',
-                backgroundColor: '#c78224',
+                borderColor: chartTheme.palette[1],
+                backgroundColor: chartTheme.palette[1],
                 borderWidth: 2,
                 pointRadius: 4,
                 pointHoverRadius: 5,
@@ -145,7 +147,7 @@ export function TerminationDashboard() {
                 order: 1,
             },
         ],
-    }), [monthsWithData]);
+    }), [monthsWithData, chartTheme]);
 
     const monthlyOptions = {
         maintainAspectRatio: false,

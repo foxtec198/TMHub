@@ -139,39 +139,39 @@
 .tm-ops-routine-unlink-dialog p {
   margin: 0 0 1rem;
 }
-:root[data-theme="dark"] .tm-ops-routine-linked-warning {
+:root[data-mode="dark"] .tm-ops-routine-linked-warning {
   border-color: #896927;
   background: #2b2414;
   color: #ffe3a7;
 }
-:root[data-theme="dark"] .tm-ops-routine-dialog .p-dialog-header,
-:root[data-theme="dark"] .tm-ops-routine-dialog .p-dialog-content {
-  background: #111a14 !important;
-  color: #edf7ef !important;
+:root[data-mode="dark"] .tm-ops-routine-dialog .p-dialog-header,
+:root[data-mode="dark"] .tm-ops-routine-dialog .p-dialog-content {
+  background: var(--surface-1) !important;
+  color: var(--surface-active) !important;
 }
-:root[data-theme="dark"] .tm-ops-routine-context {
+:root[data-mode="dark"] .tm-ops-routine-context {
   background: #17241b !important;
-  border-color: #31543a !important;
+  border-color: var(--border-strong) !important;
   color: #f1f8f2 !important;
 }
-:root[data-theme="dark"] .tm-ops-routine-exclusive {
+:root[data-mode="dark"] .tm-ops-routine-exclusive {
   background: #17241b !important;
-  border-color: #31543a !important;
+  border-color: var(--border-strong) !important;
   color: #f1f8f2 !important;
 }
-:root[data-theme="dark"] .tm-ops-routine-exclusive small {
+:root[data-mode="dark"] .tm-ops-routine-exclusive small {
   color: #aebfb1 !important;
 }
-:root[data-theme="dark"] .tm-ops-routine-exclusive .p-checkbox .p-checkbox-box {
-  background: #101a13;
-  border-color: #4fcf77;
+:root[data-mode="dark"] .tm-ops-routine-exclusive .p-checkbox .p-checkbox-box {
+  background: var(--surface-active);
+  border-color: var(--primary);
 }
-:root[data-theme="dark"] .tm-ops-routine-exclusive .p-checkbox.p-highlight .p-checkbox-box {
-  background: #249c4b;
-  border-color: #54db80;
+:root[data-mode="dark"] .tm-ops-routine-exclusive .p-checkbox.p-highlight .p-checkbox-box {
+  background: var(--primary);
+  border-color: var(--primary-hover);
 }
-:root[data-theme="dark"] .tm-ops-routine-form label {
-  color: #edf7ef !important;
+:root[data-mode="dark"] .tm-ops-routine-form label {
+  color: var(--surface-active) !important;
 }
 @media (max-width: 700px) {
   .tm-ops-routine-form {

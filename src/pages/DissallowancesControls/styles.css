@@ -347,33 +347,33 @@
     font-size: .82rem
 }
 
-:root[data-theme="dark"] .glosa-page {
+:root[data-mode="dark"] .glosa-page {
     background: #0c100d
 }
 
-:root[data-theme="dark"] .glosa-summary article,
-:root[data-theme="dark"] .glosa-panel {
-    background: #151a17;
-    border-color: #405047
+:root[data-mode="dark"] .glosa-summary article,
+:root[data-mode="dark"] .glosa-panel {
+    background: var(--surface-1);
+    border-color: var(--border-strong)
 }
 
-:root[data-theme="dark"] .glosa-toolbar {
-    border-color: #405047
+:root[data-mode="dark"] .glosa-toolbar {
+    border-color: var(--border-strong)
 }
 
-:root[data-theme="dark"] .glosa-calculated {
-    background: #202923;
-    border-color: #405047
+:root[data-mode="dark"] .glosa-calculated {
+    background: var(--surface-3);
+    border-color: var(--border-strong)
 }
 
-:root[data-theme="dark"] .glosa-calculation,
-:root[data-theme="dark"] .glosa-evidence {
-    background: #202923;
-    border-color: #405047
+:root[data-mode="dark"] .glosa-calculation,
+:root[data-mode="dark"] .glosa-evidence {
+    background: var(--surface-3);
+    border-color: var(--border-strong)
 }
 
-:root[data-theme="dark"] .glosa-heading>div:first-child>span,
-:root[data-theme="dark"] .glosa-calculated strong {
+:root[data-mode="dark"] .glosa-heading>div:first-child>span,
+:root[data-mode="dark"] .glosa-calculated strong {
     color: var(--accent)
 }
 
@@ -468,43 +468,43 @@
     color: var(--text-color)
 }
 
-:root[data-theme="dark"] .glosa-colab-card {
-    color: #f3f7f4;
-    border-color: #405b48;
-    background: #172019 !important;
+:root[data-mode="dark"] .glosa-colab-card {
+    color: var(--text-primary);
+    border-color: var(--border);
+    background: var(--surface-2) !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, .24);
 }
 
-:root[data-theme="dark"] .glosa-colab-card-header,
-:root[data-theme="dark"] .glosa-colab-card-header i {
-    color: #63e58b;
+:root[data-mode="dark"] .glosa-colab-card-header,
+:root[data-mode="dark"] .glosa-colab-card-header i {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .glosa-colab-card-details {
-    color: #b7c2ba;
+:root[data-mode="dark"] .glosa-colab-card-details {
+    color: var(--text-secondary);
 }
 
-:root[data-theme="dark"] .glosa-colab-card-details strong {
-    color: #f3f7f4;
+:root[data-mode="dark"] .glosa-colab-card-details strong {
+    color: var(--text-primary);
 }
 
-:root[data-theme="dark"] .glosa-dropzone {
-    color: #f3f7f4;
-    border-color: #557a60;
-    background: #111713 !important;
+:root[data-mode="dark"] .glosa-dropzone {
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+    background: var(--surface-1) !important;
 }
 
-:root[data-theme="dark"] .glosa-dropzone:hover,
-:root[data-theme="dark"] .glosa-dropzone:focus-visible,
-:root[data-theme="dark"] .glosa-dropzone.has-file {
-    border-color: #63e58b;
-    background: #1b2c20 !important;
+:root[data-mode="dark"] .glosa-dropzone:hover,
+:root[data-mode="dark"] .glosa-dropzone:focus-visible,
+:root[data-mode="dark"] .glosa-dropzone.has-file {
+    border-color: var(--accent-hover);
+    background: var(--surface-hover) !important;
 }
 
-:root[data-theme="dark"] .glosa-dropzone > i {
-    color: #63e58b;
+:root[data-mode="dark"] .glosa-dropzone > i {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .glosa-dropzone > span {
-    color: #b7c2ba;
+:root[data-mode="dark"] .glosa-dropzone > span {
+    color: var(--text-secondary);
 }

@@ -174,21 +174,21 @@
     font-size: .85rem
 }
 
-:root[data-theme="dark"] .absence-page {
+:root[data-mode="dark"] .absence-page {
     color: var(--text-primary)
 }
 
-:root[data-theme="dark"] .absence-header span {
+:root[data-mode="dark"] .absence-header span {
     color: var(--accent)
 }
 
-:root[data-theme="dark"] .absence-header .p-button {
+:root[data-mode="dark"] .absence-header .p-button {
     color: var(--accent);
     border-color: color-mix(in srgb, var(--accent) 70%, transparent)
 }
 
 .absence-header-actions .p-button:not(.p-button-outlined):not(.p-button-text) {
-    color: #07170b !important;
+    color: var(--button-primary-text) !important;
     background: var(--accent) !important;
     border-color: var(--accent) !important
 }
@@ -199,44 +199,44 @@
 }
 
 .absence-header-actions .p-button:not(.p-button-outlined):not(.p-button-text):hover {
-    color: #020a04 !important;
-    background: #6bea8a !important;
-    border-color: #6bea8a !important
+    color: var(--button-primary-text) !important;
+    background: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important
 }
 
-:root[data-theme="dark"] .absence-summary article {
-    background: #202923;
-    border-color: #405047;
+:root[data-mode="dark"] .absence-summary article {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
     box-shadow: 0 10px 28px rgba(0, 0, 0, .24)
 }
 
-:root[data-theme="dark"] .absence-summary article>i {
+:root[data-mode="dark"] .absence-summary article>i {
     color: var(--accent);
     background: var(--accent-soft)
 }
 
-:root[data-theme="dark"] .absence-panel {
-    background: #111713;
-    border-color: #405047
+:root[data-mode="dark"] .absence-panel {
+    background: var(--surface-1);
+    border-color: var(--border-strong)
 }
 
-:root[data-theme="dark"] .absence-filters {
-    background: #151a17;
-    border-color: #405047
+:root[data-mode="dark"] .absence-filters {
+    background: var(--surface-1);
+    border-color: var(--border-strong)
 }
 
-:root[data-theme="dark"] .absence-timer {
+:root[data-mode="dark"] .absence-timer {
     color: var(--accent);
     background: var(--accent-muted)
 }
 
-:root[data-theme="dark"] .absence-panel .p-button.p-button-text {
+:root[data-mode="dark"] .absence-panel .p-button.p-button-text {
     color: var(--accent)
 }
 
-:root[data-theme="dark"] .absence-context {
-    background: #202923;
-    border: 1px solid #405047
+:root[data-mode="dark"] .absence-context {
+    background: var(--surface-3);
+    border: 1px solid var(--border-strong)
 }
 
 .absence-filter-panel {
@@ -428,18 +428,18 @@
     font-size: .82rem
 }
 
-:root[data-theme="dark"] .absence-manual-intro {
-    border-color: #405047;
-    background: #202923
+:root[data-mode="dark"] .absence-manual-intro {
+    border-color: var(--border-strong);
+    background: var(--surface-3)
 }
 
-:root[data-theme="dark"] .absence-manual-employee>div {
-    border-color: #405047;
-    background: #202923
+:root[data-mode="dark"] .absence-manual-employee>div {
+    border-color: var(--border-strong);
+    background: var(--surface-3)
 }
 
-:root[data-theme="dark"] .absence-manual-intro>i,
-:root[data-theme="dark"] .absence-manual-employee i {
+:root[data-mode="dark"] .absence-manual-intro>i,
+:root[data-mode="dark"] .absence-manual-employee i {
     color: var(--accent)
 }
 

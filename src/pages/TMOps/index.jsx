@@ -9,6 +9,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { TaskQrScanner } from "./TaskQrScanner";
 import { TaskEvidenceCapture } from "./TaskEvidenceCapture";
 import { TaskExecutionMetrics } from "../../components/TMOps/TaskExecutionMetrics";
+import { ThemeLogo } from "../../components/ThemeLogo";
 import "./styles.css";
 
 const elapsed = (start, now) => {
@@ -326,7 +327,7 @@ export function TMOps() {
     return (
       <main className="tm-ops-shell">
         <section className="tm-ops-panel">
-          <img src="/brands/main_brand.svg" alt="TM Hub" />
+          <ThemeLogo alt="TM Hub" />
           <h1>Entrar no TM Ops</h1>
           <form onSubmit={login} className="tm-ops-form">
             <label>
@@ -376,7 +377,7 @@ export function TMOps() {
         ) : (
           <span className="executor-top-spacer" aria-hidden="true" />
         )}
-        <img src="/brands/main_brand.svg" alt="TM Ops" />
+        <ThemeLogo alt="TM Ops" />
         <Button
           className="executor-account"
           icon="pi pi-sign-out"

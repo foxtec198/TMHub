@@ -25,9 +25,9 @@
   border-bottom-right-radius: var(--tm-table-radius);
 }
 
-:root[data-theme="dark"] .tm-responsive-table{
-  border-color: #34443a;
-  background: #111713;
+:root[data-mode="dark"] .tm-responsive-table{
+  border-color: var(--border);
+  background: var(--surface-1);
   box-shadow: 0 12px 34px rgba(0, 0, 0, .28);
 }
 

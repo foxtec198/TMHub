@@ -46,7 +46,7 @@
     text-align: center;
 }
 
-:root[data-theme="dark"] .app-page-header__section {
+:root[data-mode="dark"] .app-page-header__section {
     color: var(--accent);
 }
 

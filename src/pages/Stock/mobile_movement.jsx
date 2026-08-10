@@ -17,6 +17,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import connect from "../../utils/request";
 import { clearAccessToken, getAccessToken, setAccessToken } from "../../utils/authSession";
 import { BarcodeScanner } from "./BarcodeScanner";
+import { ThemeLogo } from "../../components/ThemeLogo";
 
 // CSS
 import "../Auth/main.css";
@@ -234,10 +235,9 @@ export function MobileMovement() {
                     style={{ width: "100%", maxWidth: "27rem", boxSizing: "border-box" }}
                     onSubmit={login}
                 >
-                    <img
+                    <ThemeLogo
                         className="p-5 mb-4"
-                        src="/brands/main_brand.svg"
-                        alt="Logo"
+                        alt="TM Hub"
                         style={{ maxHeight: "20dvh", maxWidth: "90%" }}
                     />
 
@@ -298,9 +298,8 @@ export function MobileMovement() {
                     style={{ width: "100%", maxWidth: "27rem", boxSizing: "border-box" }}
                 >
                     <div className="flex flex-column align-items-center text-center mb-2">
-                        <img
-                            src="/brands/main_brand.svg"
-                            alt="Logo"
+                        <ThemeLogo
+                            alt="TM Hub"
                             style={{ width: "min(220px, 60vw)" }}
                         />
                         <span className="font-bold text-lg text-secondary inter uppercase mt-2">

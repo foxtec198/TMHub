@@ -45,64 +45,64 @@
     border: 1px solid var(--surface-border);
 }
 
-:root[data-theme="dark"] .structure-departments .p-accordion-header-link,
-:root[data-theme="dark"] .structure-contracts .p-accordion-header-link {
-    color: #f3f7f4 !important;
-    border-color: #304b37 !important;
-    background: #111713 !important;
+:root[data-mode="dark"] .structure-departments .p-accordion-header-link,
+:root[data-mode="dark"] .structure-contracts .p-accordion-header-link {
+    color: var(--text-primary) !important;
+    border-color: var(--border-strong) !important;
+    background: var(--surface-1) !important;
 }
 
-:root[data-theme="dark"] .structure-departments .p-accordion-content {
-    color: #f3f7f4 !important;
+:root[data-mode="dark"] .structure-departments .p-accordion-content {
+    color: var(--text-primary) !important;
     background: transparent !important;
 }
 
-:root[data-theme="dark"] .structure-contracts .p-accordion-content {
-    color: #f3f7f4 !important;
-    border-color: #304b37 !important;
-    background: #0d120f !important;
+:root[data-mode="dark"] .structure-contracts .p-accordion-content {
+    color: var(--text-primary) !important;
+    border-color: var(--border-strong) !important;
+    background: var(--surface-1) !important;
 }
 
-:root[data-theme="dark"] .structure-contracts .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link,
-:root[data-theme="dark"] .structure-departments .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link {
+:root[data-mode="dark"] .structure-contracts .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link,
+:root[data-mode="dark"] .structure-departments .p-accordion-header:not(.p-disabled).p-highlight .p-accordion-header-link {
     color: var(--primary-color-text);
     background: #183521 !important;
 }
 
-:root[data-theme="dark"] .structure-departments .p-accordion-header-link:hover,
-:root[data-theme="dark"] .structure-contracts .p-accordion-header-link:hover {
+:root[data-mode="dark"] .structure-departments .p-accordion-header-link:hover,
+:root[data-mode="dark"] .structure-contracts .p-accordion-header-link:hover {
     color: #fff !important;
     background: #1d2c21 !important;
 }
 
-:root[data-theme="dark"] .structure-summary > div,
-:root[data-theme="dark"] .structure-item-card,
-:root[data-theme="dark"] .structure-type-options button {
-    color: #f3f7f4 !important;
-    border-color: #304b37 !important;
-    background: #111713 !important;
+:root[data-mode="dark"] .structure-summary > div,
+:root[data-mode="dark"] .structure-item-card,
+:root[data-mode="dark"] .structure-type-options button {
+    color: var(--text-primary) !important;
+    border-color: var(--border-strong) !important;
+    background: var(--surface-1) !important;
 }
 
-:root[data-theme="dark"] .structure-summary strong,
-:root[data-theme="dark"] .structure-items h3,
-:root[data-theme="dark"] .structure-type-options i {
-    color: #63e58b !important;
+:root[data-mode="dark"] .structure-summary strong,
+:root[data-mode="dark"] .structure-items h3,
+:root[data-mode="dark"] .structure-type-options i {
+    color: var(--accent-hover) !important;
 }
 
-:root[data-theme="dark"] .structure-summary span,
-:root[data-theme="dark"] .structure-supervisor,
-:root[data-theme="dark"] .structure-item-card small,
-:root[data-theme="dark"] .structure-empty,
-:root[data-theme="dark"] .structure-dialog-help,
-:root[data-theme="dark"] .structure-type-options span {
-    color: #b7c2ba !important;
+:root[data-mode="dark"] .structure-summary span,
+:root[data-mode="dark"] .structure-supervisor,
+:root[data-mode="dark"] .structure-item-card small,
+:root[data-mode="dark"] .structure-empty,
+:root[data-mode="dark"] .structure-dialog-help,
+:root[data-mode="dark"] .structure-type-options span {
+    color: var(--text-secondary) !important;
 }
 
-:root[data-theme="dark"] .structure-empty,
-:root[data-theme="dark"] .structure-zero-state {
-    color: #b7c2ba !important;
-    border-color: #36543e !important;
-    background: #0d120f !important;
+:root[data-mode="dark"] .structure-empty,
+:root[data-mode="dark"] .structure-zero-state {
+    color: var(--text-secondary) !important;
+    border-color: var(--border-strong) !important;
+    background: var(--surface-1) !important;
 }
 
 .structure-departments .p-accordion-content {
@@ -280,13 +280,13 @@
     width: 100%;
 }
 
-:root[data-theme="dark"] .structure-current-supervisor {
-    border-color: #304b37;
-    background: #111713;
+:root[data-mode="dark"] .structure-current-supervisor {
+    border-color: var(--border-strong);
+    background: var(--surface-1);
 }
 
-:root[data-theme="dark"] .structure-current-supervisor strong {
-    color: #f3f7f4;
+:root[data-mode="dark"] .structure-current-supervisor strong {
+    color: var(--text-primary);
 }
 
 .structure-type-options {

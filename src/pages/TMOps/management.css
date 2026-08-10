@@ -76,11 +76,11 @@
   font-size: 0.8rem;
   font-weight: 700;
 }
-:root[data-theme="dark"] .tm-ops-task-cards > div {
-  border-color: #31543a;
-  background: #111a14;
+:root[data-mode="dark"] .tm-ops-task-cards > div {
+  border-color: var(--border-strong);
+  background: var(--surface-1);
 }
-:root[data-theme="dark"] .tm-ops-task-cards b {
+:root[data-mode="dark"] .tm-ops-task-cards b {
   color: #f0f8f2;
 }
 .tm-ops-content-card {
@@ -389,61 +389,61 @@
 .tm-ops-geolocation-map__legend .is-start { background: #168b4f; }
 .tm-ops-geolocation-map__legend .is-route { background: #efad14; }
 .tm-ops-geolocation-map__legend .is-end { background: #d64545; }
-:root[data-theme="dark"] .tm-ops-management {
-  background: #090d0a !important;
-  color: #eef7f0 !important;
+:root[data-mode="dark"] .tm-ops-management {
+  background: var(--app-bg) !important;
+  color: var(--surface-2) !important;
 }
-:root[data-theme="dark"] .tm-ops-content-card,
-:root[data-theme="dark"] .tm-ops-checklist-dialog .p-dialog-header,
-:root[data-theme="dark"] .tm-ops-checklist-dialog .p-dialog-content,
-:root[data-theme="dark"] .tm-ops-task-history-dialog .p-dialog-header,
-:root[data-theme="dark"] .tm-ops-task-history-dialog .p-dialog-content,
-:root[data-theme="dark"] .tm-ops-response-event > div,
-:root[data-theme="dark"] .tm-ops-response-summary {
-  background: #111a14 !important;
-  color: #eef7f0 !important;
-  border-color: #31543a !important;
+:root[data-mode="dark"] .tm-ops-content-card,
+:root[data-mode="dark"] .tm-ops-checklist-dialog .p-dialog-header,
+:root[data-mode="dark"] .tm-ops-checklist-dialog .p-dialog-content,
+:root[data-mode="dark"] .tm-ops-task-history-dialog .p-dialog-header,
+:root[data-mode="dark"] .tm-ops-task-history-dialog .p-dialog-content,
+:root[data-mode="dark"] .tm-ops-response-event > div,
+:root[data-mode="dark"] .tm-ops-response-summary {
+  background: var(--surface-1) !important;
+  color: var(--surface-2) !important;
+  border-color: var(--border-strong) !important;
 }
-:root[data-theme="dark"] .checklist-evidence-required {
-  border-color: #31543a;
-  background: #111a14;
-  color: #eef7f0;
+:root[data-mode="dark"] .checklist-evidence-required {
+  border-color: var(--border-strong);
+  background: var(--surface-1);
+  color: var(--surface-2);
 }
-:root[data-theme="dark"] .tm-ops-content-card {
+:root[data-mode="dark"] .tm-ops-content-card {
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 }
-:root[data-theme="dark"] .tm-ops-execution-metrics > div {
-  border-color: #31543a;
-  background: #111a14;
+:root[data-mode="dark"] .tm-ops-execution-metrics > div {
+  border-color: var(--border-strong);
+  background: var(--surface-1);
 }
-:root[data-theme="dark"] .tm-ops-execution-metrics i {
-  color: #69d995;
+:root[data-mode="dark"] .tm-ops-execution-metrics i {
+  color: var(--accent-hover);
 }
-:root[data-theme="dark"] .tm-ops-execution-metrics span {
+:root[data-mode="dark"] .tm-ops-execution-metrics span {
   color: #a9c6b1;
 }
-:root[data-theme="dark"] .tm-ops-execution-metrics strong {
-  color: #eef7f0;
+:root[data-mode="dark"] .tm-ops-execution-metrics strong {
+  color: var(--surface-2);
 }
-:root[data-theme="dark"] .tm-ops-geolocation-map,
-:root[data-theme="dark"] .tm-ops-geolocation-map > header {
-  border-color: #31543a;
-  background: #111a14;
+:root[data-mode="dark"] .tm-ops-geolocation-map,
+:root[data-mode="dark"] .tm-ops-geolocation-map > header {
+  border-color: var(--border-strong);
+  background: var(--surface-1);
 }
-:root[data-theme="dark"] .tm-ops-geolocation-map > header strong {
-  color: #eef7f0;
+:root[data-mode="dark"] .tm-ops-geolocation-map > header strong {
+  color: var(--surface-2);
 }
-:root[data-theme="dark"] .tm-ops-geolocation-map > header small {
-  color: #baf5ce;
-  background: #1d4d2f;
+:root[data-mode="dark"] .tm-ops-geolocation-map > header small {
+  color: var(--primary-hover);
+  background: var(--surface-active);
 }
-:root[data-theme="dark"] .tm-ops-toolbar h2,
-:root[data-theme="dark"] .tm-ops-form-grid label {
-  color: #eef7f0 !important;
+:root[data-mode="dark"] .tm-ops-toolbar h2,
+:root[data-mode="dark"] .tm-ops-form-grid label {
+  color: var(--surface-2) !important;
 }
-:root[data-theme="dark"] .tm-ops-table .p-datatable-wrapper,
-:root[data-theme="dark"] .tm-ops-table .p-datatable-table {
-  background: #111a14 !important;
+:root[data-mode="dark"] .tm-ops-table .p-datatable-wrapper,
+:root[data-mode="dark"] .tm-ops-table .p-datatable-table {
+  background: var(--surface-1) !important;
 }
 @media (max-width: 700px) {
   .tm-ops-management {

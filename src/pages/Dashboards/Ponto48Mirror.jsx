@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Table } from "../../components/tables/Table";
 import { useToast } from "../../contexts/ToastContext";
+import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 
 const EMPTY_DATA = { importacoes: [], importacao: null, resumo: {}, colaboradores: [] };
@@ -68,13 +69,13 @@ function recalculateEmployee(employee, dateRange) {
 }
 
 export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refreshKey = 0, referenceStart = null }) {
+  const chartTheme = useChartTheme();
   const [data, setData] = useState(EMPTY_DATA);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("all");
   const [search, setSearch] = useState("");
   const [detail, setDetail] = useState(null);
   const { showToast } = useToast();
-  const isDarkMode = document.documentElement.dataset.theme === "dark";
 
   useEffect(() => {
     let active = true;
@@ -142,8 +143,8 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
 
   const chartData = useMemo(() => ({
     labels: negativeBalances.map((employee) => employee.nome),
-    datasets: [{ label: "Saldo em minutos", data: negativeBalances.map((employee) => employee.saldo_final_minutos), backgroundColor: "#e5484d", borderRadius: 6 }],
-  }), [negativeBalances]);
+    datasets: [{ label: "Saldo em minutos", data: negativeBalances.map((employee) => employee.saldo_final_minutos), backgroundColor: chartTheme.danger, borderRadius: 6 }],
+  }), [negativeBalances, chartTheme]);
 
   const chartOptions = useMemo(() => ({
     indexAxis: "y",
@@ -151,10 +152,10 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { ticks: { color: isDarkMode ? "#c6d0ca" : "#66746b", callback: (value) => formatMinutes(value, true) }, grid: { color: "rgba(120,140,128,.14)" } },
-      y: { ticks: { color: isDarkMode ? "#d7e0da" : "#66746b", autoSkip: false }, grid: { display: false } },
+      x: { ticks: { color: chartTheme.text, callback: (value) => formatMinutes(value, true) }, grid: { color: chartTheme.grid } },
+      y: { ticks: { color: chartTheme.text, autoSkip: false }, grid: { display: false } },
     },
-  }), [isDarkMode]);
+  }), [chartTheme]);
 
   const columns = useMemo(() => [
     { field: "nome", header: "Colaborador", class: "text-truncate" },

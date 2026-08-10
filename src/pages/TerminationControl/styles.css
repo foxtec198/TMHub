@@ -646,238 +646,238 @@
 
 /* O tema PrimeReact carregado pela aplicação é claro; estas regras mantêm
    todas as superfícies da página de rescisões coerentes com o tema escuro. */
-:root[data-theme="dark"] .termination-page {
-    color: #f3f6f4;
-    background: #050505;
+:root[data-mode="dark"] .termination-page {
+    color: var(--text-primary);
+    background: var(--app-bg);
 }
 
-:root[data-theme="dark"] .termination-page .app-page-header h1,
-:root[data-theme="dark"] .termination-summary strong,
-:root[data-theme="dark"] .termination-main-cell strong,
-:root[data-theme="dark"] .termination-filter-heading strong,
-:root[data-theme="dark"] .termination-calculation-form label > span,
-:root[data-theme="dark"] .termination-result-employee strong,
-:root[data-theme="dark"] .termination-result-list strong,
-:root[data-theme="dark"] .termination-result-totals strong {
-    color: #f3f6f4;
+:root[data-mode="dark"] .termination-page .app-page-header h1,
+:root[data-mode="dark"] .termination-summary strong,
+:root[data-mode="dark"] .termination-main-cell strong,
+:root[data-mode="dark"] .termination-filter-heading strong,
+:root[data-mode="dark"] .termination-calculation-form label > span,
+:root[data-mode="dark"] .termination-result-employee strong,
+:root[data-mode="dark"] .termination-result-list strong,
+:root[data-mode="dark"] .termination-result-totals strong {
+    color: var(--text-primary);
 }
 
-:root[data-theme="dark"] .termination-page .app-page-header__section,
-:root[data-theme="dark"] .termination-page .termination-summary article > i,
-:root[data-theme="dark"] .termination-import-note i,
-:root[data-theme="dark"] .termination-dropzone > i,
-:root[data-theme="dark"] .termination-result-empty i,
-:root[data-theme="dark"] .termination-result-totals .is-primary strong {
-    color: #63e58b;
+:root[data-mode="dark"] .termination-page .app-page-header__section,
+:root[data-mode="dark"] .termination-page .termination-summary article > i,
+:root[data-mode="dark"] .termination-import-note i,
+:root[data-mode="dark"] .termination-dropzone > i,
+:root[data-mode="dark"] .termination-result-empty i,
+:root[data-mode="dark"] .termination-result-totals .is-primary strong {
+    color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .termination-page .app-page-header p,
-:root[data-theme="dark"] .termination-summary small,
-:root[data-theme="dark"] .termination-summary span,
-:root[data-theme="dark"] .termination-toolbar > span:last-child,
-:root[data-theme="dark"] .termination-main-cell small,
-:root[data-theme="dark"] .termination-filter-heading span,
-:root[data-theme="dark"] .termination-import-note,
-:root[data-theme="dark"] .termination-dropzone span,
-:root[data-theme="dark"] .termination-result-empty,
-:root[data-theme="dark"] .termination-result-employee small,
-:root[data-theme="dark"] .termination-result-employee span,
-:root[data-theme="dark"] .termination-calculation-info span,
-:root[data-theme="dark"] .termination-result-fgts-balance span,
-:root[data-theme="dark"] .termination-result-fgts-balance small,
-:root[data-theme="dark"] .termination-result-list span,
-:root[data-theme="dark"] .termination-result-totals span,
-:root[data-theme="dark"] .termination-result-notes {
-    color: #aebbb2;
+:root[data-mode="dark"] .termination-page .app-page-header p,
+:root[data-mode="dark"] .termination-summary small,
+:root[data-mode="dark"] .termination-summary span,
+:root[data-mode="dark"] .termination-toolbar > span:last-child,
+:root[data-mode="dark"] .termination-main-cell small,
+:root[data-mode="dark"] .termination-filter-heading span,
+:root[data-mode="dark"] .termination-import-note,
+:root[data-mode="dark"] .termination-dropzone span,
+:root[data-mode="dark"] .termination-result-empty,
+:root[data-mode="dark"] .termination-result-employee small,
+:root[data-mode="dark"] .termination-result-employee span,
+:root[data-mode="dark"] .termination-calculation-info span,
+:root[data-mode="dark"] .termination-result-fgts-balance span,
+:root[data-mode="dark"] .termination-result-fgts-balance small,
+:root[data-mode="dark"] .termination-result-list span,
+:root[data-mode="dark"] .termination-result-totals span,
+:root[data-mode="dark"] .termination-result-notes {
+    color: var(--text-secondary);
 }
 
-:root[data-theme="dark"] .termination-summary article,
-:root[data-theme="dark"] .termination-panel,
-:root[data-theme="dark"] .termination-toolbar,
-:root[data-theme="dark"] .termination-calculation-form,
-:root[data-theme="dark"] .termination-result-employee,
-:root[data-theme="dark"] .termination-result-totals {
-    color: #f3f6f4;
-    background: #111713;
-    border-color: #304035;
+:root[data-mode="dark"] .termination-summary article,
+:root[data-mode="dark"] .termination-panel,
+:root[data-mode="dark"] .termination-toolbar,
+:root[data-mode="dark"] .termination-calculation-form,
+:root[data-mode="dark"] .termination-result-employee,
+:root[data-mode="dark"] .termination-result-totals {
+    color: var(--text-primary);
+    background: var(--surface-1);
+    border-color: var(--border);
     box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
 }
 
-:root[data-theme="dark"] .termination-summary article > i {
-    background: #203d29;
+:root[data-mode="dark"] .termination-summary article > i {
+    background: var(--surface-hover);
 }
 
-:root[data-theme="dark"] .termination-summary .is-danger > i {
+:root[data-mode="dark"] .termination-summary .is-danger > i {
     color: #ff7777;
     background: rgba(255, 85, 85, .14);
 }
 
-:root[data-theme="dark"] .termination-summary .is-success > i {
-    color: #63e58b;
-    background: rgba(99, 229, 139, .14);
+:root[data-mode="dark"] .termination-summary .is-success > i {
+    color: var(--status-success);
+    background: var(--status-success-soft);
 }
 
-:root[data-theme="dark"] .termination-summary .is-warning > i {
+:root[data-mode="dark"] .termination-summary .is-warning > i {
     color: #ffb45c;
     background: rgba(255, 180, 92, .14);
 }
 
-:root[data-theme="dark"] .termination-panel {
-    background: #111;
+:root[data-mode="dark"] .termination-panel {
+    background: var(--surface-1);
 }
 
-:root[data-theme="dark"] .termination-toolbar {
-    border-bottom-color: #304035;
+:root[data-mode="dark"] .termination-toolbar {
+    border-bottom-color: var(--border);
 }
 
-:root[data-theme="dark"] .termination-toolbar .p-inputtext {
-    color: #f4f7f5;
-    background: #151b17;
-    border-color: #3f6f4a;
+:root[data-mode="dark"] .termination-toolbar .p-inputtext {
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .termination-filter-panel,
-:root[data-theme="dark"] .termination-filter-panel .p-overlaypanel-content {
-    color: #f3f6f4 !important;
-    background: #111713 !important;
-    border-color: #3f6f4a !important;
+:root[data-mode="dark"] .termination-filter-panel,
+:root[data-mode="dark"] .termination-filter-panel .p-overlaypanel-content {
+    color: var(--text-primary) !important;
+    background: var(--surface-1) !important;
+    border-color: var(--border-strong) !important;
 }
 
-:root[data-theme="dark"] .termination-import-dialog .p-dialog-content,
-:root[data-theme="dark"] .termination-calculation-dialog .p-dialog-content,
-:root[data-theme="dark"] .termination-delete-dialog.p-dialog,
-:root[data-theme="dark"] .termination-delete-dialog .p-dialog-header,
-:root[data-theme="dark"] .termination-delete-dialog .p-dialog-content {
-    color: #f3f6f4;
+:root[data-mode="dark"] .termination-import-dialog .p-dialog-content,
+:root[data-mode="dark"] .termination-calculation-dialog .p-dialog-content,
+:root[data-mode="dark"] .termination-delete-dialog.p-dialog,
+:root[data-mode="dark"] .termination-delete-dialog .p-dialog-header,
+:root[data-mode="dark"] .termination-delete-dialog .p-dialog-content {
+    color: var(--text-primary);
     background: #0d100e;
 }
 
-:root[data-theme="dark"] .termination-delete-dialog.p-dialog,
-:root[data-theme="dark"] .termination-delete-dialog .p-dialog-header,
-:root[data-theme="dark"] .termination-delete-actions {
-    border-color: #304035;
+:root[data-mode="dark"] .termination-delete-dialog.p-dialog,
+:root[data-mode="dark"] .termination-delete-dialog .p-dialog-header,
+:root[data-mode="dark"] .termination-delete-actions {
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .termination-delete-dialog .p-dialog-title,
-:root[data-theme="dark"] .termination-delete-content strong {
-    color: #f3f6f4;
+:root[data-mode="dark"] .termination-delete-dialog .p-dialog-title,
+:root[data-mode="dark"] .termination-delete-content strong {
+    color: var(--text-primary);
 }
 
-:root[data-theme="dark"] .termination-delete-content p {
-    color: #aebbb2;
+:root[data-mode="dark"] .termination-delete-content p {
+    color: var(--text-secondary);
 }
 
-:root[data-theme="dark"] .termination-delete-icon {
+:root[data-mode="dark"] .termination-delete-icon {
     color: #ff7777;
     background: rgba(255, 85, 85, .14);
 }
 
-:root[data-theme="dark"] .termination-delete-warning {
+:root[data-mode="dark"] .termination-delete-warning {
     color: #ffb0b0;
     background: #291516;
     border-color: #643033;
 }
 
-:root[data-theme="dark"] .termination-import-note {
-    background: #172019;
-    border-color: #315b3b;
+:root[data-mode="dark"] .termination-import-note {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .termination-dropzone {
-    color: #f3f6f4;
-    background: #151b17;
-    border-color: #3f6f4a;
+:root[data-mode="dark"] .termination-dropzone {
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .termination-dropzone:hover,
-:root[data-theme="dark"] .termination-dropzone.has-file {
-    background: #203d29;
-    border-color: #63e58b;
+:root[data-mode="dark"] .termination-dropzone:hover,
+:root[data-mode="dark"] .termination-dropzone.has-file {
+    background: var(--surface-hover);
+    border-color: var(--accent-hover);
 }
 
-:root[data-theme="dark"] .termination-calculation-form {
-    background: #111713;
+:root[data-mode="dark"] .termination-calculation-form {
+    background: var(--surface-1);
 }
 
-:root[data-theme="dark"] .termination-calculation-info {
-    background: #151b17;
-    border-color: #304035;
+:root[data-mode="dark"] .termination-calculation-info {
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .termination-calculation-info.is-experience {
-    color: #63e58b;
-    background: rgba(99, 229, 139, .08);
-    border-color: #315b3b;
+:root[data-mode="dark"] .termination-calculation-info.is-experience {
+    color: var(--accent-hover);
+    background: var(--accent-muted);
+    border-color: var(--border-strong);
 }
 
-:root[data-theme="dark"] .termination-calculation-info.is-notice {
+:root[data-mode="dark"] .termination-calculation-info.is-notice {
     color: #7eb8ff;
     background: rgba(87, 155, 255, .09);
     border-color: #31547a;
 }
 
-:root[data-theme="dark"] .termination-calculation-info.is-restricted {
+:root[data-mode="dark"] .termination-calculation-info.is-restricted {
     color: #ffb45c;
     background: rgba(255, 180, 92, .09);
     border-color: #6d4a27;
 }
 
-:root[data-theme="dark"] .termination-calculation-result {
-    color: #f3f6f4;
+:root[data-mode="dark"] .termination-calculation-result {
+    color: var(--text-primary);
     background: #0b0e0c;
-    border-color: #304035;
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .termination-result-fgts-balance {
-    color: #f3f6f4;
-    background: #172019;
-    border-color: #304035;
+:root[data-mode="dark"] .termination-result-fgts-balance {
+    color: var(--text-primary);
+    background: var(--surface-2);
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .termination-result-fgts-balance strong,
-:root[data-theme="dark"] .termination-result-notice-date,
-:root[data-theme="dark"] .termination-result-list .is-earning-title span,
-:root[data-theme="dark"] .termination-result-list .is-earning strong,
-:root[data-theme="dark"] .termination-result-totals .is-positive strong {
-    color: #63e58b !important;
+:root[data-mode="dark"] .termination-result-fgts-balance strong,
+:root[data-mode="dark"] .termination-result-notice-date,
+:root[data-mode="dark"] .termination-result-list .is-earning-title span,
+:root[data-mode="dark"] .termination-result-list .is-earning strong,
+:root[data-mode="dark"] .termination-result-totals .is-positive strong {
+    color: var(--accent-hover) !important;
 }
 
-:root[data-theme="dark"] .termination-result-list .termination-result-section-title {
-    background: #111713;
+:root[data-mode="dark"] .termination-result-list .termination-result-section-title {
+    background: var(--surface-1);
 }
 
-:root[data-theme="dark"] .termination-result-list .is-discount-title span,
-:root[data-theme="dark"] .termination-result-list .is-discount strong,
-:root[data-theme="dark"] .termination-result-totals .is-negative strong {
+:root[data-mode="dark"] .termination-result-list .is-discount-title span,
+:root[data-mode="dark"] .termination-result-list .is-discount strong,
+:root[data-mode="dark"] .termination-result-totals .is-negative strong {
     color: #ff7777;
 }
 
-:root[data-theme="dark"] .termination-result-list .is-employer-title span,
-:root[data-theme="dark"] .termination-result-list .is-employer-charge strong {
+:root[data-mode="dark"] .termination-result-list .is-employer-title span,
+:root[data-mode="dark"] .termination-result-list .is-employer-charge strong {
     color: #ffb45c;
 }
 
-:root[data-theme="dark"] .termination-result-list > div,
-:root[data-theme="dark"] .termination-result-notes,
-:root[data-theme="dark"] .termination-result-employee,
-:root[data-theme="dark"] .termination-result-totals {
-    border-color: #304035;
+:root[data-mode="dark"] .termination-result-list > div,
+:root[data-mode="dark"] .termination-result-notes,
+:root[data-mode="dark"] .termination-result-employee,
+:root[data-mode="dark"] .termination-result-totals {
+    border-color: var(--border);
 }
 
-:root[data-theme="dark"] .termination-result-list .is-discount strong {
+:root[data-mode="dark"] .termination-result-list .is-discount strong {
     color: #ff7777;
 }
 
-:root[data-theme="dark"] .termination-page .p-datatable .p-datatable-emptymessage > td {
-    color: #edf3ef;
-    background: #161816;
+:root[data-mode="dark"] .termination-page .p-datatable .p-datatable-emptymessage > td {
+    color: var(--text-primary);
+    background: var(--surface-1);
 }
 
-:root[data-theme="dark"] .termination-page .p-datatable-wrapper::-webkit-scrollbar-track {
-    background: #111;
+:root[data-mode="dark"] .termination-page .p-datatable-wrapper::-webkit-scrollbar-track {
+    background: var(--surface-1);
 }
 
-:root[data-theme="dark"] .termination-page .p-datatable-wrapper::-webkit-scrollbar-thumb {
+:root[data-mode="dark"] .termination-page .p-datatable-wrapper::-webkit-scrollbar-thumb {
     background: #536057;
     border-radius: 999px;
 }

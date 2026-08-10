@@ -30,41 +30,41 @@
 .requests-speed-dial .p-speeddial-action {
   width: 3.25rem;
   height: 3.25rem;
-  color: #dff8e5;
-  background: #26322a !important;
-  border: 1px solid #41634a !important;
+  color: var(--text-primary);
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border-strong) !important;
   border-radius: 50%;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .24);
 }
 
 .requests-speed-dial .p-speeddial-action:hover {
-  color: #071009;
+  color: var(--accent-contrast);
   background: var(--accent) !important;
 }
 
 .requests-speed-dial .p-speeddial-button {
   width: 4rem;
   height: 4rem;
-  color: #071009 !important;
+  color: var(--accent-contrast) !important;
   background: var(--accent) !important;
   border: 3px solid rgba(255, 255, 255, .58);
-  border-color: #a7f3b9 !important;
-  box-shadow: 0 10px 28px rgba(22, 122, 49, .32);
+  border-color: var(--border-strong) !important;
+  box-shadow: var(--shadow-md);
 }
 
 .requests-speed-dial .p-speeddial-button:hover,
 .requests-speed-dial .p-speeddial-button:focus,
 .requests-speed-dial .p-speeddial-button:active,
 .requests-speed-dial .p-speeddial-opened .p-speeddial-button {
-  color: #020603 !important;
-  background: #63e58b !important;
-  border-color: #c3f8cf !important;
-  box-shadow: 0 0 0 .2rem rgba(99, 229, 139, .18), 0 12px 30px rgba(0, 0, 0, .3) !important;
+  color: var(--accent-contrast) !important;
+  background: var(--accent-hover) !important;
+  border-color: var(--border-strong) !important;
+  box-shadow: 0 0 0 .2rem var(--focus-ring), 0 12px 30px rgba(0, 0, 0, .3) !important;
 }
 
 /* The action buttons must sit directly on the table/card surface in both themes. */
 .request-actions-group.p-button-group,
-:root[data-theme="dark"] .request-actions-group.p-button-group {
+:root[data-mode="dark"] .request-actions-group.p-button-group {
   padding: 0 !important;
   background: transparent !important;
   border: 0 !important;
@@ -98,25 +98,25 @@
   border-radius: 10px;
 }
 
-:root[data-theme="dark"] .request-import-form input[type="file"] {
-  color: #dce7df;
-  background: #171c18;
-  border-color: #477653;
+:root[data-mode="dark"] .request-import-form input[type="file"] {
+  color: var(--border);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
 }
 
 /* Inline editing must inherit the table surface instead of adding a black block in dark mode. */
-:root[data-theme="dark"] .tm-responsive-table .p-inplace,
-:root[data-theme="dark"] .tm-responsive-table .p-inplace-display,
-:root[data-theme="dark"] .tm-responsive-table .p-inplace-content {
+:root[data-mode="dark"] .tm-responsive-table .p-inplace,
+:root[data-mode="dark"] .tm-responsive-table .p-inplace-display,
+:root[data-mode="dark"] .tm-responsive-table .p-inplace-content {
   color: inherit;
   background: transparent !important;
   border-color: transparent;
   box-shadow: none;
 }
 
-:root[data-theme="dark"] .tm-responsive-table .p-inplace-display:not(.p-disabled):hover {
-  color: #eaffef;
-  background: rgba(75, 214, 110, .1) !important;
+:root[data-mode="dark"] .tm-responsive-table .p-inplace-display:not(.p-disabled):hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--accent) 10%, transparent) !important;
 }
 
 .reserve-usage-dialog {
@@ -181,12 +181,12 @@
   text-align: center;
 }
 
-:root[data-theme="dark"] .reserve-usage-list {
-  background: #252a27;
+:root[data-mode="dark"] .reserve-usage-list {
+  background: var(--surface-3);
   border-color: #445048;
 }
 
-:root[data-theme="dark"] .reserve-usage-item {
+:root[data-mode="dark"] .reserve-usage-item {
   border-color: #3c4540;
 }
 

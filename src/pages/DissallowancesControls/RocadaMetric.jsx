@@ -10,11 +10,13 @@ import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
+import { useChartTheme } from "../../theme/useTheme";
 
 const monthName = (value) => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" })
   .format(new Date(`${value}T12:00:00`));
 
 function MonthChart({ month }) {
+  const chartTheme = useChartTheme();
   const days = (month.dias || []).filter((day) => day.operacional);
   if (!days.length) return <div className="rocada-month-chart__empty">{month.futuro ? "Indicador será definido no mês" : "Sem dias operacionais registrados"}</div>;
 
@@ -24,8 +26,8 @@ function MonthChart({ month }) {
       {
         label: "Trabalhados",
         data: days.map((day) => day.trabalhados),
-        borderColor: "#47cd77",
-        backgroundColor: "rgba(71, 205, 119, .16)",
+        borderColor: chartTheme.palette[0],
+        backgroundColor: chartTheme.palette[0],
         fill: true,
         borderWidth: 2.5,
         tension: .35,
@@ -36,7 +38,7 @@ function MonthChart({ month }) {
         type: "line",
         label: "Média mensal",
         data: days.map(() => month.media_trabalhados),
-        borderColor: "#f5c451",
+        borderColor: chartTheme.warning,
         borderWidth: 2,
         pointRadius: 0,
         borderDash: [4, 3],
@@ -45,7 +47,7 @@ function MonthChart({ month }) {
         type: "line",
         label: "Média contratual",
         data: days.map(() => month.meta),
-        borderColor: "#a6b0ad",
+        borderColor: chartTheme.text,
         borderWidth: 1,
         pointRadius: 0,
         borderDash: [2, 3],
@@ -54,7 +56,7 @@ function MonthChart({ month }) {
         type: "line",
         label: "Quadro médio",
         data: days.map(() => month.media_quadro),
-        borderColor: "#5ca9e6",
+        borderColor: chartTheme.info,
         borderWidth: 1.5,
         pointRadius: 0,
         borderDash: [6, 3],

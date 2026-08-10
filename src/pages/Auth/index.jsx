@@ -12,7 +12,9 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import { setAccessToken } from "../../utils/authSession";
+import { applyProfileAppearance } from "../../theme/theme";
 import { LOGIN_INFORMATIVES } from "./informativos";
+import { ThemeLogo } from "../../components/ThemeLogo";
 
 // CSS
 import './main.css'
@@ -112,9 +114,7 @@ export function Auth() {
             if (res.data.email) localStorage.setItem("email", res.data.email);
             if (res.data.foto_perfil) localStorage.setItem("profile_photo", res.data.foto_perfil);
             else localStorage.removeItem("profile_photo");
-            const theme = res.data.tema === "dark" ? "dark" : "light";
-            localStorage.setItem("theme", theme);
-            document.documentElement.dataset.theme = theme;
+            applyProfileAppearance(res.data);
             setAccessToken(res.data.access_token);
             const requirements = {
                 primeiro_acesso: res.data.primeiro_acesso,
@@ -186,7 +186,7 @@ export function Auth() {
                 </div>
             ) : (
                 <div className="auth-informative-visual" aria-hidden="true">
-                    <img src="/brands/main_brand_white.svg" alt="" />
+                    <ThemeLogo variant="inverse" alt="" />
                     <span><i className={item.icon} /></span>
                 </div>
             )}
@@ -222,7 +222,7 @@ export function Auth() {
             <section className="auth-login-panel">
               <form className="auth-login-card" onSubmit={(e) => setAuth(e)}>
                 <div className="auth-login-brand">
-                    <img src="/brands/main_brand.svg" alt="TM Hub — Painel Executivo" />
+                    <ThemeLogo />
                     <span>Acesso ao painel executivo</span>
                     <h1>Bem-vindo de volta</h1>
                     <p>Entre com suas credenciais para continuar.</p>

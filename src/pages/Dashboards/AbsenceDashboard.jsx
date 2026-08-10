@@ -9,6 +9,7 @@ import { DashboardFilterButton, DashboardFilterPanel } from "../../components/Da
 import { PageHeader } from "../../components/PageHeader";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 import "./absenceDashboard.css";
@@ -28,6 +29,7 @@ function EmptyChart({ text }) {
 }
 
 export function AbsenceDashboard() {
+  const chartTheme = useChartTheme();
   const [filters, setFilters] = useState(defaultFilters);
   const [data, setData] = useState(null);
   const [refresh, setRefresh] = useState(0);
@@ -58,7 +60,7 @@ export function AbsenceDashboard() {
     return () => { socketio.off("absence_control_update", reload); socketio.off("new_request", reload); };
   }, []);
 
-  const indicators = data?.indicadores || {};
+  const indicators = useMemo(() => data?.indicadores || {}, [data]);
   const options = data?.filtros || {};
   const activeFilterCount = ["status", "classification", "department", "supervisor", "reason", "contract", "collaborator"].filter((key) => filters[key]?.length).length;
   const treatedPercentage = indicators.total ? Math.round((indicators.tratadas || 0) * 100 / indicators.total) : 0;
@@ -68,9 +70,9 @@ export function AbsenceDashboard() {
   const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
   const clearFilters = () => setFilters(defaultFilters());
 
-  const reasonChart = useMemo(() => ({ labels: reasonData.map((item) => item.label), datasets: [{ label: "Ocorrências", data: reasonData.map((item) => item.total), backgroundColor: "#4bd66e", hoverBackgroundColor: "#6bea8a", borderRadius: 7, barThickness: 22 }] }), [reasonData]);
-  const classificationChart = useMemo(() => ({ labels: ["Justificadas", "Injustificadas", "Em análise"], datasets: [{ data: [indicators.justificadas || 0, indicators.injustificadas || 0, indicators.em_analise || 0], backgroundColor: ["#4bd66e", "#ef5350", "#f5a524"], hoverOffset: 4, borderWidth: 0, cutout: "72%" }] }), [indicators]);
-  const reasonOptions = useMemo(() => ({ indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: "rgba(130,145,135,.12)" }, ticks: { precision: 0, color: "#91a098" }, border: { display: false } }, y: { grid: { display: false }, ticks: { color: "#91a098", font: { weight: "600" } }, border: { display: false } } } }), []);
+  const reasonChart = useMemo(() => ({ labels: reasonData.map((item) => item.label), datasets: [{ label: "Ocorrências", data: reasonData.map((item) => item.total), backgroundColor: chartTheme.palette[0], hoverBackgroundColor: chartTheme.palette[1], borderRadius: 7, barThickness: 22 }] }), [reasonData, chartTheme]);
+  const classificationChart = useMemo(() => ({ labels: ["Justificadas", "Injustificadas", "Em análise"], datasets: [{ data: [indicators.justificadas || 0, indicators.injustificadas || 0, indicators.em_analise || 0], backgroundColor: [chartTheme.success, chartTheme.danger, chartTheme.warning], hoverOffset: 4, borderWidth: 0, cutout: "72%" }] }), [indicators, chartTheme]);
+  const reasonOptions = useMemo(() => ({ indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: chartTheme.grid }, ticks: { precision: 0, color: chartTheme.text }, border: { display: false } }, y: { grid: { display: false }, ticks: { color: chartTheme.text, font: { weight: "600" } }, border: { display: false } } } }), [chartTheme]);
 
   return (
     <section className="absence-dashboard">

@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Table } from "../../components/tables/Table";
 import { useToast } from "../../contexts/ToastContext";
+import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 
 const EMPTY_DATA = { importacoes: [], importacao: null, resumo: {}, ajustes: [] };
@@ -40,13 +41,13 @@ function AdjustmentCard({ active, icon, label, value, detail, tone, onClick }) {
 }
 
 export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, refreshKey = 0, referenceStart = null }) {
+  const chartTheme = useChartTheme();
   const [data, setData] = useState(EMPTY_DATA);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("all");
   const [search, setSearch] = useState("");
   const [detail, setDetail] = useState(null);
   const { showToast } = useToast();
-  const isDarkMode = document.documentElement.dataset.theme === "dark";
 
   useEffect(() => {
     let active = true;
@@ -141,8 +142,8 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
 
   const chartData = useMemo(() => ({
     labels: reasonRanking.map(([reason]) => reason),
-    datasets: [{ label: "Ajustes", data: reasonRanking.map(([, count]) => count), backgroundColor: "#36c96d", borderRadius: 6 }],
-  }), [reasonRanking]);
+    datasets: [{ label: "Ajustes", data: reasonRanking.map(([, count]) => count), backgroundColor: chartTheme.palette[0], borderRadius: 6 }],
+  }), [reasonRanking, chartTheme]);
 
   const chartOptions = useMemo(() => ({
     indexAxis: "y",
@@ -150,10 +151,10 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { beginAtZero: true, ticks: { precision: 0, color: isDarkMode ? "#c6d0ca" : "#66746b" }, grid: { color: "rgba(120,140,128,.14)" } },
-      y: { ticks: { color: isDarkMode ? "#d7e0da" : "#66746b", autoSkip: false }, grid: { display: false } },
+      x: { beginAtZero: true, ticks: { precision: 0, color: chartTheme.text }, grid: { color: chartTheme.grid } },
+      y: { ticks: { color: chartTheme.text, autoSkip: false }, grid: { display: false } },
     },
-  }), [isDarkMode]);
+  }), [chartTheme]);
 
   const columns = useMemo(() => [
     { field: "nome", header: "Colaborador", class: "text-truncate" },

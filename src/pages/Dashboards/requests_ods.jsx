@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+import { ThemeLogo } from "../../components/ThemeLogo";
 import "./requests_ods.css";
 
 const PAGE_SIZE = 9;
@@ -102,7 +103,7 @@ export function RequestsODS() {
   }, []);
 
   useEffect(() => {
-    loadRequests();
+    const initialLoad = window.setTimeout(loadRequests, 0);
     const clock = window.setInterval(() => setNow(Date.now()), 1000);
     const fallback = window.setInterval(loadRequests, 60_000);
     const scheduleRefresh = () => {
@@ -119,6 +120,7 @@ export function RequestsODS() {
     document.addEventListener("fullscreenchange", handleFullscreen);
 
     return () => {
+      window.clearTimeout(initialLoad);
       window.clearInterval(clock);
       window.clearInterval(fallback);
       window.clearTimeout(refreshTimer.current);
@@ -149,11 +151,8 @@ export function RequestsODS() {
   }), [requests, now]);
 
   const pageCount = Math.max(1, Math.ceil(sortedRequests.length / PAGE_SIZE));
-  const visibleRequests = sortedRequests.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  useEffect(() => {
-    if (page >= pageCount) setPage(0);
-  }, [page, pageCount]);
+  const visiblePage = Math.min(page, pageCount - 1);
+  const visibleRequests = sortedRequests.slice(visiblePage * PAGE_SIZE, (visiblePage + 1) * PAGE_SIZE);
 
   useEffect(() => {
     if (pageCount <= 1) return undefined;
@@ -182,7 +181,7 @@ export function RequestsODS() {
     <main className="requests-kds">
       <header className="requests-kds__header">
         <div className="requests-kds__brand">
-          <img src="/brands/main_brand.svg" alt="TM Hub — Painel Executivo" />
+          <ThemeLogo />
           <div><span>OPERAÇÃO EM TEMPO REAL</span><h1>ODS DE REPOSIÇÕES</h1></div>
         </div>
 
@@ -242,8 +241,8 @@ export function RequestsODS() {
       <footer className="requests-kds__footer">
         <span>{error || `Última sincronização: ${lastUpdated ? lastUpdated.toLocaleTimeString("pt-BR") : "aguardando"}`}</span>
         <div className="requests-kds__pagination">
-          {Array.from({ length: pageCount }, (_, index) => <i key={index} className={index === page ? "is-active" : ""} />)}
-          <span>PÁGINA {page + 1}/{pageCount}</span>
+          {Array.from({ length: pageCount }, (_, index) => <i key={index} className={index === visiblePage ? "is-active" : ""} />)}
+          <span>PÁGINA {visiblePage + 1}/{pageCount}</span>
         </div>
         <span>ABERTAS SEM LIMITE • FINALIZADAS DE HOJE</span>
       </footer>

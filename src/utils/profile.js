@@ -1,3 +1,5 @@
+import { applyProfileAppearance } from "../theme/theme";
+
 export function getInitials(name = "") {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "?";
@@ -11,9 +13,6 @@ export function storeProfile(profile) {
   else localStorage.removeItem("profile_photo");
   if (profile.gerencia_faltas != null) localStorage.setItem("gerencia_faltas", profile.gerencia_faltas ? "true" : "false");
   if (Array.isArray(profile.permissions)) localStorage.setItem("permissions", JSON.stringify(profile.permissions));
-  if (profile.tema === "dark" || profile.tema === "light") {
-    localStorage.setItem("theme", profile.tema);
-    document.documentElement.dataset.theme = profile.tema;
-  }
+  if (profile.tema || profile.modo_tema) applyProfileAppearance(profile);
   window.dispatchEvent(new CustomEvent("tmhub:profile", { detail: profile }));
 }
