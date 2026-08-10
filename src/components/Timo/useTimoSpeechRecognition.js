@@ -116,6 +116,9 @@ export function useTimoSpeechRecognition({ onFinalTranscript, onStateChange, onE
 
       recognition.onend = () => {
         runningRef.current = false;
+        // Alguns navegadores encerram a sessão mesmo com continuous=true.
+        // Enquanto o usuário não desativar o Timo, a sessão é retomada para
+        // manter a escuta passiva e preservar o fluxo wake word → comando.
         if (enabledRef.current) scheduleRestart();
       };
 
