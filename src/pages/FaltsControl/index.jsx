@@ -285,7 +285,6 @@ function AbsenceControlPage() {
       actions={<>
         <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
         {canEdit && <Button icon="pi pi-plus" label="Lançar falta" onClick={openManual} />}
-        <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
       </>}
     />
     <div className="absence-summary">

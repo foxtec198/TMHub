@@ -83,49 +83,95 @@ export function MainLayout() {
   const items = [
     {
       label: 'Dashboards',
-      icon: 'pi pi-file',
+      icon: 'pi pi-chart-line',
       items: [
         {
-          label: 'Reposições',
-          icon: 'pi pi-sync',
-          visible: can("dashboard_reposicoes"),
-          command: () => { navigateTo("/reports/reposicoes") }
+          label: "Operacional",
+          items: [
+            {
+              label: "Reposições",
+              items: [
+                {
+                  label: 'Reposições',
+                  icon: 'pi pi-sync',
+                  visible: can("dashboard_reposicoes"),
+                  command: () => { navigateTo("/reports/reposicoes") }
+                },
+                {
+                  label: 'Reposições - ODS',
+                  icon: 'pi pi-external-link',
+                  visible: can("dashboard_reposicoes_ods"),
+                  command: () => { navigateTo("/reports/reposicoes/ods") }
+                }
+              ],
+            },
+            {
+              label: 'Logística',
+              icon: 'pi pi-truck',
+              visible: can("dashboard_logistica"),
+              command: () => { navigateTo("/reports/logistica") }
+            },
+          ]
         },
         {
-          label: 'Reposições - ODS',
-          icon: 'pi pi-external-link',
-          visible: can("dashboard_reposicoes_ods"),
-          command: () => { navigateTo("/reports/reposicoes/ods") }
+          label: "RH",
+          items: [
+            {
+              label: 'Ponto 48 horas',
+              icon: 'pi pi-clock',
+              visible: can("dashboard_ponto48"),
+              command: () => { navigateTo("/reports/ponto-48-horas") }
+            },
+            {
+              label: 'Admissões',
+              icon: 'pi pi-user-plus',
+              visible: can("dashboard_admissoes"),
+              command: () => { navigateTo("/reports/admissoes") }
+            },
+            {
+              label: 'Faltas',
+              icon: 'pi pi-chart-bar',
+              visible: can("dashboard_faltas"),
+              command: () => { navigateTo("/reports/faltas") }
+            },
+            {
+              label: 'PCD',
+              icon: 'pi pi-heart',
+              visible: can("dashboard_pcd"),
+              command: () => { navigateTo("/reports/pcd") }
+            },
+            {
+              label: "Rescisões",
+              icon: "pi pi-user-minus",
+              visible: can("dashboard_rescisoes"),
+              command: () => {
+                navigateTo("/reports/rescisoes");
+              },
+            },
+            {
+              label: "Glosas",
+              items: [
+                {
+                  label: 'Gerais',
+                  icon: 'pi pi-money-bill',
+                  visible: can("dashboard_glosas"),
+                  command: () => { navigateTo("/reports/glosas") }
+                },
+                {
+                  label: 'Roçada',
+                  icon: 'pi pi-bullseye',
+                  visible: can("dashboard_glosas"),
+                  command: () => { navigateTo("/reports/rocada") }
+                },
+              ]
+            },
+          ]
         },
         {
-          label: 'Colab. por DPTO',
+          label: 'Colaboradores',
           icon: 'pi pi-users',
           visible: can("dashboard_colaboradores"),
           command: () => { navigateTo("/reports/colaboradores-departamento") }
-        },
-        {
-          label: 'Ponto 48 horas',
-          icon: 'pi pi-clock',
-          visible: can("dashboard_ponto48"),
-          command: () => { navigateTo("/reports/ponto-48-horas") }
-        },
-        {
-          label: 'Admissões',
-          icon: 'pi pi-user-plus',
-          visible: can("dashboard_admissoes"),
-          command: () => { navigateTo("/reports/admissoes") }
-        },
-        {
-          label: 'Faltas',
-          icon: 'pi pi-chart-bar',
-          visible: can("dashboard_faltas"),
-          command: () => { navigateTo("/reports/faltas") }
-        },
-        {
-          label: 'Logística',
-          icon: 'pi pi-truck',
-          visible: can("dashboard_logistica"),
-          command: () => { navigateTo("/reports/logistica") }
         },
         {
           label: 'Projetos',
@@ -133,60 +179,114 @@ export function MainLayout() {
           visible: can("dashboard_projetos"),
           command: () => { navigateTo("/reports/projetos") }
         },
-        {
-          label: 'Glosas',
-          icon: 'pi pi-money-bill',
-          visible: can("dashboard_glosas"),
-          command: () => { navigateTo("/reports/glosas") }
-        },
-        {
-          label: 'Roçada',
-          icon: 'pi pi-bullseye',
-          visible: can("dashboard_glosas"),
-          command: () => { navigateTo("/reports/rocada") }
-        },
-        {
-          label: 'PCD',
-          icon: 'pi pi-heart',
-          visible: can("dashboard_pcd"),
-          command: () => { navigateTo("/reports/pcd") }
-        },
-        {
-          label: "Rescisões",
-          icon: "pi pi-user-minus",
-          visible: can("dashboard_rescisoes"),
-          command: () => {
-          navigateTo("/reports/rescisoes");},
-        },
       ]
     },
     {
-      label: "Admissão",
-      icon: 'pi pi-user-plus',
+      label: "RH",
+      icon: "pi pi-users",
       items: [
         {
-          label: 'Vagas',
-          icon: 'pi pi-briefcase',
-          visible: can("admissoes"),
-          command: () => { navigateTo("/admissao/vagas") }
+          label: "Admissão",
+          icon: 'pi pi-user-plus',
+          items: [
+            {
+              label: 'Vagas',
+              icon: 'pi pi-briefcase',
+              visible: can("admissoes"),
+              command: () => { navigateTo("/admissao/vagas") }
+            },
+            {
+              label: 'Aditivos',
+              icon: 'pi pi-plus-circle',
+              visible: can("admissoes"),
+              command: () => { navigateTo("/admissao/aditivos") }
+            },
+          ]
         },
         {
-          label: 'Aditivos',
-          icon: 'pi pi-plus-circle',
-          visible: can("admissoes"),
-          command: () => { navigateTo("/admissao/aditivos") }
-        },
-      ]
-    },
-    {
-      label: "Indicadores",
-      icon: 'pi pi-chart-line',
-      items: [
-        {
-          label: 'PCD',
+          label: "PCD's",
           icon: 'pi pi-heart',
           visible: can("indicador_pcd"),
           command: () => { navigateTo("/indicadores/pcd") }
+        },
+        {
+          label: 'Rescisões',
+          icon: 'pi pi-user-minus',
+          visible: can("controle_rescisoes"),
+          command: () => { navigateTo("/rescisoes") }
+        },
+        {
+          label: 'Faltas',
+          icon: 'pi pi-calendar-times',
+          visible: can("controle_faltas"),
+          command: () => { navigateTo("/controle-faltas") }
+        },
+        {
+          label: 'Glosas',
+          icon: 'pi pi-money-bill',
+          visible: can("controle_glosas"),
+          command: () => { navigateTo("/controle-glosas") }
+        },
+        {
+          label: 'Disciplina',
+          icon: 'pi pi-file-edit',
+          visible: can("controle_medidas_disciplinares"),
+          command: () => { navigateTo("/controle-medidas-disciplinares") }
+        },
+      ]
+    },
+    {
+      label: "Operacional",
+      icon: "pi pi-briefcase",
+      items: [
+        {
+          label: 'Reposições',
+          icon: 'pi pi-sync',
+          items: [
+            {
+              label: 'Requisições',
+              icon: 'pi pi-question',
+              visible: can("reposicoes"),
+              command: () => { navigateTo("/reposicoes/requisicoes") }
+            },
+            {
+              label: 'Histórico',
+              icon: 'pi pi-history',
+              display: false,
+              visible: can("historico_reposicoes"),
+              command: () => { navigateTo("/reposicoes/historico") }
+            },
+            {
+              label: 'Reservas',
+              icon: 'pi pi-users',
+              visible: can("reservas"),
+              command: () => { navigateTo("/reposicoes/reservas") },
+            },
+          ]
+        },
+        {
+          label: "Estoque",
+          icon: 'pi pi-box',
+          items: [
+            {
+              label: 'Produtos',
+              icon: 'pi pi-box',
+              visible: can("estoque_produtos"),
+              command: () => { navigateTo("/estoque/produtos") }
+            },
+            {
+              label: 'Barcode',
+              icon: 'pi pi-barcode',
+              visible: can("estoque_codigos"),
+              command: () => { navigateTo("/estoque/codigos-de-barras") }
+            },
+            {
+              label: 'Movimentações',
+              icon: 'pi pi-arrow-right-arrow-left',
+              visible: can("estoque_movimentos"),
+              command: () => { navigateTo("/estoque/movimentacoes") }
+            },
+          ]
         },
       ]
     },
@@ -204,70 +304,7 @@ export function MainLayout() {
         },
       ]
     },
-    {
-      label: "Reposições",
-      icon: 'pi pi-sync',
-      items: [
-        ...(canManageAbsences ? [{
-          label: 'Controle de Faltas',
-          icon: 'pi pi-calendar-times',
-          command: () => { navigateTo("/controle-faltas") }
-        }] : []),
-        ...(can("controle_glosas") ? [{
-          label: 'Controle de Glosas',
-          icon: 'pi pi-money-bill',
-          command: () => { navigateTo("/controle-glosas") }
-        }] : []),
-        ...(can("controle_medidas_disciplinares") ? [{
-          label: 'Medidas Disciplinares',
-          icon: 'pi pi-file-edit',
-          command: () => { navigateTo("/controle-medidas-disciplinares") }
-        }] : []),
-        {
-          label: 'Requisições',
-          icon: 'pi pi-question',
-          visible: can("reposicoes"),
-          command: () => { navigateTo("/reposicoes/requisicoes") }
-        },
-        {
-          label: 'Histórico',
-          icon: 'pi pi-history',
-          display: false,
-          visible: can("historico_reposicoes"),
-          command: () => { navigateTo("/reposicoes/historico") }
-        },
-        {
-          label: 'Reservas Tecnicas',
-          icon: 'pi pi-users',
-          visible: can("reservas"),
-          command: () => { navigateTo("/reposicoes/reservas") },
-        },
-      ]
-    },
-    {
-      label: "Estoque",
-      icon: 'pi pi-box',
-      items: [
-        {
-          label: 'Produtos',
-          icon: 'pi pi-barcode',
-          visible: can("estoque_produtos"),
-          command: () => { navigateTo("/estoque/produtos") }
-        },
-        {
-          label: 'Gerar Códigos',
-          icon: 'pi pi-qrcode',
-          visible: can("estoque_codigos"),
-          command: () => { navigateTo("/estoque/codigos-de-barras") }
-        },
-        {
-          label: 'Movimentações',
-          icon: 'pi pi-arrow-right-arrow-left',
-          visible: can("estoque_movimentos"),
-          command: () => { navigateTo("/estoque/movimentacoes") }
-        },
-      ]
-    },
+
     {
       label: 'TM Ops',
       icon: 'pi pi-calendar-clock',
@@ -295,15 +332,6 @@ export function MainLayout() {
         },
       ],
     },
-
-    // MENUITEMS SEM SUBITEMS
-    {
-      label: 'Rescisões',
-      icon: 'pi pi-user-minus',
-      visible: can("controle_rescisoes"),
-      command: () => { navigateTo("/rescisoes") }
-    },
-  
     {
       label: 'Estrutura',
       icon: 'pi pi-building',

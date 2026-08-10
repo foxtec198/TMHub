@@ -180,7 +180,6 @@ export function DepartmentEmployeesDashboard() {
                             type="button"
                             icon="pi pi-filter-fill"
                             label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
-                            className="department-filter-button"
                             aria-label="Abrir filtros do dashboard"
                             onClick={(event) => filterPanel.current?.toggle(event)}
                         />

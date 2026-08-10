@@ -420,11 +420,9 @@ function DisallowanceControlContent() {
       title="Controle de Glosas"
       description="Acompanhe coberturas, valores em análise e perdas por competência."
       actions={<>
-        <Button label={section === "glosas" ? "Roçada · DPTO 92" : "Glosas gerais"} icon={section === "glosas" ? "pi pi-chart-line" : "pi pi-list"} outlined onClick={() => setSection((current) => current === "glosas" ? "rocada" : "glosas")} />
         {section === "glosas" && <>
           <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => filterPanel.current?.toggle(event)} />
           <Button label="Exportar XLSX" icon="pi pi-file-excel" outlined onClick={exportSpreadsheet} />
-          <Button label="Atualizar" icon="pi pi-refresh" outlined onClick={() => setRefresh((value) => value + 1)} />
           {canCreate && <Button label="Nova glosa" icon="pi pi-plus" onClick={openCreate} />}
         </>}
       </>}
