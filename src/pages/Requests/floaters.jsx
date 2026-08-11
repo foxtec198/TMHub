@@ -4,7 +4,6 @@ import { Tag } from "primereact/tag";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 import { Dialog } from "primereact/dialog";
 import { Calendar } from "primereact/calendar";
-import { DashCard } from "../../components/DashCard";
 import { PageHeader } from "../../components/PageHeader";
 
 // Utils
@@ -29,7 +28,6 @@ export function Floaters() {
 
     // Handles de Reservas
     const [reservas, setReservas] = useState([]);
-    const [totalColaboradores, setTotalColaboradores] = useState(0);
     const [searchReservas, setSearchReservas] = useState("");
     const [usageDialog, setUsageDialog] = useState(false);
     const [usageDate, setUsageDate] = useState(new Date());
@@ -84,21 +82,18 @@ export function Floaters() {
         }; load();
     }, [debouncedSearch, setLoading, showToast]);
 
-    // Keep summary totals independent from the debounced search result shown in the splitter.
+    // A tela precisa apenas das reservas; não carrega toda a base de colaboradores
+    // somente para alimentar cards de resumo.
     useEffect(() => {
-        async function loadSummary() {
+        async function loadReservations() {
             try {
-                const [employeesResponse, reservationsResponse] = await Promise.all([
-                    connect.get("/funcionarios"),
-                    connect.get("/reservas"),
-                ]);
-                setTotalColaboradores(employeesResponse.data.length);
-                setReservas(reservationsResponse.data);
+                const { data } = await connect.get("/reservas");
+                setReservas(data);
             } catch (err) {
-                showToast("error", "Erro nos indicadores", err.response?.data || "Não foi possível carregar os totais.");
+                showToast("error", "Reservas", err.response?.data || "Não foi possível carregar as reservas.");
             }
         }
-        loadSummary();
+        loadReservations();
     }, [refresh, showToast]);
 
     async function setReserva(id, nome) {
@@ -178,13 +173,6 @@ export function Floaters() {
                     }}
                 />}
             />
-
-            {/* Cards */}
-            <div className="floaters-summary">
-                <DashCard title="Total de colaboradores" icon="pi pi-users" value={totalColaboradores} className="floater-summary-card" />
-                <DashCard title="Reservas técnicas" icon="pi pi-shield" value={reservas.length} className="floater-summary-card" />
-                <DashCard title="Indisponíveis" icon="pi pi-ban" value={reservas.filter((reserva) => reserva.disponivel === false).length} className="floater-summary-card" />
-            </div>
 
             <Splitter className="floaters-splitter" layout={isMobile ? "vertical" : "horizontal"} gutterSize={12}>
                 <SplitterPanel className="floaters-panel" size={50} minSize={35}>
