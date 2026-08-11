@@ -132,6 +132,12 @@
   min-width: 0;
 }
 
+.floater-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+
 .floater-card-content>strong {
   display: block;
   overflow: hidden;
@@ -223,7 +229,7 @@
 
 .floaters-usage-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -276,6 +282,23 @@
   padding: .75rem;
   color: var(--text-color-secondary);
   text-align: center;
+}
+
+.floater-availability-dialog {
+  width: min(31rem, calc(100vw - 2rem));
+}
+
+.floater-availability-dialog p {
+  color: var(--text-color-secondary);
+  line-height: 1.5;
+}
+
+.floater-availability-options {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-top: 1.25rem;
 }
 
 :root[data-mode="dark"] .floater-summary-card {

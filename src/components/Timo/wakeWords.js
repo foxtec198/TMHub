@@ -1,6 +1,7 @@
 const WAKE_WORDS = [
-  "timo", 
-  "timo bot", 
+  "timo",
+  "timo bot",
+  "timo club",
   "time",
   "imo",
   "mo",
@@ -20,17 +21,53 @@ export function normalizeTimoTranscript(value) {
     .trim();
 }
 
+const SORTED_WAKE_WORDS = [...new Set(WAKE_WORDS.map(normalizeTimoTranscript) )]
+.sort(
+  (a, b) => b.length - a.length
+);
+
+export function findWakeWord(transcript) {
+  const normalized =
+    normalizeTimoTranscript(transcript);
+
+  if (!normalized) {
+    return null;
+  }
+
+  for (const wakeWord of SORTED_WAKE_WORDS) {
+    const escaped = wakeWord.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
+
+    const expression = new RegExp(
+      `(^|\\s)${escaped}(?=\\s|$)`
+    );
+
+    if (expression.test(normalized)) {
+      return wakeWord;
+    }
+  }
+
+  return null;
+}
+
 export function commandAfterWakeWord(transcript) {
   const normalized = normalizeTimoTranscript(transcript);
-  const wakeWord = WAKE_WORDS.find((word) => {
-    const expression = new RegExp(`(^|\\s)${word}(?=\\s|$)`);
-    return expression.test(normalized);
-  });
+  const wakeWord = findWakeWord(normalized);
+  if (!wakeWord) { return null; }
 
-  if (!wakeWord) return null;
+  const escaped = wakeWord.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
 
   return normalized
-    .replace(new RegExp(`(^|\\s)${wakeWord}(?=\\s|$)`), " ")
+    .replace(new RegExp(
+        `(^|\\s)${escaped}(?=\\s|$)`
+      ),
+      " "
+    )
     .replace(/\s+/g, " ")
     .trim();
 }
