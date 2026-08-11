@@ -781,7 +781,17 @@ export function RequestReport() {
                     />
                 </OverlayPanel>
 
-                <DashboardFilterButton panelRef={op_filters} activeCount={activeFilterCount} className="shadow-2" />
+                <Button
+                    icon="pi pi-filter-fill"
+                    className="dashboard-filter-button border-round-lg shadow-6"
+                    aria-label={activeFilterCount ? `Abrir filtros (${activeFilterCount} ativos)` : "Abrir filtros"}
+                    onClick={(event) => op_filters.current?.toggle(event)}
+                    style={{
+                        background: "ghostwhite",
+                        border: "1px solid ghostwhite",
+                        color: "#3a3535",
+                    }}
+                />
             </div>
 
             <div className="dashboard-content flex w-full min-h-full gap-4">

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
+import { MultiSelect } from "primereact/multiselect";
+import { OverlayPanel } from "primereact/overlaypanel";
 
 import { PageHeader } from "../../components/PageHeader";
 import { useLoading } from "../../contexts/LoadingContext";
@@ -159,7 +162,7 @@ export function ProjectDashboard() {
         description="Prazos, execução e distribuição dos cards pelos membros."
         actions={<>
           <div className="project-dashboard-period"><i className="pi pi-calendar" />{filters.periodo?.[0]?.toLocaleDateString("pt-BR")} — {filters.periodo?.[1]?.toLocaleDateString("pt-BR")}</div>
-          <DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />
+          <Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
           <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
         </>}
       />
@@ -262,18 +265,19 @@ export function ProjectDashboard() {
         </article>
       </section>
 
-      <DashboardFilterPanel
-        panelRef={filterPanel}
-        period={filters.periodo}
-        onPeriodChange={(value) => setFilter("periodo", value)}
-        onClear={clearFilters}
-        fields={[
-          { name: "projeto", label: "Projetos", value: filters.projeto, options: proceduralOptions.projetos || [], onChange: (value) => setFilter("projeto", value) },
-          { name: "colaborador", label: "Colaboradores", value: filters.colaborador, options: proceduralOptions.colaboradores || [], onChange: (value) => setFilter("colaborador", value) },
-          { name: "card", label: "Cards", value: filters.card, options: proceduralOptions.cards || [], onChange: (value) => setFilter("card", value), wide: true },
-          { name: "status", label: "Status", value: filters.status, options: (proceduralOptions.status || ["fazer", "andamento", "conclu"]).map((value) => ({ label: value.replace(/\b\w/g, (letter) => letter.toUpperCase()), value })), onChange: (value) => setFilter("status", value), wide: true, filter: false },
-        ]}
-      />
+      <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
+        <div className="dashboard-filter-title">
+          <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
+          <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+        </div>
+        <div className="dashboard-filter-grid">
+          <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
+          <label><span>Projetos</span><MultiSelect value={filters.projeto} options={proceduralOptions.projetos || []} onChange={(event) => setFilter("projeto", event.value)} placeholder="Todos os projetos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label><span>Colaboradores</span><MultiSelect value={filters.colaborador} options={proceduralOptions.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label className="is-wide"><span>Cards</span><MultiSelect value={filters.card} options={proceduralOptions.cards || []} onChange={(event) => setFilter("card", event.value)} placeholder="Todos os cards" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label className="is-wide"><span>Status</span><MultiSelect value={filters.status} options={(proceduralOptions.status || ["fazer", "andamento", "conclu"]).map((value) => ({ label: value.replace(/\b\w/g, (letter) => letter.toUpperCase()), value }))} onChange={(event) => setFilter("status", event.value)} placeholder="Todos os status" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        </div>
+      </OverlayPanel>
     </main>
   );
 }

@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { MultiSelect } from "primereact/multiselect";
+import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
@@ -79,7 +82,7 @@ export function AbsenceDashboard() {
         section="Dashboards"
         title="Dashboard de Faltas"
         description="Indicadores de ocorrência, justificativa e velocidade de tratativa."
-        actions={<><div className="absence-period-label"><i className="pi pi-calendar" /><span>{formatPeriod(filters.period)}</span></div><DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>}
+        actions={<><div className="absence-period-label"><i className="pi pi-calendar" /><span>{formatPeriod(filters.period)}</span></div><Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>}
       />
 
       <section className="absence-overview">
@@ -102,15 +105,22 @@ export function AbsenceDashboard() {
         <article className="absence-dashboard-panel absence-recent-panel"><header><div><span>Ocorrências recentes</span><h2>Últimas faltas do recorte</h2></div></header><DataTable value={data?.recentes || []} paginator rows={7} stripedRows size="small" emptyMessage="Nenhuma falta no período."><Column field="data_falta" header="Data" sortable body={(row) => new Date(`${String(row.data_falta).slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR")} /><Column field="colaborador" header="Colaborador" sortable /><Column field="contrato" header="Contrato" sortable /><Column field="motivo" header="Motivo" sortable /><Column field="status" header="Tratativa" body={(row) => <Tag value={row.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={row.status === "tratada" ? "success" : "info"} />} /></DataTable></article>
       </section>
 
-      <DashboardFilterPanel panelRef={filterPanel} period={filters.period} onPeriodChange={(value) => setFilter("period", value)} onClear={clearFilters} fields={[
-        { name: "status", label: "Situação", value: filters.status, options: [{ label: "Pendentes", value: "pendente" }, { label: "Tratadas", value: "tratada" }], onChange: (value) => setFilter("status", value), filter: false },
-        { name: "classification", label: "Classificação", value: filters.classification, options: [{ label: "Justificadas", value: "justificada" }, { label: "Injustificadas", value: "injustificada" }, { label: "Em análise", value: "em_analise" }], onChange: (value) => setFilter("classification", value), filter: false },
-        { name: "department", label: "Departamento", value: filters.department, options: asOptions(options.departamentos, "DPTO. "), onChange: (value) => setFilter("department", value) },
-        { name: "supervisor", label: "Supervisor", value: filters.supervisor, options: asOptions(options.supervisores), onChange: (value) => setFilter("supervisor", value) },
-        { name: "reason", label: "Motivo", value: filters.reason, options: asOptions(options.motivos), onChange: (value) => setFilter("reason", value), wide: true },
-        { name: "contract", label: "Contrato", value: filters.contract, options: asOptions(options.contratos), onChange: (value) => setFilter("contract", value), wide: true },
-        { name: "collaborator", label: "Colaborador", value: filters.collaborator, options: asOptions(options.colaboradores), onChange: (value) => setFilter("collaborator", value), wide: true },
-      ]} />
+      <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
+        <div className="dashboard-filter-title">
+          <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
+          <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+        </div>
+        <div className="dashboard-filter-grid">
+          <label className="is-wide"><span>Período</span><Calendar value={filters.period} onChange={(event) => setFilter("period", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
+          <label><span>Situação</span><MultiSelect value={filters.status} options={[{ label: "Pendentes", value: "pendente" }, { label: "Tratadas", value: "tratada" }]} onChange={(event) => setFilter("status", event.value)} placeholder="Todas as situações" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label><span>Classificação</span><MultiSelect value={filters.classification} options={[{ label: "Justificadas", value: "justificada" }, { label: "Injustificadas", value: "injustificada" }, { label: "Em análise", value: "em_analise" }]} onChange={(event) => setFilter("classification", event.value)} placeholder="Todas as classificações" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label><span>Departamento</span><MultiSelect value={filters.department} options={asOptions(options.departamentos, "DPTO. ")} onChange={(event) => setFilter("department", event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label><span>Supervisor</span><MultiSelect value={filters.supervisor} options={asOptions(options.supervisores)} onChange={(event) => setFilter("supervisor", event.value)} placeholder="Todos os supervisores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label className="is-wide"><span>Motivo</span><MultiSelect value={filters.reason} options={asOptions(options.motivos)} onChange={(event) => setFilter("reason", event.value)} placeholder="Todos os motivos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label className="is-wide"><span>Contrato</span><MultiSelect value={filters.contract} options={asOptions(options.contratos)} onChange={(event) => setFilter("contract", event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+          <label className="is-wide"><span>Colaborador</span><MultiSelect value={filters.collaborator} options={asOptions(options.colaboradores)} onChange={(event) => setFilter("collaborator", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        </div>
+      </OverlayPanel>
     </section>
   );
 }

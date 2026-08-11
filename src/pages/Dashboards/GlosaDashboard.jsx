@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
+import { MultiSelect } from "primereact/multiselect";
+import { OverlayPanel } from "primereact/overlaypanel";
 
 import { PageHeader } from "../../components/PageHeader";
 import { useLoading } from "../../contexts/LoadingContext";
@@ -51,7 +54,7 @@ export function GlosaDashboard() {
   const chart = useMemo(() => ({ labels: (data?.evolucao_mensal || []).map((row) => row.competencia), datasets: [{ label: "Valor", data: (data?.evolucao_mensal || []).map((row) => row.valor), backgroundColor: chartTheme.danger, borderRadius: 8 }] }), [data, chartTheme]);
 
   return <main className="project-dashboard">
-    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>} />
+    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>} />
     <section className="project-dashboard-summary">
       <Summary icon="pi pi-file" label="Glosas" value={summary.total_registros || 0} detail="registros no período" />
       <Summary icon="pi pi-money-bill" label="Valor total" value={money(summary.valor_total)} detail="valor apontado" tone="violet" />
@@ -61,11 +64,18 @@ export function GlosaDashboard() {
     </section>
     <section className="project-dashboard-analysis"><article className="project-dashboard-panel project-dashboard-performance"><header><div><span>Financeiro</span><h2>Evolução mensal</h2></div></header><div className="project-dashboard-chart">{data?.evolucao_mensal?.length ? <Chart type="bar" data={chart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: chartTheme.text } }, y: { beginAtZero: true, grid: { color: chartTheme.grid }, ticks: { color: chartTheme.text } } } }} /> : <div className="project-dashboard-empty">Sem movimentação no período.</div>}</div></article><article className="project-dashboard-panel project-dashboard-insight"><span>Resumo do recorte</span><h2>{summary.valor_descoberto ? "Há valores sem cobertura para tratar" : "Não há valores descobertos"}</h2><p>Os indicadores consideram somente as glosas dentro do período e dos filtros escolhidos.</p><div><span><small>Dias apontados</small><strong>{summary.dias || 0}</strong></span><em>{summary.total_registros || 0} glosas</em></div></article></section>
     <section className="project-dashboard-detail-grid"><article className="project-dashboard-panel"><header><div><span>Contratos</span><h2>Maior impacto financeiro</h2></div></header><MetricList rows={data?.por_contrato} label="contrato" /></article><article className="project-dashboard-panel"><header><div><span>Motivos</span><h2>Ocorrências e colaboradores</h2></div></header><MetricList rows={data?.por_motivo} label="motivo" /></article></section>
-    <DashboardFilterPanel panelRef={filterPanel} period={filters.periodo} onPeriodChange={(value) => setFilter("periodo", value)} onClear={() => setFilters(initialFilters())} fields={[
-      { name: "cobertura", label: "Situação", value: filters.cobertura, options: [{ label: "Em análise", value: "em_analise" }, { label: "Coberta", value: "coberta" }, { label: "Parcial", value: "parcial" }, { label: "Descoberta", value: "descoberta" }], onChange: (value) => setFilter("cobertura", value), filter: false },
-      { name: "departamento", label: "Departamento", value: filters.departamento, options: (options.departamentos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter("departamento", value) },
-      { name: "contrato", label: "Contrato", value: filters.contrato, options: options.contratos || [], onChange: (value) => setFilter("contrato", value), wide: true },
-      { name: "colaborador", label: "Colaborador", value: filters.colaborador, options: options.colaboradores || [], onChange: (value) => setFilter("colaborador", value), wide: true },
-    ]} />
+    <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
+      <div className="dashboard-filter-title">
+        <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
+        <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
+      </div>
+      <div className="dashboard-filter-grid">
+        <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
+        <label><span>Situação</span><MultiSelect value={filters.cobertura} options={[{ label: "Em análise", value: "em_analise" }, { label: "Coberta", value: "coberta" }, { label: "Parcial", value: "parcial" }, { label: "Descoberta", value: "descoberta" }]} onChange={(event) => setFilter("cobertura", event.value)} placeholder="Todas as situações" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        <label><span>Departamento</span><MultiSelect value={filters.departamento} options={(options.departamentos || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        <label className="is-wide"><span>Contrato</span><MultiSelect value={filters.contrato} options={options.contratos || []} onChange={(event) => setFilter("contrato", event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        <label className="is-wide"><span>Colaborador</span><MultiSelect value={filters.colaborador} options={options.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+      </div>
+    </OverlayPanel>
   </main>;
 }
