@@ -7,6 +7,7 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
+import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
@@ -36,6 +37,13 @@ const NOTICE_OPTIONS = [
   { label: "Indenizado", value: "indenizado" },
   { label: "Trabalhado", value: "trabalhado" },
 ];
+
+const emptyFilters = () => ({
+  motivo: [],
+  departamento: [],
+  centro_custo_id: [],
+  supervisor_id: [],
+});
 
 const EMPTY_CALCULATION = {
   colaborador_id: null,
@@ -119,6 +127,32 @@ function money(value) {
   return Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function cardNumber(value) {
+  const number = Number(value || 0);
+  const absolute = Math.abs(Number.isFinite(number) ? number : 0);
+  const sign = number < 0 ? "-" : "";
+
+  if (absolute < 100_000) {
+    return `${sign}${Math.trunc(absolute).toLocaleString("pt-BR")}`;
+  }
+
+  const scale = absolute >= 1_000_000_000
+    ? { divisor: 1_000_000_000, suffix: "B" }
+    : absolute >= 1_000_000
+      ? { divisor: 1_000_000, suffix: "M" }
+      : { divisor: 1_000, suffix: "K" };
+  const scaled = scale.suffix === "K"
+    ? Math.trunc(absolute / scale.divisor)
+    : Math.trunc((absolute / scale.divisor) * 10) / 10;
+
+  return `${sign}${scaled.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} ${scale.suffix}`;
+}
+
+function cardMoney(value) {
+  const number = Number(value || 0);
+  return `${number < 0 ? "-" : ""}R$ ${cardNumber(Math.abs(number))}`;
+}
+
 function errorMessage(error, fallback) {
   const data = error?.response?.data;
   if (typeof data === "string" && data.trim()) return data;
@@ -133,7 +167,7 @@ function TerminationControlContent() {
   const [summary, setSummary] = useState({});
   const [filterOptions, setFilterOptions] = useState({ motivos: [], departamentos: [], centros: [], supervisores: [] });
   const [period, setPeriod] = useState(defaultPeriod);
-  const [filters, setFilters] = useState({ motivo: null, departamento: null, centro_custo_id: null, supervisor_id: null });
+  const [filters, setFilters] = useState(emptyFilters);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [revision, setRevision] = useState(0);
@@ -211,8 +245,8 @@ function TerminationControlContent() {
     if (period?.[0]) params.inicio = isoDate(period[0]);
     if (period?.[1]) params.fim = isoDate(period[1]);
     if (debouncedSearch) params.busca = debouncedSearch;
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== "") params[key] = value;
+    Object.entries(filters).forEach(([key, values]) => {
+      if (values.length) params[key] = values.join(",");
     });
     return params;
   }, [debouncedSearch, filters, period]);
@@ -238,12 +272,12 @@ function TerminationControlContent() {
     return () => socketio.off("termination_update", reload);
   }, []);
 
-  const activeFilterCount = Object.values(filters).filter((value) => value !== null && value !== "").length
+  const activeFilterCount = Object.values(filters).filter((values) => values.length).length
     + (period?.[0] || period?.[1] ? 1 : 0);
 
   function clearFilters() {
     setPeriod(null);
-    setFilters({ motivo: null, departamento: null, centro_custo_id: null, supervisor_id: null });
+    setFilters(emptyFilters());
     setSearch("");
     filterPanel.current?.hide();
   }
@@ -375,12 +409,12 @@ function TerminationControlContent() {
       />
 
       <div className="termination-summary">
-        <article><i className="pi pi-users" /><div><small>Rescisões</small><strong>{summary.total || 0}</strong><span>no período filtrado</span></div></article>
-        <article><i className="pi pi-arrow-up-right" /><div><small>Proventos</small><strong>{money(summary.proventos)}</strong><span>valor bruto</span></div></article>
-        <article className="is-danger"><i className="pi pi-arrow-down-right" /><div><small>Descontos</small><strong>{money(summary.descontos)}</strong><span>retenções informadas</span></div></article>
-        <article className="is-success"><i className="pi pi-wallet" /><div><small>Líquido</small><strong>{money(summary.liquido)}</strong><span>pago aos colaboradores</span></div></article>
-        <article className="is-warning"><i className="pi pi-building-columns" /><div><small>FGTS rescisório</small><strong>{money(summary.fgts_rescisorio)}</strong><span>guia rescisória</span></div></article>
-        <article><i className="pi pi-chart-line" /><div><small>Custo bruto</small><strong>{money(summary.custo_bruto)}</strong><span>proventos + FGTS</span></div></article>
+        <article><i className="pi pi-users" /><div><small>Rescisões</small><strong>{cardNumber(summary.total)}</strong><span>no período filtrado</span></div></article>
+        <article><i className="pi pi-arrow-up-right" /><div><small>Proventos</small><strong>{cardMoney(summary.proventos)}</strong><span>valor bruto</span></div></article>
+        <article className="is-danger"><i className="pi pi-arrow-down-right" /><div><small>Descontos</small><strong>{cardMoney(summary.descontos)}</strong><span>retenções informadas</span></div></article>
+        <article className="is-success"><i className="pi pi-wallet" /><div><small>Líquido</small><strong>{cardMoney(summary.liquido)}</strong><span>pago aos colaboradores</span></div></article>
+        <article className="is-warning"><i className="pi pi-building-columns" /><div><small>FGTS rescisório</small><strong>{cardMoney(summary.fgts_rescisorio)}</strong><span>guia rescisória</span></div></article>
+        <article><i className="pi pi-chart-line" /><div><small>Custo bruto</small><strong>{cardMoney(summary.custo_bruto)}</strong><span>proventos + FGTS</span></div></article>
       </div>
 
       <article className="termination-panel">
@@ -424,10 +458,10 @@ function TerminationControlContent() {
         </div>
         <div className="termination-filter-grid">
           <label className="is-wide"><span>Período de demissão</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" showIcon readOnlyInput hideOnRangeSelection /></label>
-          <label className="is-wide"><span>Motivo</span><Dropdown value={filters.motivo} options={(filterOptions.motivos || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilters((current) => ({ ...current, motivo: event.value }))} placeholder="Todos os motivos" showClear filter /></label>
-          <label><span>Departamento</span><Dropdown value={filters.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} onChange={(event) => setFilters((current) => ({ ...current, departamento: event.value }))} placeholder="Todos" showClear /></label>
-          <label><span>Contrato</span><Dropdown value={filters.centro_custo_id} options={filterOptions.centros || []} onChange={(event) => setFilters((current) => ({ ...current, centro_custo_id: event.value }))} placeholder="Todos" showClear filter /></label>
-          <label className="is-wide"><span>Supervisor</span><Dropdown value={filters.supervisor_id} options={filterOptions.supervisores || []} onChange={(event) => setFilters((current) => ({ ...current, supervisor_id: event.value }))} placeholder="Todos os supervisores" showClear filter /></label>
+          <label className="is-wide"><span>Motivo</span><MultiSelect value={filters.motivo} options={(filterOptions.motivos || []).map((value) => ({ label: value, value }))} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, motivo: event.value || [] }))} placeholder="Todos os motivos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
+          <label><span>Departamento</span><MultiSelect value={filters.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, departamento: event.value || [] }))} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
+          <label><span>Contrato</span><MultiSelect value={filters.centro_custo_id} options={filterOptions.centros || []} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, centro_custo_id: event.value || [] }))} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
+          <label className="is-wide"><span>Supervisor</span><MultiSelect value={filters.supervisor_id} options={filterOptions.supervisores || []} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, supervisor_id: event.value || [] }))} placeholder="Todos os supervisores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
         </div>
       </OverlayPanel>
 
