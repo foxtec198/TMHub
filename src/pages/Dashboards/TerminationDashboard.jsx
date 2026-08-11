@@ -3,15 +3,17 @@ import './pcdDashboard.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
+import { Calendar } from 'primereact/calendar';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
+import { MultiSelect } from 'primereact/multiselect';
+import { OverlayPanel } from 'primereact/overlaypanel';
 
 import connect from '../../utils/request';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { PageHeader } from '../../components/PageHeader';
-import { DashboardFilterButton, DashboardFilterPanel } from '../../components/DashboardFilterPanel';
 import { useChartTheme } from '../../theme/useTheme';
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -34,20 +36,30 @@ function formatCurrency(value, compact = false) {
     }).format(Number(value || 0));
 }
 
-function formatCardCurrency(value) {
+function formatCardNumber(value) {
     const number = Number(value || 0);
-    const absolute = Math.abs(number);
+    const absolute = Math.abs(Number.isFinite(number) ? number : 0);
     const sign = number < 0 ? '-' : '';
 
-    if (absolute >= 1_000_000) {
-        return `${sign}R$ ${(absolute / 1_000_000).toFixed(2)}M`;
+    if (absolute < 100_000) {
+        return `${sign}${Math.trunc(absolute).toLocaleString('pt-BR')}`;
     }
 
-    if (absolute >= 100_000) {
-        return `${sign}R$ ${Math.round(absolute / 1_000)}K`;
-    }
+    const scale = absolute >= 1_000_000_000
+        ? { divisor: 1_000_000_000, suffix: 'B' }
+        : absolute >= 1_000_000
+            ? { divisor: 1_000_000, suffix: 'M' }
+            : { divisor: 1_000, suffix: 'K' };
+    const scaled = scale.suffix === 'K'
+        ? Math.trunc(absolute / scale.divisor)
+        : Math.trunc((absolute / scale.divisor) * 10) / 10;
 
-    return `${sign}R$ ${Math.round(absolute).toLocaleString('pt-BR')}`;
+    return `${sign}${scaled.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ${scale.suffix}`;
+}
+
+function formatCardCurrency(value) {
+    const number = Number(value || 0);
+    return `${number < 0 ? '-' : ''}R$ ${formatCardNumber(Math.abs(number))}`;
 }
 
 function formatDate(value) {
@@ -66,6 +78,84 @@ function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
                 <em>{detail}</em>
             </span>
         </article>
+    );
+}
+
+function TerminationFilterButton({ panelRef, activeCount = 0 }) {
+    return (
+        <Button
+            type="button"
+            icon="pi pi-filter-fill"
+            label={activeCount ? `Filtros (${activeCount})` : 'Filtros'}
+            className="dashboard-filter-trigger"
+            aria-label="Abrir filtros do dashboard de rescisões"
+            onClick={(event) => panelRef.current?.toggle(event)}
+        />
+    );
+}
+
+function TerminationFilterPanel({
+    panelRef,
+    period,
+    onPeriodChange,
+    fields,
+    onClear,
+}) {
+    return (
+        <OverlayPanel ref={panelRef} className="dashboard-filter-panel">
+            <div className="dashboard-filter-title">
+                <div>
+                    <strong>Filtrar rescisões</strong>
+                    <span>Os filtros abaixo respeitam as filiais selecionadas no menu principal.</span>
+                </div>
+                <Button
+                    type="button"
+                    icon="pi pi-filter-slash"
+                    label="Limpar filtros"
+                    text
+                    severity="secondary"
+                    onClick={onClear}
+                />
+            </div>
+
+            <div className="dashboard-filter-grid">
+                <label>
+                    <span>Período</span>
+                    <Calendar
+                        value={period}
+                        onChange={(event) => onPeriodChange(event.value)}
+                        selectionMode="range"
+                        readOnlyInput
+                        hideOnRangeSelection
+                        dateFormat="dd/mm/yy"
+                        placeholder="Selecione o período"
+                        showIcon
+                        showButtonBar
+                    />
+                </label>
+
+                {fields.map((field) => (
+                    <label key={field.name}>
+                        <span>{field.label}</span>
+                        <MultiSelect
+                            value={field.value || []}
+                            options={field.options || []}
+                            optionLabel="label"
+                            optionValue="value"
+                            onChange={(event) => field.onChange(event.value || [])}
+                            placeholder={field.placeholder || `Todos os ${field.label.toLowerCase()}`}
+                            display="chip"
+                            filter
+                            showClear
+                            className="w-full"
+                            maxSelectedLabels={2}
+                            selectedItemsLabel="{0} selecionados"
+                            panelClassName="dashboard-filter-dropdown"
+                        />
+                    </label>
+                ))}
+            </div>
+        </OverlayPanel>
     );
 }
 
@@ -179,7 +269,7 @@ export function TerminationDashboard() {
     };
 
     const summary = [
-        { icon: 'pi pi-user-minus', label: 'Rescisões', value: indicators.total_rescisoes ?? 0, detail: 'no período selecionado' },
+        { icon: 'pi pi-user-minus', label: 'Rescisões', value: formatCardNumber(indicators.total_rescisoes), detail: 'no período selecionado' },
         { icon: 'pi pi-chart-line', label: 'Custo total', value: formatCardCurrency(indicators.custo_total), detail: 'proventos + FGTS', tone: 'primary' },
         { icon: 'pi pi-calculator', label: 'Custo médio', value: formatCardCurrency(indicators.custo_medio), detail: 'por rescisão' },
         { icon: 'pi pi-arrow-up-right', label: 'Proventos', value: formatCardCurrency(indicators.proventos), detail: 'valor bruto', tone: 'success' },
@@ -199,11 +289,12 @@ export function TerminationDashboard() {
                 section="Dashboards"
                 title="Rescisões"
                 description="Acompanhe o volume e os valores das rescisões por período, filial e contrato."
-                actions={<>
-                    <DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />
-                    <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-                </>}
             />
+
+            <div className="termination-dashboard-toolbar">
+                <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
+                <TerminationFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />
+            </div>
 
             <div className="termination-dashboard-summary">
                 {summary.map((item) => <SummaryCard key={item.label} {...item} />)}
@@ -266,7 +357,7 @@ export function TerminationDashboard() {
                     <div className="pcd-dashboard-status-strip">
                         <div className="is-active">
                             <span>Rescisões</span>
-                            <strong>{indicators.total_rescisoes ?? 0}</strong>
+                            <strong>{formatCardNumber(indicators.total_rescisoes)}</strong>
                         </div>
                         <div className="is-earnings">
                             <span>Proventos</span>
@@ -332,17 +423,15 @@ export function TerminationDashboard() {
                 </div>
             </article>
 
-            <DashboardFilterPanel
+            <TerminationFilterPanel
                 panelRef={filterPanel}
                 period={period}
                 onPeriodChange={setPeriod}
                 onClear={clearFilters}
-                title="Filtrar rescisões"
-                description="Os filtros abaixo respeitam as filiais selecionadas no menu principal."
                 fields={[
                     { name: 'departamento', label: 'Departamentos', value: filters.departamento, options: (filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value: String(value) })), onChange: (value) => setFilter('departamento', value) },
-                    { name: 'motivo', label: 'Motivos', value: filters.motivo, options: (filterOptions.motivos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('motivo', value), wide: true },
-                    { name: 'contrato', label: 'Contratos', value: filters.contrato, options: (filterOptions.contratos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('contrato', value), wide: true },
+                    { name: 'motivo', label: 'Motivos', value: filters.motivo, options: (filterOptions.motivos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('motivo', value) },
+                    { name: 'contrato', label: 'Contratos', value: filters.contrato, options: (filterOptions.contratos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('contrato', value) },
                     { name: 'supervisor', label: 'Supervisores', value: filters.supervisor, options: (filterOptions.supervisores || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('supervisor', value) },
                     { name: 'aviso', label: 'Tipos de aviso', value: filters.aviso, options: (filterOptions.avisos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter('aviso', value) },
                 ]}

@@ -4,6 +4,14 @@
     color: var(--text-color, var(--text-primary));
 }
 
+.termination-dashboard-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .6rem;
+    margin-bottom: 1rem;
+}
+
 .termination-dashboard-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
@@ -404,6 +412,15 @@
 @media (max-width: 560px) {
     .termination-dashboard {
         padding: 1rem;
+    }
+
+    .termination-dashboard-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .termination-dashboard-toolbar .p-button {
+        width: 100%;
     }
 
     .termination-dashboard-summary {
