@@ -147,7 +147,13 @@ export function DashboardLogistic() {
                             <i className="pi pi-calendar" />
                             {filters.period?.[0]?.toLocaleDateString('pt-BR')} — {filters.period?.[1]?.toLocaleDateString('pt-BR')}
                         </div>
-                        <DashboardFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />
+                        <Button
+                            type="button"
+                            icon="pi pi-filter-fill"
+                            label={activeFilterCount ? `Filtros (${activeFilterCount})` : 'Filtros'}
+                            aria-label="Abrir filtros do dashboard"
+                            onClick={(event) => filterPanel.current?.toggle(event)}
+                        />
                         <Button icon="pi pi-refresh" outlined onClick={() => setRefresh((value) => value + 1)} />
                     </>
                 )}
