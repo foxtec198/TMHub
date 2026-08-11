@@ -1,5 +1,5 @@
 import "./pcdDashboard.css";
-//teste
+
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
