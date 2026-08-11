@@ -2,13 +2,12 @@ const WAKE_WORDS = [
   "timo",
   "timo bot",
   "timo club",
-  "time",
-  "imo",
-  "mo",
+  // Transcrições comuns do navegador para "Timo".
+  // Não usar fragmentos como "mo" ou "ino": eles acordavam o assistente
+  // no meio de palavras normais e deixavam o próximo comando inconsistente.
   "te amo",
   "time",
-  "tino",
-  "ino"
+  "tino"
 ];
 
 export function normalizeTimoTranscript(value) {

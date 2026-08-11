@@ -61,7 +61,6 @@ export function TimoAssistant() {
   const awaitingCommandRef = useRef(false);
   const wakeTimerRef = useRef(null);
   const bubbleTimerRef = useRef(null);
-  const commandTimerRef = useRef(null);
   const processingRef = useRef(false);
 
   const dragRef = useRef(null);
@@ -166,7 +165,6 @@ export function TimoAssistant() {
       awaitingCommandRef.current = false;
 
       window.clearTimeout(wakeTimerRef.current);
-      window.clearTimeout(commandTimerRef.current);
 
       setState("processing");
 
@@ -199,7 +197,6 @@ export function TimoAssistant() {
         awaitingCommandRef.current = false;
 
         window.clearTimeout(wakeTimerRef.current);
-        window.clearTimeout(commandTimerRef.current);
 
         resetWakeRef.current();
       }
@@ -215,7 +212,7 @@ export function TimoAssistant() {
    * "Timo" para acordar o avatar.
    */
   const handleWakeWord = useCallback(
-    ({ inlineCommand }) => {
+    () => {
       if (processingRef.current || awaitingCommandRef.current) {
         return;
       }
@@ -239,22 +236,13 @@ export function TimoAssistant() {
       }, WAKE_TIMEOUT);
 
       /*
-       * Também permite:
-       *
-       * "Timo quantas faltas tivemos hoje"
-       *
-       * Se a própria hipótese que encontrou a wake word
-       * já contiver comando, processamos logo depois.
+       * A wake word pode ser detectada em um resultado parcial. O comando só
+       * é enviado quando o navegador confirmar o resultado final; enviar o
+       * texto parcial fazia o Timo processar "quantas faltas" antes da frase
+       * terminar e, depois, ignorar o restante por já estar processando.
        */
-      if (inlineCommand) {
-        window.clearTimeout(commandTimerRef.current);
-
-        commandTimerRef.current = window.setTimeout(() => {
-          processCommand(inlineCommand);
-        }, 180);
-      }
     },
-    [processCommand, showBubble]
+    [showBubble]
   );
 
   /*
@@ -365,7 +353,6 @@ export function TimoAssistant() {
     return () => {
       window.clearTimeout(wakeTimerRef.current);
       window.clearTimeout(bubbleTimerRef.current);
-      window.clearTimeout(commandTimerRef.current);
     };
   }, []);
 
@@ -510,7 +497,6 @@ export function TimoAssistant() {
       awaitingCommandRef.current = false;
 
       window.clearTimeout(wakeTimerRef.current);
-      window.clearTimeout(commandTimerRef.current);
       window.clearTimeout(bubbleTimerRef.current);
 
       resetWakeRef.current();
