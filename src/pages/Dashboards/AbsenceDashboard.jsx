@@ -5,7 +5,6 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Tag } from "primereact/tag";
 
-import { DashboardFilterButton, DashboardFilterPanel } from "../../components/DashboardFilterPanel";
 import { PageHeader } from "../../components/PageHeader";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";

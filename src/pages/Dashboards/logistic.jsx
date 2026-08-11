@@ -8,7 +8,6 @@ import { MultiSelect } from 'primereact/multiselect';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { Tag } from 'primereact/tag';
 
-import { DashboardFilterButton } from '../../components/DashboardFilterPanel';
 
 import { PageHeader } from '../../components/PageHeader';
 import { useLoading } from '../../contexts/LoadingContext';
