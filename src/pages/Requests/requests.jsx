@@ -95,7 +95,8 @@ export function Requests() {
     const [importDialog, setImportDialog] = useState(false)
     const [usageDialog, setUsageDialog] = useState(false)
     const [usageDate, setUsageDate] = useState(new Date())
-    const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [] })
+    const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [], indisponiveis: [] })
+    const [availabilityDialog, setAvailabilityDialog] = useState(null)
 
     const { showToast } = useToast();
     const setLoading = useLoading();
@@ -173,6 +174,25 @@ export function Requests() {
             accept: () => accept(value),
         });
     };
+
+    async function updateReservationAvailability(motivo) {
+        if (!availabilityDialog?.reserva_floater_id) return;
+        try {
+            setLoading(true);
+            await connect.patch("/reservas", {
+                id: availabilityDialog.reserva_floater_id,
+                disponivel: false,
+                motivo,
+            });
+            showToast("success", "Reserva indisponível", `${availabilityDialog.reserva} foi marcada como indisponível por ${motivo.toLowerCase()}.`);
+            setAvailabilityDialog(null);
+            setRefresh((previous) => previous + 1);
+        } catch (error) {
+            showToast("error", "Reserva", error.response?.data || "Não foi possível atualizar a disponibilidade.");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     async function deleteRequest(row) {
         try {
@@ -266,12 +286,23 @@ export function Requests() {
                             <InplaceContent>
                                 <DropdownWS
                                     uri="/reservas"
+                                    uriParams={{ disponivel: true }}
                                     staticOptions={NO_REPLACEMENT_OPTION}
                                     className="w-10rem text-truncate"
                                     onChange={(value) => { confirm("Reserva", { id: row.id, reserva_id: value }) }}
                                 />
                             </InplaceContent>
                         </Inplace>
+                        {row.reserva_floater_id ? <Button
+                            icon="pi pi-ban"
+                            text
+                            rounded
+                            severity="warning"
+                            disabled={!canEdit}
+                            aria-label={`Marcar ${row.reserva} como indisponível`}
+                            tooltip="Marcar como indisponível"
+                            onClick={() => setAvailabilityDialog(row)}
+                        /> : null}
                     </div>
                 )
             }
@@ -482,6 +513,33 @@ export function Requests() {
                             )) : <span className="reserve-usage-empty">Nenhuma reserva disponível nesta data.</span>}
                         </div>
                     </section>
+                    <section>
+                        <h3>Indisponíveis ({reservationUsage.indisponiveis.length})</h3>
+                        <div className="reserve-usage-list">
+                            {reservationUsage.indisponiveis.length ? reservationUsage.indisponiveis.map((item) => (
+                                <div className="reserve-usage-item" key={item.id}>
+                                    <div className="reserve-usage-person"><strong>{item.nome}</strong></div>
+                                    <div className="reserve-usage-meta">
+                                        <Tag value={item.indisponibilidade_motivo || "INDISPONÍVEL"} severity="warning" rounded />
+                                        <span>{item.matricula}</span>
+                                    </div>
+                                </div>
+                            )) : <span className="reserve-usage-empty">Nenhuma reserva indisponível nesta data.</span>}
+                        </div>
+                    </section>
+                </div>
+            </Dialog>
+            <Dialog
+                header="Marcar reserva como indisponível"
+                visible={Boolean(availabilityDialog)}
+                modal
+                className="reserve-availability-dialog"
+                onHide={() => setAvailabilityDialog(null)}
+            >
+                <p>Por que <strong>{availabilityDialog?.reserva}</strong> não pode atender à reposição?</p>
+                <div className="reserve-availability-options">
+                    <Button label="Falta" icon="pi pi-user-minus" severity="danger" onClick={() => updateReservationAvailability("FALTA")} />
+                    <Button label="Apoio" icon="pi pi-users" severity="warning" onClick={() => updateReservationAvailability("APOIO")} />
                 </div>
             </Dialog>
         </main>

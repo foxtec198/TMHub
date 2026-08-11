@@ -94,3 +94,76 @@
   --chart-grid: rgba(18, 74, 82, .13);
   --chart-tooltip-bg: #10252b;
 }
+
+/* O efeito é pontual: dá personalidade ao tema sem comprometer leitura ou navegação. */
+:root[data-theme="cyberpunk"] .layout-brand {
+  position: relative;
+  isolation: isolate;
+  animation: cyberpunk-brand-glitch 12s steps(1, end) infinite;
+}
+
+:root[data-theme="cyberpunk"] .layout-brand::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  z-index: -1;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, #00f0ff 18%, #ff334f 62%, transparent);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+  animation: cyberpunk-brand-scan 12s steps(1, end) infinite;
+}
+
+:root[data-theme="cyberpunk"] .layout-sidebar {
+  position: relative;
+}
+
+:root[data-theme="cyberpunk"] .layout-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 47%,
+    rgba(0, 240, 255, 0.16) 48%,
+    rgba(255, 51, 79, 0.14) 50%,
+    transparent 52%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  animation: cyberpunk-menu-glitch 16s steps(1, end) infinite;
+}
+
+@keyframes cyberpunk-brand-glitch {
+  0%, 92%, 100% { transform: translate(0); filter: none; }
+  92.5% { transform: translateX(-1px); filter: drop-shadow(2px 0 rgba(255, 51, 79, 0.72)); }
+  93% { transform: translateX(1px); filter: drop-shadow(-2px 0 rgba(0, 240, 255, 0.72)); }
+  93.5% { transform: translateY(-1px); }
+  94% { transform: translate(0); filter: none; }
+}
+
+@keyframes cyberpunk-brand-scan {
+  0%, 92%, 100% { opacity: 0; transform: translateY(0); }
+  92.5%, 93.5% { opacity: 0.72; transform: translateY(-4px); }
+  94% { opacity: 0; transform: translateY(0); }
+}
+
+@keyframes cyberpunk-menu-glitch {
+  0%, 96%, 100% { opacity: 0; transform: translateY(0); }
+  96.3% { opacity: 0.72; transform: translateY(-3px); }
+  96.7% { opacity: 0.34; transform: translateY(2px); }
+  97% { opacity: 0; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="cyberpunk"] .layout-brand,
+  :root[data-theme="cyberpunk"] .layout-brand::after,
+  :root[data-theme="cyberpunk"] .layout-sidebar::before {
+    animation: none;
+  }
+}

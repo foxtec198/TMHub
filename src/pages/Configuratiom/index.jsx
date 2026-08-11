@@ -26,6 +26,7 @@ import { CapacityDepartmentSettings } from "./CapacityDepartmentSettings";
 import { CollaboratorImportSettings } from "./EmployeeImportSettings";
 import { NewsSettings } from "./NewsSettings";
 import { TMOpsAccessSettings } from "./TMOpsAccessSettings";
+import { TimoSettings } from "./TimoSettings";
 
 // Styles
 import "./settings.css";
@@ -219,23 +220,6 @@ export function Settings() {
               <Button label="Atualizar senha" icon="pi pi-shield" onClick={changePassword} />
             </article>
 
-            {isAdmin ? (
-              <article className="settings-card">
-                <div className="settings-card-title"><i className="pi pi-sparkles" /><div><h2>Timo</h2><p>Assistente visual com reconhecimento de voz contínuo.</p></div></div>
-                <div className="settings-inline settings-inline--preference">
-                  <div>
-                    <strong>{profile.timo_ativo ? "Timo ativado" : "Timo desativado"}</strong>
-                    <small>Quando ativado, o Timo aparece no cabeçalho e solicita acesso ao microfone.</small>
-                  </div>
-                  <Button
-                    label={profile.timo_ativo ? "Desativar" : "Ativar"}
-                    icon={profile.timo_ativo ? "pi pi-pause" : "pi pi-play"}
-                    outlined={Boolean(profile.timo_ativo)}
-                    onClick={() => save({ timo_ativo: !profile.timo_ativo }, profile.timo_ativo ? "Timo desativado." : "Timo ativado.")}
-                  />
-                </div>
-              </article>
-            ) : null}
           </div>
         </div>
       </TabPanel>
@@ -254,6 +238,15 @@ export function Settings() {
       </TabPanel>}
       {isAdmin && <TabPanel header="TM Ops" leftIcon="pi pi-calendar-clock mr-2">
         <TMOpsAccessSettings />
+      </TabPanel>}
+      {isAdmin && <TabPanel header="Timo" leftIcon="pi pi-sparkles mr-2">
+        <TimoSettings
+          timoActive={Boolean(profile.timo_ativo)}
+          onToggleTimo={() => save(
+            { timo_ativo: !profile.timo_ativo },
+            profile.timo_ativo ? "Timo desativado." : "Timo ativado.",
+          )}
+        />
       </TabPanel>}
       {isAdmin && <TabPanel header="Notícias" leftIcon="pi pi-megaphone mr-2">
         <NewsSettings />

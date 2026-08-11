@@ -33,7 +33,8 @@ export function Floaters() {
     const [searchReservas, setSearchReservas] = useState("");
     const [usageDialog, setUsageDialog] = useState(false);
     const [usageDate, setUsageDate] = useState(new Date());
-    const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [] });
+    const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [], indisponiveis: [] });
+    const [availabilityDialog, setAvailabilityDialog] = useState(null);
 
     // Handles de busca para colaboradores
     const [colaboradores, setColaboradores] = useState([])
@@ -123,6 +124,30 @@ export function Floaters() {
         } finally { setLoading(false) }
     }
 
+    async function updateAvailability(reserva, disponivel, motivo = null) {
+        try {
+            setLoading(true);
+            await connect.patch("/reservas", {
+                id: reserva.floater_id,
+                disponivel,
+                ...(motivo ? { motivo } : {}),
+            });
+            showToast(
+                "success",
+                "Reserva atualizada",
+                disponivel
+                    ? `${get_first_name(reserva.nome)} está disponível novamente.`
+                    : `${get_first_name(reserva.nome)} foi marcada como indisponível por ${motivo.toLowerCase()}.`,
+            );
+            setAvailabilityDialog(null);
+            setRefresh((previous) => !previous);
+        } catch (error) {
+            showToast("error", "Reserva", error.response?.data || "Não foi possível atualizar a disponibilidade.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     // Consulta um único dia operacional e mantém o mesmo contrato usado na tela de requisições.
     async function loadReservationUsage(date = usageDate) {
         const value = new Date(date);
@@ -158,6 +183,7 @@ export function Floaters() {
             <div className="floaters-summary">
                 <DashCard title="Total de colaboradores" icon="pi pi-users" value={totalColaboradores} className="floater-summary-card" />
                 <DashCard title="Reservas técnicas" icon="pi pi-shield" value={reservas.length} className="floater-summary-card" />
+                <DashCard title="Indisponíveis" icon="pi pi-ban" value={reservas.filter((reserva) => reserva.disponivel === false).length} className="floater-summary-card" />
             </div>
 
             <Splitter className="floaters-splitter" layout={isMobile ? "vertical" : "horizontal"} gutterSize={12}>
@@ -241,18 +267,31 @@ export function Floaters() {
                                         <div className="floater-card-tags">
                                             <Tag value={reserva.cargo || "Cargo não informado"} rounded />
                                             <Tag value={(reserva.situacao || "Sem situação").toUpperCase()} severity="success" rounded />
+                                            {reserva.disponivel === false ? <Tag value={`INDISPONÍVEL · ${reserva.indisponibilidade_motivo || "SEM MOTIVO"}`} severity="warning" rounded /> : <Tag value="DISPONÍVEL" severity="success" rounded />}
                                         </div>
                                     </div>
-                                    <Button
-                                        rounded
-                                        outlined
-                                        icon="pi pi-trash"
-                                        disabled={!canEdit}
-                                        severity="danger"
-                                        tooltip="Remover das reservas"
-                                        aria-label={`Remover ${reserva.nome} das reservas`}
-                                        onClick={() => delReserva(reserva.floater_id, reserva.nome)}
-                                    />
+                                    <div className="floater-card-actions">
+                                        <Button
+                                            rounded
+                                            outlined
+                                            icon={reserva.disponivel === false ? "pi pi-check" : "pi pi-ban"}
+                                            disabled={!canEdit}
+                                            severity={reserva.disponivel === false ? "success" : "warning"}
+                                            tooltip={reserva.disponivel === false ? "Marcar como disponível" : "Marcar como indisponível"}
+                                            aria-label={`Alterar disponibilidade de ${reserva.nome}`}
+                                            onClick={() => reserva.disponivel === false ? updateAvailability(reserva, true) : setAvailabilityDialog(reserva)}
+                                        />
+                                        <Button
+                                            rounded
+                                            outlined
+                                            icon="pi pi-trash"
+                                            disabled={!canEdit}
+                                            severity="danger"
+                                            tooltip="Remover das reservas"
+                                            aria-label={`Remover ${reserva.nome} das reservas`}
+                                            onClick={() => delReserva(reserva.floater_id, reserva.nome)}
+                                        />
+                                    </div>
                                 </article>
                             );
                         }) : (
@@ -319,6 +358,38 @@ export function Floaters() {
                                 : <span className="floaters-usage-empty">Nenhuma reserva disponível nesta data.</span>}
                         </div>
                     </section>
+                    <section>
+                        <h3>Indisponíveis ({reservationUsage.indisponiveis.length})</h3>
+                        <div className="floaters-usage-list">
+                            {reservationUsage.indisponiveis.length
+                                ? reservationUsage.indisponiveis.map((item) => (
+                                    <div className="floaters-usage-item" key={item.id}>
+                                        <div className="floaters-usage-person">
+                                            <strong>{item.nome}</strong>
+                                            <span>Matrícula: {item.matricula}</span>
+                                        </div>
+                                        <div className="floaters-usage-meta">
+                                            <Tag value={item.indisponibilidade_motivo || "INDISPONÍVEL"} severity="warning" rounded />
+                                        </div>
+                                    </div>
+                                ))
+                                : <span className="floaters-usage-empty">Nenhuma reserva indisponível nesta data.</span>}
+                        </div>
+                    </section>
+                </div>
+            </Dialog>
+
+            <Dialog
+                header="Marcar reserva como indisponível"
+                visible={Boolean(availabilityDialog)}
+                modal
+                className="floater-availability-dialog"
+                onHide={() => setAvailabilityDialog(null)}
+            >
+                <p>Por que <strong>{availabilityDialog?.nome}</strong> não pode atender às reposições?</p>
+                <div className="floater-availability-options">
+                    <Button label="Falta" icon="pi pi-user-minus" severity="danger" onClick={() => updateAvailability(availabilityDialog, false, "FALTA")} />
+                    <Button label="Apoio" icon="pi pi-users" severity="warning" onClick={() => updateAvailability(availabilityDialog, false, "APOIO")} />
                 </div>
             </Dialog>
         </main>
