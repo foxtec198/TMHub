@@ -1191,6 +1191,12 @@
 .timo-settings__status { display: inline-flex; align-items: center; gap: .4rem; padding: .52rem .7rem; border: 1px solid var(--border); border-radius: 999px; color: var(--text-secondary); background: var(--surface-2); font-size: .82rem; font-weight: 700; }
 .timo-settings__status.is-active { border-color: color-mix(in srgb, var(--status-success) 55%, var(--border)); color: var(--status-success); }
 .timo-settings__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.timo-settings__tabs .p-tabview-panels { padding: 1rem 0 0; background: transparent; }
+.timo-settings__tabs .p-tabview-nav { flex-wrap: wrap; gap: .35rem; border-color: var(--border); background: transparent; }
+.timo-settings__tabs .p-tabview-nav li { margin-right: 0; }
+.timo-settings__tabs .p-tabview-nav-link { border-color: var(--border); background: var(--surface-2); color: var(--text-secondary); border-radius: .7rem .7rem 0 0; }
+.timo-settings__tabs .p-tabview-nav li.p-highlight .p-tabview-nav-link { border-color: var(--primary); color: var(--primary); background: var(--surface-1); }
+.timo-settings__tab-description { margin: 0 0 1rem; color: var(--text-secondary); font-size: .88rem; }
 .timo-intent-card { display: grid; gap: .9rem; padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; color: var(--text-primary); background: var(--surface-1); box-shadow: var(--shadow-sm); }
 .timo-intent-card.is-disabled { opacity: .72; }
 .timo-intent-card__header { display: flex; justify-content: space-between; gap: .8rem; }
@@ -1213,6 +1219,17 @@
 .timo-command-form .p-inputtext,
 .timo-command-form .p-inputtextarea,
 .timo-command-form .p-dropdown { width: 100%; color: var(--text-primary); background: var(--surface-2); border-color: var(--border); }
+.timo-learning__intro { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface-1); }
+.timo-learning__intro h3 { margin: 0; color: var(--text-primary); font-size: 1rem; }
+.timo-learning__intro p { max-width: 48rem; margin: .35rem 0 0; color: var(--text-secondary); font-size: .86rem; line-height: 1.4; }
+.timo-learning__list { display: grid; gap: .75rem; }
+.timo-learning-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(13rem, .8fr) auto; align-items: center; gap: .85rem; padding: .9rem 1rem; border: 1px solid var(--border); border-radius: .85rem; background: var(--surface-1); }
+.timo-learning-card code { display: block; overflow: hidden; color: var(--text-primary); font-size: .88rem; text-overflow: ellipsis; white-space: nowrap; }
+.timo-learning-card small { display: block; margin-top: .35rem; color: var(--text-muted); }
+.timo-learning-card .p-dropdown { width: 100%; color: var(--text-primary); background: var(--surface-2); border-color: var(--border); }
+.timo-learning-card__actions { display: flex; justify-content: flex-end; gap: .4rem; }
+.timo-learning__empty { padding: 1.35rem; border: 1px dashed var(--border); border-radius: .85rem; color: var(--text-secondary); text-align: center; }
+.timo-learning__empty i { margin-right: .4rem; color: var(--status-success); }
 
 @media (max-width: 620px) {
   .timo-settings__intro { align-items: flex-start; flex-direction: column; }
@@ -1220,4 +1237,7 @@
   .timo-settings__list,
   .timo-intent-card__actions,
   .timo-command-form { grid-template-columns: 1fr; }
+  .timo-learning__intro,
+  .timo-learning-card { align-items: stretch; grid-template-columns: 1fr; }
+  .timo-learning-card__actions { justify-content: flex-start; }
 }

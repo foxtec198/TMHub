@@ -5,6 +5,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { InputTextarea } from "primereact/inputtextarea";
+import { TabPanel, TabView } from "primereact/tabview";
 
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -39,6 +40,12 @@ export function TimoSettings({ timoActive, onToggleTimo }) {
   const [customDialog, setCustomDialog] = useState(false);
   const [customCommand, setCustomCommand] = useState(EMPTY_CUSTOM_COMMAND);
   const [creatingCustom, setCreatingCustom] = useState(false);
+  const [learningExamples, setLearningExamples] = useState([]);
+  const [learningIntentOptions, setLearningIntentOptions] = useState([]);
+  const [learningSelections, setLearningSelections] = useState({});
+  const [approvedLearningCount, setApprovedLearningCount] = useState(0);
+  const [reviewingLearningId, setReviewingLearningId] = useState(null);
+  const [training, setTraining] = useState(false);
   const { showToast } = useToast();
   const setLoading = useLoading();
 
@@ -52,6 +59,9 @@ export function TimoSettings({ timoActive, onToggleTimo }) {
         if (!active) return;
         setConfigurations(data?.configuracoes || []);
         setNavigationOptions(data?.acoes || []);
+        setLearningExamples(data?.aprendizados || []);
+        setLearningIntentOptions(data?.intents_disponiveis || []);
+        setApprovedLearningCount(data?.aprendizados_aprovados || 0);
       } catch (error) {
         if (active) {
           showToast("error", "Timo", errorMessage(error, "Não foi possível carregar as automações do Timo."));
@@ -130,6 +140,126 @@ export function TimoSettings({ timoActive, onToggleTimo }) {
     }
   }
 
+  async function reviewLearning(example, status) {
+    const selectedIntent = learningSelections[example.id] || example.intent_sugerida;
+    if (status === "aprovado" && !selectedIntent) {
+      showToast("warn", "Aprendizado", "Selecione a intenção correta para aprovar a frase.");
+      return;
+    }
+
+    setReviewingLearningId(example.id);
+    try {
+      await connect.patch(`/timo/aprendizados/${example.id}`, {
+        status,
+        intent: selectedIntent,
+      });
+      setLearningExamples((current) => current.filter((item) => item.id !== example.id));
+      if (status === "aprovado") {
+        setApprovedLearningCount((current) => current + 1);
+      }
+      showToast("success", "Aprendizado", status === "aprovado" ? "Frase aprovada para o próximo treino." : "Frase ignorada.");
+    } catch (error) {
+      showToast("error", "Aprendizado", errorMessage(error, "Não foi possível revisar a frase."));
+    } finally {
+      setReviewingLearningId(null);
+    }
+  }
+
+  async function trainLearning() {
+    setTraining(true);
+    try {
+      const { data } = await connect.post("/timo/aprendizados/treinar");
+      showToast("success", "Aprendizado", data?.message || "Modelo treinado com as frases aprovadas.");
+    } catch (error) {
+      showToast("error", "Aprendizado", errorMessage(error, "Não foi possível treinar o modelo."));
+    } finally {
+      setTraining(false);
+    }
+  }
+
+  function renderConfiguration(configuration) {
+    return (
+      <article className={`timo-intent-card${configuration.ativo ? "" : " is-disabled"}`} key={configuration.intent}>
+        <header className="timo-intent-card__header">
+          <div>
+            <h3>{configuration.label}</h3>
+            <code>{configuration.intent}</code>
+            <p>{configuration.description}</p>
+          </div>
+          <label className="timo-intent-card__switch">
+            <span>{configuration.ativo ? "Ativa" : "Desativada"}</span>
+            <InputSwitch checked={configuration.ativo} onChange={(event) => update(configuration.intent, "ativo", event.value)} />
+          </label>
+        </header>
+
+        <label className="timo-intent-card__field">
+          <span>Resposta do balão</span>
+          <InputTextarea
+            rows={3}
+            autoResize
+            value={configuration.resposta_template}
+            onChange={(event) => update(configuration.intent, "resposta_template", event.target.value)}
+            placeholder="Mensagem que o Timo vai mostrar"
+          />
+          {configuration.comandos?.length ? (
+            <small>Fale: {configuration.comandos.map((command) => `“${command}”`).join(" ou ")}</small>
+          ) : null}
+          {configuration.variaveis?.length ? (
+            <small>Variáveis disponíveis: {configuration.variaveis.join(", ")}</small>
+          ) : null}
+        </label>
+
+        <div className="timo-intent-card__actions">
+          <label className="timo-intent-card__field">
+            <span>Após responder</span>
+            <Dropdown
+              value={configuration.acao_tipo}
+              options={ACTION_TYPES}
+              optionLabel="label"
+              optionValue="value"
+              onChange={(event) => update(configuration.intent, "acao_tipo", event.value)}
+            />
+          </label>
+
+          {configuration.acao_tipo === "navigate" ? (
+            <label className="timo-intent-card__field">
+              <span>Tela para abrir</span>
+              <Dropdown
+                value={configuration.acao_valor}
+                options={navigationOptions}
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Selecione uma tela"
+                onChange={(event) => update(configuration.intent, "acao_valor", event.value)}
+              />
+            </label>
+          ) : null}
+        </div>
+
+        <footer>
+          {configuration.personalizado ? (
+            <Button
+              icon="pi pi-trash"
+              severity="danger"
+              text
+              rounded
+              loading={savingIntent === configuration.intent}
+              onClick={() => removeCustomCommand(configuration)}
+              aria-label="Remover comando personalizado"
+              tooltip="Remover comando"
+            />
+          ) : null}
+          <Button
+            label="Salvar automação"
+            icon="pi pi-save"
+            loading={savingIntent === configuration.intent}
+            onClick={() => save(configuration)}
+          />
+        </footer>
+      </article>
+    );
+  }
+
   return (
     <section className="timo-settings">
       <div className="timo-settings__intro">
@@ -152,88 +282,66 @@ export function TimoSettings({ timoActive, onToggleTimo }) {
         </div>
       </div>
 
-      <div className="timo-settings__list">
-        {configurations.map((configuration) => (
-          <article className={`timo-intent-card${configuration.ativo ? "" : " is-disabled"}`} key={configuration.intent}>
-            <header className="timo-intent-card__header">
-              <div>
-                <h3>{configuration.label}</h3>
-                <code>{configuration.intent}</code>
-                <p>{configuration.description}</p>
-              </div>
-              <label className="timo-intent-card__switch">
-                <span>{configuration.ativo ? "Ativa" : "Desativada"}</span>
-                <InputSwitch checked={configuration.ativo} onChange={(event) => update(configuration.intent, "ativo", event.value)} />
-              </label>
-            </header>
-
-            <label className="timo-intent-card__field">
-              <span>Resposta do balão</span>
-              <InputTextarea
-                rows={3}
-                autoResize
-                value={configuration.resposta_template}
-                onChange={(event) => update(configuration.intent, "resposta_template", event.target.value)}
-                placeholder="Mensagem que o Timo vai mostrar"
-              />
-              {configuration.comandos?.length ? (
-                <small>Fale: {configuration.comandos.map((command) => `“${command}”`).join(" ou ")}</small>
-              ) : null}
-              {configuration.variaveis?.length ? (
-                <small>Variáveis disponíveis: {configuration.variaveis.join(", ")}</small>
-              ) : null}
-            </label>
-
-            <div className="timo-intent-card__actions">
-              <label className="timo-intent-card__field">
-                <span>Após responder</span>
+      <TabView className="timo-settings__tabs">
+        <TabPanel header="Consultas e análises" leftIcon="pi pi-chart-line mr-2">
+          <p className="timo-settings__tab-description">Indicadores e respostas analíticas baseadas nos dados operacionais do seu escopo.</p>
+          <div className="timo-settings__list">
+            {configurations.filter((item) => item.categoria === "analises").map(renderConfiguration)}
+          </div>
+        </TabPanel>
+        <TabPanel header="Navegação entre telas" leftIcon="pi pi-compass mr-2">
+          <p className="timo-settings__tab-description">Comandos para abrir telas do TMHub. O acesso final continua respeitando a permissão de cada usuário.</p>
+          <div className="timo-settings__list">
+            {configurations.filter((item) => item.categoria === "telas").map(renderConfiguration)}
+          </div>
+        </TabPanel>
+        <TabPanel header="Personalizados" leftIcon="pi pi-sparkles mr-2">
+          <p className="timo-settings__tab-description">Frases criadas manualmente para respostas ou ações específicas.</p>
+          <div className="timo-settings__list">
+            {configurations.filter((item) => item.categoria === "personalizado").map(renderConfiguration)}
+          </div>
+        </TabPanel>
+        <TabPanel header="Aprendizado" leftIcon="pi pi-graduation-cap mr-2">
+          <div className="timo-learning__intro">
+            <div>
+              <h3>Frases para revisão</h3>
+              <p>Somente comandos que o Timo não entendeu entram aqui. Revise a intenção e treine o modelo quando quiser aplicar as frases aprovadas.</p>
+            </div>
+            <Button
+              label={`Treinar modelo${approvedLearningCount ? ` (${approvedLearningCount})` : ""}`}
+              icon="pi pi-refresh"
+              disabled={!approvedLearningCount}
+              loading={training}
+              onClick={trainLearning}
+            />
+          </div>
+          <div className="timo-learning__list">
+            {learningExamples.length ? learningExamples.map((example) => (
+              <article className="timo-learning-card" key={example.id}>
+                <div>
+                  <code>“{example.texto}”</code>
+                  <small>{example.ocorrencias} ocorrência(s) · confiança sugerida {Math.round((example.confianca || 0) * 100)}%</small>
+                </div>
                 <Dropdown
-                  value={configuration.acao_tipo}
-                  options={ACTION_TYPES}
+                  value={learningSelections[example.id] || example.intent_sugerida || null}
+                  options={learningIntentOptions}
                   optionLabel="label"
                   optionValue="value"
-                  onChange={(event) => update(configuration.intent, "acao_tipo", event.value)}
+                  filter
+                  placeholder="Intenção correta"
+                  onChange={(event) => setLearningSelections((current) => ({ ...current, [example.id]: event.value }))}
                 />
-              </label>
-
-              {configuration.acao_tipo === "navigate" ? (
-                <label className="timo-intent-card__field">
-                  <span>Tela para abrir</span>
-                  <Dropdown
-                    value={configuration.acao_valor}
-                    options={navigationOptions}
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Selecione uma tela"
-                    onChange={(event) => update(configuration.intent, "acao_valor", event.value)}
-                  />
-                </label>
-              ) : null}
-            </div>
-
-            <footer>
-              {configuration.personalizado ? (
-                <Button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  text
-                  rounded
-                  loading={savingIntent === configuration.intent}
-                  onClick={() => removeCustomCommand(configuration)}
-                  aria-label="Remover comando personalizado"
-                  tooltip="Remover comando"
-                />
-              ) : null}
-              <Button
-                label="Salvar automação"
-                icon="pi pi-save"
-                loading={savingIntent === configuration.intent}
-                onClick={() => save(configuration)}
-              />
-            </footer>
-          </article>
-        ))}
-      </div>
+                <div className="timo-learning-card__actions">
+                  <Button label="Ignorar" text severity="secondary" disabled={reviewingLearningId === example.id} onClick={() => reviewLearning(example, "ignorado")} />
+                  <Button label="Aprovar" icon="pi pi-check" loading={reviewingLearningId === example.id} onClick={() => reviewLearning(example, "aprovado")} />
+                </div>
+              </article>
+            )) : (
+              <div className="timo-learning__empty"><i className="pi pi-check-circle" /> Nenhuma frase aguardando revisão.</div>
+            )}
+          </div>
+        </TabPanel>
+      </TabView>
 
       <Dialog
         header="Novo comando do Timo"
