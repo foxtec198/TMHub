@@ -43,7 +43,7 @@ const ERROR_MESSAGES = {
  * apareça em vários interim results
  * e acorde o assistente várias vezes.
  */
-const WAKE_COOLDOWN = 1500;
+const WAKE_COOLDOWN = 900;
 
 
 /*

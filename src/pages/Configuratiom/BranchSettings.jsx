@@ -9,6 +9,7 @@ import { Table } from "../../components/tables/Table";
 import connect from "../../utils/request";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+import { SpeedDial } from "primereact/speeddial";
 
 const EMPTY_FORM = { nome: "", ativa: true, usuario_ids: [], centro_custo_ids: [], departamentos: [] };
 
@@ -75,11 +76,12 @@ export function BranchSettings() {
     { header: "Status", field: "ativa", body: (branch) => <Tag value={branch.ativa ? "ATIVA" : "INATIVA"} severity={branch.ativa ? "success" : "secondary"} /> },
     { header: "Usuários", body: (branch) => branch.usuario_ids?.length || 0 },
     { header: "Contratos", body: (branch) => branch.centro_custo_ids?.length || 0 },
-    { header: "Departamentos", body: (branch) => branch.departamentos?.join(", ") || "—" },
+    { header: "Departamentos", class: 'text-truncate', body: (branch) => branch.departamentos?.join(", ") || "—" },
     { header: "Ações", body: (branch) => <Button icon="pi pi-pencil" rounded text aria-label={`Editar ${branch.nome}`} onClick={() => openEdit(branch)} /> },
   ];
 
-  return <div className="branch-settings-layout">
+  return <div>
+    {/* Article da TABELA de filiais  */}
     <article className="settings-card branch-table-card">
       <div className="settings-card-title"><i className="pi pi-building" /><div><h2>Filiais</h2><p>Defina os usuários e contratos de cada unidade</p></div></div>
       {status === "loading" && <div className="settings-feedback"><i className="pi pi-spin pi-spinner" /> Carregando filiais e vínculos...</div>}
@@ -87,12 +89,12 @@ export function BranchSettings() {
       {status === "ready" && branches.length > 0 && <Table data={branches} columns={columns} search rows={5} rowsPerPageOptions={[5, 10, 25]} />}
       {status === "ready" && branches.length === 0 && <div className="settings-feedback">Nenhuma filial cadastrada.</div>}
     </article>
-    <aside className="settings-card branch-help-card">
-      <div className="settings-card-title"><i className="pi pi-sitemap" /><div><h2>Escopo de acesso</h2><p>As filiais vinculadas ao usuário são unificadas</p></div></div>
-      <p>Selecionar um departamento inclui todos os contratos dele. Depois você também pode ajustar os contratos individualmente.</p>
-      <Button label="Nova filial" icon="pi pi-plus" onClick={openCreate} />
-    </aside>
 
+
+    {/* Button para criar filias */}
+    <div className="users-speed-dial"><SpeedDial onClick={openCreate} direction="up" showIcon="pi pi-plus"/></div>
+
+    {/* Dialog de criação de filiais */}
     <Dialog header={editingId ? "Editar filial" : "Nova filial"} visible={dialog} modal className="branch-dialog" onHide={() => setDialog(false)}>
       <form className="branch-form" onSubmit={save}>
         <label htmlFor="branch-name">Nome da filial</label>
