@@ -1,13 +1,12 @@
 const WAKE_WORDS = [
   "timo",
-  "timo bot",
-  "timo club",
-  // Transcrições comuns do navegador para "Timo".
-  // Não usar fragmentos como "mo" ou "ino": eles acordavam o assistente
-  // no meio de palavras normais e deixavam o próximo comando inconsistente.
-  "te amo",
   "time",
-  "tino"
+  "tino",
+  "primo",
+  "te amo",
+  "tine",
+  "tim",
+  "shimomo"
 ];
 
 export function normalizeTimoTranscript(value) {
@@ -26,12 +25,10 @@ const SORTED_WAKE_WORDS = [...new Set(WAKE_WORDS.map(normalizeTimoTranscript) )]
 );
 
 export function findWakeWord(transcript) {
-  const normalized =
-    normalizeTimoTranscript(transcript);
+  const normalized = normalizeTimoTranscript(transcript);
+  console.log("[TIMO ESCUTOU] ", normalized)
 
-  if (!normalized) {
-    return null;
-  }
+  if (!normalized) { return null; }
 
   for (const wakeWord of SORTED_WAKE_WORDS) {
     const escaped = wakeWord.replace(

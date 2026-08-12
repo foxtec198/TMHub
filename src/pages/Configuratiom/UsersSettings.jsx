@@ -164,18 +164,17 @@ export function UsersSettings() {
     { header: "Nome", field: "nome", sortable: true },
     { header: "E-mail", field: "email", body: (user) => user.email || "—" },
     { header: "CPF", field: "cpf", body: (user) => user.cpf || "Restrito" },
+    { header: "Último acesso", field: "last_login", body: (user) => formatDate(user.last_login) },
     { header: "Perfil", field: "role", body: (user) => <Tag value={user.role || "USER"} severity={user.role === "ADMIN" ? "success" : "secondary"} /> },
     { header: "Filiais", body: (user) => user.filial_ids?.length || 0 },
     { header: "Telas", body: (user) => user.permissions?.filter((permission) => permission.view).length || 0 },
-    { header: "Controle de faltas", body: (user) => <Tag value={user.gerencia_faltas ? "RESPONSÁVEL" : "SEM ACESSO"} severity={user.gerencia_faltas ? "success" : "secondary"} /> },
-    { header: "Último acesso", field: "last_login", body: (user) => formatDate(user.last_login) },
     ...(canManage ? [{
       header: "Ações",
       body: (user) => <Button icon="pi pi-pencil" rounded text aria-label={`Editar ${user.nome}`} onClick={() => openEdit(user)} />,
     }] : []),
   ];
 
-  return <div className="users-settings-layout">
+  return <div>
     <article className="settings-card users-table-card">
       <div className="settings-card-title"><i className="pi pi-users" /><div><h2>Usuários cadastrados</h2><p>Contas com acesso ao TM Hub</p></div></div>
       {usersStatus === "loading" && <div className="settings-feedback"><i className="pi pi-spin pi-spinner" /> Carregando usuários...</div>}
@@ -184,22 +183,27 @@ export function UsersSettings() {
       {usersStatus === "ready" && users.length === 0 && <div className="settings-feedback">Nenhum usuário cadastrado.</div>}
     </article>
 
-    <aside className="settings-card users-actions-card">
-      <div className="settings-card-title"><i className="pi pi-user-plus" /><div><h2>Gerenciar acessos</h2><p>{canManage ? "Crie uma conta ou importe a planilha padrão" : "Somente administradores podem alterar contas"}</p></div></div>
-      {canManage ? <>
-        <p>Use o botão abaixo para escolher entre cadastro individual e importação em massa.</p>
-        <div className="users-speed-dial"><SpeedDial model={speedDialItems} direction="up" showIcon="pi pi-plus" hideIcon="pi pi-times" /></div>
-      </> : <div className="users-readonly"><i className="pi pi-lock" /><span>Você possui acesso somente à listagem.</span></div>}
-    </aside>
+    <div className="users-speed-dial">
+      <SpeedDial model={speedDialItems} direction="up" showIcon="pi pi-plus" hideIcon="pi pi-times" />
+    </div>
 
     <Dialog header={editingId ? "Editar usuário" : "Criar usuário"} visible={userDialog} modal className="user-dialog" onHide={() => setUserDialog(false)}>
       <form className="user-form flex flex-column gap-4 mt-4" onSubmit={saveUser}>
         <FloatLabel><InputText id="user-name" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required /><label htmlFor="user-name">Nome</label></FloatLabel>
-        <FloatLabel><InputText id="user-cpf" value={form.cpf} onChange={(event) => setForm({ ...form, cpf: event.target.value })} maxLength={14} /><label htmlFor="user-cpf">CPF (opcional)</label></FloatLabel>
-        <FloatLabel><InputText id="user-email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /><label htmlFor="user-email">E-mail</label></FloatLabel>
-        <FloatLabel><Dropdown inputId="user-role" value={form.role} options={ROLE_OPTIONS} onChange={(event) => setForm({ ...form, role: event.value })} /><label htmlFor="user-role">Perfil</label></FloatLabel>
-        <FloatLabel><MultiSelect inputId="user-branches" value={form.filial_ids} options={branches} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, filial_ids: event.value })} display="chip" filter /><label htmlFor="user-branches">Filiais com acesso</label></FloatLabel>
-        <div className="theme-option"><div><strong>Responsável pelo Controle de Faltas</strong><span>Permite analisar e concluir tratativas de faltas nas filiais vinculadas.</span></div><InputSwitch checked={form.gerencia_faltas} onChange={(event) => setForm({ ...form, gerencia_faltas: event.value })} /></div>
+
+        <div className="flex flex-wrap gap-3 mt-3">
+          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><InputText id="user-cpf" value={form.cpf} onChange={(event) => setForm({ ...form, cpf: event.target.value })} maxLength={14} /><label htmlFor="user-cpf">CPF (opcional)</label></FloatLabel>
+          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><InputText id="user-email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /><label htmlFor="user-email">E-mail</label></FloatLabel>
+        </div>
+
+        <div className="flex flex-wrap gap-3 mt-3">
+          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><Dropdown inputId="user-role" value={form.role} options={ROLE_OPTIONS} onChange={(event) => setForm({ ...form, role: event.value })} /><label htmlFor="user-role">Perfil</label></FloatLabel>
+          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><MultiSelect inputId="user-branches0" className="w-full" value={form.filial_ids} options={branches} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, filial_ids: event.value })} display="chip" filter /><label htmlFor="user-branches">Filiais com acesso</label></FloatLabel>
+        </div>
+
+        <FloatLabel className="mt-3"><Password autoComplete="off" aria-autocomplete="off" inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /><label htmlFor="user-password">{editingId ? "Nova senha (opcional)" : "Senha"}</label></FloatLabel>
+
+
         <section className="permission-editor">
           <header><div><strong>Telas e permissões</strong><span>Criação ou alteração habilitam automaticamente a visualização.</span></div></header>
           <div className="permission-table">
@@ -218,7 +222,6 @@ export function UsersSettings() {
           </div>
           {form.role === "ADMIN" && <small className="permission-admin-note"><i className="pi pi-shield" /> Administradores possuem acesso total.</small>}
         </section>
-        <FloatLabel><Password inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /><label htmlFor="user-password">{editingId ? "Nova senha (opcional)" : "Senha"}</label></FloatLabel>
         <div className="dialog-actions"><Button type="button" label="Cancelar" text onClick={() => setUserDialog(false)} /><Button type="submit" label={editingId ? "Salvar alterações" : "Criar usuário"} icon="pi pi-check" /></div>
       </form>
     </Dialog>
