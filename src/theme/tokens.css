@@ -237,6 +237,16 @@ body { transition: background-color .18s ease, color .18s ease; }
 :root[data-theme] .p-button.p-button-text.p-button-warning { color: var(--status-warning) !important; }
 :root[data-theme] .p-button.p-button-outlined.p-button-info,
 :root[data-theme] .p-button.p-button-text.p-button-info { color: var(--status-info) !important; }
+:root[data-theme] .p-tag.p-tag-warning {
+  color: color-mix(in srgb, var(--status-warning) 78%, #fff) !important;
+  background: color-mix(in srgb, var(--status-warning) 17%, var(--surface-1)) !important;
+  border: 1px solid color-mix(in srgb, var(--status-warning) 48%, var(--border)) !important;
+}
+:root[data-theme] .p-tag.p-tag-info {
+  color: color-mix(in srgb, var(--status-info) 82%, #fff) !important;
+  background: color-mix(in srgb, var(--status-info) 16%, var(--surface-1)) !important;
+  border: 1px solid color-mix(in srgb, var(--status-info) 46%, var(--border)) !important;
+}
 :root[data-theme] .p-button.p-button-outlined:not(:disabled):hover,
 :root[data-theme] .p-button.p-button-text:not(:disabled):hover { background: var(--accent-soft) !important; }
 :root[data-theme] .p-button:disabled,
