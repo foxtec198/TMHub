@@ -55,6 +55,8 @@ import { TMOps } from "./pages/TMOps";
 import { TMOpsManagement } from "./pages/TMOps/Management";
 import { TMOpsTasks } from "./pages/TMOps/Tasks";
 import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
+import { TicketDetail, TicketsDashboard } from "./pages/Tickets";
+import { TicketManagement } from "./pages/Tickets/TicketManagement";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -194,6 +196,18 @@ export function AppRoutes() {
             }
           />
           <Route path="/configuracoes" element={<Settings />} />
+          <Route
+            path="/tickets"
+            element={<PermissionGate screen="tickets"><TicketsDashboard /></PermissionGate>}
+          />
+          <Route
+            path="/tickets/:ticketId"
+            element={<PermissionGate screen="tickets"><TicketDetail /></PermissionGate>}
+          />
+          <Route
+            path="/tickets/gestao"
+            element={<PermissionGate screen="tickets" adminOnly><TicketManagement /></PermissionGate>}
+          />
           <Route
             path="/controle-faltas"
             element={

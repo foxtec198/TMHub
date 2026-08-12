@@ -1,7 +1,8 @@
 import { io } from "socket.io-client"
 import { getAccessToken } from "./authSession";
+import { apiServer } from "./apiServer";
 
-export const socketio = io(import.meta.env.VITE_SERVER, {
+export const socketio = io(apiServer, {
   auth: (callback) => callback({ token: getAccessToken() }),
   reconnection: true,          // tenta reconectar automaticamente
   reconnectionAttempts: 10,    // número de tentativas

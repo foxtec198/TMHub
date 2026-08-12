@@ -2,8 +2,9 @@
 import axios from "axios";
 import { socketio } from "./socketio";
 import { getAccessToken } from "./authSession";
+import { apiServer } from "./apiServer";
 
-export const server = import.meta.env.VITE_SERVER;
+export const server = apiServer;
 
 const connect = axios.create({
   baseURL: server,

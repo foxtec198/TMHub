@@ -44,6 +44,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/projetos": ["projetos"],
   "/reports/rescisoes": ["rescisoes", "colaboradores"],
   "/controle-medidas-disciplinares": ["medidas_disciplinares"],
+  "/tickets": ["tickets"],
 };
 
 export function MainLayout() {
@@ -338,6 +339,18 @@ export function MainLayout() {
       icon: 'pi pi-building',
       visible: can("estrutura"),
       command: () => { navigateTo("/estrutura") }
+    },
+    {
+      label: 'Chamados',
+      icon: 'pi pi-headphones',
+      visible: can("tickets"),
+      command: () => { navigateTo("/tickets") }
+    },
+    {
+      label: 'Gestão de chamados',
+      icon: 'pi pi-sliders-h',
+      visible: can("tickets") && String(role || "").toUpperCase() === "ADMIN",
+      command: () => { navigateTo("/tickets/gestao") }
     },
     {
       label: 'Meus Projetos',

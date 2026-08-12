@@ -1,7 +1,8 @@
 import axios from "axios";
+import { apiServer } from "./apiServer";
 
 const tmOpsRequest = axios.create({
-    baseURL: import.meta.env.VITE_SERVER,
+    baseURL: apiServer,
 });
 
 tmOpsRequest.interceptors.request.use((config) => {
