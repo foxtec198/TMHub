@@ -11,6 +11,7 @@ import { TimoVoiceAgentSettings } from "../../components/Timo/TimoVoiceAgentSett
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
+import { socketio } from "../../utils/socketio";
 
 
 const ACTION_TYPES = [
@@ -75,6 +76,42 @@ export function TimoSettings() {
     load();
     return () => { active = false; };
   }, [setLoading, showToast]);
+
+  useEffect(() => {
+    const updateLearningInRealTime = (payload) => {
+      if (!payload) return;
+      const example = payload.aprendizado;
+
+      if (payload.event === "capturado" && example?.id) {
+        setLearningExamples((current) => {
+          const withoutCurrent = current.filter((item) => item.id !== example.id);
+          return [example, ...withoutCurrent]
+            .sort((left, right) => (right.ocorrencias || 0) - (left.ocorrencias || 0))
+            .slice(0, 100);
+        });
+      }
+
+      if (payload.event === "revisado" && example?.id) {
+        setLearningExamples((current) => current.filter((item) => item.id !== example.id));
+        setLearningSelections((current) => {
+          const next = { ...current };
+          delete next[example.id];
+          return next;
+        });
+      }
+
+      if (payload.event === "treinado") {
+        setLearningSelections({});
+      }
+
+      if (typeof payload.aprendizados_aprovados === "number") {
+        setApprovedLearningCount(payload.aprendizados_aprovados);
+      }
+    };
+
+    socketio.on("timo_learning_updated", updateLearningInRealTime);
+    return () => socketio.off("timo_learning_updated", updateLearningInRealTime);
+  }, []);
 
   function update(intent, field, value) {
     setConfigurations((current) => current.map((item) => (
@@ -155,9 +192,6 @@ export function TimoSettings() {
         intent: selectedIntent,
       });
       setLearningExamples((current) => current.filter((item) => item.id !== example.id));
-      if (status === "aprovado") {
-        setApprovedLearningCount((current) => current + 1);
-      }
       showToast("success", "Aprendizado", status === "aprovado" ? "Frase aprovada para o próximo treino." : "Frase ignorada.");
     } catch (error) {
       showToast("error", "Aprendizado", errorMessage(error, "Não foi possível revisar a frase."));
