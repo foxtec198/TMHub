@@ -139,6 +139,17 @@
   animation: cyberpunk-menu-glitch 16s steps(1, end) infinite;
 }
 
+/*
+ * No mobile, a sidebar precisa sair do fluxo para não reservar a largura do
+ * menu quando estiver fechada. A regra acima usa maior especificidade por
+ * causa do tema e, sem este override, anulava o position:absolute do layout.
+ */
+@media screen and (max-width: 960px) {
+  :root[data-theme="cyberpunk"] .layout-sidebar {
+    position: absolute;
+  }
+}
+
 @keyframes cyberpunk-brand-glitch {
   0%, 92%, 100% { transform: translate(0); filter: none; }
   92.5% { transform: translateX(-1px); filter: drop-shadow(2px 0 rgba(255, 51, 79, 0.72)); }

@@ -1,0 +1,100 @@
+.timo-agent-settings {
+  display: grid;
+  gap: 1rem;
+}
+
+.timo-agent-settings__header,
+.timo-agent-card,
+.timo-agent-settings__note {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface-1);
+}
+
+.timo-agent-settings__header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem;
+}
+
+.timo-agent-settings h3,
+.timo-agent-settings p {
+  margin: 0;
+}
+
+.timo-agent-settings p,
+.timo-agent-card small {
+  color: var(--text-secondary);
+}
+
+.timo-agent-settings__actions,
+.timo-agent-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+}
+
+.timo-agent-settings__note {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+  padding: .8rem 1rem;
+  color: var(--text-secondary);
+}
+
+.timo-agent-settings__note i {
+  color: var(--primary);
+}
+
+.timo-agent-settings__list {
+  display: grid;
+  gap: .7rem;
+}
+
+.timo-agent-card {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: .9rem 1rem;
+}
+
+.timo-agent-card > div:first-child {
+  display: grid;
+  gap: .22rem;
+}
+
+.timo-agent-card__status {
+  color: var(--text-secondary);
+  font-size: .82rem;
+}
+
+.timo-agent-card__status i {
+  margin-right: .32rem;
+  font-size: .5rem;
+}
+
+.timo-agent-card__status.is-online {
+  color: var(--status-success, var(--primary));
+}
+
+.timo-agent-pairing-code {
+  display: block;
+  margin: 1rem 0;
+  padding: .9rem;
+  overflow-wrap: anywhere;
+  border: 1px dashed var(--primary);
+  border-radius: .75rem;
+  color: var(--text-primary);
+  background: var(--surface-2);
+}
+
+@media (max-width: 640px) {
+  .timo-agent-settings__header,
+  .timo-agent-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
