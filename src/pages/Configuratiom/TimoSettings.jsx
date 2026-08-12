@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { InputTextarea } from "primereact/inputtextarea";
 import { TabPanel, TabView } from "primereact/tabview";
+import { TimoVoiceAgentSettings } from "../../components/Timo/TimoVoiceAgentSettings";
 
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -33,7 +34,7 @@ function errorMessage(error, fallback) {
 }
 
 
-export function TimoSettings({ timoActive, onToggleTimo }) {
+export function TimoSettings() {
   const [configurations, setConfigurations] = useState([]);
   const [navigationOptions, setNavigationOptions] = useState([]);
   const [savingIntent, setSavingIntent] = useState(null);
@@ -169,6 +170,8 @@ export function TimoSettings({ timoActive, onToggleTimo }) {
     setTraining(true);
     try {
       const { data } = await connect.post("/timo/aprendizados/treinar");
+      setApprovedLearningCount(data?.aprendizados_aprovados || 0);
+      setLearningSelections({});
       showToast("success", "Aprendizado", data?.message || "Modelo treinado com as frases aprovadas.");
     } catch (error) {
       showToast("error", "Aprendizado", errorMessage(error, "Não foi possível treinar o modelo."));
@@ -268,16 +271,6 @@ export function TimoSettings({ timoActive, onToggleTimo }) {
           <p>Defina o que cada intenção reconhecida mostra no balão e qual tela o assistente pode abrir.</p>
         </div>
         <div className="timo-settings__intro-actions">
-          <span className={`timo-settings__status${timoActive ? " is-active" : ""}`}>
-            <i className={`pi ${timoActive ? "pi-microphone" : "pi-microphone-slash"}`} aria-hidden="true" />
-            {timoActive ? "Timo ativo" : "Timo desativado"}
-          </span>
-          <Button
-            label={timoActive ? "Desativar Timo" : "Ativar Timo"}
-            icon={timoActive ? "pi pi-pause" : "pi pi-play"}
-            outlined={Boolean(timoActive)}
-            onClick={onToggleTimo}
-          />
           <Button label="Novo comando" icon="pi pi-plus" onClick={() => setCustomDialog(true)} />
         </div>
       </div>
@@ -340,6 +333,9 @@ export function TimoSettings({ timoActive, onToggleTimo }) {
               <div className="timo-learning__empty"><i className="pi pi-check-circle" /> Nenhuma frase aguardando revisão.</div>
             )}
           </div>
+        </TabPanel>
+        <TabPanel header="Voice Agent" leftIcon="pi pi-microphone mr-2">
+          <TimoVoiceAgentSettings />
         </TabPanel>
       </TabView>
 

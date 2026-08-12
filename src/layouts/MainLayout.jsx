@@ -15,7 +15,7 @@ import { Avatar } from "primereact/avatar";
 import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
 import { ThemeLogo } from "../components/ThemeLogo";
-import { TimoAssistant } from "../components/Timo/TimoAssistant";
+import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
 
 // Styles
 import './main.css'
@@ -56,14 +56,11 @@ export function MainLayout() {
     const storedRole = localStorage.getItem("role");
     return storedRole ? capitalize(storedRole) : "";
   });
-  const [timoEnabled, setTimoEnabled] = useState(
-    () => String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN"
-      && String(localStorage.getItem("timo_ativo")) === "true"
-  );
   const [isMenuVisible, setIsMenuVisible] = useState(
     () => !window.matchMedia("(max-width: 960px)").matches
   );
   const [dataRevision, setDataRevision] = useState(0);
+  const [profileStatus, setProfileStatus] = useState("loading");
 
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -361,10 +358,12 @@ export function MainLayout() {
   ];
 
   useEffect(() => {
-    if (!displayName || !role) {
+    // No reload, o perfil ainda está sendo revalidado. Redirecionar antes
+    // desta consulta cria uma falsa impressão de logout apesar do JWT válido.
+    if (profileStatus === "ready" && (!displayName || !role)) {
       navigate("/");
     }
-  }, [displayName, navigate, role]);
+  }, [displayName, navigate, profileStatus, role]);
 
   useEffect(() => {
     let active = true;
@@ -376,7 +375,6 @@ export function MainLayout() {
 
       const profileRole = String(profile.role || "").toUpperCase();
       const isProfileAdmin = profileRole === "ADMIN";
-      setTimoEnabled(isProfileAdmin && profile.timo_ativo === true);
       const isMatrixUser = Array.isArray(profile.filiais)
         && profile.filiais.some((filial) => Number(filial.id) === 1);
 
@@ -390,6 +388,7 @@ export function MainLayout() {
 
         storeProfile(profile);
         const maySelectBranches = updateProfile(profile);
+        setProfileStatus("ready");
         setCanSelectFiliais(maySelectBranches);
 
         if (!maySelectBranches) {
@@ -431,6 +430,8 @@ export function MainLayout() {
         setSelectedFilialIds([]);
         setCanSelectFiliais(false);
         localStorage.removeItem("selected_filial_ids");
+        // Falha pontual de rede não deve invalidar nem redirecionar a sessão.
+        setProfileStatus("ready");
       }
     };
 
@@ -523,7 +524,6 @@ export function MainLayout() {
         </div>
 
         <div className="flex gap-2 align-items-center flipup animation-duration-500">
-          {timoEnabled ? <TimoAssistant /> : null}
           <div className="layout-user-info flex flex-column text-right">
             <span className="font-bold">{displayName}</span>
             <span className="text-700 font-italic">{role}</span>
@@ -536,6 +536,7 @@ export function MainLayout() {
           />
         </div>
       </header>
+      <TimoAgentNavigationBridge />
 
       {/* MAIN CONTENT */}
       <div className="layout-body">

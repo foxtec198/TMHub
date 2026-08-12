@@ -240,13 +240,7 @@ export function Settings() {
         <TMOpsAccessSettings />
       </TabPanel>}
       {isAdmin && <TabPanel header="Timo" leftIcon="pi pi-sparkles mr-2">
-        <TimoSettings
-          timoActive={Boolean(profile.timo_ativo)}
-          onToggleTimo={() => save(
-            { timo_ativo: !profile.timo_ativo },
-            profile.timo_ativo ? "Timo desativado." : "Timo ativado.",
-          )}
-        />
+        <TimoSettings />
       </TabPanel>}
       {isAdmin && <TabPanel header="Notícias" leftIcon="pi pi-megaphone mr-2">
         <NewsSettings />
