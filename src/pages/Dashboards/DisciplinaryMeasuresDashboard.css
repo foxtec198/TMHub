@@ -1,0 +1,662 @@
+.disciplinary-dashboard {
+  min-height: 100%;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  color: var(--text-primary);
+}
+
+.disciplinary-dashboard-period {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: .5rem;
+  padding: 0 .85rem;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: .84rem;
+}
+
+.disciplinary-dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: .8rem;
+  margin-bottom: 1rem;
+}
+
+.disciplinary-dashboard-card {
+  --card-accent: var(--text-secondary);
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: .75rem;
+  min-width: 0;
+  padding: 1rem;
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.disciplinary-dashboard-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--card-accent);
+  content: "";
+}
+
+.disciplinary-dashboard-card.is-primary { --card-accent: var(--primary); }
+.disciplinary-dashboard-card.is-info { --card-accent: var(--chart-5); }
+.disciplinary-dashboard-card.is-warning { --card-accent: var(--chart-3); }
+.disciplinary-dashboard-card.is-success { --card-accent: var(--chart-2); }
+.disciplinary-dashboard-card.is-danger { --card-accent: var(--chart-4); }
+
+.disciplinary-dashboard-card__icon {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  place-items: center;
+  color: var(--card-accent);
+  background: color-mix(in srgb, var(--card-accent) 12%, transparent);
+  border-radius: 12px;
+  font-size: 1.1rem;
+}
+
+.disciplinary-dashboard-card > span:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.disciplinary-dashboard-card small {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disciplinary-dashboard-card strong {
+  overflow: hidden;
+  color: var(--card-accent);
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disciplinary-dashboard-card em {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: .72rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disciplinary-dashboard-grid,
+.disciplinary-dashboard-loading-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, .65fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.disciplinary-dashboard-loading-grid > :last-child {
+  grid-column: 1 / -1;
+}
+
+.disciplinary-dashboard-panel {
+  --panel-accent: var(--primary);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--panel-accent);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.disciplinary-dashboard-panel {
+  padding: 1.2rem;
+}
+
+.disciplinary-dashboard-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.disciplinary-dashboard-panel header span {
+  color: var(--primary);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.disciplinary-dashboard-panel h2 {
+  margin: .2rem 0 0;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.disciplinary-dashboard-panel.is-full {
+  grid-column: 1 / -1;
+}
+
+.disciplinary-dashboard-absence-comparison header p {
+  margin: .25rem 0 0;
+  color: var(--text-secondary);
+  font-size: .76rem;
+  line-height: 1.4;
+}
+
+.disciplinary-dashboard-chart {
+  height: 21rem;
+  margin-top: .75rem;
+}
+
+.disciplinary-dashboard-chart > .p-chart,
+.disciplinary-dashboard-chart > .p-chart > canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Mesma composição executiva adotada nos dashboards de PCD e rescisões. */
+.disciplinary-dashboard .disciplinary-dashboard-panel.disciplinary-dashboard-insight {
+  display: grid !important;
+  min-height: 23.4rem;
+  align-content: start;
+  gap: .8rem;
+  padding: 1.2rem;
+  color: var(--text-primary);
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--primary) 10%, var(--surface-1)),
+    var(--surface-1) 72%
+  );
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight > span {
+  display: block;
+  color: var(--primary);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.25;
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight > p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: .84rem;
+  line-height: 1.5;
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight-item {
+  display: flex !important;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .72rem .8rem;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border));
+  border-radius: 11px;
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight-item > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .1rem;
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight-item small,
+.disciplinary-dashboard .disciplinary-dashboard-insight-item em {
+  color: var(--text-secondary);
+  font-size: .7rem;
+  font-style: normal;
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight-item strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--primary);
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.disciplinary-dashboard .disciplinary-dashboard-insight-item em {
+  flex: 0 0 auto;
+  max-width: 8rem;
+  text-align: right;
+}
+
+.disciplinary-dashboard-offenders {
+  --ranking-accent: var(--primary);
+  min-width: 0;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--ranking-accent);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.disciplinary-dashboard-offenders > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.disciplinary-dashboard-offenders header span {
+  color: var(--primary);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.disciplinary-dashboard-offenders h2 {
+  margin: .2rem 0 0;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.disciplinary-dashboard-offenders header p {
+  margin: .25rem 0 0;
+  color: var(--text-secondary);
+  font-size: .78rem;
+}
+
+.disciplinary-dashboard-offender-list {
+  display: grid;
+  padding: .35rem 1.2rem .75rem;
+}
+
+.disciplinary-dashboard-offender-row {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .8rem;
+  min-width: 0;
+  padding: .75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.disciplinary-dashboard-offender-row:last-child {
+  border-bottom: 0;
+}
+
+.disciplinary-dashboard-offender-rank {
+  color: var(--primary);
+  font-size: .8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.disciplinary-dashboard-offender-person {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.disciplinary-dashboard-offender-person strong,
+.disciplinary-dashboard-offender-person span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disciplinary-dashboard-offender-person span {
+  color: var(--text-secondary);
+  font-size: .72rem;
+}
+
+.disciplinary-dashboard-offender-counts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(5.4rem, 1fr));
+  gap: .5rem;
+}
+
+.disciplinary-dashboard-offender-counts > span {
+  --offender-color: var(--primary);
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: .45rem;
+  padding: .52rem .62rem;
+  background: color-mix(in srgb, var(--offender-color) 9%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--offender-color) 28%, transparent);
+  border-radius: 9px;
+}
+
+.disciplinary-dashboard-offender-counts .is-warning {
+  --offender-color: var(--chart-1);
+}
+
+.disciplinary-dashboard-offender-counts .is-suspension {
+  --offender-color: var(--chart-2);
+}
+
+.disciplinary-dashboard-offender-counts small {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: .63rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.disciplinary-dashboard-offender-counts strong {
+  flex: 0 0 auto;
+  color: var(--offender-color);
+  font-size: .9rem;
+}
+
+.disciplinary-dashboard-empty {
+  display: grid;
+  height: 100%;
+  min-height: 9rem;
+  place-content: center;
+  justify-items: center;
+  gap: .65rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.disciplinary-dashboard-empty i {
+  color: var(--primary);
+  font-size: 2rem;
+  opacity: .65;
+}
+
+.disciplinary-dashboard-error,
+.disciplinary-dashboard-inline-error,
+.disciplinary-dashboard-notice {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+}
+
+.disciplinary-dashboard-error {
+  justify-content: center;
+  min-height: 12rem;
+  color: var(--status-danger);
+  background: color-mix(in srgb, var(--status-danger) 7%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--status-danger) 32%, transparent);
+}
+
+.disciplinary-dashboard-error > i {
+  font-size: 1.7rem;
+}
+
+.disciplinary-dashboard-error > div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.disciplinary-dashboard-error span {
+  color: var(--text-secondary);
+}
+
+.disciplinary-dashboard-inline-error {
+  color: var(--status-danger);
+  background: var(--status-danger-soft);
+  border: 1px solid color-mix(in srgb, var(--status-danger) 28%, transparent);
+}
+
+.disciplinary-dashboard-inline-error span {
+  flex: 1;
+}
+
+.disciplinary-dashboard-notice {
+  color: var(--status-info);
+  background: var(--status-info-soft);
+  border: 1px solid color-mix(in srgb, var(--status-info) 30%, transparent);
+}
+
+.dashboard-filter-grid .p-multiselect {
+  width: 100%;
+}
+
+:root[data-mode="dark"] .disciplinary-dashboard-card,
+:root[data-mode="dark"] .disciplinary-dashboard-period {
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+:root[data-mode="dark"] .disciplinary-dashboard-panel,
+:root[data-mode="dark"] .disciplinary-dashboard-offenders {
+  background: var(--surface-3);
+  border-right-color: var(--border-strong);
+  border-bottom-color: var(--border-strong);
+  border-left-color: var(--border-strong);
+}
+
+:root[data-mode="dark"] .disciplinary-dashboard .disciplinary-dashboard-panel.disciplinary-dashboard-insight {
+  background: linear-gradient(
+    155deg,
+    var(--surface-hover),
+    var(--surface-3) 72%
+  );
+}
+
+:root[data-mode="dark"] .disciplinary-dashboard .disciplinary-dashboard-insight-item {
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface-3));
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
+}
+
+:root[data-mode="dark"] .disciplinary-dashboard-offender-counts > span {
+  background: color-mix(in srgb, var(--offender-color) 10%, var(--surface-3));
+}
+
+/* No tema Orgulho, o dashboard percorre toda a paleta temática. */
+:root[data-theme="pride"] .disciplinary-dashboard-card {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--card-accent) 11%, var(--surface-1)),
+    var(--surface-1) 68%
+  );
+  border-color: color-mix(in srgb, var(--card-accent) 34%, var(--border));
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-card__icon {
+  background: color-mix(in srgb, var(--card-accent) 15%, var(--surface-1));
+  border: 1px solid color-mix(in srgb, var(--card-accent) 34%, transparent);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-panel {
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--panel-accent) 8%, var(--surface-1)),
+    var(--surface-1) 52%
+  );
+  border-color: color-mix(in srgb, var(--panel-accent) 32%, var(--border));
+  border-top: 3px solid var(--panel-accent);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-panel > header {
+  padding-bottom: .75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--panel-accent) 24%, var(--border));
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-panel header span {
+  color: var(--panel-accent);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-offenders {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--ranking-accent) 8%, var(--surface-1)),
+    var(--surface-1) 56%
+  );
+  border-color: color-mix(in srgb, var(--ranking-accent) 32%, var(--border));
+  border-top: 3px solid var(--ranking-accent);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-offenders > header {
+  background: color-mix(in srgb, var(--ranking-accent) 6%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--ranking-accent) 26%, var(--border));
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-offenders header span,
+:root[data-theme="pride"] .disciplinary-dashboard-offender-rank {
+  color: var(--ranking-accent);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-card.is-info {
+  --card-accent: var(--chart-5);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-card.is-warning {
+  --card-accent: var(--chart-2);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-card.is-success {
+  --card-accent: var(--chart-4);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-card.is-danger {
+  --card-accent: var(--chart-1);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-panel.is-monthly {
+  --panel-accent: var(--chart-2);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-panel.is-reasons {
+  --panel-accent: var(--chart-3);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-panel.disciplinary-dashboard-absence-comparison {
+  --panel-accent: var(--chart-1);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard .disciplinary-dashboard-panel.disciplinary-dashboard-insight {
+  --panel-accent: var(--chart-7);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-offenders {
+  --ranking-accent: var(--chart-6);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-offender-counts .is-warning {
+  --offender-color: var(--chart-2);
+}
+
+:root[data-theme="pride"] .disciplinary-dashboard-offender-counts .is-suspension {
+  --offender-color: var(--chart-1);
+}
+
+@media (max-width: 1180px) {
+  .disciplinary-dashboard-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .disciplinary-dashboard-grid,
+  .disciplinary-dashboard-loading-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .disciplinary-dashboard-loading-grid > :last-child {
+    grid-column: auto;
+  }
+
+  .disciplinary-dashboard-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .disciplinary-dashboard-offender-row {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+  }
+
+  .disciplinary-dashboard-offender-counts {
+    grid-column: 2;
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 600px) {
+  .disciplinary-dashboard {
+    padding: 1rem;
+  }
+
+  .disciplinary-dashboard-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .disciplinary-dashboard-chart {
+    height: 19rem;
+  }
+
+  .disciplinary-dashboard .disciplinary-dashboard-insight-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .disciplinary-dashboard .disciplinary-dashboard-insight-item em {
+    max-width: none;
+    text-align: left;
+  }
+
+  .disciplinary-dashboard-error,
+  .disciplinary-dashboard-inline-error {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .disciplinary-dashboard-error .p-button,
+  .disciplinary-dashboard-inline-error .p-button {
+    width: 100%;
+  }
+
+  .disciplinary-dashboard-offenders > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .disciplinary-dashboard-offender-row {
+    grid-template-columns: 1.8rem minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .disciplinary-dashboard-offender-counts {
+    grid-template-columns: 1fr;
+  }
+
+}

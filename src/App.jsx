@@ -57,6 +57,7 @@ import { TMOpsTasks } from "./pages/TMOps/Tasks";
 import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
 import { TicketDetail, TicketsDashboard } from "./pages/Tickets";
 import { TicketManagement } from "./pages/Tickets/TicketManagement";
+import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasuresDashboard.jsx";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -290,6 +291,14 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="dashboard_pcd">
                 <PcdDashboard />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/reports/medidas-disciplinares"
+            element={
+              <PermissionGate screen="dashboard_medidas_disciplinares">
+                <DisciplinaryMeasuresDashboard />
               </PermissionGate>
             }
           />

@@ -44,6 +44,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/projetos": ["projetos"],
   "/reports/rescisoes": ["rescisoes", "colaboradores"],
   "/controle-medidas-disciplinares": ["medidas_disciplinares"],
+  "/reports/medidas-disciplinares": ["medidas_disciplinares"],
   "/tickets": ["tickets"],
 };
 
@@ -149,6 +150,14 @@ export function MainLayout() {
               visible: can("dashboard_rescisoes"),
               command: () => {
                 navigateTo("/reports/rescisoes");
+              },
+            },
+            {
+              label: "Medidas Disciplinares",
+              icon: "pi pi-file-edit",
+              visible: can("dashboard_medidas_disciplinares"),
+              command: () => {
+                navigateTo("/reports/medidas-disciplinares");
               },
             },
             {
