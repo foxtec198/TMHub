@@ -33,8 +33,9 @@ try {
     & gh auth status *> $null
     if ($LASTEXITCODE -ne 0) { throw 'GitHub CLI sem autenticação. Execute: gh auth login' }
 
-    $existingPr = (& gh pr view $branch --json url --jq '.url' 2>$null).Trim()
-    if ($LASTEXITCODE -eq 0 -and $existingPr) {
+$existingPr = [string](& gh pr list --head $branch --state open --json url --jq '.[0].url' 2>$null)
+$existingPr = $existingPr.Trim()
+if ($existingPr) {
         Write-Host "`nPush concluído. PR já existente: $existingPr" -ForegroundColor Green
         exit 0
     }
