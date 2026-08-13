@@ -7,6 +7,8 @@
     "dev": "vite --host 0.0.0.0",
     "dev:full": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-full.ps1",
     "dev:mobile": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-mobile.ps1",
+    "work:new": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/new-work.ps1",
+    "deploy:pr": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-pr.ps1",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
