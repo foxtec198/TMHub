@@ -160,17 +160,17 @@ export function DashboardLogistic() {
             />
 
             <section className="logistic-kpis">
-                <article className="is-primary"><i className="pi pi-box" /><span>Produtos cadastrados</span><strong>{indicators.produtos || 0}</strong></article>
-                <article><i className="pi pi-database" /><span>Itens em estoque</span><strong>{indicators.itens_estoque || 0}</strong></article>
-                <article className="is-success"><i className="pi pi-arrow-down" /><span>Entradas no período</span><strong>{indicators.entradas || 0}</strong></article>
-                <article className="is-danger"><i className="pi pi-arrow-up" /><span>Saídas no período</span><strong>{indicators.saidas || 0}</strong></article>
-                <article className="is-warning"><i className="pi pi-exclamation-triangle" /><span>Estoque baixo</span><strong>{indicators.estoque_baixo || 0}</strong></article>
-                <article className="is-danger"><i className="pi pi-times-circle" /><span>Sem estoque</span><strong>{indicators.sem_estoque || 0}</strong></article>
-                <article className="is-info"><i className="pi pi-box" /><span>Produtos entregues</span><strong>{indicators.produtos_entregues || indicators.epis_entregues || 0}</strong></article>
+                <article className="tm-dashboard-card is-primary"><i className="pi pi-box" /><span>Produtos cadastrados</span><strong>{indicators.produtos || 0}</strong></article>
+                <article className="tm-dashboard-card"><i className="pi pi-database" /><span>Itens em estoque</span><strong>{indicators.itens_estoque || 0}</strong></article>
+                <article className="tm-dashboard-card is-success"><i className="pi pi-arrow-down" /><span>Entradas no período</span><strong>{indicators.entradas || 0}</strong></article>
+                <article className="tm-dashboard-card is-danger"><i className="pi pi-arrow-up" /><span>Saídas no período</span><strong>{indicators.saidas || 0}</strong></article>
+                <article className="tm-dashboard-card is-warning"><i className="pi pi-exclamation-triangle" /><span>Estoque baixo</span><strong>{indicators.estoque_baixo || 0}</strong></article>
+                <article className="tm-dashboard-card is-danger"><i className="pi pi-times-circle" /><span>Sem estoque</span><strong>{indicators.sem_estoque || 0}</strong></article>
+                <article className="tm-dashboard-card is-info"><i className="pi pi-box" /><span>Produtos entregues</span><strong>{indicators.produtos_entregues || indicators.epis_entregues || 0}</strong></article>
             </section>
 
             <section className="logistic-grid logistic-grid-main">
-                <article className="logistic-panel">
+                <article className="logistic-panel tm-dashboard-panel">
                     <header><div><span>Fluxo do período</span><h2>Entradas e saídas</h2></div></header>
                     <div className="logistic-chart">
                         {data?.serie?.length
@@ -178,7 +178,7 @@ export function DashboardLogistic() {
                             : <EmptyChart label="Nenhuma movimentação no período." />}
                     </div>
                 </article>
-                <article className="logistic-panel">
+                <article className="logistic-panel tm-dashboard-panel">
                     <header><div><span>Giro de estoque</span><h2>Produtos mais movimentados</h2></div></header>
                     <div className="logistic-chart">
                         {data?.mais_movimentados?.length
@@ -189,7 +189,7 @@ export function DashboardLogistic() {
             </section>
 
             <section className="logistic-grid">
-                <article className="logistic-panel">
+                <article className="logistic-panel tm-dashboard-panel">
                     <header><div><span>Distribuição de produtos</span><h2>Saídas por colaborador</h2></div></header>
                     <div className="logistic-chart">
                         {(data?.produtos_por_colaborador || data?.epis_por_colaborador)?.length
@@ -197,7 +197,7 @@ export function DashboardLogistic() {
                             : <EmptyChart label="Nenhuma saída para colaborador registrada." />}
                     </div>
                 </article>
-                <article className="logistic-panel">
+                <article className="logistic-panel tm-dashboard-panel">
                     <header><div><span>Contratos e locais</span><h2>Saídas por centro de custo</h2></div></header>
                     <div className="logistic-chart">
                         {(data?.produtos_por_local || data?.epis_por_local)?.length
@@ -208,7 +208,7 @@ export function DashboardLogistic() {
             </section>
 
             <section className="logistic-grid logistic-grid-detail">
-                <article className="logistic-panel">
+                <article className="logistic-panel tm-dashboard-panel">
                     <header><div><span>Atenção operacional</span><h2>Produtos abaixo do mínimo</h2></div></header>
                     <DataTable value={data?.estoque_baixo || []} rows={8} paginator size="small" emptyMessage="Nenhum produto com estoque baixo.">
                         <Column field="produto" header="Produto" sortable />
@@ -217,7 +217,7 @@ export function DashboardLogistic() {
                         <Column header="Situação" body={(row) => <Tag value={row.quantidade <= 0 ? 'SEM ESTOQUE' : 'BAIXO'} severity={row.quantidade <= 0 ? 'danger' : 'warning'} />} />
                     </DataTable>
                 </article>
-                <article className="logistic-panel">
+                <article className="logistic-panel tm-dashboard-panel">
                     <header><div><span>Histórico recente</span><h2>Últimas movimentações</h2></div></header>
                     <DataTable value={data?.recentes || []} rows={8} paginator size="small" emptyMessage="Nenhuma movimentação encontrada.">
                         <Column field="data_hora" header="Data" body={(row) => new Date(row.data_hora).toLocaleString('pt-BR')} />

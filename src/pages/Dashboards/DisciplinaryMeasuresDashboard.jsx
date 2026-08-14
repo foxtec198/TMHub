@@ -75,7 +75,7 @@ function EmptyChart({ text }) {
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
   return (
-    <article className={`disciplinary-dashboard-card is-${tone}`}>
+    <article className={`disciplinary-dashboard-card tm-dashboard-card is-${tone}`}>
       <span className="disciplinary-dashboard-card__icon">
         <i className={icon} />
       </span>
@@ -93,7 +93,7 @@ function LoadingState() {
     <div className="disciplinary-dashboard-loading" aria-busy="true">
       <div className="disciplinary-dashboard-summary">
         {Array.from({ length: 5 }, (_, index) => (
-          <article className="disciplinary-dashboard-card" key={index}>
+          <article className="disciplinary-dashboard-card tm-dashboard-card" key={index}>
             <Skeleton shape="circle" size="2.7rem" />
             <span>
               <Skeleton width="65%" height=".8rem" />
@@ -527,7 +527,7 @@ export function DisciplinaryMeasuresDashboard() {
           </div>
 
           <div className="disciplinary-dashboard-grid">
-            <article className="disciplinary-dashboard-panel is-monthly">
+            <article className="disciplinary-dashboard-panel tm-dashboard-panel is-monthly">
               <header>
                 <div>
                   <span>Evolução mensal</span>
@@ -553,7 +553,7 @@ export function DisciplinaryMeasuresDashboard() {
               </div>
             </article>
 
-            <article className="disciplinary-dashboard-panel disciplinary-dashboard-insight">
+            <article className="disciplinary-dashboard-panel tm-dashboard-panel disciplinary-dashboard-insight">
               <span>Leitura executiva</span>
               <h2>
                 {!indicators.total
@@ -611,7 +611,7 @@ export function DisciplinaryMeasuresDashboard() {
 
             </article>
 
-            <article className="disciplinary-dashboard-panel is-full disciplinary-dashboard-absence-comparison">
+            <article className="disciplinary-dashboard-panel tm-dashboard-panel is-full disciplinary-dashboard-absence-comparison">
               <header>
                 <div>
                   <span>Correlação operacional</span>
@@ -656,7 +656,7 @@ export function DisciplinaryMeasuresDashboard() {
                 </div>
             </article>
 
-            <article className="disciplinary-dashboard-panel is-full is-reasons">
+            <article className="disciplinary-dashboard-panel tm-dashboard-panel is-full is-reasons">
               <header><div><span>Principais causas</span><h2>Medidas por motivo</h2></div></header>
               <div className="disciplinary-dashboard-chart">
                 {reasons.length
@@ -673,7 +673,7 @@ export function DisciplinaryMeasuresDashboard() {
             </article>
           </div>
 
-          <article className="disciplinary-dashboard-offenders">
+          <article className="disciplinary-dashboard-offenders tm-dashboard-panel">
             <header>
               <div>
                 <span>Recorrência</span>
@@ -775,4 +775,3 @@ export function DisciplinaryMeasuresDashboard() {
     </section>
   );
 }
-//teste

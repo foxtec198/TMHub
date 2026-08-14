@@ -27,7 +27,7 @@ function formatPeriod(batch) {
 
 function MirrorCard({ active, icon, label, value, detail, tone, onClick }) {
   return (
-    <button type="button" className={`ponto48-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
+    <button type="button" className={`ponto48-card tm-dashboard-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
       <span className="ponto48-card__icon"><i className={icon} /></span>
       <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
     </button>
@@ -184,11 +184,11 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
           </div>
 
           <div className="ponto48-analysis">
-            <article className="ponto48-panel ponto48-ranking"><header><div><span>Banco de horas</span><h2>Maiores saldos negativos</h2></div><Tag value={formatPeriod(data.importacao)} severity="success" /></header><div className="ponto48-chart">{negativeBalances.length ? <Chart type="bar" data={chartData} options={chartOptions} /> : <p>Nenhum saldo negativo para os filtros atuais.</p>}</div></article>
-            <article className="ponto48-panel ponto48-insight"><span>Resumo da jornada</span><h2>{formatMinutes(summary.normal)}</h2><p>Total de horas normais no recorte selecionado.</p><div><strong>{formatMinutes(summary.credit)}</strong><small>créditos</small></div><div><strong>{formatMinutes(summary.overtime)}</strong><small>horas extras</small></div></article>
+            <article className="ponto48-panel tm-dashboard-panel ponto48-ranking"><header><div><span>Banco de horas</span><h2>Maiores saldos negativos</h2></div><Tag value={formatPeriod(data.importacao)} severity="success" /></header><div className="ponto48-chart">{negativeBalances.length ? <Chart type="bar" data={chartData} options={chartOptions} /> : <p>Nenhum saldo negativo para os filtros atuais.</p>}</div></article>
+            <article className="ponto48-panel tm-dashboard-panel ponto48-insight"><span>Resumo da jornada</span><h2>{formatMinutes(summary.normal)}</h2><p>Total de horas normais no recorte selecionado.</p><div><strong>{formatMinutes(summary.credit)}</strong><small>créditos</small></div><div><strong>{formatMinutes(summary.overtime)}</strong><small>horas extras</small></div></article>
           </div>
 
-          <div className="ponto48-table-panel">
+          <div className="ponto48-table-panel tm-dashboard-panel">
             <div className="ponto48-table-heading"><div><span>Espelho consolidado</span><h2>Jornada por colaborador</h2></div><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nome ou matrícula" /></div>
             <Table data={filteredEmployees} columns={columns} rows={10} loading={loading} />
           </div>
@@ -196,7 +196,7 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
       )}
 
       <Dialog header={detail ? `Espelho de ${detail.nome}` : "Espelho Ponto"} visible={!!detail} modal className="ponto48-mirror-dialog" onHide={() => setDetail(null)}>
-        {detail ? <><div className="ponto48-detail-summary"><div><span>Horas normais</span><strong>{formatMinutes(detail.horas_normais_minutos)}</strong></div><div><span>Créditos</span><strong>{formatMinutes(detail.credito_minutos)}</strong></div><div><span>Débitos</span><strong>{formatMinutes(detail.debito_minutos)}</strong></div><div><span>Saldo final</span><strong>{formatMinutes(detail.saldo_final_minutos, true)}</strong></div></div><div className="ponto48-mirror-records">{detail.registros.map((record) => <article key={record.id} className={record.batida_impar ? "is-irregular" : ""}><header><strong>{new Date(`${record.data}T00:00:00`).toLocaleDateString("pt-BR")}</strong><Tag value={formatMinutes(record.saldo_minutos, true)} severity={record.saldo_minutos < 0 ? "danger" : record.saldo_minutos > 0 ? "success" : "secondary"} /></header><div className="ponto48-punches">{record.batidas.map((punch, index) => <span key={`${record.id}-${index}`}>{punch || "—"}</span>)}</div><footer><span>Normal: {formatMinutes(record.horas_normais_minutos)}</span><span>Crédito: {formatMinutes(record.credito_minutos)}</span><span>Débito: {formatMinutes(record.debito_minutos)}</span>{record.motivo ? <strong>{record.motivo}</strong> : null}</footer></article>)}</div></> : null}
+        {detail ? <><div className="ponto48-detail-summary"><div className="tm-dashboard-card"><span>Horas normais</span><strong>{formatMinutes(detail.horas_normais_minutos)}</strong></div><div className="tm-dashboard-card"><span>Créditos</span><strong>{formatMinutes(detail.credito_minutos)}</strong></div><div className="tm-dashboard-card"><span>Débitos</span><strong>{formatMinutes(detail.debito_minutos)}</strong></div><div className="tm-dashboard-card"><span>Saldo final</span><strong>{formatMinutes(detail.saldo_final_minutos, true)}</strong></div></div><div className="ponto48-mirror-records">{detail.registros.map((record) => <article key={record.id} className={`tm-dashboard-card ${record.batida_impar ? "is-irregular" : ""}`}><header><strong>{new Date(`${record.data}T00:00:00`).toLocaleDateString("pt-BR")}</strong><Tag value={formatMinutes(record.saldo_minutos, true)} severity={record.saldo_minutos < 0 ? "danger" : record.saldo_minutos > 0 ? "success" : "secondary"} /></header><div className="ponto48-punches">{record.batidas.map((punch, index) => <span key={`${record.id}-${index}`}>{punch || "—"}</span>)}</div><footer><span>Normal: {formatMinutes(record.horas_normais_minutos)}</span><span>Crédito: {formatMinutes(record.credito_minutos)}</span><span>Débito: {formatMinutes(record.debito_minutos)}</span>{record.motivo ? <strong>{record.motivo}</strong> : null}</footer></article>)}</div></> : null}
       </Dialog>
     </div>
   );

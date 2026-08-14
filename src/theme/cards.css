@@ -27,26 +27,8 @@
   .executor-list-card,
   .floater-card,
   .glosa-colab-card,
-  .rocada-month-card,
   .movimentacao-card,
-  .kanban-card,
-  .project-command-card,
-  .project-dashboard-progress-card,
-  .admission-panel,
-  .admission-table-panel,
-  .pcd-dashboard-panel,
-  .project-dashboard-panel,
-  .termination-dashboard-panel,
-  .termination-dashboard-table-panel,
-  .ponto48-panel,
-  .ponto48-table-panel,
-  .ponto48-records article,
-  .ponto48-mirror-records article,
-  .ponto48-adjustment-detail > section,
-  .ponto48-detail-summary > div,
-  .dashboard-chart-card,
-  .dashboard-table,
-  .dashboard-status
+  .kanban-card
 ) {
   color: var(--text-primary);
   background: var(--card-bg) !important;
@@ -88,14 +70,8 @@
 /* Executive metric cards follow the compact visual used by the dashboards. */
 :root[data-theme] :where(
   .tm-metric-card,
-  .admission-summary-card,
-  .pcd-dashboard-summary-card,
-  .termination-dashboard-card,
-  .project-dashboard-summary-card,
-  .ponto48-card,
   .pcd-summary-card,
-  .floater-summary-card,
-  .admission-status-card
+  .floater-summary-card
 ) {
   color: var(--text-primary);
   background: var(--card-bg) !important;
@@ -114,6 +90,44 @@
   padding: var(--card-padding) !important;
 }
 
+/* Semantic dashboard primitives. Individual dashboards should use these
+   classes instead of registering page-specific selectors here. */
+:root[data-theme] :where(.tm-dashboard-card, .tm-dashboard-panel) {
+  min-width: 0;
+  color: var(--text-primary);
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-top: 1px solid var(--card-border) !important;
+  border-radius: var(--card-radius) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+:root[data-theme] .tm-dashboard-card {
+  border-left: 3px solid var(--card-accent) !important;
+}
+
+:root[data-theme] .tm-dashboard-panel {
+  border-left: 3px solid var(--ranking-accent, var(--panel-accent, var(--primary))) !important;
+}
+
+:root[data-theme] .tm-dashboard-card::before {
+  display: none !important;
+}
+
+:where(.tm-dashboard-card.is-primary) { --card-accent: var(--primary); }
+:where(.tm-dashboard-card.is-success) { --card-accent: var(--status-success); }
+:where(.tm-dashboard-card.is-warning) { --card-accent: var(--status-warning); }
+:where(.tm-dashboard-card.is-danger) { --card-accent: var(--status-danger); }
+:where(.tm-dashboard-card.is-info) { --card-accent: var(--status-info); }
+:where(.tm-dashboard-card.is-violet) { --card-accent: var(--chart-6); }
+
+:where(.tm-dashboard-panel.is-primary) { --panel-accent: var(--primary); }
+:where(.tm-dashboard-panel.is-success) { --panel-accent: var(--status-success); }
+:where(.tm-dashboard-panel.is-warning) { --panel-accent: var(--status-warning); }
+:where(.tm-dashboard-panel.is-danger) { --panel-accent: var(--status-danger); }
+:where(.tm-dashboard-panel.is-info) { --panel-accent: var(--status-info); }
+:where(.tm-dashboard-panel.is-violet) { --panel-accent: var(--chart-6); }
+
 .tm-metric-card:not(:has(.tm-metric-card__icon)) {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -125,24 +139,8 @@
 .tm-metric-card.is-violet { --card-accent: var(--chart-6); }
 .tm-metric-card.is-neutral { --card-accent: var(--text-secondary); }
 
-:root[data-theme] .ponto48-card.is-active {
-  border-color: var(--card-accent) !important;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--card-accent) 14%, transparent), var(--card-shadow) !important;
-}
-
-/* Status remains semantic even though every month uses the same surface. */
-:root[data-theme] .rocada-month-card.is-safe { border-top: 4px solid var(--status-success) !important; }
-:root[data-theme] .rocada-month-card.is-risk { border-top: 4px solid var(--status-danger) !important; }
-:root[data-theme] .rocada-month-card.is-empty { border-top: 4px solid var(--status-info) !important; }
-:root[data-theme] .rocada-month-card.is-future { border-top: 4px solid var(--text-muted) !important; }
-
 .tm-metric-card__icon,
 :root[data-theme] :where(
-  .admission-summary-card__icon,
-  .pcd-dashboard-summary-card__icon,
-  .termination-dashboard-card__icon,
-  .project-dashboard-summary-card__icon,
-  .ponto48-card__icon,
   .settings-card-title > i,
   .init-help-card-title > i,
   .init-doc-icon
@@ -167,11 +165,6 @@
 
 .tm-metric-card__content small,
 :root[data-theme] :where(
-  .admission-summary-card,
-  .pcd-dashboard-summary-card,
-  .termination-dashboard-card,
-  .project-dashboard-summary-card,
-  .ponto48-card,
   .pcd-summary-card
 ) small {
   overflow: hidden;
@@ -192,11 +185,6 @@
 
 .tm-metric-card__value-row strong,
 :root[data-theme] :where(
-  .admission-summary-card,
-  .pcd-dashboard-summary-card,
-  .termination-dashboard-card,
-  .project-dashboard-summary-card,
-  .ponto48-card,
   .pcd-summary-card
 ) strong {
   overflow: hidden;
@@ -212,11 +200,7 @@
 
 .tm-metric-card__content em,
 :root[data-theme] :where(
-  .admission-summary-card,
-  .pcd-dashboard-summary-card,
-  .termination-dashboard-card,
-  .project-dashboard-summary-card,
-  .ponto48-card
+  .pcd-summary-card
 ) em {
   overflow: hidden;
   margin-top: .15rem;

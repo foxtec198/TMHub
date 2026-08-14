@@ -188,10 +188,10 @@ export function DepartmentEmployeesDashboard() {
             />
 
             <div className="department-dashboard__summary">
-                <div><span>Departamentos</span><strong>{departments.length}</strong></div>
-                <div><span>Colaboradores</span><strong>{filteredEmployees.length}</strong></div>
-                <div><span>Ativos</span><strong>{filteredEmployees.filter((employee) => !isDismissed(employee)).length}</strong></div>
-                <div><span>Demitidos</span><strong>{filteredEmployees.filter(isDismissed).length}</strong></div>
+                <div className="tm-dashboard-card"><span>Departamentos</span><strong>{departments.length}</strong></div>
+                <div className="tm-dashboard-card"><span>Colaboradores</span><strong>{filteredEmployees.length}</strong></div>
+                <div className="tm-dashboard-card"><span>Ativos</span><strong>{filteredEmployees.filter((employee) => !isDismissed(employee)).length}</strong></div>
+                <div className="tm-dashboard-card"><span>Demitidos</span><strong>{filteredEmployees.filter(isDismissed).length}</strong></div>
             </div>
 
             <OverlayPanel ref={filterPanel} className="department-filter-panel">

@@ -33,7 +33,7 @@ function formatDuration(value) {
 
 function AdjustmentCard({ active, icon, label, value, detail, tone, onClick }) {
   return (
-    <button type="button" className={`ponto48-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
+    <button type="button" className={`ponto48-card tm-dashboard-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
       <span className="ponto48-card__icon"><i className={icon} /></span>
       <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
     </button>
@@ -182,11 +182,11 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
           </div>
 
           <div className="ponto48-analysis">
-            <article className="ponto48-panel ponto48-ranking"><header><div><span>Frequência</span><h2>Principais motivos</h2></div><Tag value={formatPeriod(data.importacao)} severity="success" /></header><div className="ponto48-chart">{reasonRanking.length ? <Chart type="bar" data={chartData} options={chartOptions} /> : <p>Nenhum ajuste para os filtros atuais.</p>}</div></article>
-            <article className="ponto48-panel ponto48-insight"><span>Leitura dos ajustes</span><h2>{topAdjuster[0]}</h2><p>Responsável com maior volume no recorte atual: {topAdjuster[1]} ajuste(s).</p><div><strong>{formatDuration(summary.averageDelay)}</strong><small>tempo médio de tratamento</small></div><div><strong>{data.resumo?.nao_vinculados || 0}</strong><small>registros sem vínculo automático</small></div></article>
+            <article className="ponto48-panel tm-dashboard-panel ponto48-ranking"><header><div><span>Frequência</span><h2>Principais motivos</h2></div><Tag value={formatPeriod(data.importacao)} severity="success" /></header><div className="ponto48-chart">{reasonRanking.length ? <Chart type="bar" data={chartData} options={chartOptions} /> : <p>Nenhum ajuste para os filtros atuais.</p>}</div></article>
+            <article className="ponto48-panel tm-dashboard-panel ponto48-insight"><span>Leitura dos ajustes</span><h2>{topAdjuster[0]}</h2><p>Responsável com maior volume no recorte atual: {topAdjuster[1]} ajuste(s).</p><div><strong>{formatDuration(summary.averageDelay)}</strong><small>tempo médio de tratamento</small></div><div><strong>{data.resumo?.nao_vinculados || 0}</strong><small>registros sem vínculo automático</small></div></article>
           </div>
 
-          <div className="ponto48-table-panel">
+          <div className="ponto48-table-panel tm-dashboard-panel">
             <div className="ponto48-table-heading"><div><span>Detalhamento</span><h2>Registros ajustados</h2></div><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar nome, matrícula ou motivo" /></div>
             <Table data={filteredRecords} columns={columns} rows={10} loading={loading} />
           </div>
@@ -194,7 +194,7 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
       )}
 
       <Dialog header={detail ? `Ajuste de ${detail.nome}` : "Detalhes do ajuste"} visible={!!detail} modal className="ponto48-adjustment-dialog" onHide={() => setDetail(null)}>
-        {detail ? <div className="ponto48-adjustment-detail"><div className="ponto48-detail-summary"><div><span>Data ajustada</span><strong>{formatDate(detail.data)}</strong></div><div><span>Origem</span><strong>{detail.solicitacao ? "Solicitação" : "Direto"}</strong></div><div><span>Batidas</span><strong>{detail.quantidade_batidas}</strong></div><div><span>Tratamento</span><strong>{formatDuration(detail.tempo_ajuste_minutos)}</strong></div></div><section><span>Batidas registradas</span><div className="ponto48-punches">{detail.batidas.map((punch, index) => <span key={`${detail.id}-${index}`}>{punch || "—"}</span>)}</div></section><dl><div><dt>Motivo</dt><dd>{detail.motivo || "Não informado"}</dd></div><div><dt>Ajustado/aprovado por</dt><dd>{detail.ajustado_por || "Não informado"}</dd></div><div><dt>Criado em</dt><dd>{formatDate(detail.solicitado_em, true)}</dd></div><div><dt>Alterado em</dt><dd>{formatDate(detail.alterado_em, true)}</dd></div></dl></div> : null}
+        {detail ? <div className="ponto48-adjustment-detail"><div className="ponto48-detail-summary"><div className="tm-dashboard-card"><span>Data ajustada</span><strong>{formatDate(detail.data)}</strong></div><div className="tm-dashboard-card"><span>Origem</span><strong>{detail.solicitacao ? "Solicitação" : "Direto"}</strong></div><div className="tm-dashboard-card"><span>Batidas</span><strong>{detail.quantidade_batidas}</strong></div><div className="tm-dashboard-card"><span>Tratamento</span><strong>{formatDuration(detail.tempo_ajuste_minutos)}</strong></div></div><section className="tm-dashboard-panel"><span>Batidas registradas</span><div className="ponto48-punches">{detail.batidas.map((punch, index) => <span key={`${detail.id}-${index}`}>{punch || "—"}</span>)}</div></section><dl><div><dt>Motivo</dt><dd>{detail.motivo || "Não informado"}</dd></div><div><dt>Ajustado/aprovado por</dt><dd>{detail.ajustado_por || "Não informado"}</dd></div><div><dt>Criado em</dt><dd>{formatDate(detail.solicitado_em, true)}</dd></div><div><dt>Alterado em</dt><dd>{formatDate(detail.alterado_em, true)}</dd></div></dl></div> : null}
       </Dialog>
     </div>
   );

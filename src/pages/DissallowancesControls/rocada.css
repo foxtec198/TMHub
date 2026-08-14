@@ -16,7 +16,9 @@
 .rocada-month-card__target { color: var(--text-color-secondary); font-size: .78rem; }
 .rocada-month-card__stats { display: flex; flex-direction: column; gap: .25rem; color: var(--text-color-secondary); font-size: .8rem; }
 .rocada-month-card .p-button { align-self: flex-start; padding-left: 0; }
-.rocada-month-chart { height: 76px; margin: .1rem 0; }
+.rocada-month-chart {width: 100%;height: 112px;min-height: 112px;margin: .1rem 0;overflow: hidden;}
+.rocada-month-chart .p-chart,
+.rocada-month-chart canvas {display: block;width: 100% !important;height: 100% !important;max-height: 100%;}
 .rocada-month-chart__empty { display: grid; height: 76px; place-items: center; padding: 0 .5rem; border: 1px dashed var(--surface-border); border-radius: 9px; color: var(--text-color-secondary); font-size: .75rem; text-align: center; }
 .rocada-metric__empty { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 4rem 1rem; border: 1px dashed var(--surface-border); border-radius: 18px; color: var(--text-color-secondary); text-align: center; }
 .rocada-metric__empty > i { color: var(--primary-color); font-size: 2rem; }
