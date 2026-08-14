@@ -45,6 +45,10 @@ function SelectedCollaborator({ title, collaborator, icon }) {
                     <dd>{collaborator.matricula || "Não informada"}</dd>
                 </div>
                 <div>
+                    <dt>Cargo</dt>
+                    <dd>{collaborator.cargo || "Não informado"}</dd>
+                </div>
+                <div>
                     <dt>Lugar</dt>
                     <dd>{place}</dd>
                 </div>
@@ -281,10 +285,16 @@ export function Request() {
                                         <div className="request-reserve-option">
                                             <span>{option.name}</span>
                                             <small className={option.disabled ? "request-reserve-unavailable" : "request-reserve-available"}>
-                                                {option.disabled ? "Indisponível nesta data" : "Disponível"}
+                                                {[option.cargo, option.disabled ? "Indisponível nesta data" : "Disponível"].filter(Boolean).join(" · ")}
                                             </small>
                                         </div>
                                     )}
+                                    valueTemplate={(option, props) => option ? (
+                                        <div className="request-reserve-option">
+                                            <span>{option.name}</span>
+                                            <small>{option.cargo || "Cargo não informado"}</small>
+                                        </div>
+                                    ) : <span className="p-placeholder">{props.placeholder}</span>}
                                     filter
                                 />
                                 <Dropdown

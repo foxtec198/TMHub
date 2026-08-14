@@ -2,8 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from 'primereact/button';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { AvatarGroup } from 'primereact/avatargroup';
+import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { SplitButton } from 'primereact/splitbutton';
 import { createProject, deleteProject, getProjects, getUsers, renameProject, updateProject } from './services/project';
-import { deleteCard, updateCard } from './services/card';
+import { createCard, deleteCard, updateCard } from './services/card';
 import ProjectsSidebar from '../../components/ProjectsSidebar';
 import KanbanBoard from '../../components/KanbanBoard';
 import CardDetailDialog from '../../components/CardDetailDialog';
@@ -26,8 +30,10 @@ export function ProjetosPage() {
   const [cardSelecionado, setCardSelecionado] = useState(null);
   const [projetoParaMembrosId, setProjetoParaMembrosId] = useState(null);
   const [novoProjetoAberto, setNovoProjetoAberto] = useState(false);
+  const [novoCard, setNovoCard] = useState({ visible: false, titulo: '', colunaId: null });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [deletingProject, setDeletingProject] = useState(false);
+  const [creatingCard, setCreatingCard] = useState(false);
   const { showToast } = useToast();
 
   const projetoParaMembros = projetoParaMembrosId
@@ -128,14 +134,21 @@ export function ProjetosPage() {
   async function salvarCard(cardAtualizado) {
     if (!projetoAtivo) return;
 
+    const projetoOriginal = projetoAtivo;
     const projetoAtualizado = {
       ...projetoAtivo,
       cards: { ...projetoAtivo.cards, [cardAtualizado.id]: cardAtualizado },
     };
     setProjetos((prev) => prev.map((p) => (p.id === projetoAtualizado.id ? projetoAtualizado : p)));
-    const data = await updateCard(cardAtualizado.id, cardAtualizado);
-    setProjetos((prev) => prev.map((p) => (p.id === data.id ? data : p)));
-    setCardSelecionado(null);
+    try {
+      const data = await updateCard(cardAtualizado.id, cardAtualizado);
+      setProjetos((prev) => prev.map((p) => (p.id === data.id ? data : p)));
+      setCardSelecionado(null);
+    } catch (error) {
+      setProjetos((prev) => prev.map((p) => (p.id === projetoOriginal.id ? projetoOriginal : p)));
+      showToast('error', 'Salvar card', error.response?.data || 'Não foi possível salvar as alterações do card.');
+      throw error;
+    }
   }
 
   async function excluirCard(cardId) {
@@ -180,6 +193,40 @@ export function ProjetosPage() {
       showToast('error', 'Novo projeto', 'Não foi possível carregar os usuários.');
     }
   }
+
+  function abrirNovoCard(colunaId = projetoAtivo?.columns?.[0]?.id) {
+    if (!projetoAtivo || !colunaId) return;
+    setNovoCard({ visible: true, titulo: '', colunaId });
+  }
+
+  async function criarCardNoProjeto() {
+    const titulo = novoCard.titulo.trim();
+    if (!projetoAtivo || !titulo || !novoCard.colunaId) return;
+
+    setCreatingCard(true);
+    try {
+      const data = await createCard(projetoAtivo.id, {
+        titulo,
+        columnId: novoCard.colunaId,
+      });
+      setProjetos((prev) => prev.map((item) => (item.id === data.id ? data : item)));
+      setNovoCard({ visible: false, titulo: '', colunaId: null });
+      showToast('success', 'Card criado', 'O card foi criado no projeto.');
+    } catch (error) {
+      showToast('error', 'Criar card', error.response?.data || 'Não foi possível criar o card.');
+    } finally {
+      setCreatingCard(false);
+    }
+  }
+
+  const criarCardItems = useMemo(
+    () => (projetoAtivo?.columns || []).map((column) => ({
+      label: `Criar em ${column.titulo}`,
+      icon: 'pi pi-plus',
+      command: () => abrirNovoCard(column.id),
+    })),
+    [projetoAtivo]
+  );
 
   // A lista de usuários pode ser muito grande e só é necessária nos diálogos de membros.
   useEffect(() => {
@@ -240,6 +287,15 @@ export function ProjetosPage() {
           </div>
 
           <div className="flex align-items-center gap-2">
+            {projetoAtivo && (
+              <SplitButton
+                label="Criar card"
+                icon="pi pi-plus"
+                onClick={() => abrirNovoCard()}
+                model={criarCardItems}
+                disabled={!projetoAtivo.columns?.length}
+              />
+            )}
             {projetoAtivo && projetoAtivo.donoId === currentUserId && (
               <Button
                 icon="pi pi-users"
@@ -306,6 +362,46 @@ export function ProjetosPage() {
         onHide={() => setNovoProjetoAberto(false)}
         onCreate={criarProjeto}
       />
+
+      <Dialog
+        header="Criar card"
+        visible={novoCard.visible}
+        modal
+        style={{ width: '28rem', maxWidth: 'calc(100vw - 2rem)' }}
+        onHide={() => !creatingCard && setNovoCard({ visible: false, titulo: '', colunaId: null })}
+        footer={(
+          <div className="flex justify-content-end gap-2">
+            <Button label="Cancelar" text disabled={creatingCard} onClick={() => setNovoCard({ visible: false, titulo: '', colunaId: null })} />
+            <Button label="Criar card" icon="pi pi-plus" loading={creatingCard} onClick={criarCardNoProjeto} />
+          </div>
+        )}
+      >
+        <div className="flex flex-column gap-3">
+          <label className="flex flex-column gap-2">
+            <span>Título</span>
+            <InputText
+              autoFocus
+              value={novoCard.titulo}
+              onChange={(event) => setNovoCard((current) => ({ ...current, titulo: event.target.value }))}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') criarCardNoProjeto();
+              }}
+              placeholder="Descreva o card"
+            />
+          </label>
+          <label className="flex flex-column gap-2">
+            <span>Coluna</span>
+            <Dropdown
+              value={novoCard.colunaId}
+              options={projetoAtivo?.columns || []}
+              optionLabel="titulo"
+              optionValue="id"
+              onChange={(event) => setNovoCard((current) => ({ ...current, colunaId: event.value }))}
+              placeholder="Selecione a coluna"
+            />
+          </label>
+        </div>
+      </Dialog>
     </div>
   );
 }

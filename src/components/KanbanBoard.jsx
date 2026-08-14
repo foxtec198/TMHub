@@ -116,18 +116,6 @@ export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
     onUpdateProjeto({ ...projeto, columns, cards });
   }
 
-  function adicionarCard(colunaId, titulo) {
-    const novoId = `t${Date.now()}`;
-    const cards = {
-      ...projeto.cards,
-      [novoId]: { id: novoId, titulo, descricao: '', memberIds: [], etiqueta: null },
-    };
-    const columns = projeto.columns.map((c) =>
-      c.id === colunaId ? { ...c, cardIds: [...c.cardIds, novoId] } : c
-    );
-    onUpdateProjeto({ ...projeto, columns, cards });
-  }
-
   function confirmarNovaColuna() {
     const titulo = novaColunaTitulo.trim();
     if (titulo) {
@@ -162,7 +150,6 @@ export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
           onColumnDragEnd={handleColumnDragEnd}
           onCardClick={onOpenCard}
           onRenameColumn={renomearColuna}
-          onAddCard={adicionarCard}
           onDeleteColumn={excluirColuna}
         />
       ))}
