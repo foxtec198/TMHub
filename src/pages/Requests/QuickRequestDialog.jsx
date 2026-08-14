@@ -19,6 +19,16 @@ const centerLabel = (center) => {
   return `${identifiedLocal} - DPTO. ${center.departamento}`;
 };
 
+const reservationTemplate = (reservation, selected = false) => {
+  if (!reservation) return null;
+  return (
+    <div className={selected ? "collaborator-dropdown-option is-selected" : "collaborator-dropdown-option"}>
+      <strong>{reservation.nome}</strong>
+      <small>{[reservation.matricula, reservation.cargo].filter(Boolean).join(" · ") || "Cargo não informado"}</small>
+    </div>
+  );
+};
+
 export function QuickRequestDialog({ visible, onHide, onCreated }) {
   const [options, setOptions] = useState({ supervisors: [], reservations: [], centers: [] });
   const [form, setForm] = useState(initialForm);
@@ -46,7 +56,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
     Promise.all([connect.get("/supervisores"), connect.get("/reservas"), connect.get("/centro")])
       .then(([supervisors, reservations, centers]) => setOptions({
         supervisors: supervisors.data.map((item) => ({ label: item.nome, value: item.id })),
-        reservations: reservations.data.map((item) => ({ label: item.nome, value: item.id })),
+        reservations: reservations.data.map((item) => ({ ...item, label: item.nome, value: item.id })),
         centers: centers.data.map((item) => ({ label: centerLabel(item), value: item.id })),
       }))
       .catch(() => showToast("error", "Lançamento rápido", "Não foi possível carregar as opções."));
@@ -95,7 +105,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
         onError={() => showToast("error", "Lançamento rápido", "Não foi possível buscar os colaboradores.")}
       />
       <Dropdown value={form.center} options={options.centers} onChange={(e) => setForm({ ...form, center: e.value })} placeholder="Centro de custo" filter />
-      {!form.noCoverage && <Dropdown value={form.reservation} options={options.reservations} onChange={(e) => setForm({ ...form, reservation: e.value })} placeholder="Reserva" filter />}
+      {!form.noCoverage && <Dropdown value={form.reservation} options={options.reservations} onChange={(e) => setForm({ ...form, reservation: e.value })} placeholder="Reserva" filter itemTemplate={(option) => reservationTemplate(option)} valueTemplate={(option, props) => option ? reservationTemplate(option, true) : <span className="p-placeholder">{props.placeholder}</span>} />}
       <Dropdown value={form.reason} options={REASONS} onChange={(e) => setForm({ ...form, reason: e.value })} placeholder="Motivo" />
       {form.reason === "INJUSTIFICADA" && <Dropdown value={form.warning} options={["Aplicado", "Não Aplicado"]} onChange={(e) => setForm({ ...form, warning: e.value })} placeholder="Advertência" />}
       <InputText value={form.obs} onChange={(e) => setForm({ ...form, obs: e.target.value })} placeholder="Observação (opcional)" />

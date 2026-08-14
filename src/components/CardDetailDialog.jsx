@@ -19,6 +19,7 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
   const [dataFim, setDataFim] = useState(null);
   const [comentario, setComentario] = useState('');
   const [sending, setSending] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingComment, setEditingComment] = useState('');
   const fileInputRef = useRef(null);
@@ -40,16 +41,23 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
   if (!card) return null;
 
   // Preserva o título anterior quando o campo for enviado vazio.
-  function salvar() {
-    onSave({
-      ...card,
-      titulo: titulo.trim() || card.titulo,
-      descricao,
-      etiqueta: etiqueta.trim() || null,
-      memberIds,
-      data_inicio: dataInicio?.toISOString(),
-      data_fim: dataFim?.toISOString() || null,
-    });
+  async function salvar() {
+    setSaving(true);
+    try {
+      await onSave({
+        ...card,
+        titulo: titulo.trim() || card.titulo,
+        descricao,
+        etiqueta: etiqueta.trim() || null,
+        memberIds,
+        data_inicio: dataInicio?.toISOString(),
+        data_fim: dataFim?.toISOString() || null,
+      });
+    } catch {
+      // A página exibe o erro e recompõe o estado otimista do card.
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function addComment() {
@@ -102,8 +110,8 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
         <div className="flex justify-content-between">
           <Button label="Excluir card" icon="pi pi-trash" severity="danger" text onClick={() => onDelete(card.id)} />
           <div>
-            <Button label="Cancelar" text onClick={onHide} />
-            <Button label="Salvar" icon="pi pi-check" onClick={salvar} />
+            <Button label="Cancelar" text disabled={saving} onClick={onHide} />
+            <Button label="Salvar" icon="pi pi-check" loading={saving} onClick={salvar} />
           </div>
         </div>
       }
