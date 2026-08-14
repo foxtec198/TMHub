@@ -70,7 +70,7 @@ function formatDate(value) {
 
 function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
     return (
-        <article className={`termination-dashboard-card is-${tone}`}>
+        <article className={`termination-dashboard-card tm-dashboard-card is-${tone}`}>
             <span className="termination-dashboard-card__icon"><i className={icon} /></span>
             <span>
                 <small>{label}</small>
@@ -301,7 +301,7 @@ export function TerminationDashboard() {
             </div>
 
             <div className="termination-dashboard-charts">
-                <article className="termination-dashboard-panel is-monthly">
+                <article className="termination-dashboard-panel tm-dashboard-panel is-monthly">
                     <header>
                         <div><span>EVOLUÇÃO MENSAL</span><h2>Volume e custo das rescisões</h2></div>
                     </header>
@@ -317,7 +317,7 @@ export function TerminationDashboard() {
                     </div>
                 </article>
 
-                <article className="termination-dashboard-panel pcd-dashboard-insight">
+                <article className="termination-dashboard-panel tm-dashboard-panel pcd-dashboard-insight">
                     <span>Leitura executiva</span>
                     <h2>
                         {!indicators.total_rescisoes
@@ -355,19 +355,19 @@ export function TerminationDashboard() {
                     </div>
 
                     <div className="pcd-dashboard-status-strip">
-                        <div className="is-active">
+                        <div className="tm-dashboard-card is-active">
                             <span>Rescisões</span>
                             <strong>{formatCardNumber(indicators.total_rescisoes)}</strong>
                         </div>
-                        <div className="is-earnings">
+                        <div className="tm-dashboard-card is-earnings">
                             <span>Proventos</span>
                             <strong>{formatCardCurrency(indicators.proventos)}</strong>
                         </div>
-                        <div className="is-discounts">
+                        <div className="tm-dashboard-card is-discounts">
                             <span>Descontos</span>
                             <strong>{formatCardCurrency(indicators.descontos)}</strong>
                         </div>
-                        <div className="is-cost">
+                        <div className="tm-dashboard-card is-cost">
                             <span>Custo total</span>
                             <strong>{formatCardCurrency(indicators.custo_total)}</strong>
                         </div>
@@ -375,7 +375,7 @@ export function TerminationDashboard() {
                 </article>
             </div>
 
-            <article className="termination-dashboard-table-panel">
+            <article className="termination-dashboard-table-panel tm-dashboard-panel">
                 <nav className="termination-dashboard-tabs" aria-label="Visualizações do dashboard de rescisões">
                     <button type="button" className={activeTable === 'branches' ? 'is-active' : ''} onClick={() => setActiveTable('branches')}><i className="pi pi-building" /><span>Por filial</span></button>
                     <button type="button" className={activeTable === 'contracts' ? 'is-active' : ''} onClick={() => setActiveTable('contracts')}><i className="pi pi-briefcase" /><span>Por contrato</span></button>

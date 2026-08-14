@@ -188,7 +188,7 @@ export function ProjectDashboard() {
       </section>
 
       <section className="project-command-grid">
-        <article className="project-command-card project-participants-card">
+        <article className="project-command-card tm-dashboard-panel project-participants-card">
           <header><span>Pessoas</span><h2>Times por projeto</h2></header>
           <div className="project-participant-groups">
             {(data?.participantes_por_projeto || []).map((group) => (
@@ -207,7 +207,7 @@ export function ProjectDashboard() {
           </div>
         </article>
 
-        <article className="project-command-card project-performance-card">
+        <article className="project-command-card tm-dashboard-panel project-performance-card">
           <header><span>Performance</span><h2>Entrega contra o prazo</h2></header>
           <div className="project-performance-content">
             <div
@@ -224,7 +224,7 @@ export function ProjectDashboard() {
           </div>
         </article>
 
-        <article className="project-command-card project-deadlines-card">
+        <article className="project-command-card tm-dashboard-panel project-deadlines-card">
           <header><span>Agenda</span><h2>Próximos vencimentos</h2></header>
           <div className="project-deadline-feed">
             {upcomingCards.map((card) => (
@@ -238,7 +238,7 @@ export function ProjectDashboard() {
           </div>
         </article>
 
-        <article className="project-command-card project-timeline-card">
+        <article className="project-command-card tm-dashboard-panel project-timeline-card">
           <header><span>Planejamento</span><h2>Timeline dos cards</h2></header>
           <div className="project-card-timeline">
             {timelineCards.map((card) => (
@@ -257,7 +257,7 @@ export function ProjectDashboard() {
           </div>
         </article>
 
-        <article className="project-command-card project-status-card">
+        <article className="project-command-card tm-dashboard-panel project-status-card">
           <header><span>Status</span><h2>Distribuição atual</h2></header>
           <div className="project-dashboard-doughnut">
             {totalCards ? <Chart type="doughnut" data={statusChart} options={doughnutOptions} plugins={[projectDoughnutCenterPlugin]} /> : <EmptyChart text="Sem cards no período." />}

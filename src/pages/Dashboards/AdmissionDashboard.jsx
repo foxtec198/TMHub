@@ -59,7 +59,7 @@ function formatHours(value) {
 
 function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
     return (
-        <article className={`admission-summary-card is-${tone}`}>
+        <article className={`admission-summary-card tm-dashboard-card is-${tone}`}>
             <span className="admission-summary-card__icon"><i className={icon} /></span>
             <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
         </article>
@@ -171,12 +171,12 @@ export function AdmissionDashboard() {
             </div>
 
             <div className="admission-analysis">
-                <article className="admission-panel">
+                <article className="admission-panel tm-dashboard-panel">
                     <header><div><span>Evolução mensal</span><h2>Volume de vagas e tempo de primeira ação</h2></div><Tag value={`Meta ${actionTarget}h`} severity="warning" rounded /></header>
                     <div className="admission-chart"><Chart type="bar" data={monthlyChart} options={chartOptions} /></div>
                 </article>
 
-                <article className="admission-panel admission-insight">
+                <article className="admission-panel tm-dashboard-panel admission-insight">
                     <span>Leitura executiva</span>
                     <h2>{indicators.percentual_no_prazo >= 80 ? 'Operação dentro da meta' : 'SLA exige atenção'}</h2>
                     <p>O indicador combina a primeira ação do responsável e o tempo total até a conclusão da vaga.</p>
@@ -185,7 +185,7 @@ export function AdmissionDashboard() {
                     <div><span><small>Fechamento</small><strong>{indicators.sla_conclusao_medio_dias ?? '-'} dias úteis</strong></span><em>{indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'dentro da meta' : 'acima da meta'}</em></div>
                     <div className="admission-status-strip">
                         {(data?.status || []).map((item) => (
-                            <div className={`admission-status-card is-${item.status}`} key={item.status}>
+                            <div className={`admission-status-card tm-dashboard-card is-${item.status}`} key={item.status}>
                                 <span>{STATUS_LABELS[item.status]}</span>
                                 <strong>{item.total}</strong>
                             </div>
@@ -194,7 +194,7 @@ export function AdmissionDashboard() {
                 </article>
             </div>
 
-            <article className="admission-table-panel">
+            <article className="admission-table-panel tm-dashboard-panel">
                 <nav className="admission-table-tabs" aria-label="Visualizações do dashboard">
                     <button className={activeTable === 'departments' ? 'is-active' : ''} type="button" onClick={() => setActiveTable('departments')}><i className="pi pi-building" /><span>SLA por departamento</span></button>
                     <button className={activeTable === 'recent' ? 'is-active' : ''} type="button" onClick={() => setActiveTable('recent')}><i className="pi pi-history" /><span>Vagas recentes</span></button>

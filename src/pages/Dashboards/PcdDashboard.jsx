@@ -14,7 +14,7 @@ import { useChartTheme } from "../../theme/useTheme";
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
     return (
-        <article className={`pcd-dashboard-summary-card is-${tone}`}>
+        <article className={`pcd-dashboard-summary-card tm-dashboard-card is-${tone}`}>
             <span className="pcd-dashboard-summary-card__icon">
                 <i className={icon} />
             </span>
@@ -255,7 +255,7 @@ export function PcdDashboard() {
             </div>
 
             <div className="pcd-dashboard-grid">
-                <article className="pcd-dashboard-panel pcd-dashboard-panel--status">
+                <article className="pcd-dashboard-panel tm-dashboard-panel pcd-dashboard-panel--status">
                     <header>
                         <div>
                             <span>Quadro PCD</span>
@@ -280,7 +280,7 @@ export function PcdDashboard() {
                     </div>
                 </article>
 
-                <article className="pcd-dashboard-panel pcd-dashboard-insight">
+                <article className="pcd-dashboard-panel tm-dashboard-panel pcd-dashboard-insight">
                     <span>Leitura executiva</span>
                     <h2>
                         {!totalEmployees
@@ -333,26 +333,26 @@ export function PcdDashboard() {
                     </div>
 
                     <div className="pcd-dashboard-status-strip">
-                        <div className="is-active">
+                        <div className="tm-dashboard-card is-active">
                             <span>Ativos</span>
                             <strong>{summary.pcd_ativos ?? 0}</strong>
                         </div>
-                        <div className="is-away">
+                        <div className="tm-dashboard-card is-away">
                             <span>Afastados</span>
                             <strong>{summary.pcd_afastados ?? 0}</strong>
                         </div>
-                        <div className="is-total">
+                        <div className="tm-dashboard-card is-total">
                             <span>Total PCD</span>
                             <strong>{totalPcd}</strong>
                         </div>
-                        <div className="is-base">
+                        <div className="tm-dashboard-card is-base">
                             <span>Base ativa</span>
                             <strong>{totalEmployees}</strong>
                         </div>
                     </div>
                 </article>
 
-                <article className="pcd-dashboard-panel pcd-dashboard-panel--types">
+                <article className="pcd-dashboard-panel tm-dashboard-panel pcd-dashboard-panel--types">
                     <header>
                         <div>
                             <span>Perfil</span>

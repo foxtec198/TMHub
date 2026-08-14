@@ -588,7 +588,7 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-verified"
                         title="Total"
-                        className="flex-grow-1"
+                        className="tm-dashboard-card flex-grow-1"
                         detail="no período filtrado"
                         value={totalRequisicoes}
                         cont="100%"
@@ -598,7 +598,7 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-folder-open "
                         title="Abertas"
-                        className="flex-grow-1"
+                        className="tm-dashboard-card flex-grow-1"
                         detail="aguardando atendimento"
                         tone="warning"
                         value={abertas}
@@ -609,7 +609,7 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-calendar "
                         title="Cobertas"
-                        className="flex-grow-1"
+                        className="tm-dashboard-card flex-grow-1"
                         detail="postos com cobertura"
                         tone="success"
                         value={postosCobertos}
@@ -620,7 +620,7 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-paperclip"
                         title="Descobertas"
-                        className="flex-grow-1"
+                        className="tm-dashboard-card flex-grow-1"
                         detail="postos sem cobertura"
                         tone="danger"
                         value={postosDescobertos}
@@ -631,7 +631,7 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-dollar"
                         title="Custo Total"
-                        className="dashboard-financial-card flex-grow-1"
+                        className="tm-dashboard-card dashboard-financial-card flex-grow-1"
                         detail="multas no período"
                         tone="info"
                         value={to_real(totalDeMultas)}
@@ -640,14 +640,14 @@ export function RequestReport() {
                     <DashCard
                         icon="pi pi-chart-line"
                         title="Média por dia"
-                        className="dashboard-financial-card flex-grow-1"
+                        className="tm-dashboard-card dashboard-financial-card flex-grow-1"
                         detail="custo médio diário"
                         tone="violet"
                         value={to_real(averageDailyCost)}
                         valueClassName="text-2xl"
                     />
                     <div
-                        className="tm-card dashboard-highlight flex justify-content-center flex-grow-1 gap-2 align-items-center p-3">
+                        className="tm-card tm-dashboard-card dashboard-highlight flex justify-content-center flex-grow-1 gap-2 align-items-center p-3">
                         <Knob
                             value={valorDoLocalComMaisFaltas}
                             valueTemplate="{value}%"
@@ -798,7 +798,7 @@ export function RequestReport() {
                 <div className="dashboard-main flex flex-column flex-grow-1 gap-4">
                     {/* CHARTS FRAME */}
                     <div className="dashboard-charts flex flex-grow-1 gap-4 max-h-15rem">
-                        <div className="tm-card dashboard-chart-card p-3 gap-2 flex flex-column justify-content-center align-items-center flex-grow-1">
+                        <div className="tm-card tm-dashboard-panel dashboard-chart-card p-3 gap-2 flex flex-column justify-content-center align-items-center flex-grow-1">
                             <Chart data={dataRepos}
                                 options={{
                                     aspectRatio: 2.5,
@@ -832,7 +832,7 @@ export function RequestReport() {
                                 className="dashboard-chart flex align-items-center justify-content-center h-full"
                             />
                         </div>
-                        <div className="tm-card dashboard-chart-card p-4 flex flex-column justify-content-center align-items-center flex-grow-1">
+                        <div className="tm-card tm-dashboard-panel dashboard-chart-card p-4 flex flex-column justify-content-center align-items-center flex-grow-1">
                             <Chart data={dataMults}
                                 className="w-full h-full"
                                 options={{
@@ -866,7 +866,7 @@ export function RequestReport() {
                     </div>
 
                     {/* TABLE FRAME */}
-                    <div className="tm-card dashboard-table flex overflow-hidden flex-grow-1 p-2">
+                    <div className="tm-card tm-dashboard-panel dashboard-table flex overflow-hidden flex-grow-1 p-2">
                         <Table
                             tableClassName="w-full"
                             columns={columns}
@@ -882,7 +882,7 @@ export function RequestReport() {
                 </div>
 
                 {/* STATUS CARD */}
-                <div className="tm-card dashboard-status flex flex-column p-4 flex-grow-1">
+                <div className="tm-card tm-dashboard-panel dashboard-status flex flex-column p-4 flex-grow-1">
                     <TabView className="h-full">
                         <TabPanel header="Departamentos">
                             <div className="flex flex-column h-full">
