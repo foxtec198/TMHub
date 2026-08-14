@@ -15,6 +15,49 @@ import { useChartTheme } from "../../theme/useTheme";
 const monthName = (value) => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" })
   .format(new Date(`${value}T12:00:00`));
 
+const rocadaPointGuidePlugin = {
+  id: "rocada-point-guides",
+  beforeDatasetsDraw(chart) {
+    const { chartArea } = chart;
+    const meta = chart.getDatasetMeta(0);
+    const dataset = chart.data.datasets[0];
+    if (!chartArea || !meta?.data?.length || !dataset) return;
+    const values = dataset.data.map(Number);
+
+    const { ctx } = chart;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+    ctx.clip();
+    ctx.strokeStyle = dataset.borderColor;
+    ctx.globalAlpha = 0.24;
+    ctx.lineWidth = 1;
+    ctx.lineCap = "round";
+    ctx.setLineDash([2, 4]);
+
+    meta.data.forEach((point, index) => {
+      const current = values[index];
+      const previous = values[index - 1];
+      const next = values[index + 1];
+      const isPeak = index > 0
+        && index < values.length - 1
+        && Number.isFinite(current)
+        && current >= previous
+        && current >= next
+        && (current > previous || current > next);
+
+      if (point.skip || !isPeak) return;
+      const { x, y } = point.getProps(["x", "y"], true);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, chartArea.bottom);
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  },
+};
+
 function MonthChart({ month }) {
   const chartTheme = useChartTheme();
   const days = (month.dias || []).filter((day) => day.operacional);
@@ -28,10 +71,13 @@ function MonthChart({ month }) {
         data: days.map((day) => day.trabalhados),
         borderColor: chartTheme.palette[0],
         backgroundColor: chartTheme.palette[0],
-        fill: true,
-        borderWidth: 2.5,
+        fill: false,
+        borderDash: [2, 3],
+        borderCapStyle: "round",
+        borderJoinStyle: "round",
+        borderWidth: 2.8,
         tension: .35,
-        pointRadius: 2,
+        pointRadius: 2.8,
         pointHoverRadius: 4,
       },
       {
@@ -39,7 +85,7 @@ function MonthChart({ month }) {
         label: "Média mensal",
         data: days.map(() => month.media_trabalhados),
         borderColor: chartTheme.warning,
-        borderWidth: 2,
+        borderWidth: 1.2,
         pointRadius: 0,
         borderDash: [4, 3],
       },
@@ -48,7 +94,7 @@ function MonthChart({ month }) {
         label: "Média contratual",
         data: days.map(() => month.meta),
         borderColor: chartTheme.text,
-        borderWidth: 1,
+        borderWidth: .8,
         pointRadius: 0,
         borderDash: [2, 3],
       },
@@ -57,16 +103,16 @@ function MonthChart({ month }) {
         label: "Quadro médio",
         data: days.map(() => month.media_quadro),
         borderColor: chartTheme.info,
-        borderWidth: 1.5,
+        borderWidth: 1,
         pointRadius: 0,
         borderDash: [6, 3],
       },
     ],
   };
-  return <div className="rocada-month-chart"><Chart type="line" data={chartData} options={{
+  return <div className="rocada-month-chart"><Chart type="line" data={chartData} plugins={[rocadaPointGuidePlugin]} options={{
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } },
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
     scales: {
       x: { display: false, grid: { display: false } },
       y: { display: false, beginAtZero: false, grid: { display: false } },
@@ -130,7 +176,7 @@ export function RocadaMetric({ endpoint = "/glosas/rocada" }) {
 
     {!months.length && <div className="rocada-metric__empty"><i className="pi pi-file-import" /><strong>Sem espelho de ponto da Roçada para este ano.</strong><span>Sem dados, consulte seu Administrator.</span></div>}
     <div className="rocada-month-grid">
-      {months.map((month) => <article className={`rocada-month-card ${month.futuro ? "is-future" : month.glosado == null ? "is-empty" : month.glosado ? "is-risk" : "is-safe"}`} key={month.competencia}>
+      {months.map((month) => <article className={`rocada-month-card tm-dashboard-card ${month.futuro ? "is-future" : month.glosado == null ? "is-empty" : month.glosado ? "is-risk" : "is-safe"}`} key={month.competencia}>
         <div className="rocada-month-card__top"><span>{monthName(month.competencia)}</span><Tag value={month.situacao} severity={month.futuro ? "secondary" : month.glosado == null ? "info" : month.glosado ? "danger" : "success"} /></div>
         <strong>{month.tem_dados ? month.media_trabalhados.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : "—"}</strong>
         <span className="rocada-month-card__target">{month.tem_dados ? `média trabalhada · média contratual ${month.meta}` : month.futuro ? "o indicador será definido no mês" : "aguardando histórico do período"}</span>

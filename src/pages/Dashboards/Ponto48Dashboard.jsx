@@ -46,7 +46,7 @@ function uniqueOptions(items, valueKey, labelKey = valueKey) {
 
 function SummaryCard({ active, icon, label, value, detail, tone, onClick }) {
   return (
-    <button type="button" className={`ponto48-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
+    <button type="button" className={`ponto48-card tm-dashboard-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
       <span className="ponto48-card__icon"><i className={icon} /></span>
       <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
     </button>
@@ -357,11 +357,11 @@ export function Ponto48Dashboard() {
       ) : (
         <>
           <div className="ponto48-analysis">
-            <article className="ponto48-panel ponto48-ranking"><header><div><span>Prioridade</span><h2>Maiores ofensores</h2></div><Tag value={formatPeriod(data.importacao)} severity="success" /></header><div className="ponto48-chart">{topOffenders.length ? <Chart type="bar" data={chartData} options={chartOptions} /> : <p>Nenhuma ocorrência para os filtros atuais.</p>}</div></article>
-            <article className="ponto48-panel ponto48-insight"><span>Leitura combinada</span><h2>{filteredSummary.offenders ? `${filteredSummary.offenders} colaborador(es) exigem atenção` : "Batidas regulares no recorte"}</h2><p>O ranking prioriza irregularidades e apresenta absenteísmo e HE na mesma linha para apoiar a investigação.</p><div><strong>{data.resumo?.batidas_impares || 0}</strong><small>batidas ímpares</small></div><div className="ponto48-link-summary" title="Nomes do CSV sem correspondência única na tabela de colaboradores. Isso não representa inconsistência nas batidas."><strong>{data.resumo?.nao_vinculados || 0}</strong><span><small>sem vínculo automático</small><em>{linkSummary.unmatched} não encontrados · {linkSummary.ambiguous} duplicados</em></span></div></article>
+            <article className="ponto48-panel tm-dashboard-panel ponto48-ranking"><header><div><span>Prioridade</span><h2>Maiores ofensores</h2></div><Tag value={formatPeriod(data.importacao)} severity="success" /></header><div className="ponto48-chart">{topOffenders.length ? <Chart type="bar" data={chartData} options={chartOptions} /> : <p>Nenhuma ocorrência para os filtros atuais.</p>}</div></article>
+            <article className="ponto48-panel tm-dashboard-panel ponto48-insight"><span>Leitura combinada</span><h2>{filteredSummary.offenders ? `${filteredSummary.offenders} colaborador(es) exigem atenção` : "Batidas regulares no recorte"}</h2><p>O ranking prioriza irregularidades e apresenta absenteísmo e HE na mesma linha para apoiar a investigação.</p><div><strong>{data.resumo?.batidas_impares || 0}</strong><small>batidas ímpares</small></div><div className="ponto48-link-summary" title="Nomes do CSV sem correspondência única na tabela de colaboradores. Isso não representa inconsistência nas batidas."><strong>{data.resumo?.nao_vinculados || 0}</strong><span><small>sem vínculo automático</small><em>{linkSummary.unmatched} não encontrados · {linkSummary.ambiguous} duplicados</em></span></div></article>
           </div>
 
-          <div className="ponto48-table-panel">
+          <div className="ponto48-table-panel tm-dashboard-panel">
             <div className="ponto48-table-heading"><div><span>Detalhamento</span><h2>Colaboradores e registros</h2></div><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nome ou matrícula" /></div>
             <Table data={filteredEmployees} columns={columns} rows={10} loading={loading} />
           </div>
@@ -377,7 +377,7 @@ export function Ponto48Dashboard() {
       </TabView>
 
       <Dialog header={detailEmployee?.nome || "Detalhes do colaborador"} visible={!!detailEmployee} modal className="ponto48-detail-dialog" onHide={() => setDetailEmployee(null)}>
-        {detailEmployee ? <><div className="ponto48-detail-summary"><div><span>Absenteísmo</span><strong>{detailEmployee.abs_percentual}%</strong></div><div><span>Horas extras</span><strong>{formatMinutes(detailEmployee.horas_extras_minutos)}</strong></div><div><span>Irregulares</span><strong>{detailEmployee.batidas_irregulares}</strong></div><div><span>Corretas</span><strong>{detailEmployee.batidas_corretas}</strong></div></div><div className="ponto48-records">{detailEmployee.registros.length ? detailEmployee.registros.map((record) => <article key={record.id} className={record.batida_irregular ? "is-irregular" : "is-correct"}><header><strong>{new Date(`${record.data}T00:00:00`).toLocaleDateString("pt-BR")}</strong><Tag value={record.batida_irregular ? "Irregular" : "Correta"} severity={record.batida_irregular ? "danger" : "success"} /></header><div className="ponto48-punches">{record.batidas.map((punch, index) => <span key={`${record.id}-${index}`}>{punch || "—"}</span>)}</div><footer><span>HE: {formatMinutes(record.horas_extras_minutos)}</span>{record.irregularidade ? <strong>{record.irregularidade}</strong> : null}</footer></article>) : <p>Não há registros diários de HE para este colaborador.</p>}</div></> : null}
+        {detailEmployee ? <><div className="ponto48-detail-summary"><div className="tm-dashboard-card"><span>Absenteísmo</span><strong>{detailEmployee.abs_percentual}%</strong></div><div className="tm-dashboard-card"><span>Horas extras</span><strong>{formatMinutes(detailEmployee.horas_extras_minutos)}</strong></div><div className="tm-dashboard-card"><span>Irregulares</span><strong>{detailEmployee.batidas_irregulares}</strong></div><div className="tm-dashboard-card"><span>Corretas</span><strong>{detailEmployee.batidas_corretas}</strong></div></div><div className="ponto48-records">{detailEmployee.registros.length ? detailEmployee.registros.map((record) => <article key={record.id} className={`tm-dashboard-card ${record.batida_irregular ? "is-irregular" : "is-correct"}`}><header><strong>{new Date(`${record.data}T00:00:00`).toLocaleDateString("pt-BR")}</strong><Tag value={record.batida_irregular ? "Irregular" : "Correta"} severity={record.batida_irregular ? "danger" : "success"} /></header><div className="ponto48-punches">{record.batidas.map((punch, index) => <span key={`${record.id}-${index}`}>{punch || "—"}</span>)}</div><footer><span>HE: {formatMinutes(record.horas_extras_minutos)}</span>{record.irregularidade ? <strong>{record.irregularidade}</strong> : null}</footer></article>) : <p>Não há registros diários de HE para este colaborador.</p>}</div></> : null}
       </Dialog>
 
       <ConfirmDialog />
