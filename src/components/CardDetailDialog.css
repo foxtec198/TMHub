@@ -1,0 +1,100 @@
+.project-card-dialog {
+  max-height: calc(100dvh - 1.5rem);
+}
+
+.project-card-dialog .p-dialog-header,
+.project-card-dialog .p-dialog-content,
+.project-card-dialog .p-dialog-footer {
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+
+.project-card-dialog .p-dialog-header {
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.project-card-dialog .p-dialog-content {
+  padding: 1rem 1.25rem;
+}
+
+.project-card-dialog .p-dialog-footer {
+  padding: .8rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.project-card-dialog__content > div {
+  display: grid;
+  gap: .65rem;
+  padding: .85rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+
+.project-card-dialog__content > div:first-child {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.project-card-dialog__content > .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.project-card-dialog__content label {
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.project-card-dialog__content .surface-100 {
+  border: 1px solid var(--border);
+  background: var(--surface-1) !important;
+  color: var(--text-primary);
+}
+
+.project-card-dialog__member-option,
+.project-card-dialog__member-chip {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+}
+
+.project-card-dialog__member-option .p-avatar,
+.project-card-dialog__member-chip .p-avatar {
+  flex: 0 0 auto;
+  width: 1.65rem;
+  height: 1.65rem;
+  font-size: .62rem;
+}
+
+.project-card-dialog__member-chip {
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .project-card-dialog .p-dialog-header,
+  .project-card-dialog .p-dialog-content,
+  .project-card-dialog .p-dialog-footer {
+    padding-right: .85rem;
+    padding-left: .85rem;
+  }
+
+  .project-card-dialog__content > .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-card-dialog__content > div {
+    padding: .7rem;
+  }
+
+  .project-card-dialog .p-dialog-footer .p-button {
+    padding-right: .55rem;
+    padding-left: .55rem;
+    font-size: .78rem;
+  }
+}

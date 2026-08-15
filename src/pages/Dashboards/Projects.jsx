@@ -6,6 +6,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 
 import { PageHeader } from "../../components/PageHeader";
+import { UserAvatar } from "../../components/UserAvatar";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
@@ -35,16 +36,15 @@ const formatCardDate = (value, compact = false) => {
   ).format(date).replace(",", " ·");
 };
 
-function MemberAvatar({ member, small = false }) {
-  return (
-    <span
-      className={`project-member-avatar ${small ? "is-small" : ""}`}
-      style={{ "--member-color": member.avatarColor || "#168447" }}
-      title={member.nome}
-    >
-      {member.iniciais || member.nome?.slice(0, 2).toUpperCase() || "?"}
-    </span>
-  );
+function MemberAvatar({ member, photosByUserId, small = false }) {
+  const photo = member.foto_perfil || photosByUserId[member.id];
+
+  return <UserAvatar
+    user={member}
+    foto_perfil={photo}
+    className={`project-member-avatar ${small ? "is-small" : ""}`}
+    style={{ "--member-color": member.avatarColor || "#168447" }}
+  />;
 }
 
 function EmptyChart({ text }) {
@@ -82,6 +82,7 @@ export function ProjectDashboard() {
   const [data, setData] = useState(null);
   const [filters, setFilters] = useState(defaultFilters);
   const [refresh, setRefresh] = useState(0);
+  const [photosByUserId, setPhotosByUserId] = useState({});
   const filterPanel = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
@@ -100,6 +101,29 @@ export function ProjectDashboard() {
       .catch((error) => showToast("error", "Dashboard de Projetos", error.response?.data || "Não foi possível carregar os dados."))
       .finally(() => setLoading(false));
   }, [filters, refresh, setLoading, showToast]);
+
+  useEffect(() => {
+    const membersAlreadyHavePhotos = [
+      ...(data?.participantes_por_projeto || []).flatMap((group) => group.membros || []),
+      ...(data?.timeline || []).flatMap((card) => card.membros || []),
+    ].some((member) => Boolean(member.foto_perfil));
+    if (!data || membersAlreadyHavePhotos) return undefined;
+
+    let active = true;
+
+    connect.get("/usuarios", { params: { include_photo: 1 } })
+      .then(({ data: users }) => {
+        if (!active) return;
+        setPhotosByUserId(Object.fromEntries(
+          (users || []).map((user) => [user.id, user.foto_perfil]).filter(([, photo]) => Boolean(photo)),
+        ));
+      })
+      .catch(() => {
+        // O dashboard continua funcional se a lista auxiliar não carregar.
+      });
+
+    return () => { active = false; };
+  }, [data]);
 
   const summary = data?.resumo || {};
   const proceduralOptions = data?.filtros || {};
@@ -197,7 +221,7 @@ export function ProjectDashboard() {
                   <span><strong>{group.projeto}</strong><small>{group.membros.length} participante(s)</small></span>
                 </div>
                 <div className="project-member-stack">
-                  {group.membros.slice(0, 6).map((member) => <MemberAvatar member={member} key={member.id} />)}
+                  {group.membros.slice(0, 6).map((member) => <MemberAvatar member={member} photosByUserId={photosByUserId} key={member.id} />)}
                   {group.membros.length > 6 && <span className="project-member-more">+{group.membros.length - 6}</span>}
                 </div>
               </div>
@@ -247,7 +271,7 @@ export function ProjectDashboard() {
                 <div>
                   <span><strong>{card.titulo}</strong><small>{card.projeto}</small></span>
                   <span className="project-member-stack is-compact">
-                    {(card.membros || []).slice(0, 4).map((member) => <MemberAvatar member={member} small key={member.id} />)}
+                    {(card.membros || []).slice(0, 4).map((member) => <MemberAvatar member={member} photosByUserId={photosByUserId} small key={member.id} />)}
                   </span>
                 </div>
               </div>

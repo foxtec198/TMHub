@@ -8,6 +8,7 @@ import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import ProjectMemberAvatar from './ProjectMemberAvatar';
 import { createCardComment, deleteCardComment, deleteCardFile, updateCardComment, uploadCardFile } from '../pages/Projects/services/card';
+import './CardDetailDialog.css';
 
 export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHide, onSave, onDelete, onProjectChange }) {
   // O formulário usa cópias locais para não alterar o card antes de Salvar.
@@ -104,7 +105,8 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
     <Dialog
       header="Detalhes do card"
       visible={visible}
-      style={{ width: '32rem' }}
+      className="project-card-dialog"
+      style={{ width: 'min(44rem, calc(100vw - 1.5rem))' }}
       onHide={onHide}
       footer={
         <div className="flex justify-content-between">
@@ -116,7 +118,7 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
         </div>
       }
     >
-      <div className="flex flex-column gap-3">
+      <div className="project-card-dialog__content flex flex-column gap-3">
         <div>
           <label className="block text-sm text-color-secondary mb-1">Título</label>
           <InputText className="w-full" value={titulo} onChange={(e) => setTitulo(e.target.value)} />
@@ -182,13 +184,16 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
             optionLabel="nome"
             optionValue="id"
             display="chip"
+            maxSelectedLabels={2}
+            selectedItemsLabel="{0} responsÃ¡veis"
             placeholder="Selecione os membros"
             itemTemplate={(m) => (
-              <div className="flex align-items-center gap-2">
+              <div className="project-card-dialog__member-option">
                 <ProjectMemberAvatar member={m} size="normal" />
                 <span>{m.nome}</span>
               </div>
             )}
+            selectedItemTemplate={(m) => m ? <span className="project-card-dialog__member-chip"><ProjectMemberAvatar member={m} size="normal" />{m.nome}</span> : null}
             onChange={(e) => setMemberIds(e.value)}
           />
         </div>

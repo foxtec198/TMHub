@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import connect from "../../utils/request";
-import { getInitials } from "../../utils/profile";
 import "./init.css";
 import WeatherWidget from "../../components/WeatherWidget";
 import { ThemeLogo } from "../../components/ThemeLogo";
+import { UserAvatar } from "../../components/UserAvatar";
 
 const documentation = [
   {
@@ -117,9 +117,7 @@ export function Init() {
           <div className="init-team-list">
             {admins.length ? admins.map((admin) => (
               <div key={admin.id}>
-                {admin.foto_perfil
-                  ? <img src={admin.foto_perfil} alt={`Foto de ${admin.nome}`} />
-                  : <span>{getInitials(admin.nome)}</span>}
+                <UserAvatar user={admin} />
                 <div>
                   <strong>{admin.nome}</strong>
                   <small>Administrador · Suporte TM Hub</small>

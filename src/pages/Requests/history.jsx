@@ -10,6 +10,7 @@ import { Table } from "../../components/tables/Table";
 import { DropdownWS } from "../../components/DropdownWithSearch";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { PageHeader } from "../../components/PageHeader";
+import { UserAvatar } from "../../components/UserAvatar";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
@@ -84,6 +85,12 @@ function formatFilterDate(value) {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     return `${day}/${month}/${date.getFullYear()}`;
+}
+
+function shortName(name) {
+    const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+    if (parts.length <= 2) return parts.join(" ") || "Usuário";
+    return `${parts[0]} ${parts.at(-1)}`;
 }
 
 export function History() {
@@ -265,7 +272,21 @@ export function History() {
         });
     }
 
-    const timelineContent = (event) => (
+    const timelineActor = (event) => {
+        if (event.criado_por_usuario) {
+            return { label: "Criado por", name: event.criado_por_usuario, id: event.criado_por_usuario_id, photo: event.criado_por_usuario_foto };
+        }
+        if (event.alterado_por) {
+            return { label: "Alterado por", name: event.alterado_por, id: event.alterado_por_usuario_id, photo: event.alterado_por_foto };
+        }
+        if (event.criado_por) return { label: "Criado por", name: event.criado_por };
+        if (event.supervisor) return { label: "Supervisor", name: event.supervisor };
+        return null;
+    };
+
+    const timelineContent = (event) => {
+        const actor = timelineActor(event);
+        return (
         <div className="flex flex-column gap-1 pb-3">
             <span className="font-bold">
                 {event.title || event.action || event.evento || event.tipo || STATUS_MAP[event.status] || "Atualização"}
@@ -273,17 +294,18 @@ export function History() {
             {event.description || event.message || event.obs
                 ? <span>{event.description || event.message || event.obs}</span>
                 : null}
-            {event.criado_por_usuario
-                ? <small className="text-600">Criado por: {event.criado_por_usuario}</small>
-                : event.alterado_por
-                ? <small className="text-600">Alterado por: {event.alterado_por}</small>
-                : event.criado_por
-                    ? <small className="text-600">Criado por: {event.criado_por}</small>
-                    : event.supervisor
-                        ? <small className="text-600">Supervisor: {event.supervisor}</small>
-                        : null}
+            {actor ? <div className="flex align-items-center gap-2 mt-1">
+                <UserAvatar
+                    userId={actor.id}
+                    nome={actor.name}
+                    foto_perfil={actor.photo}
+                    style={{ width: "1.65rem", height: "1.65rem", fontSize: ".62rem" }}
+                />
+                <small className="text-600">{actor.label}: {shortName(actor.name)}</small>
+            </div> : null}
         </div>
-    );
+        );
+    };
 
     const timelineOpposite = (event) => (
         <small className="text-600">
