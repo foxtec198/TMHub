@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -9,6 +8,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
+import { UserAvatar } from "../../components/UserAvatar";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
@@ -49,10 +49,6 @@ function asDate(value, withTime = true) {
   return date.toLocaleString("pt-BR", withTime ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" });
 }
 
-function initials(name) {
-  return String(name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
-}
-
 function statusTag(status) {
   const meta = STATUS_META[status] || STATUS_META.ABERTO;
   return <Tag value={meta.label.toUpperCase()} severity={meta.severity} icon={meta.icon} rounded className={`ticket-status ticket-status--${String(status || "aberto").toLowerCase()}`} />;
@@ -73,9 +69,7 @@ function dueLabel(ticket, now) {
 }
 
 function TicketAvatar({ user, className = "" }) {
-  return user?.foto_perfil
-    ? <Avatar image={user.foto_perfil} shape="circle" className={className} />
-    : <Avatar label={initials(user?.nome)} shape="circle" className={className} />;
+  return <UserAvatar user={user} className={className} />;
 }
 
 function TicketForm({ visible, onHide, onCreated, reasons }) {

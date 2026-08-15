@@ -1,6 +1,6 @@
 // Utils
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getInitials, storeProfile } from "../utils/profile";
+import { storeProfile } from "../utils/profile";
 import { can } from "../utils/permissions";
 import { useEffect, useState } from "react";
 import connect from "../utils/request";
@@ -11,10 +11,10 @@ import { clearAccessToken, getAccessToken } from "../utils/authSession";
 
 // Widgets
 import { PanelMenu } from "primereact/panelmenu";
-import { Avatar } from "primereact/avatar";
 import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
 import { ThemeLogo } from "../components/ThemeLogo";
+import { UserAvatar } from "../components/UserAvatar";
 import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
 
 // Styles
@@ -550,10 +550,10 @@ export function MainLayout() {
             <span className="font-bold">{displayName}</span>
             <span className="text-700 font-italic">{role}</span>
           </div>
-          <Avatar
-            image={profilePhoto || undefined}
-            label={!profilePhoto ? getInitials(displayName) : undefined}
-            shape="circle"
+          <UserAvatar
+            userId={Number(localStorage.getItem("current_id"))}
+            nome={displayName}
+            foto_perfil={profilePhoto}
             size="large"
           />
         </div>

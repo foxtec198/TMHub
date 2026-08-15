@@ -25,7 +25,7 @@
 }
 
 :root[data-mode="dark"] .projetos-sidebar {
-  background: transparent;
+  background: var(--surface-1);
   color: var(--text-primary);
 }
 
@@ -82,7 +82,7 @@
   width: 280px;
   flex-shrink: 0;
   border-right: 1px solid var(--projetos-borda);
-  background: #fff;
+  background: var(--surface-1, #fff);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -205,10 +205,12 @@
 @media screen and (max-width: 768px) {
   .projetos-sidebar {
     position: absolute;
-    z-index: 20;
+    /* A lista permanece abaixo do header principal do MainLayout. */
+    z-index: 1;
     inset: 0;
     width: 100%;
     border-right: 0;
+    background: var(--surface-1, #fff);
     transform: translateX(0);
     opacity: 1;
   }
@@ -241,8 +243,9 @@
 .kanban-column {
   background: var(--projetos-coluna-bg);
   border-radius: 12px;
-  width: 280px;
-  flex-shrink: 0;
+  /* Em desktop as colunas compartilham o espaço livre do board. */
+  flex: 1 1 280px;
+  min-width: 280px;
   padding: 0.6rem;
   display: flex;
   flex-direction: column;
@@ -414,6 +417,15 @@
 
 .kanban-column__novo-card {
   padding: 0.3rem 0.2rem 0.1rem;
+}
+
+@media screen and (max-width: 768px) {
+  /* Mantém a largura atual no celular, permitindo rolagem horizontal. */
+  .kanban-column {
+    flex: 0 0 280px;
+    width: 280px;
+    min-width: 280px;
+  }
 }
 
 .kanban-column__novo-card-acoes {

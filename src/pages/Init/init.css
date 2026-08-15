@@ -322,7 +322,8 @@
 }
 
 .init-team-list>div>span,
-.init-team-list>div>img {
+.init-team-list>div>img,
+.init-team-list>div>.p-avatar {
   display: grid;
   width: 2.4rem;
   height: 2.4rem;

@@ -17,6 +17,31 @@ import ProjectMemberAvatar from '../../components/ProjectMemberAvatar';
 import { useToast } from '../../contexts/ToastContext';
 import './ProjetosPage.css';
 
+function enrichMembersWithPhotos(project, usersById) {
+  const enrich = (member) => {
+    const user = usersById.get(member?.id);
+    return user?.foto_perfil && !member?.foto_perfil
+      ? { ...member, foto_perfil: user.foto_perfil }
+      : member;
+  };
+
+  return {
+    ...project,
+    members: (project.members || []).map(enrich),
+    cards: Object.fromEntries(Object.entries(project.cards || {}).map(([cardId, card]) => [
+      cardId,
+      { ...card, members: (card.members || []).map(enrich) },
+    ])),
+  };
+}
+
+function hasSerializedMemberPhoto(projects) {
+  return projects.some((project) => [
+    ...(project.members || []),
+    ...Object.values(project.cards || {}).flatMap((card) => card.members || []),
+  ].some((member) => Boolean(member?.foto_perfil)));
+}
+
 export function ProjetosPage() {
   // Estado normalizado da tela: projetos carregados, seleção e diálogos abertos.
   const [projetos, setProjetos] = useState([]);
@@ -234,9 +259,12 @@ export function ProjetosPage() {
 
     async function loadProjects() {
       const data = await getProjects();
+      const users = hasSerializedMemberPhoto(data) ? [] : await getUsers();
       if (!active) return;
 
-      setProjetos(data);
+      const usersById = new Map(users.map((user) => [user.id, user]));
+      setUsuarios(users);
+      setProjetos(data.map((project) => enrichMembersWithPhotos(project, usersById)));
     }
 
     loadProjects();

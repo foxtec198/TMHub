@@ -3,7 +3,7 @@
 // Utils
 import { useEffect, useMemo, useRef, useState } from "react";
 import connect from "../../utils/request";
-import { getInitials, storeProfile } from "../../utils/profile";
+import { storeProfile } from "../../utils/profile";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
 import { socketio } from "../../utils/socketio";
@@ -17,9 +17,9 @@ import { Dialog } from "primereact/dialog";
 import { InputOtp } from "primereact/inputotp";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
-import { Avatar } from "primereact/avatar";
 import { TabPanel, TabView } from "primereact/tabview";
 import { PageHeader } from "../../components/PageHeader";
+import { UserAvatar } from "../../components/UserAvatar";
 import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
 import { CapacityDepartmentSettings } from "./CapacityDepartmentSettings";
@@ -157,7 +157,7 @@ export function Settings() {
             <article className="settings-card profile-card">
               <div className="settings-card-title"><i className="pi pi-user" /><div><h2>Perfil</h2><p>Como você aparece no TM Hub</p></div></div>
               <div className="photo-row">
-                <Avatar image={profile.foto_perfil || undefined} label={!profile.foto_perfil ? getInitials(profile.nome) : undefined} shape="circle" className="settings-avatar" />
+                <UserAvatar user={profile} className="settings-avatar" />
                 <div><Button label="Trocar foto" icon="pi pi-camera" outlined onClick={() => fileRef.current?.click()} /><input ref={fileRef} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={changePhoto} /><small>PNG, JPG ou WEBP · máximo 1,5 MB</small></div>
               </div>
               <label>Nome de usuário</label><div className="settings-inline"><InputText value={profile.nome || ""} onChange={(e) => setProfile({ ...profile, nome: e.target.value })} /><Button label="Salvar" onClick={() => save({ nome: profile.nome }, "Nome atualizado.")} /></div>
