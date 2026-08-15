@@ -1,9 +1,6 @@
 import axios from "axios";
-import { apiServer } from "./apiServer";
 
-const tmOpsRequest = axios.create({
-    baseURL: apiServer,
-});
+const tmOpsRequest = axios.create({baseURL: import.meta.env.VITE_SERVER});
 
 tmOpsRequest.interceptors.request.use((config) => {
     const legacyToken = sessionStorage.getItem("schedular_token");
