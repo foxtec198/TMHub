@@ -1064,7 +1064,7 @@
 }
 
 .project-command-card>header>span {
-  color: var(--project-accent);
+  color: var(--project-accent) !important;
   font-size: 0.68rem;
   font-weight: 900;
   letter-spacing: 0.13em;
@@ -1215,7 +1215,7 @@
   margin: auto;
   place-items: center;
   border-radius: 50%;
-  background: conic-gradient(var(--accent-hover) var(--deadline-progress), rgba(255, 255, 255, 0.15) 0);
+  background: conic-gradient(var(--accent-hover) var(--deadline-progress), var(--surface-active) 0);
 }
 
 .project-performance-ring::before {
@@ -1239,8 +1239,8 @@
 }
 
 .project-performance-ring small {
-  color: color-mix(in srgb, var(--text-on-color) 76%, transparent);
-  font-size: 0.65rem;
+  color: color-mix(in srgb, var(--text-on-color) 76%, transparent) !important;
+  font-size: 0.65rem !important;
 }
 
 .project-performance-breakdown {
@@ -1265,7 +1265,7 @@
 
 .project-performance-breakdown strong {
   margin: 0.2rem 0;
-  color: #fff;
+  color: var(--text-on-color);
   font-size: 1.4rem;
 }
 
@@ -1413,7 +1413,7 @@
 
 .project-card-timeline strong {
   overflow: hidden;
-  color: #fff;
+  color: var(--text-on-color);
   font-size: 0.73rem;
   text-overflow: ellipsis;
   white-space: nowrap;

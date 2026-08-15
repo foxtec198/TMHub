@@ -1,4 +1,4 @@
-import "./pcdDashboard.css";
+import "./pcd.css";
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
@@ -236,16 +236,6 @@ export function PcdDashboard() {
                 section="Dashboards"
                 title="Dashboard PCD"
                 description="Acompanhe o quadro de colaboradores PCD e o comparativo com a meta."
-                actions={(
-                    <Button
-                        icon="pi pi-refresh"
-                        label="Atualizar"
-                        outlined
-                        onClick={() => (
-                            setRefresh((value) => value + 1)
-                        )}
-                    />
-                )}
             />
 
             <div className="pcd-dashboard-summary">

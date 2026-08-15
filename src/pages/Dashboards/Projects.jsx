@@ -10,7 +10,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
-import "./projectDashboards.css";
+import "./projects.css";
 
 const monthStart = () => new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 const defaultFilters = () => ({ periodo: [monthStart(), new Date()], projeto: [], colaborador: [], card: [], status: [] });
@@ -163,7 +163,6 @@ export function ProjectDashboard() {
         actions={<>
           <div className="project-dashboard-period"><i className="pi pi-calendar" />{filters.periodo?.[0]?.toLocaleDateString("pt-BR")} — {filters.periodo?.[1]?.toLocaleDateString("pt-BR")}</div>
           <Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
-          <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
         </>}
       />
 

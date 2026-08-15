@@ -24,8 +24,8 @@ import "./index.css";
 // Routes
 import { RequestReport } from "./pages/Dashboards/requests";
 import { DepartmentEmployeesDashboard } from "./pages/Dashboards/DepartmentEmployees";
-import { Ponto48Dashboard } from "./pages/Dashboards/Ponto48Dashboard";
-import { AdmissionDashboard } from "./pages/Dashboards/AdmissionDashboard.jsx";
+import { Ponto48Dashboard } from "./pages/Dashboards/Ponto48";
+import { AdmissionDashboard } from "./pages/Dashboards/Admission.jsx";
 import { Requests } from "./pages/Requests/requests";
 import { Request } from "./pages/Requests/new.jsx";
 import { Auth } from "./pages/Auth";
@@ -42,14 +42,14 @@ import { TerminationControl } from "./pages/TerminationControl";
 import { Settings } from "./pages/Configuratiom";
 import { AbsenceControl } from "./pages/FaltsControl";
 import { DisallowanceControl } from "./pages/DissallowancesControls";
-import { AbsenceDashboard } from "./pages/Dashboards/AbsenceDashboard";
+import { AbsenceDashboard } from "./pages/Dashboards/Absence";
 import { DashboardLogistic } from "./pages/Dashboards/logistic";
 import { Pcd } from "./pages/Indicators/pcd";
-import { PcdDashboard } from "./pages/Dashboards/PcdDashboard";
-import { ProjectDashboard } from "./pages/Dashboards/ProjectDashboard";
-import { GlosaDashboard } from "./pages/Dashboards/GlosaDashboard";
-import { RocadaDashboard } from "./pages/Dashboards/RocadaDashboard";
-import { TerminationDashboard } from "./pages/Dashboards/TerminationDashboard.jsx";
+import { PcdDashboard } from "./pages/Dashboards/Pcd";
+import { ProjectDashboard } from "./pages/Dashboards/Projects";
+import { GlosaDashboard } from "./pages/Dashboards/Dissallownces";
+import { RocadaDashboard } from "./pages/Dashboards/Rocada";
+import { TerminationDashboard } from "./pages/Dashboards/Termination.jsx";
 import { Structure } from "./pages/Structure/index";
 import { TMOps } from "./pages/TMOps";
 import { TMOpsManagement } from "./pages/TMOps/Management";
@@ -57,7 +57,7 @@ import { TMOpsTasks } from "./pages/TMOps/Tasks";
 import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
 import { TicketDetail, TicketsDashboard } from "./pages/Tickets";
 import { TicketManagement } from "./pages/Tickets/TicketManagement";
-import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasuresDashboard.jsx";
+import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasures.jsx";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -217,7 +217,6 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
-          {/* TESTEEEEEEE */}
           <Route
             path="/controle-glosas"
             element={

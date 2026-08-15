@@ -10,7 +10,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
-import "./projectDashboards.css";
+import "./projects.css";
 
 const yearPeriod = () => {
   const today = new Date();
@@ -54,7 +54,7 @@ export function GlosaDashboard() {
   const chart = useMemo(() => ({ labels: (data?.evolucao_mensal || []).map((row) => row.competencia), datasets: [{ label: "Valor", data: (data?.evolucao_mensal || []).map((row) => row.valor), backgroundColor: chartTheme.danger, borderRadius: 8 }] }), [data, chartTheme]);
 
   return <main className="project-dashboard">
-    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>} />
+    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /></>} />
     <section className="project-dashboard-summary">
       <Summary icon="pi pi-file" label="Glosas" value={summary.total_registros || 0} detail="registros no período" />
       <Summary icon="pi pi-money-bill" label="Valor total" value={money(summary.valor_total)} detail="valor apontado" tone="violet" />
