@@ -13,7 +13,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 
-import "./DisciplinaryMeasuresDashboard.css";
+import "./DisciplinaryMeasures.css";
 
 
 const MONTHS = [

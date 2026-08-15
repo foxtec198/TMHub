@@ -1,5 +1,5 @@
-import './TerminationDashboard.css'
-import './pcdDashboard.css';
+import './Termination.css'
+import './pcd.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
@@ -290,11 +290,6 @@ export function TerminationDashboard() {
                 title="Rescisões"
                 description="Acompanhe o volume e os valores das rescisões por período, filial e contrato."
             />
-
-            <div className="termination-dashboard-toolbar">
-                <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-                <TerminationFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />
-            </div>
 
             <div className="termination-dashboard-summary">
                 {summary.map((item) => <SummaryCard key={item.label} {...item} />)}

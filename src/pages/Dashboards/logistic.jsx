@@ -154,7 +154,6 @@ export function DashboardLogistic() {
                             aria-label="Abrir filtros do dashboard"
                             onClick={(event) => filterPanel.current?.toggle(event)}
                         />
-                        <Button icon="pi pi-refresh" outlined onClick={() => setRefresh((value) => value + 1)} />
                     </>
                 )}
             />

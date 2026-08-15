@@ -82,7 +82,13 @@ export function AbsenceDashboard() {
         section="Dashboards"
         title="Dashboard de Faltas"
         description="Indicadores de ocorrência, justificativa e velocidade de tratativa."
-        actions={<><div className="absence-period-label"><i className="pi pi-calendar" /><span>{formatPeriod(filters.period)}</span></div><Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} /></>}
+        actions={<>
+          <div className="absence-period-label">
+            <i className="pi pi-calendar" />
+            <span>{formatPeriod(filters.period)}</span>
+          </div>
+          <Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
+        </>}
       />
 
       <section className="absence-overview">

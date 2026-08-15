@@ -1,4 +1,4 @@
-import './admissionDashboard.css';
+import './admission.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
@@ -155,14 +155,13 @@ export function AdmissionDashboard() {
 
     return (
         <section className="admission-dashboard">
-            
+
             <PageHeader
                 section="Dashboards"
                 title="SLA de Admissões"
                 description="Acompanhe a velocidade de resposta e conclusão. Vagas com saída prevista permanecem fora do SLA."
                 actions={<>
                     <Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : 'Filtros'} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
-                    <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
                 </>}
             />
 

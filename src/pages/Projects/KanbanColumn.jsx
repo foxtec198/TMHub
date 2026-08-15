@@ -1,5 +1,5 @@
 // components/KanbanColumn.jsx
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import KanbanCard from './KanbanCard';
@@ -21,32 +21,17 @@ export default function KanbanColumn({
   onColumnDragEnd,
   onCardClick,
   onRenameColumn,
-  onAddCard,
   onDeleteColumn,
 }) {
   const [editandoTitulo, setEditandoTitulo] = useState(false);
   const [tituloTemp, setTituloTemp] = useState(coluna.titulo);
-  const [novoCardAberto, setNovoCardAberto] = useState(false);
-  const [novoCardTitulo, setNovoCardTitulo] = useState('');
   const [overIndex, setOverIndex] = useState(null);
-  const inputNovoCardRef = useRef(null);
 
   function confirmarRenomear() {
     const valor = tituloTemp.trim();
     if (valor) onRenameColumn(coluna.id, valor);
     else setTituloTemp(coluna.titulo);
     setEditandoTitulo(false);
-  }
-
-  function confirmarNovoCard() {
-    const valor = novoCardTitulo.trim();
-    if (valor) {
-      onAddCard(coluna.id, valor);
-      setNovoCardTitulo('');
-      inputNovoCardRef.current?.focus();
-    } else {
-      setNovoCardAberto(false);
-    }
   }
 
   function handleDragOverCard(e, index) {
@@ -154,40 +139,6 @@ export default function KanbanColumn({
         />
       </div>
 
-      {novoCardAberto ? (
-        <div className="kanban-column__novo-card">
-          <InputText
-            ref={inputNovoCardRef}
-            autoFocus
-            placeholder="Título do card..."
-            value={novoCardTitulo}
-            onChange={(e) => setNovoCardTitulo(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') confirmarNovoCard();
-              if (e.key === 'Escape') { setNovoCardAberto(false); setNovoCardTitulo(''); }
-            }}
-            className="w-full"
-          />
-          <div className="kanban-column__novo-card-acoes">
-            <Button label="Adicionar" size="small" onClick={confirmarNovoCard} />
-            <Button
-              icon="pi pi-times"
-              text
-              size="small"
-              severity="secondary"
-              onClick={() => { setNovoCardAberto(false); setNovoCardTitulo(''); }}
-            />
-          </div>
-        </div>
-      ) : (
-        <Button
-          label="Adicionar card"
-          icon="pi pi-plus"
-          text
-          className="kanban-column__botao-add"
-          onClick={() => setNovoCardAberto(true)}
-        />
-      )}
     </div>
   );
 }

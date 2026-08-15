@@ -127,7 +127,10 @@ export function TicketManagement() {
       section="Atendimento / Administração"
       title="Gestão de Chamados"
       description="Acompanhe os chamados da filial selecionada, direcione responsáveis e mantenha os motivos de atendimento."
-      actions={<div className="tickets-header-actions"><Button label="Atualizar" icon="pi pi-refresh" outlined onClick={load} /><Button label="Novo motivo" icon="pi pi-plus" onClick={() => setReasonDialog(true)} /></div>}
+      actions={
+        <div className="tickets-header-actions">
+          <Button label="Novo motivo" icon="pi pi-plus" onClick={() => setReasonDialog(true)} />
+        </div>}
     />
 
     <section className="ticket-management__metrics">

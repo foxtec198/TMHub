@@ -153,7 +153,7 @@ export function MainLayout() {
               },
             },
             {
-              label: "Medidas Disciplinares",
+              label: "Disciplina",
               icon: "pi pi-file-edit",
               visible: can("dashboard_medidas_disciplinares"),
               command: () => {

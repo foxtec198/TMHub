@@ -13,7 +13,7 @@ function collaboratorMeta(collaborator) {
     const center = local
         ? (centerId && !local.startsWith(`${centerId} -`) ? `${centerId} - ${local}` : local)
         : centerId;
-    return [collaborator.matricula, center, collaborator.departamento]
+    return [collaborator.matricula, collaborator.cargo, center, collaborator.departamento]
         .filter((part, index, parts) => part != null && part !== "" && parts.indexOf(part) === index)
         .join(" · ");
 }

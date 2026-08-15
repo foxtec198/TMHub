@@ -18,10 +18,8 @@ import { exportDisallowancesXlsx } from "../../utils/exportDisallowancesXlsx";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
-import { RocadaMetric } from "./RocadaMetric";
 import "./styles.css";
 import "./contrast.css";
-import "./rocada.css";
 import {
   CombinedFiltersProvider,
   CombinedMultiSelect,
@@ -427,37 +425,6 @@ function DisallowanceControlContent() {
         </>}
       </>}
     />
-
-    {section === "rocada" ? <RocadaMetric /> : <>
-    <div className="glosa-summary">
-      <article><i className="pi pi-file" /><div><small>Registros</small><strong>{summary.total_registros || 0}</strong><span>{summary.dias || 0} dia(s)</span></div></article>
-      <article><i className="pi pi-wallet" /><div><small>Valor apontado</small><strong>{money(summary.valor_total)}</strong><span>no período</span></div></article>
-      <article className="is-success"><i className="pi pi-shield" /><div><small>Coberto</small><strong>{money(summary.valor_coberto)}</strong><span>total e parcial</span></div></article>
-      <article className="is-danger"><i className="pi pi-exclamation-triangle" /><div><small>Saldo descoberto</small><strong>{money(summary.valor_descoberto)}</strong><span>perda confirmada</span></div></article>
-      <article className="is-warning"><i className="pi pi-clock" /><div><small>Em análise</small><strong>{money(summary.valor_em_analise)}</strong><span>aguardando tratativa</span></div></article>
-    </div>
-
-    <article className="glosa-panel">
-      <div className="glosa-toolbar">
-        <span className="p-input-icon-left"><i className="pi pi-search" /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar contrato, colaborador, matrícula ou justificativa" /></span>
-      </div>
-      <DataTable value={filteredRecords} paginator rows={10} rowsPerPageOptions={[10, 25, 50, 100]} stripedRows size="small" dataKey="id" emptyMessage="Nenhuma glosa encontrada para os filtros aplicados.">
-        <Column field="competencia" header="Competência" sortable body={(row) => new Date(`${row.competencia}T12:00:00`).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })} />
-        <Column field="data_falta" header="Falta" sortable body={(row) => new Date(`${row.data_falta}T12:00:00`).toLocaleDateString("pt-BR")} />
-        <Column field="contrato" header="Contrato" sortable body={(row) => <div className="glosa-main-cell"><strong>{row.contrato}</strong><small>DPTO. {row.departamento ?? "—"}</small></div>} />
-        <Column field="colaborador" header="Colaborador" body={(row) => <div className="glosa-main-cell"><strong>{row.colaborador || "Não informado"}</strong><small>{row.matricula ? `Matrícula ${row.matricula}` : "Sem matrícula"}</small></div>} />
-        <Column field="cobertura" header="Situação" sortable body={(row) => coverageTag(row.cobertura)} />
-        <Column header="Cobertura" body={(row) => <div className="glosa-main-cell"><strong>{row.quantidade_coberta_horas || 0}h de {row.quantidade_horas || 0}h</strong><small>{money(row.valor_coberto)} coberto</small></div>} />
-        <Column field="valor_total" header="Apontado" sortable body={(row) => <strong>{money(row.valor_total)}</strong>} />
-        <Column field="valor_descoberto" header="Saldo" sortable body={(row) => <strong className={row.valor_descoberto > 0 ? "glosa-value-danger" : ""}>{money(row.valor_descoberto)}</strong>} />
-        <Column header="Evidência" body={(row) => row.evidencia_url
-          ? <Button icon="pi pi-paperclip" label="Abrir" text size="small" onClick={() => window.open(row.evidencia_url, "_blank", "noopener,noreferrer")} />
-          : <span className="glosa-no-evidence">—</span>} />
-        {canEdit && <Column header="Ações" body={(row) => <div className="glosa-actions"><Button icon="pi pi-pencil" rounded text aria-label="Editar glosa" onClick={() => openEdit(row)} /><Button icon="pi pi-trash" severity="danger" rounded text aria-label="Excluir glosa" onClick={() => remove(row)} /></div>} />}
-      </DataTable>
-    </article>
-    </>}
-
     <OverlayPanel ref={filterPanel} className="glosa-filter-panel">
       <div className="glosa-filter-title">
         <div><strong>Filtrar glosas</strong><span>A exportação usa exatamente estes filtros.</span></div>

@@ -103,7 +103,7 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
   };
 
   return <Dialog visible={visible} onHide={onHide} modal header="Abrir novo chamado" className="ticket-dialog" draggable={false}>
-    <div className="ticket-form">
+    <div className="ticket-form mt-5">
       <label><span>Título</span><InputText value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Descreva o chamado em uma frase" maxLength={180} /></label>
       <label><span>Motivo</span><Dropdown value={form.reason_id} options={reasons.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => update("reason_id", event.value)} placeholder="Selecione se necessário" showClear /></label>
       <label className="ticket-form__wide"><span>Descrição</span><InputTextarea value={form.observation} onChange={(event) => update("observation", event.target.value)} placeholder="Explique o que aconteceu e o que precisa ser tratado." rows={5} autoResize /></label>
@@ -172,19 +172,82 @@ export function TicketsDashboard() {
       section="Atendimento"
       title="Central de Chamados"
       description="Acompanhe solicitações, tratativas e prazos em tempo real."
-      actions={<div className="tickets-header-actions"><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={refreshTickets} />{canCreate && <Button icon="pi pi-plus" label="Novo chamado" onClick={openNewTicket} />}</div>}
+      actions={<div className="tickets-header-actions">
+        {canCreate && <Button icon="pi pi-plus" label="Novo chamado" onClick={openNewTicket} />}
+      </div>}
     />
 
     <section className="tickets-overview">
-      <article className="tickets-highlight"><div className="tickets-highlight__icon"><i className="pi pi-headset" /></div><div><span>Fila de atendimento</span><strong>{metrics.open}</strong><small>chamados em aberto ou em andamento</small></div><button type="button" onClick={() => { setStatus(null); setOnlyOpen(false); }}>Ver todos <i className="pi pi-arrow-up-right" /></button></article>
-      <article className="tickets-metric is-total"><i className="pi pi-ticket" /><span>Total</span><strong>{metrics.total}</strong><small>no seu escopo</small></article>
-      <article className="tickets-metric is-danger"><i className="pi pi-clock" /><span>Em atraso</span><strong>{metrics.overdue}</strong><small>prazo de 24h excedido</small></article>
-      <article className="tickets-metric is-success"><i className="pi pi-check-circle" /><span>Resolvidos</span><strong>{metrics.resolved}</strong><small>tratativas concluídas</small></article>
+      <article className="tickets-highlight"><div className="tickets-highlight__icon"><i className="pi pi-headphones" /></div>
+        <div>
+          <span>Fila de atendimento</span>
+          <strong>{metrics.open}</strong>
+          <small>chamados em aberto ou em andamento</small>
+        </div>
+        <button type="button" onClick={() => { setStatus(null); setOnlyOpen(false); }}>Ver todos <i className="pi pi-arrow-up-right" /></button>
+      </article>
+
+      <article className="tickets-metric is-total">
+        <i className="pi pi-ticket" />
+        <span>Total</span>
+        <strong>{metrics.total}</strong>
+        <small>no seu escopo</small>
+      </article>
+
+      <article className="tickets-metric is-danger">
+        <i className="pi pi-clock" />
+        <span>Em atraso</span>
+        <strong>{metrics.overdue}</strong>
+        <small>prazo de 24h excedido</small>
+      </article>
+
+      <article className="tickets-metric is-success">
+        <i className="pi pi-check-circle" />
+        <span>Resolvidos</span>
+        <strong>{metrics.resolved}</strong>
+        <small>tratativas concluídas</small>
+      </article>
     </section>
 
     <section className="tickets-workspace">
-      <header className="tickets-workspace__header"><div><span>Chamados</span><h2>{onlyOpen && !status ? "Atendimento em andamento" : "Todos os chamados"}</h2></div><div className="tickets-toolbar"><span className="tickets-search"><i className="pi pi-search" /><InputText value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar chamado" aria-label="Buscar chamado" /></span><Dropdown value={status} options={STATUS} onChange={(event) => { setStatus(event.value); setOnlyOpen(false); }} placeholder="Todos os status" showClear /></div></header>
-      <div className="tickets-list">{filteredTickets.map((ticket) => <button type="button" className={`ticket-list-card ${ticket.status === "ATRASADO" ? "is-overdue" : ""}`} key={ticket.id} onClick={() => navigate(`/tickets/${ticket.id}`)}><div className="ticket-list-card__top"><span>#{ticket.id}</span>{statusTag(ticket.status)}</div><h3>{ticket.name}</h3><p>{ticket.observation}</p><div className="ticket-list-card__bottom"><span className={ticket.status === "ATRASADO" ? "is-overdue" : ""}><i className="pi pi-clock" />{dueLabel(ticket, now)}</span><div>{ticket.responsible && <TicketAvatar user={ticket.responsible} />}<span>{ticket.responsible?.nome || "Sem responsável"}</span></div></div></button>)}{!filteredTickets.length && <div className="tickets-empty"><i className="pi pi-ticket" /><strong>Nenhum chamado encontrado</strong><span>Altere os filtros ou abra um novo chamado.</span></div>}</div>
+      <header className="tickets-workspace__header">
+        <div>
+          <span>Chamados</span>
+          <h2>{onlyOpen && !status ? "Atendimento em andamento" : "Todos os chamados"}</h2>
+        </div>
+        <div className="tickets-toolbar">
+          <span className="tickets-search">
+            <i className="pi pi-search" />
+            <InputText value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar chamado" aria-label="Buscar chamado" />
+          </span>
+          <Dropdown value={status} options={STATUS} onChange={(event) => { setStatus(event.value); setOnlyOpen(false); }} placeholder="Todos os status" showClear />
+        </div>
+      </header>
+
+      <div className="tickets-list">
+        {filteredTickets.map((ticket) =>
+          <button type="button" className={`ticket-list-card ${ticket.status === "ATRASADO" ? "is-overdue" : ""}`} key={ticket.id} onClick={() => navigate(`/tickets/${ticket.id}`)}>
+            <div className="ticket-list-card__top">
+              <span>#{ticket.id}</span>
+              {statusTag(ticket.status)}
+            </div>
+            <h3>{ticket.name}</h3>
+            <p>{ticket.observation}</p>
+            <div className="ticket-list-card__bottom">
+              <span className={ticket.status === "ATRASADO" ? "is-overdue" : ""}>
+                <i className="pi pi-clock" />{dueLabel(ticket, now)}
+              </span>
+              <div>
+                {ticket.responsible && <TicketAvatar user={ticket.responsible} />}
+                <span>{ticket.responsible?.nome || "Sem responsável"}</span>
+              </div>
+            </div>
+          </button>)}{!filteredTickets.length && <div className="tickets-empty"><i className="pi pi-ticket" />
+
+            <strong>Nenhum chamado encontrado</strong>
+            <span>Altere os filtros ou abra um novo chamado.</span>
+          </div>}
+      </div>
     </section>
 
     <TicketForm visible={newTicket} onHide={() => setNewTicket(false)} onCreated={(ticket) => { setNewTicket(false); setTickets((current) => [ticket, ...current]); navigate(`/tickets/${ticket.id}`); }} reasons={reasons} />

@@ -2,13 +2,10 @@
 import axios from "axios";
 import { socketio } from "./socketio";
 import { getAccessToken } from "./authSession";
-import { apiServer } from "./apiServer";
 
-export const server = apiServer;
+export const server = import.meta.env.VITE_SERVER;
 
-const connect = axios.create({
-  baseURL: server,
-});
+const connect = axios.create({ baseURL: server });
 
 connect.interceptors.request.use((config) => {
   const token = config.skipAuth ? null : getAccessToken();

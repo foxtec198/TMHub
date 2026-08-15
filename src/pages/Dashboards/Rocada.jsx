@@ -11,6 +11,8 @@ import { socketio } from "../../utils/socketio";
 import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
 import { useChartTheme } from "../../theme/useTheme";
+import "./rocada.css";
+import "./projects.css";
 
 const monthName = (value) => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" })
   .format(new Date(`${value}T12:00:00`));
@@ -120,7 +122,7 @@ function MonthChart({ month }) {
   }} /></div>;
 }
 
-export function RocadaMetric({ endpoint = "/glosas/rocada" }) {
+export function RocadaDashboard({ endpoint = "/glosas/rocada" }) {
   const [data, setData] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -164,48 +166,50 @@ export function RocadaMetric({ endpoint = "/glosas/rocada" }) {
   };
 
   const summary = detail?.resumo;
-  return <section className="rocada-metric">
-    <div className="flex justify-content-between align-items-center">
-      <PageHeader
-        section="Dashboards"
-        title="Dashboard de Roçada"
-        description="Meta contratual do DPTO 92: média mensal mínima de 72 colaboradores trabalhados."
-      />
-      <Dropdown value={selectedYear} options={years} onChange={(event) => setSelectedYear(event.value)} placeholder="Selecione o ano" />
-    </div>
+  return <main className="project-dashboard">
+    <section className="rocada-metric">
+      <div className="flex justify-content-between align-items-center">
+        <PageHeader
+          section="Dashboards"
+          title="Dashboard de Roçada"
+          description="Meta contratual do DPTO 92: média mensal mínima de 72 colaboradores trabalhados."
+        />
+        <Dropdown value={selectedYear} options={years} onChange={(event) => setSelectedYear(event.value)} placeholder="Selecione o ano" />
+      </div>
 
-    {!months.length && <div className="rocada-metric__empty"><i className="pi pi-file-import" /><strong>Sem espelho de ponto da Roçada para este ano.</strong><span>Sem dados, consulte seu Administrator.</span></div>}
-    <div className="rocada-month-grid">
-      {months.map((month) => <article className={`rocada-month-card tm-dashboard-card ${month.futuro ? "is-future" : month.glosado == null ? "is-empty" : month.glosado ? "is-risk" : "is-safe"}`} key={month.competencia}>
-        <div className="rocada-month-card__top"><span>{monthName(month.competencia)}</span><Tag value={month.situacao} severity={month.futuro ? "secondary" : month.glosado == null ? "info" : month.glosado ? "danger" : "success"} /></div>
-        <strong>{month.tem_dados ? month.media_trabalhados.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : "—"}</strong>
-        <span className="rocada-month-card__target">{month.tem_dados ? `média trabalhada · média contratual ${month.meta}` : month.futuro ? "o indicador será definido no mês" : "aguardando histórico do período"}</span>
-        <MonthChart month={month} />
-        <div className="rocada-month-card__stats"><span><i className="pi pi-calendar" /> {month.dias_operacionais} dias</span><span><i className="pi pi-chart-line" /> base {month.meta_padrao || 72}</span><span><i className="pi pi-user-minus" /> {month.media_faltantes} faltantes/dia</span></div>
-        <Button label={month.futuro ? "Aguardando mês" : "Visualizar"} icon={month.futuro ? "pi pi-clock" : "pi pi-table"} text onClick={() => openDetail(month.competencia)} loading={loadingDetail} disabled={month.futuro} />
-      </article>)}
-    </div>
+      {!months.length && <div className="rocada-metric__empty"><i className="pi pi-file-import" /><strong>Sem espelho de ponto da Roçada para este ano.</strong><span>Sem dados, consulte seu Administrator.</span></div>}
+      <div className="rocada-month-grid">
+        {months.map((month) => <article className={`rocada-month-card tm-dashboard-card ${month.futuro ? "is-future" : month.glosado == null ? "is-empty" : month.glosado ? "is-risk" : "is-safe"}`} key={month.competencia}>
+          <div className="rocada-month-card__top"><span>{monthName(month.competencia)}</span><Tag value={month.situacao} severity={month.futuro ? "secondary" : month.glosado == null ? "info" : month.glosado ? "danger" : "success"} /></div>
+          <strong>{month.tem_dados ? month.media_trabalhados.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : "—"}</strong>
+          <span className="rocada-month-card__target">{month.tem_dados ? `média trabalhada · média contratual ${month.meta}` : month.futuro ? "o indicador será definido no mês" : "aguardando histórico do período"}</span>
+          <MonthChart month={month} />
+          <div className="rocada-month-card__stats"><span><i className="pi pi-calendar" /> {month.dias_operacionais} dias</span><span><i className="pi pi-chart-line" /> base {month.meta_padrao || 72}</span><span><i className="pi pi-user-minus" /> {month.media_faltantes} faltantes/dia</span></div>
+          <Button label={month.futuro ? "Aguardando mês" : "Visualizar"} icon={month.futuro ? "pi pi-clock" : "pi pi-table"} text onClick={() => openDetail(month.competencia)} loading={loadingDetail} disabled={month.futuro} />
+        </article>)}
+      </div>
 
-    <Dialog visible={Boolean(detail)} onHide={() => setDetail(null)} modal maximizable className="rocada-detail-dialog" header={`Espelho de Roçada · ${summary ? monthName(summary.competencia) : ""}`}>
-      {summary && <>
-        <div className="rocada-detail-summary">
-          <span><small>Média de trabalhados</small><strong>{summary.media_trabalhados}</strong></span>
-          <span><small>Média de faltantes</small><strong>{summary.media_faltantes}</strong></span>
-          <span><small>Média contratual</small><strong>{summary.meta}</strong></span>
-          <span><small>Dias operacionais</small><strong>{summary.dias_operacionais}</strong></span>
-          <Tag value={summary.situacao} severity={summary.glosado ? "danger" : "success"} />
-        </div>
-        <DataTable value={detail.colaboradores} scrollable scrollHeight="55vh" stripedRows size="small" emptyMessage="Sem colaboradores no espelho deste mês.">
-          <Column field="nome" header="Colaborador" frozen style={{ minWidth: "18rem" }} body={(row) => <strong>{row.nome}</strong>} />
-          {(detail.colunas || []).map((column, index) => <Column key={column.data} header={column.dia} style={{ minWidth: "3.25rem", textAlign: "center" }} body={(row) => {
-            const item = row.dias[index];
-            if (!item?.operacional) return <i className="pi pi-minus rocada-day--off" />;
-            return item.trabalhou
-              ? <i className="pi pi-check-circle rocada-day--worked" title="Trabalhou" />
-              : <i className="pi pi-times-circle rocada-day--absent" title={item.motivo || "Faltante"} />;
-          }} />)}
-        </DataTable>
-      </>}
-    </Dialog>
-  </section>;
+      <Dialog visible={Boolean(detail)} onHide={() => setDetail(null)} modal maximizable className="rocada-detail-dialog" header={`Espelho de Roçada · ${summary ? monthName(summary.competencia) : ""}`}>
+        {summary && <>
+          <div className="rocada-detail-summary">
+            <span><small>Média de trabalhados</small><strong>{summary.media_trabalhados}</strong></span>
+            <span><small>Média de faltantes</small><strong>{summary.media_faltantes}</strong></span>
+            <span><small>Média contratual</small><strong>{summary.meta}</strong></span>
+            <span><small>Dias operacionais</small><strong>{summary.dias_operacionais}</strong></span>
+            <Tag value={summary.situacao} severity={summary.glosado ? "danger" : "success"} />
+          </div>
+          <DataTable value={detail.colaboradores} scrollable scrollHeight="55vh" stripedRows size="small" emptyMessage="Sem colaboradores no espelho deste mês.">
+            <Column field="nome" header="Colaborador" frozen style={{ minWidth: "18rem" }} body={(row) => <strong>{row.nome}</strong>} />
+            {(detail.colunas || []).map((column, index) => <Column key={column.data} header={column.dia} style={{ minWidth: "3.25rem", textAlign: "center" }} body={(row) => {
+              const item = row.dias[index];
+              if (!item?.operacional) return <i className="pi pi-minus rocada-day--off" />;
+              return item.trabalhou
+                ? <i className="pi pi-check-circle rocada-day--worked" title="Trabalhou" />
+                : <i className="pi pi-times-circle rocada-day--absent" title={item.motivo || "Faltante"} />;
+            }} />)}
+          </DataTable>
+        </>}
+      </Dialog>
+    </section>
+  </main>
 }
