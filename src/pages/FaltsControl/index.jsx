@@ -59,6 +59,33 @@ function remaining(deadline, now) {
   return { expired: false, text: `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}min` };
 }
 
+function toApiDate(value) {
+  if (!value) return null;
+
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+async function getExportErrorMessage(error) {
+  const response = error.response?.data;
+
+  if (!(response instanceof Blob)) {
+    return response?.message || response || "Não foi possível exportar o relatório.";
+  }
+
+  try {
+    const text = await response.text();
+    const parsed = JSON.parse(text);
+    return parsed?.message || text || "Não foi possível exportar o relatório.";
+  } catch {
+    return "Não foi possível exportar o relatório.";
+  }
+}
+
 const FILTER_DEFINITIONS = {
   status: {
     getValue: (record) => record.status,
@@ -105,6 +132,7 @@ function AbsenceControlPage() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [manualForm, setManualForm] = useState(null);
+  const [exporting, setExporting] = useState(false);
   const [supervisors, setSupervisors] = useState([]);
   const [now, setNow] = useState(0);
   const [refresh, setRefresh] = useState(0);
@@ -113,6 +141,7 @@ function AbsenceControlPage() {
   const { showToast } = useToast();
   const canEdit = can("controle_faltas", "edit");
   const {
+    filters,
     options: filterOptions,
     setFilter,
     clearFilters: clearCombinedFilters,
@@ -182,6 +211,66 @@ function AbsenceControlPage() {
     clearCombinedFilters();
     setDateRange([...CURRENT_MONTH]);
     setSearch("");
+  };
+
+  const exportAbsences = async () => {
+    if (!filtered.length) {
+      showToast("warn", "Exportação", "Não há faltas para exportar com os filtros atuais.");
+      return;
+    }
+
+    // A rota atual ainda não aceita busca textual; evita uma exportação diferente da tela.
+    if (search.trim()) {
+      showToast(
+        "warn",
+        "Exportação",
+        "Limpe a busca textual para exportar. A planilha respeita período e filtros avançados.",
+      );
+      return;
+    }
+
+    const params = new URLSearchParams();
+    const inicio = toApiDate(dateRange?.[0]);
+    const fim = toApiDate(dateRange?.[1]);
+
+    if (inicio) params.append("inicio", inicio);
+    if (fim) params.append("fim", fim);
+
+    Object.entries({
+      status: filters.status,
+      classificacao: filters.classificacao,
+      departamento: filters.departamento,
+      supervisor: filters.supervisor,
+      motivo: filters.motivo,
+      contrato: filters.contrato,
+      // O seletor mantém "nome|||matrícula"; a API recebe somente o nome.
+      colaborador: filters.colaborador.map((value) => String(value).split("|||")[0]),
+    }).forEach(([name, values]) => {
+      values.forEach((value) => params.append(name, value));
+    });
+
+    setExporting(true);
+    try {
+      const { data } = await connect.get("/controle-faltas/export", {
+        params,
+        responseType: "blob",
+      });
+
+      const url = URL.createObjectURL(data);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `controle_faltas_${toApiDate(new Date())}.xlsx`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+
+      showToast("success", "Exportação concluída", "A planilha foi baixada com os filtros aplicados.");
+    } catch (error) {
+      showToast("error", "Falha na exportação", await getExportErrorMessage(error));
+    } finally {
+      setExporting(false);
+    }
   };
 
   const open = (record) => {
@@ -284,6 +373,14 @@ function AbsenceControlPage() {
       description="Registros gerados automaticamente pelas requisições de reposição."
       actions={<>
         <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+        <Button
+          icon="pi pi-file-excel"
+          label="Exportar XLSX"
+          outlined
+          loading={exporting}
+          disabled={exporting || !filtered.length}
+          onClick={exportAbsences}
+        />
         {canEdit && <Button icon="pi pi-plus" label="Lançar falta" onClick={openManual} />}
       </>}
     />
