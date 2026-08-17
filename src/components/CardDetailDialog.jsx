@@ -1,11 +1,13 @@
-// components/CardDetailDialog.jsx
+//React
 import React, { useEffect, useRef, useState } from 'react';
+//PrimeReact
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { MultiSelect } from 'primereact/multiselect';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
+//Componentes
 import ProjectMemberAvatar from './ProjectMemberAvatar';
 import { createCardComment, deleteCardComment, deleteCardFile, updateCardComment, uploadCardFile } from '../pages/Projects/services/card';
 import './CardDetailDialog.css';

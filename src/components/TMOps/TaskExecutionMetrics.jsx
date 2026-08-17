@@ -1,3 +1,4 @@
+// Converte os valores brutos das métricas para formatos de leitura rápida.
 const formatDuration = (seconds) => {
   const total = Math.max(0, Math.floor(Number(seconds) || 0));
   const hours = Math.floor(total / 3600);

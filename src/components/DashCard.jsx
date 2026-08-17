@@ -15,8 +15,8 @@ export function DashCard({
     tone = "primary",
     accentColor,
 }) {
-    // Legacy callers used a solid background as the card identity. Keep that
-    // color as an accent while the shared card system owns the surface itself.
+    // Chamadores legados usam uma cor sólida como identidade do card.
+    // A cor permanece como destaque enquanto o sistema compartilhado define a superfície.
     const layoutStyle = { ...style };
     const resolvedAccent = accentColor || layoutStyle.backgroundColor || layoutStyle.background;
     delete layoutStyle.background;

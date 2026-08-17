@@ -1,3 +1,4 @@
+// Configurações de tema
 import {
   appearanceFromLegacyTheme,
   MODE_STORAGE_KEY,
@@ -8,6 +9,7 @@ import {
 
 export const THEME_EVENT = "tmhub:theme-change";
 
+// Recupera e normaliza a aparência persistida pelo usuário.
 export function getStoredAppearance() {
   return appearanceFromLegacyTheme(
     localStorage.getItem(THEME_STORAGE_KEY),
@@ -24,6 +26,7 @@ export function getStoredMode() {
 }
 
 export function applyAppearance(value, { notify = true } = {}) {
+  // Normaliza o valor recebido e persiste tema e modo antes de atualizar o DOM.
   const current = getStoredAppearance();
   const next = {
     theme: normalizeTheme(value?.theme ?? current.theme),
@@ -56,6 +59,7 @@ export function applyMode(mode, options) {
 }
 
 export function applyProfileAppearance(profile, options) {
+  // Mantém compatibilidade com perfis que ainda salvam o tema no formato antigo.
   const candidate = String(profile?.tema || "").toLowerCase();
   const legacyMode = candidate === "light" || candidate === "dark" ? candidate : null;
   return applyAppearance({
@@ -65,6 +69,7 @@ export function applyProfileAppearance(profile, options) {
 }
 
 export function getThemeColor(variable, fallback = "") {
+  // Lê variáveis CSS somente no navegador para também funcionar em testes.
   if (typeof document === "undefined") return fallback;
   const property = variable.startsWith("--") ? variable : `--${variable}`;
   return getComputedStyle(document.documentElement).getPropertyValue(property).trim() || fallback;

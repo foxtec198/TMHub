@@ -1,4 +1,6 @@
+// React
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
@@ -11,16 +13,21 @@ import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
+// Componentes
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { PageHeader } from "../../components/PageHeader";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+// Estilos
 import "./styles.css";
 
 
+// Mantém as opções de motivo compatíveis com os valores persistidos.
 const REASON_OPTIONS = [
   { label: "Dispensa sem justa causa", value: "sem_justa_causa" },
   { label: "Dispensa por justa causa", value: "justa_causa" },
@@ -38,6 +45,7 @@ const NOTICE_OPTIONS = [
   { label: "Trabalhado", value: "trabalhado" },
 ];
 
+// Cria filtros independentes para evitar reutilizar arrays entre consultas.
 const emptyFilters = () => ({
   motivo: [],
   departamento: [],
@@ -162,6 +170,7 @@ function errorMessage(error, fallback) {
   return fallback;
 }
 
+// Reúne consulta, cálculo e manutenção dos processos de desligamento.
 function TerminationControlContent() {
   const [records, setRecords] = useState([]);
   const [summary, setSummary] = useState({});
@@ -193,6 +202,7 @@ function TerminationControlContent() {
     () => addDays(admissionDate, EXPERIENCE_DAYS - 1),
     [admissionDate],
   );
+  // Identifica o contrato de experiência para limitar os motivos aplicáveis.
   const inExperiencePeriod = useMemo(() => {
     const dismissalDate = localDate(calculationForm.data_demissao);
     if (!admissionDate || !dismissalDate || !experienceEndDate) return false;
@@ -200,6 +210,7 @@ function TerminationControlContent() {
   }, [admissionDate, calculationForm.data_demissao, experienceEndDate]);
   const reasonOptions = inExperiencePeriod ? EXPERIENCE_REASON_OPTIONS : REASON_OPTIONS;
   const fgtsBalanceDisabled = FGTS_BALANCE_DISABLED_REASONS.has(calculationForm.motivo);
+  // Calcula a prévia do aviso conforme o motivo e o tempo de serviço.
   const noticeDaysPreview = useMemo(() => {
     if (!admissionDate || !calculationForm.data_demissao) return 30;
     return Math.min(90, 30 + (3 * completeYears(admissionDate, calculationForm.data_demissao)));
@@ -240,6 +251,7 @@ function TerminationControlContent() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
+  // Serializa filtros e paginação no formato esperado pela API.
   const requestParams = useMemo(() => {
     const params = {};
     if (period?.[0]) params.inicio = isoDate(period[0]);
@@ -251,6 +263,7 @@ function TerminationControlContent() {
     return params;
   }, [debouncedSearch, filters, period]);
 
+  // Atualiza os registros sempre que os parâmetros de consulta forem alterados.
   const loadRecords = useCallback(async () => {
     try {
       const { data } = await connect.get("/rescisoes", { params: requestParams });
@@ -275,6 +288,7 @@ function TerminationControlContent() {
   const activeFilterCount = Object.values(filters).filter((values) => values.length).length
     + (period?.[0] || period?.[1] ? 1 : 0);
 
+  // Restaura os filtros e retorna à primeira página de resultados.
   function clearFilters() {
     setPeriod(null);
     setFilters(emptyFilters());
@@ -331,12 +345,14 @@ function TerminationControlContent() {
     }
   }
 
+  // Abre uma simulação limpa para calcular uma nova rescisão.
   function openCalculation() {
     setCalculationForm({ ...EMPTY_CALCULATION });
     setCalculation(null);
     setCalculationOpen(true);
   }
 
+  // Preenche os dados contratuais ao selecionar o colaborador da simulação.
   function changeCalculationEmployee(employeeId, employee) {
     setCalculationForm((current) => ({
       ...current,
@@ -346,6 +362,7 @@ function TerminationControlContent() {
     setCalculation(null);
   }
 
+  // Mantém campos dependentes consistentes quando o motivo é alterado.
   function changeCalculation(field, value) {
     setCalculationForm((current) => ({ ...current, [field]: value }));
     setCalculation(null);

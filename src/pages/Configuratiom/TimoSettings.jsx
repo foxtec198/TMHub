@@ -1,4 +1,6 @@
+// React
 import { useEffect, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -6,14 +8,18 @@ import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
 import { InputTextarea } from "primereact/inputtextarea";
 import { TabPanel, TabView } from "primereact/tabview";
+// Componentes
 import { TimoVoiceAgentSettings } from "../../components/Timo/TimoVoiceAgentSettings";
 
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 
 
+// Define as ações possíveis para comandos personalizados do agente.
 const ACTION_TYPES = [
   { label: "Somente mostrar o balão", value: "none" },
   { label: "Abrir uma tela", value: "navigate" },
@@ -35,6 +41,7 @@ function errorMessage(error, fallback) {
 }
 
 
+// Configura comandos, exemplos de aprendizado e preferências do agente Timo.
 export function TimoSettings() {
   const [configurations, setConfigurations] = useState([]);
   const [navigationOptions, setNavigationOptions] = useState([]);
@@ -51,6 +58,7 @@ export function TimoSettings() {
   const { showToast } = useToast();
   const setLoading = useLoading();
 
+  // Carrega as configurações administrativas ao abrir a seção.
   useEffect(() => {
     let active = true;
 
@@ -77,6 +85,7 @@ export function TimoSettings() {
     return () => { active = false; };
   }, [setLoading, showToast]);
 
+  // Atualiza exemplos recebidos por Socket.IO sem recarregar toda a página.
   useEffect(() => {
     const updateLearningInRealTime = (payload) => {
       if (!payload) return;
@@ -113,6 +122,7 @@ export function TimoSettings() {
     return () => socketio.off("timo_learning_updated", updateLearningInRealTime);
   }, []);
 
+// Atualiza um campo do comando selecionado preservando os demais valores.
   function update(intent, field, value) {
     setConfigurations((current) => current.map((item) => (
       item.intent === intent
@@ -142,6 +152,7 @@ export function TimoSettings() {
     }
   }
 
+// Mantém o formulário do comando personalizado independente dos exemplos salvos.
   function changeCustom(field, value) {
     setCustomCommand((current) => ({
       ...current,
@@ -214,6 +225,7 @@ export function TimoSettings() {
     }
   }
 
+// Exibe a configuração adequada para cada tipo de ação do comando.
   function renderConfiguration(configuration) {
     return (
       <article className={`timo-intent-card${configuration.ativo ? "" : " is-disabled"}`} key={configuration.intent}>

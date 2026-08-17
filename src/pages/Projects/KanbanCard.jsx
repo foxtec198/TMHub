@@ -1,9 +1,12 @@
-// components/KanbanCard.jsx
+// React
 import React from 'react';
+// PrimeReact
 import { AvatarGroup } from 'primereact/avatargroup';
 import { Tag } from 'primereact/tag';
+// Componentes
 import ProjectMemberAvatar from '../../components/ProjectMemberAvatar';
 
+// Exibe o conteúdo e os membros vinculados a um card do quadro.
 export default function KanbanCard({ card, membros, onDragStart, onDragEnd, onClick, isDragging }) {
   return (
     <div

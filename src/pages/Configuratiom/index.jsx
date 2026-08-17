@@ -1,25 +1,30 @@
-// Index of Config
+// React
 
-// Utils
 import { useEffect, useMemo, useRef, useState } from "react";
+// Utilitários
 import connect from "../../utils/request";
 import { storeProfile } from "../../utils/profile";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
+// Utilitários
 import { socketio } from "../../utils/socketio";
 import { setAccessToken } from "../../utils/authSession";
+// Tema
 import { useTheme } from "../../theme/useTheme";
 import { getAvailableThemeOptions, MODE_OPTIONS } from "../../theme/themes";
 
-// Widgets
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputOtp } from "primereact/inputotp";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { TabPanel, TabView } from "primereact/tabview";
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
 import { UserAvatar } from "../../components/UserAvatar";
+// Seções de configuração
 import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
 import { CapacityDepartmentSettings } from "./CapacityDepartmentSettings";
@@ -28,7 +33,7 @@ import { NewsSettings } from "./NewsSettings";
 import { TMOpsAccessSettings } from "./TMOpsAccessSettings";
 import { TimoSettings } from "./TimoSettings";
 
-// Styles
+// Estilos
 import "./settings.css";
 
 // Mantida igual à validação do backend para feedback imediato no formulário.
@@ -72,7 +77,7 @@ export function Settings() {
       const { data } = await connect.patch("/usuarios/perfil", payload);
       if (data.access_token) {
         setAccessToken(data.access_token);
-        // eslint-disable-next-line react-hooks/immutability -- Socket.IO requires updating auth before reconnecting.
+// eslint-disable-next-line react-hooks/immutability -- O Socket.IO exige atualizar a autenticação antes de reconectar.
         socketio.auth = { token: data.access_token };
         socketio.disconnect().connect();
       }

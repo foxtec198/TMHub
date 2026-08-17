@@ -1,5 +1,7 @@
+// Estilos
 import "./page-header.css";
 
+// Renderiza título, contexto e ações opcionais de forma consistente.
 export function PageHeader({ section, title, description, actions = null, className = "" }) {
     return (
         <header className={`app-page-header ${className}`.trim()}>

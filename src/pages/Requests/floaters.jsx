@@ -1,23 +1,26 @@
-// Widgets
+// React
+import { useEffect, useMemo, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 import { Dialog } from "primereact/dialog";
 import { Calendar } from "primereact/calendar";
-import { PageHeader } from "../../components/PageHeader";
-
-// Utils
-import { useEffect, useMemo, useState } from "react";
-import { useLoading } from "../../contexts/LoadingContext";
-import connect from "../../utils/request";
 import { InputText } from "primereact/inputtext";
 import { FloatLabel } from "primereact/floatlabel";
+// Componentes
+import { PageHeader } from "../../components/PageHeader";
+// Contextos
+import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
+import connect from "../../utils/request";
 import { get_first_name } from "../../utils/ui";
 import { can } from "../../utils/permissions";
+// Estilos
 import "./floaters.css";
 
-// Login and UI (uiiii)
+// Estado e interface
 export function Floaters() {
     // refresh coordena as duas listas após inclusão ou remoção de reserva.
     const setLoading = useLoading();
@@ -26,7 +29,7 @@ export function Floaters() {
     const canEdit = can("reservas", "edit");
     const [refresh, setRefresh] = useState(false);
 
-    // Handles de Reservas
+// Ações de reservas
     const [reservas, setReservas] = useState([]);
     const [searchReservas, setSearchReservas] = useState("");
     const [usageDialog, setUsageDialog] = useState(false);
@@ -34,7 +37,7 @@ export function Floaters() {
     const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [], indisponiveis: [] });
     const [availabilityDialog, setAvailabilityDialog] = useState(null);
 
-    // Handles de busca para colaboradores
+// Busca de colaboradores
     const [colaboradores, setColaboradores] = useState([])
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");

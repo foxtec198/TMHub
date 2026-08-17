@@ -1,21 +1,27 @@
+// Utilitários
 import connect from "../../../utils/request";
 
+// Centraliza as operações de consulta e edição de projetos.
 export async function getProjects() {
+    // Busca a lista de projetos disponível para o usuário atual.
     const { data } = await connect.get("/projetos");
     return data;
 }
 
 export async function getProject(id) {
+    // Carrega os detalhes de um projeto específico.
     const { data } = await connect.get(`/projetos?id=${id}`);
     return data;
 }
 
 export async function createProject(body) {
+    // Persiste um novo projeto com os dados do formulário.
     const { data } = await connect.post("/projetos", body);
     return data;
 }
 
 export async function renameProject(id, nome) {
+    // Atualiza apenas o nome sem alterar a estrutura do projeto.
     const { data } = await connect.patch(`/projetos?id=${id}`, {
         nome
     });
@@ -23,6 +29,7 @@ export async function renameProject(id, nome) {
 }
 
 export async function updateProject(id, body) {
+    // Aplica alterações gerais no projeto informado.
     const { data } = await connect.patch(`/projetos?id=${id}`, body);
     return data;
 }

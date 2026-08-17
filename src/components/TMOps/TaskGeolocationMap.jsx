@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useState } from "react";
+// Mapa
 import {
   CircleMarker,
   MapContainer,
@@ -9,6 +11,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
+// Traduz os eventos de geolocalização para os rótulos exibidos no mapa.
 const EVENT_LABELS = {
   inicio: "Início",
   execucao: "Durante a execução",
@@ -16,6 +19,7 @@ const EVENT_LABELS = {
 };
 
 function formatCapturedAt(value) {
+  // Mantém um texto seguro quando a API não informa um horário válido.
   if (!value) return "Horário não informado";
   const date = new Date(value);
   return Number.isNaN(date.getTime())
@@ -27,6 +31,7 @@ function MapViewport({ positions }) {
   const map = useMap();
 
   useEffect(() => {
+    // Ajusta o enquadramento ao ponto único ou ao percurso completo da tarefa.
     if (positions.length === 1) {
       map.setView(positions[0], 19, { animate: false });
       return;
@@ -43,6 +48,7 @@ export function TaskGeolocationMap({ geolocations = [] }) {
   );
 
   useEffect(() => {
+    // Observa o tema global para trocar a camada do mapa sem recarregar a página.
     const root = document.documentElement;
     const observer = new MutationObserver(() => {
       setDarkMode(root.dataset.mode === "dark");
@@ -52,6 +58,7 @@ export function TaskGeolocationMap({ geolocations = [] }) {
   }, []);
 
   const points = useMemo(
+    // Descarta coordenadas inválidas antes de enviá-las ao Leaflet.
     () =>
       geolocations
         .filter(
@@ -66,6 +73,7 @@ export function TaskGeolocationMap({ geolocations = [] }) {
     [geolocations],
   );
   const positions = useMemo(
+    // Evita recriar a lista de posições enquanto os pontos não forem alterados.
     () => points.map((point) => point.position),
     [points],
   );

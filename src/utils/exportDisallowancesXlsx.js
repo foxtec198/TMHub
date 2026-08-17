@@ -1,7 +1,10 @@
+// Dependência externa
 import { strToU8, zipSync } from "fflate";
 
+// Define o formato usado no arquivo baixado pelo navegador.
 const MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
+// Protege os valores dinâmicos antes de inseri-los no XML da planilha.
 function escapeXml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -12,6 +15,7 @@ function escapeXml(value) {
 }
 
 function columnName(index) {
+  // Converte a posição numérica na referência de coluna esperada pelo Excel.
   let value = index;
   let result = "";
   while (value > 0) {
@@ -23,10 +27,12 @@ function columnName(index) {
 }
 
 function inlineCell(reference, value, style = 0) {
+  // Gera uma célula textual já associada ao estilo da planilha.
   return `<c r="${reference}" t="inlineStr" s="${style}"><is><t>${escapeXml(value)}</t></is></c>`;
 }
 
 function numberCell(reference, value, style = 0) {
+  // Mantém valores financeiros e quantitativos como números no Excel.
   return `<c r="${reference}" s="${style}"><v>${Number(value || 0)}</v></c>`;
 }
 
@@ -35,6 +41,7 @@ function moneyText(value) {
 }
 
 export function exportDisallowancesXlsx(records, summary) {
+  // Monta o cabeçalho, os indicadores e as linhas que formarão a planilha.
   const headers = [
     "Competência", "Data da falta", "Departamento", "Contrato", "Colaborador",
     "Matrícula", "Situação", "Dias apontados", "Dias cobertos", "Valor apontado",
@@ -63,6 +70,7 @@ export function exportDisallowancesXlsx(records, summary) {
   rows.push('<row r="7"/>');
   rows.push(`<row r="8" ht="30" customHeight="1">${headers.map((label, index) => inlineCell(`${columnName(index + 1)}8`, label, 6)).join("")}</row>`);
 
+  // Relacionamentos e atalhos são criados somente para registros com evidência.
   const hyperlinkRelationships = [];
   const hyperlinks = [];
   records.forEach((record, offset) => {
@@ -141,6 +149,7 @@ export function exportDisallowancesXlsx(records, summary) {
   <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
 
+  // Empacota os arquivos XML mínimos que compõem um XLSX válido.
   const files = {
     "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`),
     "_rels/.rels": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`),
@@ -155,6 +164,7 @@ export function exportDisallowancesXlsx(records, summary) {
     files["xl/worksheets/_rels/sheet1.xml.rels"] = strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${hyperlinkRelationships.join("")}</Relationships>`);
   }
 
+  // Compacta e dispara o download sem depender de uma biblioteca de planilhas.
   const archive = zipSync(files, { level: 6 });
   const blob = new Blob([archive], { type: MIME });
   const url = URL.createObjectURL(blob);

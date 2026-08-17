@@ -1,10 +1,13 @@
-// components/ProjectsSidebar.jsx
+// React
 import { useState } from 'react';
+// PrimeReact
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { AvatarGroup } from 'primereact/avatargroup';
+// Componentes
 import ProjectMemberAvatar from './ProjectMemberAvatar';
 
+// Mantém a edição do projeto local até o nome ser confirmado.
 function ProjectRow({ projeto, ativo, currentUserId, onSelect, onRename, onOpenMembers }) {
   const [editando, setEditando] = useState(false);
   const [nomeTemp, setNomeTemp] = useState(projeto.nome);

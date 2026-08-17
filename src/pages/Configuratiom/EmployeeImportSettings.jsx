@@ -1,11 +1,16 @@
+// React
 import { useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { ProgressBar } from "primereact/progressbar";
 import { Tag } from "primereact/tag";
+// Utilitários
 import connect from "../../utils/request";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
 
 
+// Traduz as etapas técnicas da importação para mensagens exibidas ao usuário.
 const PHASE_LABELS = {
   preparando: "Preparando dados",
   cargos: "Conferindo e cadastrando cargos",

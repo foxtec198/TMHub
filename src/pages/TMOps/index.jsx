@@ -1,17 +1,25 @@
+// React
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
+// Roteamento
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+// Utilitários
 import tmOpsRequest from "../../utils/tmOpsRequest";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
+// Componentes
 import { TaskQrScanner } from "./TaskQrScanner";
 import { TaskEvidenceCapture } from "./TaskEvidenceCapture";
 import { TaskExecutionMetrics } from "../../components/TMOps/TaskExecutionMetrics";
 import { ThemeLogo } from "../../components/ThemeLogo";
+// Estilos
 import "./styles.css";
 
+// Calcula a duração em milissegundos sem gerar valores negativos.
 const elapsed = (start, now) => {
   if (!start) return "00:00:00";
   const seconds = Math.max(
@@ -42,6 +50,7 @@ const formatRemainingTime = (milliseconds) => {
   return `${Math.max(1, minutes)}min`;
 };
 
+// Classifica o prazo da tarefa para orientar a prioridade visual.
 const taskDeadlineStatus = (task, now) => {
   const estimate = Math.max(1, Number(task.estimativa_minutos) || 15);
   const deadline = task.prazo_em
@@ -78,6 +87,7 @@ const distanceInMeters = (first, second) => {
   return 2 * earthRadius * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 };
 
+// Obtém a posição atual sem impedir a execução quando o GPS não estiver disponível.
 const captureCurrentGeolocation = () =>
   new Promise((resolve) => {
     if (!navigator.geolocation) {
@@ -95,6 +105,7 @@ const captureCurrentGeolocation = () =>
     );
   });
 
+// Gerencia autenticação, execução e evidências das tarefas operacionais.
 export function TMOps() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -109,6 +120,7 @@ export function TMOps() {
   const [taskSearch, setTaskSearch] = useState("");
   const [scannerVisible, setScannerVisible] = useState(false);
   const lastExecutionLocation = useRef(null);
+  // Atualiza usuário, tarefas e rotinas a partir do token atual do TM Ops.
   const load = async () => {
     const { data } = await tmOpsRequest.get("/tm-ops/tarefas/minhas");
     setTasks(data || []);
@@ -208,8 +220,8 @@ export function TMOps() {
           });
       },
       () => {
-        // GPS can be unavailable indoors. The task remains executable and the
-        // next position update will be attempted by the browser.
+        // O GPS pode não estar disponível em ambientes internos. A tarefa continua
+        // executável e o navegador tentará atualizar a posição novamente.
       },
       {
         enableHighAccuracy: true,
@@ -233,6 +245,7 @@ export function TMOps() {
     },
     [navigate],
   );
+  // Filtra tarefas pelo texto digitado sem alterar a lista carregada.
   const visibleTasks = useMemo(() => {
     const query = taskSearch.trim().toLocaleLowerCase("pt-BR");
     if (!query) return tasks;
@@ -258,6 +271,7 @@ export function TMOps() {
     },
     [openTask, showToast, tasks],
   );
+  // Autentica o operador e reinicia o carregamento com o token retornado.
   const login = async (event) => {
     event.preventDefault();
     try {
@@ -275,6 +289,7 @@ export function TMOps() {
       );
     }
   };
+  // Registra início, pausa ou finalização junto da geolocalização disponível.
   const action = async (acao) => {
     try {
       const geolocalizacao = ["iniciar", "finalizar"].includes(acao)
@@ -305,6 +320,7 @@ export function TMOps() {
       );
     }
   };
+  // Salva a resposta de checklist sem aguardar o término da tarefa.
   const answer = async (item, valor) => {
     try {
       const { data } = await tmOpsRequest.post(

@@ -1,12 +1,15 @@
-// components/Table/index.jsx
+// PrimeReact
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
+// React
 import { useId, useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { FloatLabel } from "primereact/floatlabel";
+// Estilos
 import './index.css'
 
+// Reúne busca, filtro por data e visualização responsiva em uma tabela reutilizável.
 export function Table({
     data = [],
     columns = [],

@@ -1,11 +1,16 @@
+// React
 import { useEffect, useMemo, useState } from 'react';
+// PrimeReact
 import { MultiSelect } from 'primereact/multiselect';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Button } from 'primereact/button';
+// Utilitários
 import connect from '../../utils/request';
+// Contextos
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
+// Componentes e estilos locais
 import { buildProductBarcode } from './barcode';
 import { AnimatedBarcodeIllustration } from './AnimatedBarcodeIllustration';
 import { PageHeader } from '../../components/PageHeader';
@@ -22,6 +27,7 @@ function truncate(value, max) {
     return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
+// Carrega a imagem auxiliar antes de desenhá-la no PDF.
 function loadImage(src) {
     return new Promise((resolve, reject) => {
         const image = new Image();
@@ -31,6 +37,7 @@ function loadImage(src) {
     });
 }
 
+// Remove margens transparentes para aproveitar melhor a etiqueta impressa.
 function trimTransparentImage(image) {
     const source = document.createElement('canvas');
     source.width = image.naturalWidth;
@@ -71,6 +78,7 @@ function trimTransparentImage(image) {
     return trimmed;
 }
 
+// Desenha uma etiqueta completa com código, descrição e elementos visuais.
 function drawLabel(page, product, x, y, width, height, bwipjs, assets) {
     const radius = height * .105;
     page.save();
@@ -143,6 +151,7 @@ function drawLabel(page, product, x, y, width, height, bwipjs, assets) {
     page.restore();
 }
 
+// Distribui as etiquetas em páginas A4 conforme a quantidade selecionada.
 function renderSheet(items, bwipjs, assets) {
     const page = document.createElement('canvas');
     page.width = 3508;
@@ -185,6 +194,7 @@ export function BarcodeGenerator() {
     const setLoading = useLoading();
     const { showToast } = useToast();
 
+  // Carrega o catálogo de produtos disponível para geração de etiquetas.
     useEffect(() => {
         setLoading(true);
         connect.get(PRODUCTS_ENDPOINT)
@@ -203,6 +213,7 @@ export function BarcodeGenerator() {
         [selectedProducts, copies],
     );
 
+  // Gera o PDF somente com produtos e quantidades válidas.
     const generate = async () => {
         if (!labels.length) {
             showToast('warn', 'Atenção!', 'Selecione ao menos um produto.');

@@ -1,14 +1,21 @@
+// React
 import { useEffect, useMemo, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
+// Componentes
 import { Table } from "../../components/tables/Table";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
+// Tema
 import { useChartTheme } from "../../theme/useTheme";
+// Utilitários
 import connect from "../../utils/request";
 
+// Evita estados indefinidos enquanto os dados dos ajustes são carregados.
 const EMPTY_DATA = { importacoes: [], importacao: null, resumo: {}, ajustes: [] };
 const EMPTY_FILTERS = { departamentos: [], centros: [], supervisores: [], vinculos: [], motivos: [], responsaveis: [] };
 
@@ -40,6 +47,7 @@ function AdjustmentCard({ active, icon, label, value, detail, tone, onClick }) {
   );
 }
 
+// Apresenta ajustes importados e seus impactos no período filtrado.
 export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, refreshKey = 0, referenceStart = null }) {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(EMPTY_DATA);
@@ -74,6 +82,7 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
     return () => { active = false; };
   }, [referenceStart, refreshKey, showToast]);
 
+  // Mantém apenas ajustes compatíveis com filtros de vínculo e período.
   const filteredRecords = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleUpperCase("pt-BR");
     return data.ajustes.filter((record) => {
@@ -103,6 +112,7 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
     });
   }, [data.ajustes, dateRange, filters, search, view]);
 
+  // Resume volume, duração e situação dos ajustes exibidos.
   const summary = useMemo(() => {
     const employees = new Set();
     let totalDelay = 0;
@@ -125,12 +135,14 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
     };
   }, [filteredRecords]);
 
+  // Agrupa ocorrências por motivo para compor o ranking do painel.
   const reasonRanking = useMemo(() => {
     const counts = new Map();
     filteredRecords.forEach((record) => counts.set(record.motivo || "Sem motivo", (counts.get(record.motivo || "Sem motivo") || 0) + 1));
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
   }, [filteredRecords]);
 
+  // Identifica o colaborador com maior volume de ajustes no recorte.
   const topAdjuster = useMemo(() => {
     const counts = new Map();
     filteredRecords.forEach((record) => {

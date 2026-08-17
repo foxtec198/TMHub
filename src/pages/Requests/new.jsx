@@ -1,19 +1,22 @@
-// Widgets ----------------------------------------------
+// React
+import { useState, useRef, useEffect } from "react";
+// PrimeReact
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Stepper } from 'primereact/stepper';
 import { StepperPanel } from 'primereact/stepperpanel';
 import { Checkbox } from "primereact/checkbox";
 import { SelectButton } from "primereact/selectbutton";
-
-// Utils ------------------------------------------------
-import { useState, useRef, useEffect } from "react";
+import { InputText } from "primereact/inputtext";
+//Contextos
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
+// Utilitários
 import connect from "../../utils/request";
-import { InputText } from "primereact/inputtext";
+// Componentes
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { ThemeLogo } from "../../components/ThemeLogo";
+// Estilos
 import "./new.css";
 
 function SelectedCollaborator({ title, collaborator, icon }) {
@@ -90,7 +93,7 @@ export function Request() {
     const { showToast } = useToast();
 
     function selectedRequestDate() {
-        // The API requires the actual submission time even when tomorrow is selected.
+// A API exige o horário real do envio mesmo quando a data escolhida é amanhã.
         const now = new Date();
         if (dateChoice === "tomorrow") now.setDate(now.getDate() + 1);
         return now;

@@ -1,4 +1,4 @@
-// Utils
+// Utilitários
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { storeProfile } from "../utils/profile";
 import { can } from "../utils/permissions";
@@ -9,7 +9,7 @@ import { capitalize, deny_roles } from "../utils/ui";
 import { socketio } from "../utils/socketio";
 import { clearAccessToken, getAccessToken } from "../utils/authSession";
 
-// Widgets
+// Componentes
 import { PanelMenu } from "primereact/panelmenu";
 import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
@@ -17,7 +17,7 @@ import { ThemeLogo } from "../components/ThemeLogo";
 import { UserAvatar } from "../components/UserAvatar";
 import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
 
-// Styles
+// Estilos
 import './main.css'
 
 const REALTIME_CHANNELS_BY_ROUTE = {

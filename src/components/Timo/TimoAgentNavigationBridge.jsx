@@ -1,6 +1,9 @@
+// React
 import { useEffect } from "react";
+// Roteamento
 import { useNavigate } from "react-router-dom";
 
+// Comunicação em tempo real
 import { socketio } from "../../utils/socketio";
 
 /*
@@ -12,6 +15,7 @@ export function TimoAgentNavigationBridge() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Registra e remove o listener para não duplicar a navegação entre telas.
     const handleAgentResponse = (payload) => {
       if (payload?.action?.type === "navigate" && payload.action.path) {
         navigate(payload.action.path);

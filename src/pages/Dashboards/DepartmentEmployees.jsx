@@ -1,22 +1,25 @@
-// Colab. por DTPO.
-
-// Utils
+// React
 import { useEffect, useMemo, useRef, useState } from "react";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import connect from "../../utils/request";
 
-// Widgets
+// PrimeReact
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
+// Utilitários
 import { exportDepartmentEmployeesXlsx } from "../../utils/exportDepartmentEmployeesXlsx";
 
-// Styles
+// Estilos
 import "./departmentEmployees.css";
 
+// Inicia os filtros vazios antes do carregamento dos dados do dashboard.
 const EMPTY_FILTERS = {
     departamentos: [],
     centros: [],
@@ -27,6 +30,7 @@ const EMPTY_FILTERS = {
     colaboradores: [],
 };
 
+// Gera opções únicas e ordenadas a partir dos colaboradores carregados.
 function uniqueOptions(items, valueKey, labelKey = valueKey) {
     const options = new Map();
 
@@ -59,6 +63,7 @@ function isDismissed(employee) {
     return Number(employee.situacao_id) === 8;
 }
 
+// Agrupa colaboradores por centro para montar os painéis de departamento.
 function groupByCenter(employees) {
     const centers = new Map();
 
@@ -88,6 +93,7 @@ function DepartmentHeader({ department, employees }) {
     );
 }
 
+// Filtra colaboradores e organiza os resultados por departamento e centro.
 export function DepartmentEmployeesDashboard() {
     const filterPanel = useRef(null);
     const [employees, setEmployees] = useState([]);
@@ -95,6 +101,7 @@ export function DepartmentEmployeesDashboard() {
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
 
+  // Busca a base de colaboradores usada por filtros, indicadores e exportação.
     useEffect(() => {
         async function loadEmployees() {
             try {
@@ -113,6 +120,7 @@ export function DepartmentEmployeesDashboard() {
         loadEmployees();
     }, [showToast]);
 
+  // Deriva todas as opções de filtro sem duplicar valores da base.
     const options = useMemo(() => ({
         departamentos: uniqueOptions(employees, "departamento"),
         centros: uniqueOptions(employees, "centro_id", "centro_custo"),
@@ -123,6 +131,7 @@ export function DepartmentEmployeesDashboard() {
         colaboradores: collaboratorOptions(employees),
     }), [employees]);
 
+  // Aplica cada seleção ativa antes de agrupar os colaboradores.
     const filteredEmployees = useMemo(() => employees.filter((employee) => (
         (!filters.departamentos.length || filters.departamentos.includes(employee.departamento))
         && (!filters.centros.length || filters.centros.includes(employee.centro_id))
@@ -133,6 +142,7 @@ export function DepartmentEmployeesDashboard() {
         && (!filters.colaboradores.length || filters.colaboradores.includes(employee.id))
     )), [employees, filters]);
 
+  // Reorganiza o recorte filtrado para a estrutura de departamentos exibida.
     const departments = useMemo(() => {
         const grouped = new Map();
 
@@ -151,6 +161,7 @@ export function DepartmentEmployeesDashboard() {
         setFilters((current) => ({ ...current, [name]: value || [] }));
     };
 
+  // Exporta exatamente os colaboradores visíveis após os filtros atuais.
     const exportEmployees = () => {
         if (!filteredEmployees.length) {
             showToast("warn", "Exportação", "Não há colaboradores para os filtros selecionados.");

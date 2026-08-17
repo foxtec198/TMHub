@@ -1,5 +1,7 @@
+// Dependências externas
 import axios from "axios";
 
+// Cria um cliente isolado para enviar o token específico do TM Ops.
 const tmOpsRequest = axios.create({baseURL: import.meta.env.VITE_SERVER});
 
 tmOpsRequest.interceptors.request.use((config) => {

@@ -1,4 +1,6 @@
+// React
 import { useCallback, useEffect, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -9,12 +11,16 @@ import { MultiSelect } from "primereact/multiselect";
 import { Tag } from "primereact/tag";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
 import { RoutineDialog } from "../../components/TMOps/RoutineDialog";
 import { RoutineLinksDialog } from "../../components/TMOps/RoutineLinksDialog";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import connect from "../../utils/request";
+// Estilos
 import "./management.css";
 
 const EVIDENCE_OPTIONS = [
@@ -37,6 +43,7 @@ const normalizeEvidences = (evidences = []) =>
     )
     .filter((evidence) => evidence.tipo);
 
+// Administra rotinas, checklists e requisitos de evidência do TM Ops.
 export function TMOpsManagement({ mode = "routines" }) {
   const [routines, setRoutines] = useState([]);
   const [checklists, setChecklists] = useState([]);
@@ -54,6 +61,7 @@ export function TMOpsManagement({ mode = "routines" }) {
   const { showToast } = useToast();
   const isChecklistScreen = mode === "checklists";
 
+  // Recarrega rotinas e checklists depois de cada operação de manutenção.
   const load = useCallback(async () => {
     try {
       const requests = isChecklistScreen
@@ -76,6 +84,7 @@ export function TMOpsManagement({ mode = "routines" }) {
     load();
   }, [load]);
 
+  // Valida o checklist e persiste seus itens antes de fechar o diálogo.
   const saveChecklist = async () => {
     if (!checklist.nome.trim()) {
       showToast("warn", "Checklist", "Informe o nome.");
@@ -110,6 +119,7 @@ export function TMOpsManagement({ mode = "routines" }) {
       setLoading(false);
     }
   };
+  // Alterna a disponibilidade da rotina sem apagar sua configuração.
   const toggleRoutine = async (row) => {
     try {
       await connect.patch(`/tm-ops/rotinas/${row.id}`, {
@@ -124,6 +134,7 @@ export function TMOpsManagement({ mode = "routines" }) {
       );
     }
   };
+  // Confirma a exclusão antes de remover uma rotina do catálogo.
   const deleteRoutine = async (row) => {
     try {
       await connect.delete(`/tm-ops/rotinas/${row.id}`);
@@ -174,6 +185,7 @@ export function TMOpsManagement({ mode = "routines" }) {
         itemIndex === index ? { ...item, ...patch } : item,
       ),
     }));
+  // Mantém os tipos e obrigatoriedades de evidência sincronizados no item.
   const updateEvidenceTypes = (itemIndex, types) => {
     const current = normalizeEvidences(checklist.itens[itemIndex]?.evidencias);
     updateItem(itemIndex, {

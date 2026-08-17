@@ -1,8 +1,10 @@
-// components/MembersDialog.jsx
+//React
 import React from 'react';
+//PrimeReact
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
+//Componentes
 import ProjectMemberAvatar from './ProjectMemberAvatar';
 
 // Como todo mundo já é do mesmo sistema, "adicionar membro" é só marcar o checkbox:

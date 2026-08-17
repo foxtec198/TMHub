@@ -1,16 +1,22 @@
+//React
 import { useEffect, useMemo, useRef, useState } from "react";
+//PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
-
+//Components
 import { PageHeader } from "../../components/PageHeader";
 import { UserAvatar } from "../../components/UserAvatar";
+//Contexts
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+//Tema
 import { useChartTheme } from "../../theme/useTheme";
+//Utils
 import connect from "../../utils/request";
+//Estilos
 import "./projects.css";
 
 const monthStart = () => new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -20,6 +26,7 @@ const asParam = (values) => values?.length ? values.join(",") : undefined;
 const formatHours = (value) => value == null ? "—" : value >= 24 ? `${Math.round(value / 24)}d` : `${Math.round(value)}h`;
 const percentage = (value, total) => total ? Math.round((Number(value || 0) / total) * 100) : 0;
 
+// Interpreta datas de cards sem deslocamento causado pelo fuso horário.
 const parseCardDate = (value) => {
   if (!value) return null;
   const raw = String(value);
@@ -77,6 +84,7 @@ const projectDoughnutCenterPlugin = {
   },
 };
 
+// Carrega os dados de projetos e deriva os recortes do dashboard.
 export function ProjectDashboard() {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(null);
@@ -87,6 +95,7 @@ export function ProjectDashboard() {
   const setLoading = useLoading();
   const { showToast } = useToast();
 
+  // Busca o painel sempre que o período ou os filtros aplicados mudarem.
   useEffect(() => {
     if (!filters.periodo?.[0] || !filters.periodo?.[1]) return;
     setLoading(true);
@@ -131,6 +140,7 @@ export function ProjectDashboard() {
   const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
   const clearFilters = () => setFilters(defaultFilters());
 
+  // Converte a distribuição de status no formato consumido pelo gráfico.
   const statusChart = useMemo(() => ({
     labels: ["Abertas", "Em andamento", "Concluídas"],
     datasets: [{
@@ -159,6 +169,7 @@ export function ProjectDashboard() {
       },
     },
   }), [chartTheme]);
+  // Destaca cards próximos do prazo para priorizar a operação.
   const upcomingCards = useMemo(() => [...(data?.cards || [])]
     .filter((card) => card.atrasado || card.data_fim)
     .sort((left, right) => {
@@ -167,6 +178,7 @@ export function ProjectDashboard() {
         - (parseCardDate(right.data_fim)?.getTime() || Infinity);
     })
     .slice(0, 8), [data]);
+  // Ordena a linha do tempo para manter os eventos mais recentes primeiro.
   const timelineCards = useMemo(() => [...(data?.timeline || [])]
     .sort((left, right) => (parseCardDate(left.data_inicio || left.data_fim)?.getTime() || Infinity)
       - (parseCardDate(right.data_inicio || right.data_fim)?.getTime() || Infinity))

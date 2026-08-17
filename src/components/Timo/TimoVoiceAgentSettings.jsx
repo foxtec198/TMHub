@@ -1,11 +1,17 @@
+// React
 import { useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
+// Hook do agente
 import { useTimoVoiceAgent } from "./useTimoVoiceAgent";
+// Estilos
 import "./TimoVoiceAgentSettings.css";
 
+// Direciona o download para a versão mais recente do agente local.
 const RELEASE_URL = "https://github.com/foxtec198/timo_voice_recognizer/releases/latest";
 
 const AGENT_STATE_LABELS = {
@@ -18,6 +24,7 @@ const AGENT_STATE_LABELS = {
 };
 
 function errorMessage(error, fallback) {
+  // Prioriza a mensagem retornada pela API antes de usar o texto padrão.
   return error.response?.data?.message || error.response?.data || fallback;
 }
 
@@ -38,6 +45,7 @@ export function TimoVoiceAgentSettings() {
   const [creatingPairing, setCreatingPairing] = useState(false);
 
   const generatePairing = async () => {
+    // Cria um código temporário para vincular um novo computador ao usuário.
     setCreatingPairing(true);
     try {
       setPairing(await createPairing());
@@ -49,6 +57,7 @@ export function TimoVoiceAgentSettings() {
   };
 
   const copyPairing = async () => {
+    // Usa a área de transferência quando o navegador permitir o acesso.
     try {
       await navigator.clipboard.writeText(pairing.codigo);
       showToast("success", "Voice Agent", "Código copiado.");
@@ -58,6 +67,7 @@ export function TimoVoiceAgentSettings() {
   };
 
   const toggle = async (item) => {
+    // Alterna apenas o agente escolhido e mantém seu botão em estado de espera.
     setBusyAgentId(item.id);
     try {
       await control(item.id, !(item.id === agent?.id && preferences?.habilitado));
@@ -70,6 +80,7 @@ export function TimoVoiceAgentSettings() {
   };
 
   const choose = async (item) => {
+    // Define o computador preferido para receber comandos de voz.
     setBusyAgentId(item.id);
     try {
       await select(item.id);
@@ -82,6 +93,7 @@ export function TimoVoiceAgentSettings() {
   };
 
   const remove = async (item) => {
+    // Revoga a credencial local após confirmação explícita do usuário.
     if (!window.confirm(`Revogar o acesso do agente “${item.nome}”?`)) return;
     setBusyAgentId(item.id);
     try {

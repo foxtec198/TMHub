@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useRef, useState } from 'react';
+// PrimeReact
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Chart } from 'primereact/chart';
@@ -9,13 +11,19 @@ import { OverlayPanel } from 'primereact/overlaypanel';
 import { Tag } from 'primereact/tag';
 
 
+// Componentes
 import { PageHeader } from '../../components/PageHeader';
+// Contextos
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
+// Tema
 import { useChartTheme } from '../../theme/useTheme';
+// Utilitários
 import connect from '../../utils/request';
+// Estilos
 import './logistic.css';
 
+// Define o intervalo inicial usado nas consultas logísticas.
 const today = new Date();
 const DEFAULT_FILTERS = {
     period: [new Date(today.getFullYear(), today.getMonth(), 1), today],
@@ -33,6 +41,7 @@ function EmptyChart({ label }) {
     return <div className="logistic-empty"><i className="pi pi-chart-bar" /><span>{label}</span></div>;
 }
 
+// Consulta movimentos logísticos e prepara os principais recortes operacionais.
 export function DashboardLogistic() {
     const chartTheme = useChartTheme();
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -42,6 +51,7 @@ export function DashboardLogistic() {
     const setLoading = useLoading();
     const { showToast } = useToast();
 
+  // Atualiza o dashboard sempre que o período ou os filtros forem modificados.
     useEffect(() => {
         if (!filters.period?.[0] || !filters.period?.[1]) return;
         let active = true;
@@ -75,6 +85,7 @@ export function DashboardLogistic() {
         period: [new Date(today.getFullYear(), today.getMonth(), 1), new Date()],
     });
 
+  // Converte a movimentação diária em série temporal para o gráfico.
     const movementChart = useMemo(() => ({
         labels: (data?.serie || []).map((item) => new Date(`${item.data}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })),
         datasets: [
@@ -97,6 +108,7 @@ export function DashboardLogistic() {
         ],
     }), [data?.serie, chartTheme]);
 
+  // Ordena os produtos mais movimentados para comparação horizontal.
     const topProductsChart = useMemo(() => ({
         labels: (data?.mais_movimentados || []).map((item) => item.produto),
         datasets: [{
@@ -106,6 +118,7 @@ export function DashboardLogistic() {
         }],
     }), [data?.mais_movimentados, chartTheme]);
 
+  // Mostra os colaboradores com maior volume de movimentações.
     const collaboratorChart = useMemo(() => ({
         labels: (data?.produtos_por_colaborador || data?.epis_por_colaborador || []).map((item) => item.colaborador),
         datasets: [{

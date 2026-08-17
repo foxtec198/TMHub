@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -10,11 +12,15 @@ import { Tag } from "primereact/tag";
 import { MultiSelect } from "primereact/multiselect";
 import { InputSwitch } from "primereact/inputswitch";
 import { Checkbox } from "primereact/checkbox";
+// Componentes
 import { Table } from "../../components/tables/Table";
+// Utilitários
 import connect from "../../utils/request";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 
+// Mantém o formulário limpo como referência para criar ou editar usuários.
 const EMPTY_FORM = { nome: "", cpf: "", email: "", role: "USER", password: "", filial_ids: [], gerencia_faltas: false, permissions: [] };
 const ROLE_OPTIONS = [
   { label: "Supervisor", value: "SUPERVISOR" },
@@ -29,6 +35,7 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("pt-BR");
 }
 
+// Gerencia usuários, permissões e importação de cadastros.
 export function UsersSettings() {
   const [users, setUsers] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -47,6 +54,7 @@ export function UsersSettings() {
   const { showToast } = useToast();
   const canManage = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
 
+  // Carrega usuários e filiais para alimentar a lista e o formulário.
   useEffect(() => {
     async function loadUsers() {
       setUsersStatus("loading");
@@ -69,18 +77,21 @@ export function UsersSettings() {
     }
   }, [canManage, refresh, showToast]);
 
+  // Abre um formulário limpo para criar um novo usuário.
   const openCreate = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
     setUserDialog(true);
   };
 
+  // Copia o usuário selecionado para não alterar a lista antes de salvar.
   const openEdit = (user) => {
     setEditingId(user.id);
     setForm({ nome: user.nome || "", cpf: user.cpf || "", email: user.email || "", role: user.role || "USER", password: "", filial_ids: user.filial_ids || [], gerencia_faltas: Boolean(user.gerencia_faltas), permissions: user.permissions || [] });
     setUserDialog(true);
   };
 
+  // Persiste o formulário e atualiza a lista após criar ou editar um usuário.
   const saveUser = async (event) => {
     event.preventDefault();
     const payload = { ...form };
@@ -114,6 +125,7 @@ export function UsersSettings() {
     }
   };
 
+  // Envia a planilha de usuários e mostra o retorno consolidado da importação.
   const importUsers = async (event) => {
     event.preventDefault();
     if (!spreadsheet) return showToast("warn", "Planilha", "Selecione um arquivo .xlsx.");
@@ -146,6 +158,7 @@ export function UsersSettings() {
 
   const permissionValue = (screen, action) => Boolean(form.permissions.find((item) => item.screen === screen)?.[action]);
 
+  // Ajusta uma ação específica preservando as demais permissões da tela.
   const setPermission = (screen, action, checked) => {
     const current = form.permissions.find((item) => item.screen === screen) || { screen, view: false, create: false, edit: false };
     const updated = { ...current, [action]: checked };

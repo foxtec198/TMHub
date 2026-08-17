@@ -1,16 +1,22 @@
+// React
 import { useCallback, useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputMask } from "primereact/inputmask";
 import { Password } from "primereact/password";
 
+// Utilitários
 import connect from "../utils/request";
 import { socketio } from "../utils/socketio";
 import { clearAccessToken, getAccessToken, setAccessToken } from "../utils/authSession";
+// Contextos
 import { useLoading } from "../contexts/LoadingContext";
 import { useToast } from "../contexts/ToastContext";
+// Estilos
 import "./AuthRequirementsGate.css";
 
+// Define as pendências que bloqueiam o acesso até serem resolvidas.
 const emptyRequirements = {
   primeiro_acesso: false,
   cpf_pendente: false,
@@ -21,6 +27,7 @@ const emptyRequirements = {
   interacao_pendente: false,
 };
 
+// Normaliza e persiste as pendências que controlam o fluxo de acesso.
 function persistRequirements(requirements) {
   const normalized = { ...emptyRequirements, ...(requirements || {}) };
   localStorage.setItem("auth_requirements", JSON.stringify(normalized));
@@ -43,6 +50,7 @@ export function AuthRequirementsGate() {
   const setLoading = useLoading();
   const { showToast } = useToast();
 
+  // Aplica a resposta da API e reconecta o Socket.IO quando as pendências acabam.
   const applyResponse = useCallback((data) => {
     if (data?.cpf) setCpf(data.cpf);
     if (data?.foto_perfil) setPhoto(data.foto_perfil);
@@ -73,6 +81,7 @@ export function AuthRequirementsGate() {
     return () => window.removeEventListener("tmhub:auth-requirements", listener);
   }, [applyResponse]);
 
+  // Valida tipo e tamanho antes de converter a foto para prévia local.
   const selectPhoto = (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -86,6 +95,7 @@ export function AuthRequirementsGate() {
     reader.readAsDataURL(file);
   };
 
+  // Atualiza o perfil pendente e libera a próxima etapa de acesso.
   const saveProfile = async () => {
     if (!cpf) {
       showToast("warn", "Cadastro incompleto", "Informe um CPF válido.");
@@ -106,6 +116,7 @@ export function AuthRequirementsGate() {
     }
   };
 
+  // Confere a confirmação antes de substituir a senha obrigatória.
   const changePassword = async () => {
     if (newPassword !== confirmPassword) {
       showToast("warn", "Senhas diferentes", "A confirmação deve ser igual à nova senha.");
@@ -138,6 +149,7 @@ export function AuthRequirementsGate() {
     }
   };
 
+  // Limpa a sessão quando o usuário decide interromper o cadastro obrigatório.
   const logout = () => {
     socketio.disconnect();
     clearAccessToken();

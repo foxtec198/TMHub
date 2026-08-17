@@ -1,5 +1,7 @@
+// Tema
 import { applyProfileAppearance } from "../theme/theme";
 
+// Extrai iniciais para os casos em que não há foto de perfil.
 export function getInitials(name = "") {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "?";

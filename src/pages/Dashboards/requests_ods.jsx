@@ -1,9 +1,14 @@
+// React
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// Utilitários
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+// Componentes
 import { ThemeLogo } from "../../components/ThemeLogo";
+// Estilos
 import "./requests_ods.css";
 
+// Limita a paginação para manter os cards legíveis no painel.
 const PAGE_SIZE = 9;
 const ACTIVE_STATUSES = new Set(["pending", "updated"]);
 
@@ -14,6 +19,7 @@ const STATUS = {
   reproved: { label: "REPROVADA", icon: "pi-times-circle", tone: "reproved" },
 };
 
+// Aceita datas da API e mantém valores inválidos fora dos cálculos de prazo.
 function parseDate(value) {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
@@ -26,6 +32,7 @@ function shortName(value, fallback = "Não informado") {
   return `${parts[0]} ${parts.at(-1)}`;
 }
 
+// Mede o tempo operacional desde a abertura ou o agendamento da solicitação.
 function elapsedMilliseconds(request, now) {
   const openedAt = parseDate(request.aberta_em || request.abertura);
   if (!openedAt) return 0;
@@ -68,6 +75,7 @@ function scheduledLabel(request, now) {
   return requestDay.toLocaleDateString("pt-BR");
 }
 
+// Define a situação visual a partir da data e do tempo decorrido.
 function situation(request, now) {
   if (!ACTIVE_STATUSES.has(request.status)) return { label: "FINALIZADA", tone: "closed" };
   if (dayCategory(request, now) === "future") return { label: "AGENDADA", tone: "scheduled" };
@@ -77,6 +85,7 @@ function situation(request, now) {
   return { label: "ABERTA", tone: "open" };
 }
 
+// Mantém o painel operacional atualizado e alterna automaticamente as páginas.
 export function RequestsODS() {
   const [requests, setRequests] = useState([]);
   const [now, setNow] = useState(() => Date.now());
@@ -87,6 +96,7 @@ export function RequestsODS() {
   const [fullscreen, setFullscreen] = useState(Boolean(document.fullscreenElement));
   const refreshTimer = useRef(null);
 
+  // Carrega as solicitações e preserva a última lista em caso de falha momentânea.
   const loadRequests = useCallback(async () => {
     try {
       const { data } = await connect.get("/repo/kds");
@@ -131,6 +141,7 @@ export function RequestsODS() {
     };
   }, [loadRequests]);
 
+  // Prioriza solicitações mais críticas sem alterar a ordem original recebida.
   const sortedRequests = useMemo(() => [...requests].sort((first, second) => {
     const firstActive = ACTIVE_STATUSES.has(first.status);
     const secondActive = ACTIVE_STATUSES.has(second.status);
@@ -160,6 +171,7 @@ export function RequestsODS() {
     return () => window.clearInterval(rotation);
   }, [pageCount]);
 
+  // Consolida os totais exibidos no cabeçalho do painel.
   const summary = useMemo(() => requests.reduce((result, request) => {
     if (ACTIVE_STATUSES.has(request.status)) {
       result.open += 1;
@@ -172,6 +184,7 @@ export function RequestsODS() {
     return result;
   }, { open: 0, warning: 0, critical: 0, closed: 0 }), [requests, now]);
 
+  // Alterna o modo de exibição usado em monitores operacionais.
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) await document.exitFullscreen();
     else await document.documentElement.requestFullscreen();

@@ -1,4 +1,6 @@
+// React
 import { useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
@@ -6,10 +8,13 @@ import { InputSwitch } from "primereact/inputswitch";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 
+// Utilitários
 import connect from "../../utils/request";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 
+// Define o estado inicial usado para criar uma nova notícia.
 const emptyNews = {
   eyebrow: "Novidades",
   title: "",
@@ -30,6 +35,7 @@ export function NewsSettings() {
   const { showToast } = useToast();
 
   const load = async () => {
+    // Centraliza a recarga da lista após criar, editar ou excluir um slide.
     try {
       const { data } = await connect.get("/updates/noticias/admin");
       setItems(Array.isArray(data) ? data : []);
@@ -39,12 +45,14 @@ export function NewsSettings() {
   };
 
   useEffect(() => {
+    // Busca os slides configurados ao abrir a tela de administração.
     connect.get("/updates/noticias/admin")
       .then(({ data }) => setItems(Array.isArray(data) ? data : []))
       .catch((error) => showToast("error", "Notícias", error.response?.data || "Não foi possível carregar os slides."));
   }, [showToast]);
 
   const save = async () => {
+    // Valida os campos mínimos e escolhe criação ou edição conforme o identificador.
     if (!editing?.title?.trim() || !editing?.description?.trim()) {
       showToast("warn", "Preencha os dados", "Título e descrição são obrigatórios.");
       return;
@@ -64,6 +72,7 @@ export function NewsSettings() {
   };
 
   const remove = async (item) => {
+    // Solicita confirmação antes de remover uma notícia já publicada.
     if (!window.confirm(`Excluir o slide “${item.title}”?`)) return;
     setLoading(true);
     try {
@@ -78,6 +87,7 @@ export function NewsSettings() {
   };
 
   const selectImage = (event) => {
+    // Valida a imagem e a converte para uso imediato na prévia do formulário.
     const file = event.target.files?.[0];
     if (!file) return;
     if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 2_500_000) {

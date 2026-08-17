@@ -1,4 +1,6 @@
+// React
 import { useCallback, useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -6,12 +8,16 @@ import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
 import { TaskExecutionMetrics } from "../../components/TMOps/TaskExecutionMetrics";
 import { TaskGeolocationMap } from "../../components/TMOps/TaskGeolocationMap";
+// Utilitários
 import connect from "../../utils/request";
+// Estilos
 import "./management.css";
 
+// Controla filtros, paginação e detalhes das tarefas consultadas.
 export function TMOpsTasks() {
   const [tasks, setTasks] = useState([]);
   const [query, setQuery] = useState("");
@@ -26,6 +32,7 @@ export function TMOpsTasks() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState("");
   const loadSequence = useRef(0);
+  // Consulta tarefas e indicadores de acordo com filtros e paginação atuais.
   const load = useCallback(async () => {
     const sequence = ++loadSequence.current;
     setLoading(true);
@@ -60,6 +67,7 @@ export function TMOpsTasks() {
     const timer = setTimeout(load, 350);
     return () => clearTimeout(timer);
   }, [load]);
+  // Busca detalhes completos somente quando uma tarefa é selecionada.
   const openTaskDetail = async (task) => {
     setSelectedTask(task);
     setDetailLoading(true);
@@ -77,11 +85,13 @@ export function TMOpsTasks() {
       setDetailLoading(false);
     }
   };
+  // Limpa seleção e erros ao fechar o painel de detalhes.
   const closeTaskDetail = () => {
     setSelectedTask(null);
     setDetailLoading(false);
     setDetailError("");
   };
+  // Converte respostas de checklist em texto seguro para a visualização.
   const formatAnswer = (value) => {
     if (value === true) return "Sim";
     if (value === false) return "Não";

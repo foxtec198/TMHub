@@ -1,31 +1,36 @@
-// Widgets
-import { Table } from "../../components/tables/Table";
+// React
+import { useEffect, useMemo, useState } from "react"
+// PrimeReact
 import { Button } from "primereact/button";
 import { ButtonGroup } from "primereact/buttongroup"
 import { Tag } from "primereact/tag";
-import { DashCard } from "../../components/DashCard";
-import { Inplace, InplaceDisplay, InplaceContent, } from 'primereact/inplace';
-import { DropdownWS } from "../../components/DropdownWithSearch";
-import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { confirmDialog } from 'primereact/confirmdialog';
 import { ConfirmDialog } from 'primereact/confirmdialog';
 import { SpeedDial } from "primereact/speeddial";
 import { Tooltip } from "primereact/tooltip";
 import { Dialog } from "primereact/dialog";
 import { Calendar } from "primereact/calendar";
+import { Inplace, InplaceDisplay, InplaceContent, } from 'primereact/inplace';
+// Componentes
+import { DashCard } from "../../components/DashCard";
+import { Table } from "../../components/tables/Table";
+import { DropdownWS } from "../../components/DropdownWithSearch";
+import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+import { PageHeader } from "../../components/PageHeader";
+// Diálogos e componentes locais
 import { QuickRequestDialog } from "./QuickRequestDialog";
 import { RequestImportDialog } from "./RequestImportDialog";
-import { PageHeader } from "../../components/PageHeader";
-import "./requests.css";
-
-// Utils
-import { useEffect, useMemo, useState } from "react"
+// Utilitários
 import { socketio } from "../../utils/socketio";
-import { useToast } from "../../contexts/ToastContext";
-import { useLoading } from "../../contexts/LoadingContext";
-import { useNavigate } from "react-router-dom";
 import connect from "../../utils/request";
 import { can } from "../../utils/permissions";
+// Contextos
+import { useToast } from "../../contexts/ToastContext";
+import { useLoading } from "../../contexts/LoadingContext";
+// Roteamento
+import { useNavigate } from "react-router-dom";
+// Estilos
+import "./requests.css";
 
 // Opção sentinela usada quando a requisição será concluída sem substituto.
 const NO_REPLACEMENT_OPTION = [
@@ -37,7 +42,7 @@ const REQUEST_STATUS = {
     updated: { label: "ALTERADA", color: "var(--blue-600)" },
 };
 
-// Centralized thresholds keep cards and table visibility on the same operational rule.
+// Limites centralizados mantêm cards e tabela na mesma regra operacional.
 const REQUEST_TIME_LIMITS_HOURS = {
     late: 4,
     expired: 6,
@@ -59,7 +64,7 @@ function getRequestSituation(requestDateValue, currentTime = Date.now()) {
     const requestDay = new Date(requestDate);
     requestDay.setHours(0, 0, 0, 0);
 
-    // Future requests remain open until their scheduled calendar day begins.
+// Solicitações futuras permanecem abertas até o dia previsto começar.
     if (requestDay.getTime() > today.getTime()) return "open";
 
     const elapsedHours = (currentTime - requestDate.getTime()) / 3_600_000;
@@ -120,7 +125,7 @@ export function Requests() {
         } catch (error) { showToast("error", "Uso das reservas", error.response?.data || "Não foi possível consultar as reservas.") }
     }
 
-    // Quarter-circle actions keep the mobile trigger accessible without covering the table.
+// Ações em quarto de círculo mantêm o atalho móvel acessível sem cobrir a tabela.
     const speedDialItems = [
         ...(canCreate ? [
         { label: "Abrir em um nova página", icon: "pi pi-external-link", command: () => navigate("/reposicoes/requisicao") },
@@ -396,7 +401,7 @@ export function Requests() {
         }; get_requests();
     }, [refresh]);
 
-    // Re-evaluate elapsed time without requiring a socket event or manual page refresh.
+// Reavalia o tempo decorrido sem depender do Socket.IO ou de atualização manual.
     useEffect(() => {
         const timer = window.setInterval(() => setCurrentTime(Date.now()), 60_000);
         return () => window.clearInterval(timer);

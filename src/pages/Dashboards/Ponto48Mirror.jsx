@@ -1,14 +1,21 @@
+// React
 import { useEffect, useMemo, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
+// Componentes
 import { Table } from "../../components/tables/Table";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
+// Tema
 import { useChartTheme } from "../../theme/useTheme";
+// Utilitários
 import connect from "../../utils/request";
 
+// Mantém a estrutura esperada enquanto os dados do espelho são carregados.
 const EMPTY_DATA = { importacoes: [], importacao: null, resumo: {}, colaboradores: [] };
 const EMPTY_FILTERS = { departamentos: [], centros: [], supervisores: [], vinculos: [], motivos: [], responsaveis: [] };
 
@@ -34,6 +41,7 @@ function MirrorCard({ active, icon, label, value, detail, tone, onClick }) {
   );
 }
 
+// Recalcula o espelho conforme o período filtrado para cada colaborador.
 function recalculateEmployee(employee, dateRange) {
   const start = dateRange?.[0] ? new Date(dateRange[0]).setHours(0, 0, 0, 0) : null;
   const endDate = dateRange?.[1] || dateRange?.[0];
@@ -68,6 +76,7 @@ function recalculateEmployee(employee, dateRange) {
   });
 }
 
+// Apresenta o espelho do ponto com filtros e saldo recalculado.
 export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refreshKey = 0, referenceStart = null }) {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(EMPTY_DATA);
@@ -104,6 +113,7 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
     .map((employee) => recalculateEmployee(employee, dateRange))
     .filter((employee) => employee.registros.length), [data.colaboradores, dateRange]);
 
+  // Aplica filtros de vínculo aos colaboradores já limitados pelo período.
   const filteredEmployees = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleUpperCase("pt-BR");
     return scopedEmployees.filter((employee) => {
@@ -125,6 +135,7 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
     });
   }, [filters, scopedEmployees, search, view]);
 
+  // Consolida o saldo do recorte atual para os cartões do painel.
   const summary = useMemo(() => filteredEmployees.reduce((result, employee) => ({
     employees: result.employees + 1,
     negative: result.negative + Number(employee.saldo_final_minutos < 0),
@@ -136,6 +147,7 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
     overtime: result.overtime + employee.horas_extras_minutos,
   }), { employees: 0, negative: 0, positive: 0, odd: 0, debit: 0, credit: 0, normal: 0, overtime: 0 }), [filteredEmployees]);
 
+  // Ordena os maiores saldos negativos para destacar os casos críticos.
   const negativeBalances = useMemo(() => [...filteredEmployees]
     .filter((employee) => employee.saldo_final_minutos < 0)
     .sort((a, b) => a.saldo_final_minutos - b.saldo_final_minutos)

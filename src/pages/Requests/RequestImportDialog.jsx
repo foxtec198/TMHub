@@ -1,7 +1,11 @@
+// React
 import { useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+// Utilitários
 import connect from "../../utils/request";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
 
 export function RequestImportDialog({ visible, onHide, onImported }) {
@@ -10,7 +14,7 @@ export function RequestImportDialog({ visible, onHide, onImported }) {
   const fileInput = useRef(null);
   const { showToast } = useToast();
 
-  // Keep the dialog mounted during upload so users cannot interrupt an active batch.
+  // Mantém o diálogo aberto durante o envio para não interromper o lote ativo.
   const close = () => {
     if (importing) return;
     setSpreadsheet(null);
@@ -18,7 +22,7 @@ export function RequestImportDialog({ visible, onHide, onImported }) {
     onHide();
   };
 
-  // Always download the backend-generated template because its reference tabs are live data.
+  // Baixa o modelo gerado pela API porque suas abas de referência usam dados atuais.
   const downloadTemplate = async () => {
     try {
       const { data } = await connect.get("/repo/request/modelo-importacao", { responseType: "blob" });
@@ -33,7 +37,7 @@ export function RequestImportDialog({ visible, onHide, onImported }) {
     }
   };
 
-  // The backend owns row validation and transaction rollback; the client only transports the file.
+  // A API valida as linhas e desfaz a transação; o cliente apenas envia o arquivo.
   const importRequests = async (event) => {
     event.preventDefault();
     if (!spreadsheet) return showToast("warn", "Planilha", "Selecione um arquivo .xlsx.");

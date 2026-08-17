@@ -1,10 +1,15 @@
+// React
 import { useEffect, useState } from "react";
+// Utilitários
 import connect from "../../utils/request";
+// Estilos
 import "./init.css";
+// Componentes
 import WeatherWidget from "../../components/WeatherWidget";
 import { ThemeLogo } from "../../components/ThemeLogo";
 import { UserAvatar } from "../../components/UserAvatar";
 
+// Lista os atalhos oficiais para a documentação das duas aplicações.
 const documentation = [
   {
     title: "Documentação do Frontend",
@@ -22,6 +27,7 @@ const documentation = [
   },
 ];
 
+// Orienta o usuário sobre as informações que agilizam o atendimento.
 const supportChecklist = [
   "Informe a tela e a ação que estava realizando.",
   "Envie uma captura da mensagem apresentada.",
@@ -32,6 +38,7 @@ export function Init() {
   const [admins, setAdmins] = useState([]);
 
   useEffect(() => {
+    // Carrega os administradores disponíveis para indicar os responsáveis pelo suporte.
     connect.get("/usuarios/suporte")
       .then(({ data }) => setAdmins(Array.isArray(data) ? data : []))
       .catch(() => setAdmins([]));

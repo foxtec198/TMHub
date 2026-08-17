@@ -1,4 +1,6 @@
-// Widgets
+// React
+import { useEffect, useState, useRef, useMemo } from "react"
+// PrimeReact
 import { Chart } from "primereact/chart"
 import { MeterGroup } from "primereact/metergroup"
 import { Calendar } from "primereact/calendar"
@@ -10,23 +12,20 @@ import { Button } from "primereact/button"
 import { OverlayPanel } from "primereact/overlaypanel"
 import { FloatLabel } from "primereact/floatlabel"
 import { MultiSelect } from "primereact/multiselect"
-
 // Components
 import { DashCard } from "../../components/DashCard"
 import { Table } from "../../components/tables/Table"
 import { PageHeader } from "../../components/PageHeader"
-
 // Utils
-import { useEffect, useState, useRef, useMemo } from "react"
 import { to_real } from "../../utils/ui"
 import connect from "../../utils/request"
+//Tema
 import { useChartTheme } from "../../theme/useTheme"
-
-// CSS
+// Estilos
 import "./request.css"
 
 
-// MOCKS
+// Dados de apoio
 const totalOfReplaces = 19
 
 function getReferencePeriodDays(range) {
@@ -118,7 +117,7 @@ const MOCK = {
     ]
 }
 
-// Logic and UI
+// Lógica e interface
 export function RequestReport() {
     const chartTheme = useChartTheme();
     // Filtros enviados ao backend e referência do painel flutuante de filtros.
@@ -140,7 +139,7 @@ export function RequestReport() {
     // Alterar refresh força uma nova consulta sem acoplar os handlers ao efeito.
     const [refresh, setRefresh] = useState(null);
 
-    // Historico de reposições
+// Histórico de reposições
     const [histOriginal, setHistOriginal] = useState([]);
 
     // Filtros
@@ -149,7 +148,7 @@ export function RequestReport() {
     const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
     const [filter, setFilter] = useState([primeiroDia, ultimoDia]);
 
-    // Statics
+// Dados estáticos
     // Indicadores consolidados exibidos nos cards superiores.
     const [realizadas, setRealizadas] = useState(0);
     const [abertas, setAbertas] = useState(0);
@@ -160,18 +159,18 @@ export function RequestReport() {
     const [totalDeMultas, setTotalDeMultas] = useState(0);
     const [departamentos, setDepartamentos] = useState([]);
 
-    // Dados para CHARTS
-    // Chart de Reposicoes
+// Dados dos gráficos
+// Gráfico de reposições
     // Séries derivadas para os gráficos Chart.js.
     const [labelReposicoes, setLabels] = useState(null)
     const [dadosReposicoes, setDadosReposicoes] = useState(null)
     const [labelLocal, setlabelLocal] = useState(null)
     const [dadosAusentes, setDadosAusentes] = useState(null)
 
-    // Dados do Vertical Bar - Locais
+// Dados do gráfico de locais
     const [dadosLocais, setDadosLocais] = useState(null)
 
-    // Chart de multas
+// Gráfico de multas
     const [labelForMult, setlabelForMult] = useState(null)
     const [dataForMult, setdataForMult] = useState(null)
 
@@ -179,7 +178,7 @@ export function RequestReport() {
     // Recorte tabular e percentuais do MeterGroup.
     const [dadosTabela, setDadosTabela] = useState([])
 
-    // Dados do Meter Group
+// Dados do medidor
     const [meterGroupValues, setMeterGroupValues] = useState([]);
 
     const totalRequisicoes = realizadas + abertas;
@@ -192,7 +191,7 @@ export function RequestReport() {
         ? totalDeMultas / referencePeriodDays
         : 0;
 
-    // Use Memo para setar 
+// Valores derivados
     const hist = useMemo(() => {
         return histOriginal.filter(item => {
             if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
@@ -290,7 +289,7 @@ export function RequestReport() {
 
     }, [histOriginal, filters]);
 
-    // Use Effect para a consulta
+// Consulta dos dados
     // Carrega o histórico bruto sempre que o período/refresh mudar.
     useEffect(() => {
         async function getData() {
@@ -309,7 +308,7 @@ export function RequestReport() {
         }; getData();
     }, [refresh]);
 
-    // Use Effect para os filtros
+// Aplicação dos filtros
     // Recalcula cards, gráficos e tabela a partir do histórico já carregado.
     useEffect(() => {
         if (!hist.length) return;
@@ -383,12 +382,12 @@ export function RequestReport() {
         );
 
 
-        // Chart Locais
+// Gráfico de locais
         setlabelLocal(locaisLabels);
         setDadosLocais(locaisValues);
 
 
-        // Chart Reposições
+// Gráfico de reposições
         setLabels(dias);
 
         setDadosAusentes(
@@ -413,7 +412,7 @@ export function RequestReport() {
         setDadosTabela(hist);
 
 
-        // Chart Multas
+// Gráfico de multas
         setlabelForMult(dias);
 
         setdataForMult(
@@ -426,7 +425,7 @@ export function RequestReport() {
             )
         );
 
-        // Meter Group
+// Medidor de indicadores
         setMeterGroupValues([
             {
                 label: "Postos Cobertos",
@@ -679,7 +678,7 @@ export function RequestReport() {
                             onChange={(e) => { setFilter(e.value); setRefresh(prev => !prev) }}
                             selectionMode="range"
                             readOnlyInput
-                            // showButtonBar
+// Exibe ações auxiliares no seletor de período.
                             className="w-full"
                         />
                         <label htmlFor="dashboard-period">Selecione um período</label>
