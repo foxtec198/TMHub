@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
@@ -18,6 +15,7 @@ import { exportDisallowancesXlsx } from "../../utils/exportDisallowancesXlsx";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
+import { Table } from "../../components/tables/Table";
 import "./styles.css";
 import "./contrast.css";
 import {
@@ -94,6 +92,12 @@ function money(value) {
   return Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function formatDate(value) {
+  if (!value) return "—";
+  const [year, month, day] = String(value).slice(0, 10).split("-");
+  return year && month && day ? `${day}/${month}/${year}` : "—";
+}
+
 function coverageTag(value) {
   if (value === "coberta") return <Tag value="COBERTA" severity="success" />;
   if (value === "parcial") return <Tag value="PARCIAL" severity="info" />;
@@ -155,13 +159,10 @@ function normalizeRecord(record) {
 function DisallowanceControlContent() {
   const [period, setPeriod] = useState(defaultPeriod);
   const [records, setRecords] = useState([]);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [evidenceFile, setEvidenceFile] = useState(null);
   const [refresh, setRefresh] = useState(0);
-  const [section, setSection] = useState("glosas");
   const filterPanel = useRef(null);
   const fileInput = useRef(null);
   const setLoading = useLoading();
@@ -178,11 +179,6 @@ function DisallowanceControlContent() {
     }
     return params;
   }, [period]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 300);
-    return () => window.clearTimeout(timer);
-  }, [search]);
 
   useEffect(() => {
     let cancelled = false;
@@ -222,12 +218,7 @@ function DisallowanceControlContent() {
     clearFilters: clearMultiSelectFilters,
   } = useCombinedFilters(records);
 
-  const filteredRecords = useMemo(() => multiSelectFilteredRecords.filter((record) => {
-    if (!debouncedSearch) return true;
-    const term = debouncedSearch.toLocaleLowerCase("pt-BR");
-    return [record.contrato, record.colaborador, record.matricula, record.justificativa, record.observacao]
-      .some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
-  }), [multiSelectFilteredRecords, debouncedSearch]);
+  const filteredRecords = multiSelectFilteredRecords;
 
   const summary = useMemo(() => ({
     total_registros: filteredRecords.length,
@@ -400,7 +391,6 @@ function DisallowanceControlContent() {
   const clearFilters = () => {
     setPeriod(defaultPeriod());
     clearMultiSelectFilters();
-    setSearch("");
   };
 
   const exportSpreadsheet = () => {
@@ -412,17 +402,69 @@ function DisallowanceControlContent() {
     }
   };
 
+  const columns = [
+    {
+      header: "Data",
+      field: "data_falta",
+      sortable: true,
+      style: { width: "8rem" },
+      body: (record) => formatDate(record.data_falta),
+    },
+    {
+      header: "Colaborador",
+      field: "colaborador",
+      sortable: true,
+      body: (record) => <div className="glosa-main-cell"><strong>{record.colaborador || "Não identificado"}</strong><small>Matrícula {record.matricula || "não informada"}</small></div>,
+    },
+    {
+      header: "Contrato",
+      field: "contrato",
+      sortable: true,
+      body: (record) => <div className="glosa-main-cell"><strong>{record.contrato || "Não informado"}</strong><small>{record.departamento ? `DPTO. ${record.departamento}` : "Departamento não informado"}</small></div>,
+    },
+    {
+      header: "Cobertura",
+      field: "cobertura",
+      sortable: true,
+      body: (record) => coverageTag(record.cobertura),
+    },
+    {
+      header: "Apontamento",
+      field: "quantidade_dias",
+      sortable: true,
+      body: (record) => <div className="glosa-main-cell"><strong>{record.quantidade_dias} dia(s)</strong><small>{record.quantidade_horas} hora(s)</small></div>,
+    },
+    {
+      header: "Valores",
+      field: "valor_total",
+      sortable: true,
+      body: (record) => <div className="glosa-main-cell"><strong>{money(record.valor_total)}</strong><small className={record.valor_descoberto > 0 ? "glosa-value-danger" : ""}>Saldo: {money(record.valor_descoberto)}</small></div>,
+    },
+    {
+      header: "Evidência",
+      field: "evidencia_nome",
+      body: (record) => record.evidencia_url
+        ? <Button icon="pi pi-paperclip" label="Abrir" text size="small" onClick={() => window.open(record.evidencia_url, "_blank", "noopener,noreferrer")} />
+        : <span className="glosa-no-evidence">Sem evidência</span>,
+    },
+    {
+      header: "Ações",
+      body: (record) => canEdit
+        ? <div className="glosa-actions"><Button icon="pi pi-pencil" rounded text aria-label="Editar glosa" onClick={() => openEdit(record)} /><Button icon="pi pi-trash" rounded text severity="danger" aria-label="Excluir glosa" onClick={() => remove(record)} /></div>
+        : "—",
+      style: { width: "8rem" },
+    },
+  ];
+
   return <section className="glosa-page">
     <PageHeader
       section="Gestão contratual"
       title="Controle de Glosas"
       description="Acompanhe coberturas, valores em análise e perdas por competência."
       actions={<>
-        {section === "glosas" && <>
-          <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => filterPanel.current?.toggle(event)} />
-          <Button label="Exportar XLSX" icon="pi pi-file-excel" outlined onClick={exportSpreadsheet} />
-          {canCreate && <Button label="Nova glosa" icon="pi pi-plus" onClick={openCreate} />}
-        </>}
+        <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => filterPanel.current?.toggle(event)} />
+        <Button label="Exportar XLSX" icon="pi pi-file-excel" outlined onClick={exportSpreadsheet} />
+        {canCreate && <Button label="Nova glosa" icon="pi pi-plus" onClick={openCreate} />}
       </>}
     />
     <OverlayPanel ref={filterPanel} className="glosa-filter-panel">
@@ -518,6 +560,24 @@ function DisallowanceControlContent() {
         <div className="dialog-actions is-wide"><Button type="button" label="Cancelar" text onClick={close} /><Button type="submit" label={editing ? "Salvar alterações" : "Registrar glosa"} icon="pi pi-check" /></div>
       </form>
     </Dialog>
+    <section className="glosa-summary">
+      <article><i className="pi pi-list" /><div><small>Registros</small><strong>{summary.total_registros}</strong><span>no período selecionado</span></div></article>
+      <article><i className="pi pi-calendar" /><div><small>Dias apontados</small><strong>{summary.dias}</strong><span>dias de glosa</span></div></article>
+      <article><i className="pi pi-wallet" /><div><small>Valor total</small><strong>{money(summary.valor_total)}</strong><span>valor apontado</span></div></article>
+      <article className="is-success"><i className="pi pi-check-circle" /><div><small>Valor coberto</small><strong>{money(summary.valor_coberto)}</strong><span>tratativas cobertas</span></div></article>
+      <article className="is-danger"><i className="pi pi-exclamation-triangle" /><div><small>Saldo descoberto</small><strong>{money(summary.valor_descoberto)}</strong><span>exige acompanhamento</span></div></article>
+    </section>
+
+    <section className="glosa-panel">
+      <Table
+        data={filteredRecords}
+        columns={columns}
+        search
+        rows={10}
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        tableClassName="glosa-table"
+      />
+    </section>
   </section>;
 }
 
