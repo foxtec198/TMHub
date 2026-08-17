@@ -72,6 +72,22 @@ function TicketAvatar({ user, className = "" }) {
   return <UserAvatar user={user} className={className} />;
 }
 
+function TicketMessageAvatar({ user }) {
+  if (user?.avatar_type === "timo") {
+    return <span className="ticket-message__timo-avatar" title="Timo Bot" aria-label="Timo Bot"><i className="pi pi-sparkles" /></span>;
+  }
+  return <TicketAvatar user={user} />;
+}
+
+function isTicketRequesterMessage(ticket, message) {
+  if (typeof message?.is_requester === "boolean") return message.is_requester;
+  const requesterId = Number(ticket?.created_by?.id);
+  const authorId = Number(message?.created_by?.id);
+  return Number.isInteger(requesterId)
+    && requesterId > 0
+    && requesterId === authorId;
+}
+
 function TicketForm({ visible, onHide, onCreated, reasons }) {
   const [form, setForm] = useState(EMPTY_TICKET);
   const [saving, setSaving] = useState(false);
@@ -288,7 +304,7 @@ export function TicketDetail() {
   const update = async (payload, successMessage) => {
     try {
       const { data } = await connect.patch(`/tickets/${ticketId}`, payload);
-      setTicket((current) => ({ ...current, ...data, comments: current?.comments || [] }));
+      setTicket((current) => ({ ...current, ...data, comments: data.comments ?? (current?.comments || []) }));
       setStatusValue(data.status);
       setResponsibleValue(data.responsible?.id || null);
       showToast("success", "Chamado atualizado", successMessage);
@@ -313,7 +329,7 @@ export function TicketDetail() {
     <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><i className="pi pi-clock" /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
     <section className="ticket-conversation">
       <aside className="ticket-info-panel"><div className="ticket-info-panel__heading"><span>Informações</span><h2>{ticket.name}</h2></div><p>{ticket.observation}</p><dl><div><dt>Motivo</dt><dd>{ticket.reason?.nome || "Não informado"}</dd></div><div><dt>Solicitante</dt><dd><TicketAvatar user={ticket.created_by} />{ticket.created_by?.nome || "—"}</dd></div><div><dt>Responsável</dt><dd><TicketAvatar user={ticket.responsible} />{ticket.responsible?.nome || "Aguardando atribuição"}</dd></div></dl>{canEdit && <div className="ticket-info-panel__edit"><label><span>Status</span><Dropdown value={statusValue} options={STATUS} onChange={(event) => { setStatusValue(event.value); update({ status: event.value }, "O status foi alterado."); }} /></label>{isAdmin && <label><span>Responsável</span><Dropdown value={responsibleValue} options={assignees.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => { setResponsibleValue(event.value); update({ responsible_id: event.value }, "O responsável foi atualizado."); }} placeholder="Selecione" filter showClear /></label>}</div>}</aside>
-      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><i className="pi pi-comments" /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className="ticket-message" key={item.id}><TicketAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><i className="pi pi-paperclip" /> Abrir anexo</a>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><i className="pi pi-comments" />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={2} autoResize placeholder="Escreva uma atualização para o chamado…" /><Button icon="pi pi-send" label="Enviar" onClick={sendComment} loading={sending} disabled={!comment.trim()} /></footer>}</main>
+      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><i className="pi pi-comments" /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><i className="pi pi-paperclip" /> Abrir anexo</a>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><i className="pi pi-comments" />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={2} autoResize placeholder="Escreva uma atualização para o chamado…" /><Button icon="pi pi-send" label="Enviar" onClick={sendComment} loading={sending} disabled={!comment.trim()} /></footer>}</main>
     </section>
   </section>;
 }
