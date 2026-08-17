@@ -1,4 +1,4 @@
-// Widgets ----------------------------------------------
+// Componentes visuais ----------------------------------
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Stepper } from 'primereact/stepper';
@@ -6,7 +6,7 @@ import { StepperPanel } from 'primereact/stepperpanel';
 import { Checkbox } from "primereact/checkbox";
 import { SelectButton } from "primereact/selectbutton";
 
-// Utils ------------------------------------------------
+// Utilitários -------------------------------------------
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
@@ -16,7 +16,7 @@ import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { ThemeLogo } from "../../components/ThemeLogo";
 import "./new.css";
 
-function SelectedCollaborator({ title, collaborator, icon }) {
+function SelectedCollaborator({ title, collaborator, icon, disciplinaryContext, disciplinaryLoading }) {
     if (!collaborator) return null;
 
     const placeName = collaborator.centro_local || collaborator.lugar || collaborator.local || collaborator.posto;
@@ -53,6 +53,15 @@ function SelectedCollaborator({ title, collaborator, icon }) {
                     <dd>{place}</dd>
                 </div>
             </dl>
+            {disciplinaryLoading && <div className="request-disciplinary-loading"><i className="pi pi-spin pi-spinner" /> Verificando histórico disciplinar...</div>}
+            {disciplinaryContext?.avisos?.length > 0 && <aside className="request-disciplinary-alert" role="alert">
+                <i className="pi pi-exclamation-triangle" aria-hidden="true" />
+                <div>
+                    <strong>Orientação do RH</strong>
+                    <ul>{disciplinaryContext.avisos.map((message) => <li key={message}>{message}</li>)}</ul>
+                    <small>{disciplinaryContext.contagens?.advertencias || 0} advertência(s) · {disciplinaryContext.contagens?.suspensoes || 0} suspensão(ões)</small>
+                </div>
+            </aside>}
         </section>
     );
 }
@@ -63,6 +72,8 @@ export function Request() {
     const [replace, selectedReplace] = useState(null)
     const [absent, selectedAbsent] = useState(null)
     const [absentDetails, setAbsentDetails] = useState(null)
+    const [disciplinaryContext, setDisciplinaryContext] = useState(null)
+    const [disciplinaryLoading, setDisciplinaryLoading] = useState(false)
     const [warning, selectedWarning] = useState(null)
     const [reason, selectedReason] = useState(null)
     const [obs, setObs] = useState("")
@@ -86,11 +97,12 @@ export function Request() {
     ]
 
     const stepperRef = useRef(null)
+    const disciplinaryRequestRef = useRef(0)
     const setLoading = useLoading();
     const { showToast } = useToast();
 
     function selectedRequestDate() {
-        // The API requires the actual submission time even when tomorrow is selected.
+        // A API exige o horário real de envio, mesmo quando a data selecionada é amanhã.
         const now = new Date();
         if (dateChoice === "tomorrow") now.setDate(now.getDate() + 1);
         return now;
@@ -102,6 +114,29 @@ export function Request() {
         const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
         const day = String(selectedDate.getDate()).padStart(2, "0");
         return `${year}-${month}-${day}`;
+    }
+
+    async function loadDisciplinaryContext(collaboratorId) {
+        const requestId = ++disciplinaryRequestRef.current;
+        setDisciplinaryContext(null);
+
+        if (!collaboratorId) {
+            setDisciplinaryLoading(false);
+            return;
+        }
+
+        setDisciplinaryLoading(true);
+        try {
+            const { data } = await connect.post("/repo/request/contexto-disciplinar", {
+                colaborador_id: collaboratorId,
+            });
+            if (requestId === disciplinaryRequestRef.current) setDisciplinaryContext(data);
+        } catch {
+            // O histórico é apenas orientativo; a indisponibilidade não bloqueia a requisição.
+            if (requestId === disciplinaryRequestRef.current) setDisciplinaryContext(null);
+        } finally {
+            if (requestId === disciplinaryRequestRef.current) setDisciplinaryLoading(false);
+        }
     }
 
     // Valida os campos obrigatórios e envia a nova requisição ao backend.
@@ -124,18 +159,7 @@ export function Request() {
                 }
                 const response = await connect.post("/repo/request", data)
                 showToast("success", "Sucesso na requisição", "Sua requisição foi criada com sucesso, aguarde novidades por email!")
-                const disciplinarySummary = response.data?.resumo_disciplinar;
-                if (disciplinarySummary) {
-                    showToast(
-                        "info",
-                        "Histórico disciplinar",
-                        `${disciplinarySummary.advertencias || 0} advertência(s) e ${disciplinarySummary.suspensoes || 0} suspensão(ões) registradas.`,
-                    );
-                }
-                (response.data?.avisos || []).forEach((message) => {
-                    showToast("warn", "Orientação do RH", message);
-                });
-                selectedReplace(null); selectedAbsent(null); setAbsentDetails(null); selectedReason(null); setObs(""); selectedWarning(null); setDateChoice("today")
+                selectedReplace(null); selectedAbsent(null); setAbsentDetails(null); setDisciplinaryContext(null); selectedReason(null); setObs(""); selectedWarning(null); setDateChoice("today")
             }
             else{showToast("warn", "Atenção!", "Preencha todos os dados")}
         }
@@ -222,6 +246,8 @@ export function Request() {
                                         selectedUser(e.value);
                                         selectedAbsent(null);
                                         setAbsentDetails(null);
+                                        setDisciplinaryContext(null);
+                                        disciplinaryRequestRef.current += 1;
                                         selectedReplace(null);
                                         setReplaces([]);
                                     }}
@@ -258,6 +284,7 @@ export function Request() {
                                     onChange={(id, collaborator) => {
                                         selectedAbsent(id);
                                         setAbsentDetails(collaborator);
+                                        loadDisciplinaryContext(id);
                                     }}
                                     placeholder="Busque quem faltou"
                                     minSearch={2}
@@ -268,6 +295,8 @@ export function Request() {
                                     title="Ausente"
                                     collaborator={absentDetails}
                                     icon="pi pi-user-minus"
+                                    disciplinaryContext={disciplinaryContext}
+                                    disciplinaryLoading={disciplinaryLoading}
                                 />
                                 <Dropdown
                                     appendTo="self"
