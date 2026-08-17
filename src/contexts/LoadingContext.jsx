@@ -1,6 +1,9 @@
+// React
 import { createContext, useContext, useState } from 'react';
+// PrimeReact
 import { ProgressSpinner } from 'primereact/progressspinner';
 
+// Compartilha uma única ação para controlar o bloqueio visual da aplicação.
 const LoadingContext = createContext(null);
 
 export function LoadingProvider({ children }) {
@@ -33,6 +36,7 @@ export function LoadingProvider({ children }) {
 }
 
 export function useLoading() {
+    // Impede o uso do hook fora do provedor que controla o overlay.
     const context = useContext(LoadingContext);
     if (!context) {
         throw new Error('useLoading deve ser utilizado dentro de um LoadingProvider');

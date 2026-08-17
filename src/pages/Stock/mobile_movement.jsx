@@ -1,4 +1,6 @@
-// Widgets ----------------------------------------------
+// React
+import { useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { SelectButton } from "primereact/selectbutton";
@@ -9,17 +11,16 @@ import { Password } from "primereact/password";
 import { FloatLabel } from "primereact/floatlabel";
 import { Tag } from "primereact/tag";
 import { Divider } from "primereact/divider";
-
-// Utils ------------------------------------------------
-import { useEffect, useRef, useState } from "react";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
+// Utilitários
 import connect from "../../utils/request";
 import { clearAccessToken, getAccessToken, setAccessToken } from "../../utils/authSession";
+// Componentes
 import { BarcodeScanner } from "./BarcodeScanner";
 import { ThemeLogo } from "../../components/ThemeLogo";
-
-// CSS
+// Estilos
 import "../Auth/main.css";
 import "./mobile_movement.css";
 
@@ -32,7 +33,7 @@ const tipoOptions = [
 ];
 
 export function MobileMovement() {
-    // 'login' ou 'movimentacao'
+// Alterna entre a autenticação e a etapa de movimentação.
     const [step, setStep] = useState(getAccessToken() ? "movimentacao" : "login");
 
     const [user, setUser] = useState("");

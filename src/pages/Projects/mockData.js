@@ -1,4 +1,3 @@
-// mockData.js
 // Dados fake só pra fazer a tela funcionar sem back. Depois troca por chamadas de API/contexto de auth real.
 // A ideia: todo mundo já existe no sistema (mesma base de usuários), então "adicionar membro"
 // é só colocar o id dele no memberIds do projeto — sem convite, sem e-mail, nada.

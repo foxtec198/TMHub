@@ -1,17 +1,24 @@
+// React
 import { useCallback, useEffect, useMemo, useState } from "react";
+// Roteamento
 import { useNavigate } from "react-router-dom";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputSwitch } from "primereact/inputswitch";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
 import { Table } from "../../components/tables/Table";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 
+// Converte cada status em rótulo e cor para uso consistente na tela.
 const STATUS_META = {
   ABERTO: { label: "Aberto", severity: "info" },
   EM_ANDAMENTO: { label: "Em andamento", severity: "info" },
@@ -36,6 +43,7 @@ function statusTag(status) {
   return <Tag value={meta.label.toUpperCase()} severity={meta.severity} rounded />;
 }
 
+// Mantém motivos e indicadores usados na gestão administrativa de chamados.
 export function TicketManagement() {
   const [tickets, setTickets] = useState([]);
   const [reasons, setReasons] = useState([]);
@@ -45,6 +53,7 @@ export function TicketManagement() {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
+  // Recarrega chamados e motivos após qualquer alteração administrativa.
   const load = useCallback(async () => {
     try {
       const [{ data: ticketData }, { data: reasonData }] = await Promise.all([
@@ -71,12 +80,14 @@ export function TicketManagement() {
     };
   }, [load]);
 
+  // Consolida quantidades por status para os cartões de acompanhamento.
   const metrics = useMemo(() => ({
     total: tickets.length,
     open: tickets.filter((ticket) => ["ABERTO", "EM_ANDAMENTO", "ATRASADO"].includes(ticket.status)).length,
     unassigned: tickets.filter((ticket) => !ticket.responsible).length,
   }), [tickets]);
 
+  // Cria um motivo válido somente quando o título foi informado.
   const createReason = async () => {
     if (reasonName.trim().length < 2) {
       showToast("warn", "Motivo", "Informe um motivo com ao menos 2 caracteres.");
@@ -96,6 +107,7 @@ export function TicketManagement() {
     }
   };
 
+  // Ativa ou desativa motivos sem excluir o histórico de chamados existentes.
   const setReasonActive = async (reason, active) => {
     try {
       await connect.patch(`/tickets/motivos/${reason.id}`, { ativo: active });

@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
@@ -10,21 +12,22 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
+// Components
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+import { PageHeader } from "../../components/PageHeader";
+// Utils
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 import { can } from "../../utils/permissions";
 import { exportDisallowancesXlsx } from "../../utils/exportDisallowancesXlsx";
+// Contexts
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
-import { PageHeader } from "../../components/PageHeader";
+import {CombinedFiltersProvider,CombinedMultiSelect,useCombinedFilters,} from "../../contexts/CombinedFiltersContext";
+// Estilos
 import "./styles.css";
 import "./contrast.css";
-import {
-  CombinedFiltersProvider,
-  CombinedMultiSelect,
-  useCombinedFilters,
-} from "../../contexts/CombinedFiltersContext";
+
 
 const COVERAGE_OPTIONS = [
   { label: "Em análise", value: "em_analise" },
@@ -124,6 +127,7 @@ function requestErrorMessage(error, fallback) {
   return fallback;
 }
 
+// Uniformiza dados antigos e atuais antes de exibi-los no controle de glosas.
 function normalizeRecord(record) {
   const totalDays = Number(record.quantidade_dias || 0);
   const totalHours = Number(record.quantidade_horas ?? totalDays * 8);
@@ -152,6 +156,7 @@ function normalizeRecord(record) {
   };
 }
 
+// Centraliza filtros, evidências e operações de persistência das glosas.
 function DisallowanceControlContent() {
   const [period, setPeriod] = useState(defaultPeriod);
   const [records, setRecords] = useState([]);
@@ -170,6 +175,7 @@ function DisallowanceControlContent() {
   const canEdit = can("controle_glosas", "edit");
   const dialogOpen = Boolean(editing) || Boolean(form.competencia);
 
+  // Serializa filtros e paginação para a consulta da API.
   const requestParams = useMemo(() => {
     const params = {};
     if (period?.[0] && period?.[1]) {
@@ -222,6 +228,7 @@ function DisallowanceControlContent() {
     clearFilters: clearMultiSelectFilters,
   } = useCombinedFilters(records);
 
+  // Aplica a busca textual depois dos filtros compartilhados da tela.
   const filteredRecords = useMemo(() => multiSelectFilteredRecords.filter((record) => {
     if (!debouncedSearch) return true;
     const term = debouncedSearch.toLocaleLowerCase("pt-BR");
@@ -229,6 +236,7 @@ function DisallowanceControlContent() {
       .some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
   }), [multiSelectFilteredRecords, debouncedSearch]);
 
+  // Consolida valores para os indicadores exibidos acima da tabela.
   const summary = useMemo(() => ({
     total_registros: filteredRecords.length,
     dias: Number(filteredRecords.reduce((total, record) => total + record.quantidade_dias, 0).toFixed(2)),
@@ -251,6 +259,7 @@ function DisallowanceControlContent() {
   const coveredValue = coveredDays * Number(form.valor_diaria || 0);
   const uncoveredValue = Math.max(0, totalValue - coveredValue);
 
+  // Inicia um cadastro com valores seguros para uma nova glosa.
   const openCreate = () => {
     const initialPeriod = period?.[0] || defaultPeriod()[0];
     setEditing(null);
@@ -262,6 +271,7 @@ function DisallowanceControlContent() {
     });
   };
 
+  // Copia o registro selecionado para evitar alterar a tabela antes de salvar.
   const openEdit = (record) => {
     const days = Number(record.quantidade_dias || 1);
     const covered = Number(record.quantidade_coberta_dias || 0);
@@ -296,6 +306,7 @@ function DisallowanceControlContent() {
     setForm(EMPTY_FORM);
   };
 
+  // Valida o anexo antes de mantê-lo temporariamente no formulário.
   const selectEvidence = (file) => {
     if (!file) return;
     if (!fileIsAllowed(file)) {
@@ -309,6 +320,7 @@ function DisallowanceControlContent() {
     setEvidenceFile(file);
   };
 
+  // Envia campos e evidência juntos, criando ou atualizando conforme o registro.
   const save = async (event) => {
     event.preventDefault();
     if (!form.competencia || !form.data_falta || !form.colaborador_id) {
@@ -403,6 +415,7 @@ function DisallowanceControlContent() {
     setSearch("");
   };
 
+  // Exporta apenas os registros já filtrados na visualização atual.
   const exportSpreadsheet = () => {
     try {
       exportDisallowancesXlsx(filteredRecords, summary);

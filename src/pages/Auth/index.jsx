@@ -1,11 +1,11 @@
-// Widgets
+// Componentes
 import { Button } from "primereact/button";
 import { FloatLabel } from "primereact/floatlabel";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Carousel } from "primereact/carousel";
 
-// Utils
+// Utilitários
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useLoading } from "../../contexts/LoadingContext";
@@ -16,7 +16,7 @@ import { applyProfileAppearance } from "../../theme/theme";
 import { LOGIN_INFORMATIVES } from "./informativos";
 import { ThemeLogo } from "../../components/ThemeLogo";
 
-// CSS
+// Estilos
 import './main.css'
 
 export function Auth() {
@@ -40,7 +40,7 @@ export function Auth() {
         return salvas ? parseInt(salvas, 10) : 0;
     });
 
-    // useEffect para rodar o cronômetro do bloqueio
+// Atualiza o cronômetro enquanto o bloqueio estiver ativo.
     useEffect(() => {
         if (!bloqueadoAte) return undefined;
 
@@ -56,7 +56,7 @@ export function Auth() {
             }
         };
 
-        // Executa imediatamente e depois a cada 1 segundo
+// Executa imediatamente e depois em intervalos de um segundo.
         atualizarCronometro();
         const interval = setInterval(atualizarCronometro, 1000);
 

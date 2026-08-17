@@ -1,5 +1,7 @@
+// React
 import { useCallback, useEffect, useRef, useState } from "react";
 
+// PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
@@ -12,14 +14,19 @@ import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 
+// Estilos
 import "./styles.css";
 
+// Traduz os códigos legais para descrições exibidas na interface.
 const ALINEA_LABELS = {
   a: "Improbidade",
   b: "Má conduta",
@@ -36,6 +43,7 @@ const ALINEA_LABELS = {
   m: "Perda de habilitação",
 };
 
+// Monta opções de alínea agrupando os códigos aceitos pela legislação.
 function alineaOption(...letters) {
   const prefix = letters.length === 1 ? "Alínea" : "Alíneas";
   return {
@@ -58,6 +66,7 @@ const DEFAULT_OPTIONS = {
   ],
 };
 
+// Cria filtros independentes para evitar compartilhar arrays entre consultas.
 const emptyFilters = () => ({
   busca: "",
   colaborador_id: [],
@@ -95,6 +104,7 @@ function responsiveCell(label, content) {
   );
 }
 
+// Consulta, importa e remove registros de medidas disciplinares.
 export function DisciplinaryMeasures() {
   const [records, setRecords] = useState([]);
   const [summary, setSummary] = useState({ total: 0, advertencias: 0, suspensoes: 0 });
@@ -119,6 +129,7 @@ export function DisciplinaryMeasures() {
   const canCreate = can("controle_medidas_disciplinares", "create");
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
 
+  // Aguarda a digitação para evitar consultas repetidas durante a busca.
   useEffect(() => {
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
@@ -158,6 +169,7 @@ export function DisciplinaryMeasures() {
     };
   }, [filters, pagination.first, pagination.rows, refresh, showToast]);
 
+  // Carrega opções auxiliares somente quando a tela precisa exibir os filtros.
   const ensureFilterOptions = useCallback(async () => {
     if (filterOptionsLoaded.current) return true;
     if (filterOptionsRequest.current) return filterOptionsRequest.current;
@@ -184,6 +196,7 @@ export function DisciplinaryMeasures() {
     return filterOptionsRequest.current;
   }, [showToast]);
 
+  // Atualiza um filtro e reinicia a paginação para exibir o novo recorte.
   const updateFilter = useCallback((name, value) => {
     setPagination((current) => (current.first ? { ...current, first: 0 } : current));
     setFilters((current) => ({ ...current, [name]: value }));
@@ -222,6 +235,7 @@ export function DisciplinaryMeasures() {
     accept: deleteAll,
   });
 
+  // Envia a planilha e recarrega os dados após a importação concluída.
   const importSpreadsheet = async () => {
     if (!importFile) {
       showToast("warn", "Importação", "Selecione uma planilha .xlsx.");

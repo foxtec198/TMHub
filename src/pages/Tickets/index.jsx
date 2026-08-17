@@ -1,5 +1,8 @@
+// React
 import { useCallback, useEffect, useMemo, useState } from "react";
+// Roteamento
 import { useNavigate, useParams } from "react-router-dom";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -7,15 +10,20 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
 
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
 import { UserAvatar } from "../../components/UserAvatar";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+// Estilos
 import "./tickets.css";
 
+// Disponibiliza os status válidos para os filtros e o formulário.
 const STATUS = [
   { label: "Abertos", value: "ABERTO" },
   { label: "Em andamento", value: "EM_ANDAMENTO" },
@@ -72,12 +80,14 @@ function TicketAvatar({ user, className = "" }) {
   return <UserAvatar user={user} className={className} />;
 }
 
+// Mantém o formulário de abertura isolado da listagem de chamados.
 function TicketForm({ visible, onHide, onCreated, reasons }) {
   const [form, setForm] = useState(EMPTY_TICKET);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
   const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  // Impede envio incompleto e notifica a listagem após criar o chamado.
   const save = async () => {
     if (!form.name.trim() || !form.observation.trim()) {
       showToast("warn", "Novo chamado", "Informe o título e a descrição do chamado.");
@@ -106,6 +116,7 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
   </Dialog>;
 }
 
+// Exibe os chamados acessíveis ao usuário e seus indicadores operacionais.
 export function TicketsDashboard() {
   const [tickets, setTickets] = useState([]);
   const [reasons, setReasons] = useState([]);
@@ -120,6 +131,7 @@ export function TicketsDashboard() {
   const navigate = useNavigate();
   const canCreate = can("tickets", "create");
 
+  // Carrega a fila e os motivos disponíveis em uma única atualização.
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -144,6 +156,7 @@ export function TicketsDashboard() {
     setNewTicket(true);
   }, []);
 
+  // Combina busca textual e status sem modificar a lista original.
   const filteredTickets = useMemo(() => tickets.filter((ticket) => {
     const term = query.trim().toLocaleLowerCase("pt-BR");
     const matchesQuery = !term || [ticket.id, ticket.name, ticket.observation, ticket.reason?.nome, ticket.created_by?.nome, ticket.responsible?.nome]
@@ -248,6 +261,7 @@ export function TicketsDashboard() {
   </section>;
 }
 
+// Gerencia comentários, status e responsáveis de um chamado específico.
 export function TicketDetail() {
   const { ticketId } = useParams();
   const [ticket, setTicket] = useState(null);
@@ -285,6 +299,7 @@ export function TicketDetail() {
   }, [isAdmin]);
   useTicketRealtime(() => setRefresh((value) => value + 1));
 
+  // Persiste mudanças e atualiza os dados locais somente após sucesso.
   const update = async (payload, successMessage) => {
     try {
       const { data } = await connect.patch(`/tickets/${ticketId}`, payload);
@@ -295,6 +310,7 @@ export function TicketDetail() {
     } catch (error) { showToast("error", "Chamado", messageFrom(error, "Não foi possível atualizar o chamado.")); }
   };
 
+  // Evita comentários vazios antes de publicá-los no histórico do chamado.
   const sendComment = async () => {
     if (!comment.trim()) return;
     setSending(true);
@@ -318,12 +334,14 @@ export function TicketDetail() {
   </section>;
 }
 
+// Atualiza prazos exibidos sem requisitar novamente a lista de chamados.
 function useMinuteClock() {
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const timer = window.setInterval(() => setNow(Date.now()), 60_000); return () => window.clearInterval(timer); }, []);
   return now;
 }
 
+// Recarrega os dados quando outro usuário altera um chamado em tempo real.
 function useTicketRealtime(reload) {
   useEffect(() => {
     let timer;

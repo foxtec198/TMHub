@@ -1,11 +1,14 @@
-// components/NewProjectDialog.jsx
+// React
 import React, { useState } from 'react';
+// PrimeReact
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { MultiSelect } from 'primereact/multiselect';
 import { Button } from 'primereact/button';
+// Componentes
 import ProjectMemberAvatar from './ProjectMemberAvatar';
 
+// Define cores iniciais para diferenciar novos projetos no quadro.
 const CORES = ['#7c5cff', '#22a3a3', '#e0763a', '#c14b6b', '#3d78c9', '#2f9e44'];
 
 export default function NewProjectDialog({ visible, todosUsuarios, currentUserId, onHide, onCreate }) {

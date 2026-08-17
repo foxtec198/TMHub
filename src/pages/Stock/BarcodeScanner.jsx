@@ -1,10 +1,14 @@
+// React
 import { useCallback, useEffect, useRef, useState } from 'react';
+// PrimeReact
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+// Componentes
 import { productIdFromBarcode } from './barcode';
 import './barcode-scanner.css';
 
+// Converte erros do navegador em orientações úteis para o usuário.
 function cameraErrorMessage(error) {
     if (!window.isSecureContext) return 'A câmera exige uma conexão segura (HTTPS ou localhost).';
     if (!navigator.mediaDevices?.getUserMedia) return 'Este navegador não oferece acesso à câmera.';
@@ -35,6 +39,7 @@ export function BarcodeScanner({ visible, products, onHide, onProduct }) {
         onProductRef.current = onProduct;
     }, [onProduct, products]);
 
+  // Extrai o ID do código lido e procura o produto na lista disponível.
     const resolveProduct = useCallback((decodedText) => {
         if (handledRef.current) return;
         const id = productIdFromBarcode(decodedText);
@@ -52,6 +57,7 @@ export function BarcodeScanner({ visible, products, onHide, onProduct }) {
         onProductRef.current(product);
     }, []);
 
+  // Inicializa o leitor somente enquanto o diálogo está aberto.
     useEffect(() => {
         if (!visible || !cameraMounted || !scannerTargetRef.current) return undefined;
 
@@ -127,6 +133,7 @@ export function BarcodeScanner({ visible, products, onHide, onProduct }) {
         };
     }, [cameraMounted, resolveProduct, visible]);
 
+  // Fecha o diálogo e limpa a mensagem deixada pela última leitura.
     const hideScanner = () => {
         setCameraLive(false);
         setCameraMounted(false);

@@ -1,8 +1,12 @@
+// React
 import { useCallback, useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
+// Utilitários
 import tmOpsRequest from "../../utils/tmOpsRequest";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
 
 const EVIDENCE_META = {
@@ -13,6 +17,7 @@ const EVIDENCE_META = {
   signature: { label: "Assinatura", icon: "pi pi-pencil" },
 };
 
+// Define formatos aceitos conforme o tipo de evidência solicitado.
 function captureFormats(type) {
   return type === "qrcode"
     ? ["qr_code"]
@@ -29,11 +34,13 @@ function captureFormats(type) {
       ];
 }
 
+// Encerra todos os tracks para liberar a câmera ao fechar o componente.
 function stopStream(streamRef) {
   streamRef.current?.getTracks().forEach((track) => track.stop());
   streamRef.current = null;
 }
 
+// Coleta foto, QR Code ou assinatura e envia a evidência da tarefa.
 export function TaskEvidenceCapture({ task, item, onSaved }) {
   const { showToast } = useToast();
   const galleryInput = useRef(null);
@@ -89,12 +96,14 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     [item.id, onSaved, showToast, task.id],
   );
 
+  // Converte o arquivo escolhido no estado usado pelo fluxo de envio.
   const submitFile = (type, event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (file) submit({ tipo: type, file });
   };
 
+  // Inicializa a leitura de QR Code apenas quando esse tipo de evidência é exigido.
   useEffect(() => {
     if (!scannerType || !scannerReady || !videoRef.current) return undefined;
     let stream;
@@ -115,7 +124,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
           return;
         }
       } catch {
-        // The next camera frame is attempted while the dialog remains open.
+        // Tenta o próximo quadro da câmera enquanto o diálogo permanece aberto.
       }
       frame = requestAnimationFrame(scan);
     };
@@ -151,6 +160,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     };
   }, [scannerReady, scannerType, submit]);
 
+  // Abre a câmera traseira para capturar fotos quando necessário.
   useEffect(() => {
     if (!cameraVisible || !cameraReady || !photoVideoRef.current) return undefined;
     let stream;
@@ -179,6 +189,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     };
   }, [cameraReady, cameraVisible]);
 
+  // Limpa os fluxos de câmera quando o componente é desmontado.
   useEffect(
     () => () => {
       stopStream(scannerStreamRef);
@@ -187,6 +198,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     [],
   );
 
+  // Transforma o quadro atual da câmera em arquivo para envio.
   const takePhoto = () => {
     const video = photoVideoRef.current;
     const canvas = photoCanvasRef.current;
@@ -215,6 +227,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     );
   };
 
+  // Dimensiona o canvas conforme a densidade de pixels da tela.
   const prepareSignature = () => {
     requestAnimationFrame(() => {
       const canvas = canvasRef.current;
@@ -235,6 +248,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     const box = canvasRef.current.getBoundingClientRect();
     return { x: event.clientX - box.left, y: event.clientY - box.top };
   };
+  // Inicia o traço da assinatura a partir da posição relativa do ponteiro.
   const startDrawing = (event) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     drawingRef.current = true;
@@ -243,6 +257,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     context.beginPath();
     context.moveTo(cursor.x, cursor.y);
   };
+  // Desenha continuamente enquanto o usuário mantém o ponteiro pressionado.
   const draw = (event) => {
     if (!drawingRef.current) return;
     const cursor = point(event);
@@ -250,6 +265,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
     context.lineTo(cursor.x, cursor.y);
     context.stroke();
   };
+  // Serializa a assinatura do canvas como imagem antes de enviá-la.
   const saveSignature = () => {
     canvasRef.current?.toBlob((blob) => {
       if (blob)

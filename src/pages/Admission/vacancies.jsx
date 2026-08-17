@@ -1,6 +1,7 @@
+//Estilos
 import './vacancies.css';
 
-// Widgets
+// Componentes
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -18,7 +19,7 @@ import { CollaboratorDropdown } from '../../components/CollaboratorDropdown';
 import { InterviewHistoryDialog } from './InterviewHistoryDialog';
 import { PageHeader } from '../../components/PageHeader';
 
-// Utils
+// Utilitários
 import { useEffect, useMemo, useState } from 'react';
 import connect from '../../utils/request';
 import { useLoading } from '../../contexts/LoadingContext';

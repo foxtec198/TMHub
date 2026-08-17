@@ -1,7 +1,10 @@
+// Dependência externa
 import { strToU8, zipSync } from "fflate";
 
+// Define o formato usado no arquivo baixado pelo navegador.
 const MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
+// Escapa texto dinâmico antes de inseri-lo no XML da planilha.
 const escapeXml = (value) =>
   String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -11,6 +14,7 @@ const escapeXml = (value) =>
     .replaceAll("'", "&apos;");
 
 const columnName = (index) => {
+  // Converte a posição numérica na referência de coluna do Excel.
   let value = index;
   let result = "";
   while (value > 0) {
@@ -25,12 +29,14 @@ const cell = (reference, value, style = 0) =>
   `<c r="${reference}" t="inlineStr" s="${style}"><is><t>${escapeXml(value)}</t></is></c>`;
 
 const formatDate = (value) => {
+  // Evita propagar datas inválidas para a exportação.
   if (!value) return "";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString("pt-BR");
 };
 
 export function exportDepartmentEmployeesXlsx(employees) {
+  // Transforma a lista filtrada em uma planilha de colaboradores por departamento.
   const headers = [
     "Matrícula",
     "Colaborador",
@@ -86,6 +92,7 @@ export function exportDepartmentEmployeesXlsx(employees) {
   <cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="3" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf></cellXfs>
   <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
+  // Empacota a estrutura XML mínima necessária para um XLSX válido.
   const files = {
     "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`),
     "_rels/.rels": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`),
@@ -95,6 +102,7 @@ export function exportDepartmentEmployeesXlsx(employees) {
     "xl/worksheets/sheet1.xml": strToU8(sheetXml),
   };
 
+  // Compacta o arquivo e inicia o download diretamente no navegador.
   const blob = new Blob([zipSync(files, { level: 6 })], { type: MIME });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

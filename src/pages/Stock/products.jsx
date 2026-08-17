@@ -1,5 +1,7 @@
+// Estilos
 import './products.css';
 
+// PrimeReact
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
@@ -8,15 +10,20 @@ import { Button } from 'primereact/button';
 import { Tag } from 'primereact/tag';
 import { Dialog } from 'primereact/dialog';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+// Componentes
 import { Table } from '../../components/tables/Table';
 import { DashCard } from '../../components/DashCard';
 import { PageHeader } from '../../components/PageHeader';
 
+// React
 import { useEffect, useMemo, useState } from 'react';
+// Utilitários
 import connect from '../../utils/request';
+// Contextos
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 
+// Centraliza os endpoints usados pela gestão de produtos e categorias.
 const PRODUCTS_ENDPOINT = '/estoque/produtos';
 const CATEGORIES_ENDPOINT = '/estoque/categorias';
 
@@ -26,6 +33,7 @@ const statusMap = {
     esgotado: { label: 'Esgotado', severity: 'danger' },
 };
 
+// Determina o status visual conforme o saldo e o estoque mínimo do produto.
 function statusOf(product) {
     if (!product.quantidade) return 'esgotado';
     if (product.quantidade <= product.quantidade_minima) return 'baixo';
@@ -46,6 +54,7 @@ const unityOptions = [
     { label: 'UN', value: 'UN' },
 ];
 
+// Gerencia produtos, categorias e seus níveis de estoque.
 export function Products() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -91,6 +100,7 @@ export function Products() {
 
     const categoryName = (id) => categories.find((c) => c.id === id)?.nome ?? '-';
 
+  // Consolida os totais usados nos cartões de estoque.
     const totals = useMemo(() => ({
         total: products.length,
         baixo: products.filter((p) => statusOf(p) === 'baixo').length,
@@ -102,11 +112,13 @@ export function Products() {
         setDialogVisible(true);
     };
 
+  // Copia o produto para o formulário antes de abrir a edição.
     const openEdit = (product) => {
         setForm({ ...product });
         setDialogVisible(true);
     };
 
+  // Valida os campos e escolhe criação ou edição conforme o identificador.
     const handleSave = async () => {
         if (!form.nome || !form.categoria_id || !form.unidade) {
             showToast('warn', 'Atenção!', 'Preencha nome, categoria e unidade.');
@@ -160,6 +172,7 @@ export function Products() {
         });
     };
 
+  // Cria uma categoria e atualiza a lista disponível no formulário.
     const handleAddCategory = async () => {
         if (!newCategory.nome) {
             showToast('warn', 'Atenção!', 'Informe o nome da categoria.');
@@ -194,6 +207,7 @@ export function Products() {
         }
     };
 
+  // Memoriza as colunas e ações para evitar recriar a tabela a cada renderização.
     const table_itens = useMemo(() => ([
         { field: 'nome', header: 'Produto', class: 'text-truncate' },
         {

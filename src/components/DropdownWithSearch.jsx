@@ -1,7 +1,11 @@
+// React
 import { useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Dropdown } from "primereact/dropdown";
+// Utilitários
 import connect from "../utils/request";
 
+// Busca opções remotamente e controla o valor selecionado.
 export function DropdownWS({
     uri,
     uriParams = {},
@@ -71,6 +75,7 @@ export function DropdownWS({
         }
     }
 
+    // Busca opções conforme o texto, limite e parâmetros externos da consulta.
     useEffect(() => {
         buscarOptions();
 
@@ -80,6 +85,7 @@ export function DropdownWS({
     }, [uri, JSON.stringify(uriParams)]);
 
     function handleFilter(e) {
+    // Atualiza o termo local para acionar o debounce da busca remota.
         const search = e.filter?.trim() || "";
 
         clearTimeout(timeoutRef.current);
@@ -90,6 +96,7 @@ export function DropdownWS({
     }
 
     function handleChange(e) {
+    // Mantém o valor interno somente quando o componente não é controlado.
         if (onChange) { onChange(e.value); }
         else { setInternalValue(e.value); }
     }

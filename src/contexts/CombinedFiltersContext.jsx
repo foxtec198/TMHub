@@ -1,3 +1,4 @@
+// React
 import {
   createContext,
   useCallback,
@@ -6,10 +7,13 @@ import {
   useMemo,
   useState,
 } from "react";
+// PrimeReact
 import { MultiSelect } from "primereact/multiselect";
 
+// Centraliza filtros para que telas relacionadas usem o mesmo estado.
 const CombinedFiltersContext = createContext(null);
 
+// Cria uma chave de estado vazia para cada filtro declarado pela tela.
 function buildEmptyFilters(definitions) {
   return Object.keys(definitions).reduce((filters, name) => {
     filters[name] = [];
@@ -17,6 +21,7 @@ function buildEmptyFilters(definitions) {
   }, {});
 }
 
+// Ordena rótulos de forma natural para evitar opções aparentemente aleatórias.
 function sortOptions(options) {
   return options.sort((left, right) =>
     String(left.label).localeCompare(String(right.label), "pt-BR", {
@@ -26,6 +31,7 @@ function sortOptions(options) {
   );
 }
 
+// Extrai opções únicas da fonte de dados conforme a definição do filtro.
 function buildOptions(data, definition) {
   if (definition.options) {
     const availableValues = new Set(
@@ -63,6 +69,7 @@ export function CombinedFiltersProvider({ definitions, children }) {
 
   const [filters, setFilters] = useState(emptyFilters);
 
+  // Reinicia o estado quando uma tela informa uma nova definição de filtros.
   useEffect(() => {
     setFilters((current) => {
       const next = buildEmptyFilters(definitions);
@@ -75,6 +82,7 @@ export function CombinedFiltersProvider({ definitions, children }) {
     });
   }, [definitions]);
 
+  // Atualiza um filtro sem descartar as seleções dos demais.
   const setFilter = useCallback((name, values) => {
     setFilters((current) => ({
       ...current,
@@ -129,6 +137,7 @@ export function useCombinedFilters(data = []) {
     })
   ), [definitions, filters]);
 
+  // Calcula opções compatíveis com as demais seleções já ativas.
   const options = useMemo(() => (
     Object.entries(definitions).reduce((result, [name, definition]) => {
       const compatibleData = data.filter((item) => matchesFilters(item, name));
@@ -137,6 +146,7 @@ export function useCombinedFilters(data = []) {
     }, {})
   ), [data, definitions, matchesFilters]);
 
+  // Descarta valores que deixaram de existir após uma mudança nos dados.
   useEffect(() => {
     setFilters((current) => {
       let changed = false;

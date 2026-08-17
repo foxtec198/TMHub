@@ -1,5 +1,7 @@
+// Estilos
 import "./theme-logo.css";
 
+// Combina variante e classes externas antes de renderizar o logotipo.
 export function ThemeLogo({
   className = "",
   variant = "default",

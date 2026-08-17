@@ -1,9 +1,12 @@
-// components/KanbanColumn.jsx
+// React
 import React, { useState } from 'react';
+// PrimeReact
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
+// Componentes
 import KanbanCard from './KanbanCard';
 
+// Controla renomeação e destinos de arrastar e soltar da coluna.
 export default function KanbanColumn({
   coluna,
   cards,

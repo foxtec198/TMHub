@@ -1,15 +1,21 @@
+// React
 import { useEffect, useMemo, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
+// Utilitários
 import connect from "../../utils/request";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Estilos
 import "./routineDialog.css";
 
+// Achata a árvore de locais para exibir cada caminho na seleção.
 const flattenLocations = (locations = [], parentPath = "") =>
   locations.flatMap((location) => {
     const path = parentPath

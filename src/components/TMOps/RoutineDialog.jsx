@@ -13,6 +13,7 @@ import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import "./routineDialog.css";
 
+// Cria uma rotina inicial respeitando a estrutura pré-selecionada.
 const emptyRoutine = (fixedStructure) => ({
   nome: "",
   descricao: "",
@@ -52,6 +53,7 @@ export function RoutineDialog({
   const { showToast } = useToast();
   const isEditing = Boolean(initialRoutine?.id);
 
+  // Carrega opções e sincroniza o formulário com a rotina em edição.
   useEffect(() => {
     if (!visible) return;
     let active = true;
@@ -113,6 +115,7 @@ export function RoutineDialog({
     (item) => item.value === routine.centro_custo_id,
   );
 
+  // Consulta colaboradores sob demanda para evitar carregar toda a base.
   const searchEmployees = async ({ query }) => {
     try {
       const { data } = await connect.get("/funcionarios", {
@@ -139,6 +142,7 @@ export function RoutineDialog({
     }
   };
 
+  // Escolhe criação ou edição conforme a rotina recebida pelo diálogo.
   const submit = async (payload) => {
     const response = isEditing
       ? await connect.patch(`/tm-ops/rotinas/${initialRoutine.id}`, payload)
@@ -208,6 +212,7 @@ export function RoutineDialog({
     }
   };
 
+  // Confirma o desvínculo antes de remover a rotina da estrutura atual.
   const confirmUnlink = async () => {
     if (!pendingPayload) return;
     setLoading(true);

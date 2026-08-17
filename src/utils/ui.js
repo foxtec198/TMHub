@@ -1,3 +1,4 @@
+// Concentra formatações usadas na apresentação de valores e nomes.
 export function to_real(value) {
     return new Intl.NumberFormat('pt-BR', {
         style: 'currency',

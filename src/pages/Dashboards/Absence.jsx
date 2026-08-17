@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
@@ -8,14 +10,20 @@ import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Tema
 import { useChartTheme } from "../../theme/useTheme";
+// Utilitários
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+// Estilos
 import "./absenceDashboard.css";
 
+// Inicia os filtros com o período do mês corrente.
 const initialPeriod = () => {
   const now = new Date();
   return [new Date(now.getFullYear(), now.getMonth(), 1), now];
@@ -26,10 +34,12 @@ const asOptions = (values = [], prefix = "") => values.map((value) => typeof val
 const formatPeriod = (period) => period?.[0] && period?.[1] ? `${period[0].toLocaleDateString("pt-BR")} — ${period[1].toLocaleDateString("pt-BR")}` : "Período incompleto";
 const formatDuration = (value) => value == null ? "—" : value >= 48 ? `${(value / 24).toFixed(1)} dias` : `${Number(value).toFixed(1)}h`;
 
+// Exibe uma mensagem consistente quando não há dados para um gráfico.
 function EmptyChart({ text }) {
   return <div className="absence-empty-chart"><i className="pi pi-chart-bar" /><span>{text}</span></div>;
 }
 
+// Consulta ausências e transforma os dados em indicadores e gráficos.
 export function AbsenceDashboard() {
   const chartTheme = useChartTheme();
   const [filters, setFilters] = useState(defaultFilters);
@@ -39,6 +49,7 @@ export function AbsenceDashboard() {
   const setLoading = useLoading();
   const { showToast } = useToast();
 
+  // Atualiza o painel conforme o período, os filtros e a revisão em tempo real.
   useEffect(() => {
     if (!filters.period?.[0] || !filters.period?.[1]) return undefined;
     let cancelled = false;
@@ -72,7 +83,9 @@ export function AbsenceDashboard() {
   const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
   const clearFilters = () => setFilters(defaultFilters());
 
+  // Converte os motivos filtrados em série horizontal para o Chart.js.
   const reasonChart = useMemo(() => ({ labels: reasonData.map((item) => item.label), datasets: [{ label: "Ocorrências", data: reasonData.map((item) => item.total), backgroundColor: chartTheme.palette[0], hoverBackgroundColor: chartTheme.palette[1], borderRadius: 7, barThickness: 22 }] }), [reasonData, chartTheme]);
+  // Mostra a composição das ausências por classificação.
   const classificationChart = useMemo(() => ({ labels: ["Justificadas", "Injustificadas", "Em análise"], datasets: [{ data: [indicators.justificadas || 0, indicators.injustificadas || 0, indicators.em_analise || 0], backgroundColor: [chartTheme.success, chartTheme.danger, chartTheme.warning], hoverOffset: 4, borderWidth: 0, cutout: "72%" }] }), [indicators, chartTheme]);
   const reasonOptions = useMemo(() => ({ indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: chartTheme.grid }, ticks: { precision: 0, color: chartTheme.text }, border: { display: false } }, y: { grid: { display: false }, ticks: { color: chartTheme.text, font: { weight: "600" } }, border: { display: false } } } }), [chartTheme]);
 

@@ -34,6 +34,7 @@ function formatPeriod(batch) {
   return `${format(batch.periodo_inicio)} a ${format(batch.periodo_fim)}`;
 }
 
+// Remove valores repetidos para preencher filtros com opções únicas.
 function uniqueOptions(items, valueKey, labelKey = valueKey) {
   const values = new Map();
   items.forEach((item) => {
@@ -53,6 +54,7 @@ function SummaryCard({ active, icon, label, value, detail, tone, onClick }) {
   );
 }
 
+// Coordena importação, filtros e indicadores dos ajustes de ponto.
 export function Ponto48Dashboard() {
   const chartTheme = useChartTheme();
   const filterPanel = useRef(null);
@@ -78,6 +80,7 @@ export function Ponto48Dashboard() {
   const { showToast } = useToast();
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
 
+  // Carrega o lote selecionado e mantém o último estado válido em caso de erro.
   const loadDashboard = async (batchId) => {
     try {
       setLoading(true);
@@ -134,6 +137,7 @@ export function Ponto48Dashboard() {
   });
   }, [adjustmentRecords, data.colaboradores]);
 
+  // Aplica filtros de vínculo e período sem modificar os dados do lote.
   const filteredEmployees = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleUpperCase("pt-BR");
     return data.colaboradores.filter((employee) => {
@@ -155,6 +159,7 @@ export function Ponto48Dashboard() {
     });
   }, [data.colaboradores, filters, search, view]);
 
+  // Recalcula os cartões a partir dos colaboradores filtrados.
   const filteredSummary = useMemo(() => filteredEmployees.reduce((summary, employee) => ({
     employees: summary.employees + 1,
     offenders: summary.offenders + Number(employee.dias_problematicos > 0),
@@ -163,13 +168,14 @@ export function Ponto48Dashboard() {
     absence: summary.absence + employee.ausencia_minutos,
   }), { employees: 0, offenders: 0, correct: 0, overtime: 0, absence: 0 }), [filteredEmployees]);
 
-  // A missing link means the CSV name was not uniquely associated with an employee record.
-  // It is a registration/linkage warning and must not be presented as a punch inconsistency.
+  // A ausência de vínculo indica que o nome do CSV não foi associado de forma única.
+  // É um alerta cadastral, não uma inconsistência de ponto.
   const linkSummary = useMemo(() => data.colaboradores.reduce((summary, employee) => ({
     unmatched: summary.unmatched + Number(employee.match_status === "unmatched"),
     ambiguous: summary.ambiguous + Number(employee.match_status === "ambiguous"),
   }), { unmatched: 0, ambiguous: 0 }), [data.colaboradores]);
 
+  // Ordena os casos mais críticos para a tabela de acompanhamento.
   const topOffenders = useMemo(() => [...filteredEmployees]
     .filter((employee) => employee.dias_problematicos > 0)
     .sort((a, b) => b.dias_problematicos - a.dias_problematicos || b.abs_percentual - a.abs_percentual || b.horas_extras_minutos - a.horas_extras_minutos)
@@ -239,6 +245,7 @@ export function Ponto48Dashboard() {
     setDateRange(null);
   };
 
+  // Envia o arquivo de ponto e seleciona o lote criado pela importação.
   const importReports = async () => {
     if (!absenteeismFile || !overtimeFile || !adjustmentsFile || !mirrorFile) return showToast("warn", "Importação", "Selecione os quatro relatórios CSV.");
     try {
@@ -289,6 +296,7 @@ export function Ponto48Dashboard() {
     }
   };
 
+  // Solicita confirmação antes de apagar todos os dados importados.
   const confirmClearImportedData = () => {
     if (!selectedBatch) return;
     confirmDialog({

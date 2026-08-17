@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -11,13 +13,17 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { SpeedDial } from "primereact/speeddial";
 import { Tag } from "primereact/tag";
 import { Tooltip } from "primereact/tooltip";
+// Utils 
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+import { can } from "../../utils/permissions";
+// Contexts
 import { useToast } from "../../contexts/ToastContext";
 import { useLoading } from "../../contexts/LoadingContext";
-import { can } from "../../utils/permissions";
+// Components
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { PageHeader } from "../../components/PageHeader";
+// Estilos
 import "./pcd.css";
 
 const TIPOS_PCD = ["Motora", "Visual", "Auditiva", "Intelectual", "Outras", "Reabilitado"];
@@ -40,6 +46,7 @@ const EMPTY_FILTERS = {
   situacoes: [],
 };
 
+// Gera opções únicas para os filtros com base nos dados carregados.
 function uniqueOptions(items, valueKey, labelKey = valueKey) {
   const options = new Map();
 
@@ -54,6 +61,7 @@ function uniqueOptions(items, valueKey, labelKey = valueKey) {
   return [...options.values()].sort((a, b) => a.label.localeCompare(b.label, "pt-BR", { numeric: true }));
 }
 
+// Agrupa colaboradores por centro de custo para os indicadores do painel.
 function groupByCenter(colaboradores) {
   const centers = new Map();
 
@@ -76,6 +84,7 @@ function matches(colaborador, search) {
   );
 }
 
+// Consulta e mantém os registros de pessoas com deficiência.
 export function Pcd() {
   const [colaboradores, setColaboradores] = useState([]);
   const [filiaisPorDepartamento, setFiliaisPorDepartamento] = useState({});
@@ -133,6 +142,7 @@ export function Pcd() {
     ),
   }), [colaboradores, filiaisPorDepartamento]);
 
+  // Combina filtros e busca textual sem modificar a lista original.
   const filteredColaboradores = useMemo(() => colaboradores.filter((colaborador) => {
     const tipos = (colaborador.type_pcd || "Não informado").split(",").map((tipo) => tipo.trim()).filter(Boolean);
     const filiais = filiaisPorDepartamento[String(colaborador.departamento)] || [];
@@ -165,6 +175,7 @@ export function Pcd() {
     setFilters((current) => ({ ...current, [name]: value || [] }));
   };
 
+  // Consolida quantidades por tipo de PCD para os cartões de resumo.
   const summaryByType = useMemo(() => {
     const counts = {};
     for (const colaborador of filteredColaboradores) {

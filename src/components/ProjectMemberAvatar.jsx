@@ -1,5 +1,7 @@
+// Componentes
 import { UserAvatar } from "./UserAvatar";
 
+// Prioriza a foto do membro e aplica uma cor de fallback no avatar.
 export default function ProjectMemberAvatar({ member, style, ...props }) {
   const photo = member?.foto_perfil || null;
 

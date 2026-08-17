@@ -1,5 +1,6 @@
-// utils/request.js
+// Dependências externas
 import axios from "axios";
+// Sessão e comunicação em tempo real
 import { socketio } from "./socketio";
 import { getAccessToken } from "./authSession";
 
@@ -21,7 +22,7 @@ connect.interceptors.request.use((config) => {
     config.headers["X-TMHub-Socket-Id"] = socketio.id;
   }
 
-  // Public forms must not inherit the authenticated layout's branch context.
+  // Formulários públicos não devem herdar o contexto de filial autenticado.
   if (token) {
     const selectedFilialIds = localStorage.getItem("selected_filial_ids");
     if (selectedFilialIds !== null) {

@@ -1,7 +1,10 @@
+// React
 import { useContext, useMemo } from "react";
+// Tema
 import { getThemeColor } from "./theme";
 import { ThemeContext } from "./theme-context";
 
+// Garante que o hook seja usado dentro do provedor de tema.
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) throw new Error("useTheme deve ser usado dentro de ThemeProvider.");

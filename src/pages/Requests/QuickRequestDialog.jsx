@@ -1,12 +1,17 @@
+// React
 import { useEffect, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
+// Componentes
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+// Utilitários
 import connect from "../../utils/request";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -62,13 +67,13 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
       .catch(() => showToast("error", "Lançamento rápido", "Não foi possível carregar as opções."));
   }, [visible, options.supervisors.length, showToast]);
 
-  // Mirror the full-page request payload so both entry points follow the same API contract.
+// Replica o payload da tela completa para manter o mesmo contrato da API.
   const save = async (event) => {
     event.preventDefault();
     if (!form.supervisor || !form.absent || !form.center || !form.reason || (!form.noCoverage && !form.reservation)) {
       return showToast("warn", "Lançamento rápido", "Preencha os campos obrigatórios.");
     }
-    // Preserve the current clock time while allowing any absence date in quick creation.
+// Preserva o horário atual ao permitir qualquer data na criação rápida.
     const date = new Date(form.date);
     const now = new Date();
     date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());

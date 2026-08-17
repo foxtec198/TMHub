@@ -1,7 +1,9 @@
-// components/KanbanBoard.jsx
+//React
 import React, { useState } from 'react';
+//PrimeReact
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
+//Componentes
 import KanbanColumn from '../pages/Projects/KanbanColumn';
 
 export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
@@ -26,6 +28,7 @@ export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
     setDraggingCardId(null);
   }
 
+  // Marca a coluna em movimento e evita disputar eventos com os cards.
   function handleColumnDragStart(e, columnId) {
     e.stopPropagation();
     setDraggingColumnId(columnId);
@@ -43,6 +46,7 @@ export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
     setColumnDropTarget({ id: columnId, position });
   }
 
+  // Reordena as colunas apenas quando o destino é diferente da origem.
   function handleColumnDrop(e, columnId) {
     if (!draggingColumnId || draggingColumnId === columnId) return;
     e.preventDefault();
@@ -69,13 +73,14 @@ export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
     setColumnDropTarget(null);
   }
 
-  // Move o card arrastado para a coluna/posição alvo
+// Move o card arrastado para a coluna e posição de destino.
+  // Clona as colunas antes de mover o card para preservar a imutabilidade do estado.
   function moverCard(colunaDestinoId, index) {
     if (!draggingCardId) return;
 
     const columns = projeto.columns.map((col) => ({ ...col, cardIds: [...col.cardIds] }));
 
-    // remove o card de onde estava
+// Remove o card da posição anterior antes de atualizar o quadro.
     let colunaOrigem = null;
     for (const col of columns) {
       const pos = col.cardIds.indexOf(draggingCardId);
@@ -105,11 +110,13 @@ export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
     moverCard(colunaId, coluna ? coluna.cardIds.length : 0);
   }
 
+  // Atualiza somente o título da coluna informada.
   function renomearColuna(colunaId, novoTitulo) {
     const columns = projeto.columns.map((c) => (c.id === colunaId ? { ...c, titulo: novoTitulo } : c));
     onUpdateProjeto({ ...projeto, columns });
   }
 
+  // Remove a coluna e seus vínculos visuais do quadro.
   function excluirColuna(colunaId) {
     const columns = projeto.columns.filter((c) => c.id !== colunaId);
     const cards = { ...projeto.cards };

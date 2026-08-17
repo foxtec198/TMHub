@@ -14,6 +14,7 @@ import { SpeedDial } from "primereact/speeddial";
 const EMPTY_FORM = { nome: "", ativa: true, usuario_ids: [], centro_custo_ids: [], departamentos: [] };
 
 export function BranchSettings() {
+  // Gerencia filiais e os departamentos vinculados a cada centro de custo.
   const [branches, setBranches] = useState([]);
   const [options, setOptions] = useState({ usuarios: [], centros_custo: [] });
   const [form, setForm] = useState(EMPTY_FORM);
@@ -25,6 +26,7 @@ export function BranchSettings() {
   const setLoading = useLoading();
   const { showToast } = useToast();
 
+  // Carrega filiais, centros e departamentos antes de abrir o formulário.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus("loading");
@@ -48,15 +50,18 @@ export function BranchSettings() {
       });
   }, [refresh, showToast]);
 
+  // Evita departamentos duplicados nas opções apresentadas ao usuário.
   const departmentOptions = useMemo(() => [...new Set(options.centros_custo.map((center) => center.departamento).filter((value) => value != null))]
     .sort((a, b) => Number(a) - Number(b)).map((value) => ({ label: `DPTO. ${value}`, value })), [options.centros_custo]);
   const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setDialog(true); };
+  // Copia os dados da filial para edição sem alterar a lista original.
   const openEdit = (branch) => {
     setEditingId(branch.id);
     setForm({ nome: branch.nome || "", ativa: branch.ativa !== false, usuario_ids: branch.usuario_ids || [], centro_custo_ids: branch.centro_custo_ids || [], departamentos: branch.departamentos || [] });
     setDialog(true);
   };
 
+  // Persiste a filial e recarrega os dados após criar ou editar.
   const save = async (event) => {
     event.preventDefault();
     setLoading(true);

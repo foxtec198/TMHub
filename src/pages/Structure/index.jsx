@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -8,14 +10,19 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
 import { RoutineDialog } from "../../components/TMOps/RoutineDialog";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import connect from "../../utils/request";
 import { can } from "../../utils/permissions";
+// Estilos
 import "./index.css";
 
+// Garante valores previsíveis ao criar ou limpar o formulário de estrutura.
 const EMPTY_FORM = {
     tipo: "",
     nome: "",
@@ -32,6 +39,7 @@ const ASSET_CATEGORY_OPTIONS = [
     { label: "Veículo", value: "VEÍCULO" },
 ];
 
+// Exibe e mantém contratos, locais, ativos e rotinas da estrutura organizacional.
 export function Structure() {
     const [departments, setDepartments] = useState([]);
     const [supervisors, setSupervisors] = useState([]);
@@ -55,6 +63,7 @@ export function Structure() {
     const canEdit = can("estrutura", "edit");
     const canCreateRoutine = can("tm_ops", "create");
 
+  // Carrega a estrutura completa para alimentar filtros e painéis hierárquicos.
     useEffect(() => {
         let active = true;
         setLoading(true);
@@ -76,6 +85,7 @@ export function Structure() {
         return () => { active = false; };
     }, [refresh, setLoading, showToast]);
 
+  // Soma contratos, locais e ativos para os indicadores do cabeçalho.
     const totals = useMemo(() => departments.reduce((summary, department) => {
         summary.contracts += department.contratos.length;
         department.contratos.forEach((contract) => {
@@ -85,6 +95,7 @@ export function Structure() {
         return summary;
     }, { contracts: 0, locations: 0, assets: 0 }), [departments]);
 
+  // Deriva opções únicas de filtro a partir da estrutura já carregada.
     const filterOptions = useMemo(() => {
         const contracts = departments.flatMap((department) => department.contratos);
         const unique = (values) => [...new Set(values.filter(Boolean))]
@@ -99,6 +110,7 @@ export function Structure() {
         };
     }, [departments]);
 
+  // Mantém somente os ramos que correspondem aos filtros ativos.
     const filteredDepartments = useMemo(() => {
         const query = filters.search.trim().toLocaleLowerCase("pt-BR");
         return departments.map((department) => ({
@@ -145,6 +157,7 @@ export function Structure() {
         setForm({ ...EMPTY_FORM, tipo: "local", parent_id: parent.id });
     };
 
+  // Persiste a nova posição do local dentro da mesma hierarquia.
     const moveLocation = async (locationId, parentId) => {
         if (!locationId || locationId === parentId) return;
         setLoading(true);
@@ -166,6 +179,7 @@ export function Structure() {
         setSelectedSupervisorId(contract.supervisor_id || null);
     };
 
+  // Atualiza o responsável do contrato selecionado pelo diálogo.
     const updateSupervisor = async () => {
         if (!supervisorDialog || !selectedSupervisorId) {
             showToast("warn", "Estrutura", "Selecione um supervisor.");
@@ -199,6 +213,7 @@ export function Structure() {
         }
     };
 
+  // Cria ou edita o item conforme o tipo selecionado no formulário.
     const submit = async () => {
         if (!form.tipo) {
             showToast("warn", "Estrutura", "Escolha se deseja cadastrar um local ou um ativo.");
@@ -240,6 +255,7 @@ export function Structure() {
         </article>
     );
 
+  // Solicita confirmação antes de remover contratos, locais ou ativos.
     const removeItem = (event, type, item) => {
         event.stopPropagation();
         confirmDialog({

@@ -1,11 +1,15 @@
+// Utilitários
 import connect from "../../../utils/request";
 
+// Encapsula as operações de persistência dos cards e comentários.
 export async function updateCard(id, body) {
+    // Atualiza os dados de um card existente no projeto.
     const { data } = await connect.patch(`/projetos/cards/${id}`, body);
     return data;
 }
 
 export async function createCard(projectId, body) {
+    // Cria um card já vinculado ao projeto informado.
     const { data } = await connect.post(
         `/projetos/${projectId}/cards`,
         body
@@ -15,11 +19,13 @@ export async function createCard(projectId, body) {
 }
 
 export async function deleteCard(id) {
+    // Remove o card e deixa a API reconciliar seus vínculos.
     const { data } = await connect.delete(`/projetos/cards/${id}`);
     return data;
 }
 
 export async function createCardComment(cardId, conteudo) {
+    // Adiciona uma mensagem ao histórico do card.
     const { data } = await connect.post(`/projetos/cards/${cardId}/comentarios`, { conteudo });
     return data;
 }

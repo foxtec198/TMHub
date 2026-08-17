@@ -1,27 +1,36 @@
-// Utils
+// Estrutura
 import { MainLayout } from "./layouts/MainLayout";
+// Roteamento
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+// React DOM
 import { createRoot } from "react-dom/client";
+// React
 import { useEffect } from "react";
+// PrimeReact
 import { addLocale } from "primereact/api";
+// Utilitários
 import connect from "./utils/request";
 
-// Providers
+// PrimeReact
 import { PrimeReactProvider } from "primereact/api";
+// Contextos
 import { LoadingProvider } from "./contexts/LoadingContext";
 import { ToastProvider } from "./contexts/ToastContext";
+// Tema
 import { ThemeProvider } from "./theme/ThemeProvider";
+// Componentes
 import { PermissionGate } from "./components/PermissionGate";
 import { AuthRequirementsGate } from "./components/AuthRequirementsGate";
+// Utilitários
 import { clearAccessToken, getAccessToken } from "./utils/authSession";
 
-// Styles
+// Estilos globais
 import "primeicons/primeicons.css";
 import "primereact/resources/themes/saga-green/theme.css";
 import "primeflex/primeflex.css";
 import "./index.css";
 
-// Routes
+// Páginas
 import { RequestReport } from "./pages/Dashboards/requests";
 import { DepartmentEmployeesDashboard } from "./pages/Dashboards/DepartmentEmployees";
 import { Ponto48Dashboard } from "./pages/Dashboards/Ponto48";
@@ -59,7 +68,7 @@ import { TicketDetail, TicketsDashboard } from "./pages/Tickets";
 import { TicketManagement } from "./pages/Tickets/TicketManagement";
 import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasures.jsx";
 
-// Theme tokens and PrimeReact overrides must be the final stylesheet layer.
+// Mantém tokens e sobrescritas do PrimeReact como a última camada de estilos.
 import "./theme/theme.css";
 
 addLocale("pt-BR", {
@@ -119,7 +128,7 @@ export function AppRoutes() {
   };
 
   useEffect(() => {
-    // HMR and rerenders must never accumulate response interceptors.
+    // Evita acumular interceptadores nas renderizações e no HMR.
     connect.interceptors.response.clear();
     const interceptor = connect.interceptors.response.use(
       (response) => response,

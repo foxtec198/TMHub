@@ -1,14 +1,20 @@
+// React
 import { useEffect, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { InputSwitch } from "primereact/inputswitch";
 import { Tag } from "primereact/tag";
+// Componentes
 import { Table } from "../../components/tables/Table";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Utilitários
 import connect from "../../utils/request";
 
+// Carrega e atualiza as capacidades vinculadas a centros e departamentos.
 export function CapacityDepartmentSettings() {
   const [data, setData] = useState({ centros_custo: [], departamentos: [] });
   const [editingCenter, setEditingCenter] = useState(null);

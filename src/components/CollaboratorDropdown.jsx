@@ -6,6 +6,7 @@ import "./collaborator-dropdown.css";
 const DEFAULT_LIMIT = 50;
 const DEFAULT_DEBOUNCE = 350;
 
+// Compõe a identificação exibida junto ao nome do colaborador.
 function collaboratorMeta(collaborator) {
     if (!collaborator) return "";
     const centerId = collaborator.centro_id ? String(collaborator.centro_id) : "";
@@ -57,6 +58,7 @@ export function CollaboratorDropdown({
     const requestIdRef = useRef(0); // Identifica respostas antigas de buscas que terminaram fora de ordem.
     const serializedParams = useMemo(() => JSON.stringify(queryParams), [queryParams]);
 
+  // Reinicia a busca quando os parâmetros externos da consulta forem alterados.
     useEffect(() => {
         if (selectedOption && selectedOption.id) {
             selectedOptionRef.current = {
@@ -68,6 +70,7 @@ export function CollaboratorDropdown({
         }
     }, [selectedOption, value]);
 
+  // Aplica debounce para não consultar a API a cada tecla digitada.
     useEffect(() => {
         const requestId = ++requestIdRef.current;
         const normalizedFilter = filter.trim();
@@ -110,6 +113,7 @@ export function CollaboratorDropdown({
     }, [debounce, filter, limit, minSearch, serializedParams]);
 
     function handleChange(event) {
+  // Entrega tanto o ID quanto o objeto completo ao formulário consumidor.
         // O primeiro argumento mantém compatibilidade com formulários que armazenam somente o ID.
         selectedOptionRef.current = event.value == null
             ? null
@@ -118,6 +122,7 @@ export function CollaboratorDropdown({
     }
 
     function handleFilter(event) {
+  // Mantém o termo local enquanto a busca remota aguarda o debounce.
         const nextFilter = event.filter || "";
         setFilter(nextFilter);
         if (nextFilter.trim().length < minSearch) {

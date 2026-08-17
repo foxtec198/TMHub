@@ -1,5 +1,6 @@
+//React
 import { useEffect, useMemo, useRef, useState } from "react";
-
+//PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
@@ -7,12 +8,15 @@ import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Skeleton } from "primereact/skeleton";
 import { Tag } from "primereact/tag";
-
+//Components
 import { PageHeader } from "../../components/PageHeader";
+//Contexts
 import { useToast } from "../../contexts/ToastContext";
+//Tema
 import { useChartTheme } from "../../theme/useTheme";
+//Utils
 import connect from "../../utils/request";
-
+//Estilos
 import "./DisciplinaryMeasures.css";
 
 
@@ -21,6 +25,7 @@ const MONTHS = [
   "jul", "ago", "set", "out", "nov", "dez",
 ];
 
+// Inicia o painel com o período mensal usado no acompanhamento executivo.
 const initialPeriod = () => {
   const today = new Date();
   return [new Date(today.getFullYear(), 0, 1), today];
@@ -131,9 +136,11 @@ function ErrorState({ message, onRetry }) {
   );
 }
 
+// Consulta os indicadores e prepara os gráficos de medidas disciplinares.
 export function DisciplinaryMeasuresDashboard() {
   const chartTheme = useChartTheme();
   const chartThemeKey = `${chartTheme.theme}-${chartTheme.mode}`;
+  // Lê a paleta do tema ativo para manter os gráficos coerentes com a interface.
   const chartColors = useMemo(() => (
     chartTheme.theme === "pride"
       ? [chartTheme.palette[1], chartTheme.palette[4], chartTheme.palette[5]]
@@ -161,6 +168,7 @@ export function DisciplinaryMeasuresDashboard() {
   const [refresh, setRefresh] = useState(0);
   const periodComplete = Boolean(filters.period?.[0] && filters.period?.[1]);
 
+  // Reconsulta os indicadores quando o período ou os filtros forem alterados.
   useEffect(() => {
     if (!periodComplete) return undefined;
     const controller = new AbortController();
@@ -226,6 +234,7 @@ export function DisciplinaryMeasuresDashboard() {
     setFilters((current) => ({ ...current, [key]: value || [] }));
   };
 
+  // Converte a série mensal no formato aceito pelo Chart.js.
   const monthlyChart = useMemo(() => ({
     labels: monthly.map((item) => monthLabel(item.mes)),
     datasets: [
@@ -262,6 +271,7 @@ export function DisciplinaryMeasuresDashboard() {
     ],
   }), [monthly, chartColors]);
 
+  // Agrupa os motivos mais frequentes para comparação horizontal.
   const reasonChart = useMemo(() => ({
     labels: reasons.map((item) => item.label),
     datasets: [{
@@ -277,6 +287,7 @@ export function DisciplinaryMeasuresDashboard() {
     }],
   }), [reasons, chartColors, chartTheme]);
 
+  // Compara medidas disciplinares e ausências no mesmo intervalo.
   const absenceComparisonChart = useMemo(() => ({
     labels: absenceComparison.map((item) => item.label),
     datasets: [
@@ -450,6 +461,7 @@ export function DisciplinaryMeasuresDashboard() {
     : 0;
   const mainReason = reasons[0];
   const leadingDepartment = departments[0];
+  // Destaca o mês com maior volume para a leitura rápida do resumo.
   const busiestMonth = useMemo(() => [...monthly]
     .sort((first, second) => (
       Number(second.total || 0) - Number(first.total || 0)

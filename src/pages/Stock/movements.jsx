@@ -1,6 +1,8 @@
+// Estilos
 import './movements.css';
-
-import { Table } from '../../components/tables/Table';
+// React
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+// PrimeReact
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
@@ -12,16 +14,19 @@ import { SelectButton } from 'primereact/selectbutton';
 import { MultiSelect } from 'primereact/multiselect';
 import { SpeedDial } from 'primereact/speeddial';
 import { Tooltip } from 'primereact/tooltip';
-
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+// Utilitários
+import { can } from '../../utils/permissions';
 import connect from '../../utils/request';
+// Contextos
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+// Componentes
+import { Table } from '../../components/tables/Table';
 import { BarcodeScanner } from './BarcodeScanner';
 import { PageHeader } from '../../components/PageHeader';
 import { isProductBarcode, productIdFromBarcode } from './barcode';
-import { can } from '../../utils/permissions';
+
 
 const MOVEMENTS_ENDPOINT = '/estoque/movimentos';
 const ASSET_MOVEMENTS_ENDPOINT = '/estoque/movimentos/ativos';
@@ -83,6 +88,7 @@ export function Movements() {
     const isAdmin = role === 'ADMIN';
     const canCreate = can('estoque_movimentos', 'create');
     const canEdit = can('estoque_movimentos', 'edit');
+    // Deriva o produto, o tipo e o ativo selecionados para validar os formulários.
     const selectedProduct = products.find((product) => product.id === form.item_id);
     const isEpi = categories.find((category) => category.id === selectedProduct?.categoria_id)
         ?.nome?.trim()?.toUpperCase() === 'EPI';
@@ -91,6 +97,7 @@ export function Movements() {
         (location) => location.centro_custo_id === assetMovementForm.centro_custo_destino_id,
     );
 
+    // Remove a movimentação e atualiza a lista após confirmação do usuário.
     const handleDeleteMovement = async (movement) => {
         setLoading(true);
         try {
@@ -171,6 +178,7 @@ export function Movements() {
 
     const productName = (id) => products.find((p) => p.id === id)?.nome ?? `#${id}`;
 
+    // Preserva opções já escolhidas ao complementar a busca remota de colaboradores.
     const mergeEmployeeOptions = useCallback((items) => {
         setEmployeeOptions((current) => {
             const merged = new Map(current.map((item) => [item.id, item]));
@@ -203,6 +211,7 @@ export function Movements() {
 
     useEffect(() => () => window.clearTimeout(employeeSearchTimer.current), []);
 
+    // Divide a quantidade total entre os destinatários para iniciar a distribuição.
     const distributeRecipients = (ids, total) => {
         if (!ids.length) return [];
         const parsedTotal = Number(total || 0);
@@ -246,6 +255,7 @@ export function Movements() {
     const recipientOption = (employeeId) => employeeOptions.find((item) => item.id === employeeId);
     const recipientTotal = form.destinatarios.reduce((total, item) => total + Number(item.quantidade || 0), 0);
 
+    // Converte a movimentação persistida no estado editável do formulário.
     function openEdit(movement) {
         const options = (movement.destinatarios || []).map((recipient) => ({
             id: recipient.colaborador_id,
@@ -268,6 +278,7 @@ export function Movements() {
         setDialogVisible(true);
     }
 
+    // Memoriza as colunas para não recriar os renderizadores a cada interação.
     const table_itens = useMemo(() => ([
         {
             field: 'data_hora',
@@ -376,11 +387,13 @@ export function Movements() {
         setAssetMovementDialogVisible(true);
     };
 
+    // Abre o leitor rápido sem perder a movimentação que está sendo preenchida.
     const openQuickScanner = () => {
         setForm({ ...emptyForm, tipo: null });
         setScannerVisible(true);
     };
 
+    // Usa o produto lido como seleção atual e fecha o leitor.
     const handleScannedProduct = useCallback((product) => {
         setForm((current) => ({
             ...current,
@@ -441,6 +454,7 @@ export function Movements() {
         };
     }, [handleBarcodeValue, scannerVisible]);
 
+    // Valida a distribuição dos itens antes de enviar a movimentação à API.
     const handleSave = async () => {
         if (!form.item_id || !form.tipo || !form.quantidade) {
             showToast('warn', 'Atenção!', 'Selecione o produto, o tipo e a quantidade.');
@@ -481,6 +495,7 @@ export function Movements() {
         }
     };
 
+    // Registra a movimentação de ativo em fluxo separado do estoque de produtos.
     const handleAssetMovementSave = async () => {
         if (!assetMovementForm.ativo_id || !assetMovementForm.centro_custo_destino_id) {
             showToast('warn', 'Atenção!', 'Selecione o ativo e o contrato de destino.');

@@ -25,6 +25,6 @@ export const ToastProvider = ({ children }) => {
   );
 };
 
-// Context hook intentionally shares the provider module to keep a single public toast API.
+// O hook compartilha o módulo do provedor para manter uma única API pública de notificações.
 // eslint-disable-next-line react-refresh/only-export-components
 export const useToast = () => useContext(ToastContext);

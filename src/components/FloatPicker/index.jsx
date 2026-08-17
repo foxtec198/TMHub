@@ -1,8 +1,12 @@
+// React
 import { useMemo, useState } from "react";
+// PrimeReact
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
+// Estilos
 import './main.css'
 
+// Filtra colaboradores ainda disponíveis para a seleção.
 export function FloatPicker({
     colaboradores = [],
     selecionados = [],

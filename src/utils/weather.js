@@ -52,6 +52,7 @@ export const WEATHER_CODES = {
 };
 
 export function getWeatherTheme(code, isDay = true) {
+  // Mapeia códigos meteorológicos no tema visual usado pelo widget.
   const time = isDay ? 'day' : 'night';
 
   if ([95, 96, 99].includes(code)) {
@@ -118,6 +119,7 @@ export function getWeatherTheme(code, isDay = true) {
 }
 
 export function getBrowserTimezone() {
+  // Usa o fuso do navegador para alinhar consultas e horários exibidos.
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 }
 
@@ -131,6 +133,7 @@ export function getWeatherCondition(code) {
 }
 
 export function getAqiStatus(aqi) {
+  // Traduz o índice de qualidade do ar para rótulo e severidade da interface.
   if (!Number.isFinite(aqi)) {
     return {
       label: 'Indisponível',
@@ -180,6 +183,7 @@ export function getAqiStatus(aqi) {
 }
 
 export function getCurrentCoordinates(options = {}) {
+  // Encapsula a geolocalização com limites adequados para consultas meteorológicas.
   const {
     enableHighAccuracy = false,
     timeout = 10000,
@@ -230,6 +234,7 @@ export function getCurrentCoordinates(options = {}) {
 }
 
 function buildUrl(baseUrl, params) {
+  // Ignora parâmetros vazios antes de montar a URL da API externa.
   const url = new URL(baseUrl);
 
   Object.entries(params).forEach(([key, value]) => {
@@ -257,6 +262,7 @@ function getCacheKey(latitude, longitude) {
 }
 
 function readCache(key, ttl) {
+  // Reutiliza uma resposta recente para reduzir chamadas e manter o widget ágil.
   try {
     const raw = localStorage.getItem(key);
 
@@ -278,6 +284,7 @@ function readCache(key, ttl) {
 }
 
 function writeCache(key, data) {
+  // Continua funcionando mesmo quando o armazenamento local está indisponível.
   try {
     localStorage.setItem(
       key,

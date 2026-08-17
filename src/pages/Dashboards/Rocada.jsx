@@ -1,4 +1,6 @@
+// React
 import { useEffect, useMemo, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
@@ -6,14 +8,20 @@ import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+// Utilitários
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+// Contextos
 import { useToast } from "../../contexts/ToastContext";
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
+// Tema
 import { useChartTheme } from "../../theme/useTheme";
+// Estilos
 import "./rocada.css";
 import "./projects.css";
 
+// Formata competências para os filtros e indicadores mensais.
 const monthName = (value) => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" })
   .format(new Date(`${value}T12:00:00`));
 
@@ -60,6 +68,7 @@ const rocadaPointGuidePlugin = {
   },
 };
 
+// Converte os dias operacionais do mês em uma série visual de roçada.
 function MonthChart({ month }) {
   const chartTheme = useChartTheme();
   const days = (month.dias || []).filter((day) => day.operacional);
@@ -122,6 +131,7 @@ function MonthChart({ month }) {
   }} /></div>;
 }
 
+// Exibe o acompanhamento mensal de roçada e seus detalhes por competência.
 export function RocadaDashboard({ endpoint = "/glosas/rocada" }) {
   const [data, setData] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
@@ -130,6 +140,7 @@ export function RocadaDashboard({ endpoint = "/glosas/rocada" }) {
   const [refresh, setRefresh] = useState(0);
   const { showToast } = useToast();
 
+  // Carrega os indicadores conforme o ano selecionado.
   useEffect(() => {
     connect.get(endpoint)
       .then(({ data: response }) => {
@@ -146,6 +157,7 @@ export function RocadaDashboard({ endpoint = "/glosas/rocada" }) {
     return () => socketio.off("disallowance_update", reload);
   }, []);
 
+  // Extrai anos únicos para o seletor sem alterar os dados recebidos.
   const years = useMemo(() => [...new Set((data?.meses || []).map((item) => item.competencia.slice(0, 4)))]
     .sort((left, right) => Number(right) - Number(left))
     .map((year) => ({ label: year, value: year })), [data]);
@@ -153,6 +165,7 @@ export function RocadaDashboard({ endpoint = "/glosas/rocada" }) {
     .filter((item) => item.competencia.startsWith(selectedYear || ""))
     .sort((left, right) => left.competencia.localeCompare(right.competencia)), [data, selectedYear]);
 
+  // Busca o detalhamento somente quando o usuário abre uma competência.
   const openDetail = async (competencia) => {
     setLoadingDetail(true);
     try {

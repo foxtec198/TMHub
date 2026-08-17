@@ -1,3 +1,4 @@
+// Permite variar a tag sem perder o estilo e o tom do painel.
 export function DashboardPanel({
     as: Component = "article",
     children,

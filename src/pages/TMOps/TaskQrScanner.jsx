@@ -1,9 +1,12 @@
+// React
 import { useEffect, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 
 function taskIdFromQr(value) {
+  // Aceita tanto o ID isolado quanto os formatos textuais usados nos QR Codes.
   const match = String(value || "").match(
     /(?:task|tarefa)?\s*[:#/-]?\s*(\d+)/i,
   );
@@ -18,6 +21,7 @@ export function TaskQrScanner({ visible, onHide, onTaskId }) {
   );
 
   useEffect(() => {
+    // Inicia a câmera apenas enquanto o diálogo estiver visível e garante sua liberação.
     if (!visible || !videoRef.current) return undefined;
     let stream;
     let animationFrame;
@@ -28,6 +32,7 @@ export function TaskQrScanner({ visible, onHide, onTaskId }) {
         : null;
 
     const scan = async () => {
+      // Agenda a próxima leitura para acompanhar os quadros da câmera sem bloquear a interface.
       if (!active || !detector || !videoRef.current) return;
       try {
         const codes = await detector.detect(videoRef.current);
@@ -38,12 +43,13 @@ export function TaskQrScanner({ visible, onHide, onTaskId }) {
           return;
         }
       } catch {
-        /* waits for the next camera frame */
+        // Ignora falhas pontuais e tenta novamente no próximo quadro.
       }
       animationFrame = requestAnimationFrame(scan);
     };
 
     const start = async () => {
+      // Oferece digitação manual quando o navegador não suporta leitura nativa de QR Code.
       if (!detector) {
         setStatus(
           "Leitura automática de QR não é suportada neste navegador. Informe o código abaixo.",
@@ -72,6 +78,7 @@ export function TaskQrScanner({ visible, onHide, onTaskId }) {
   }, [visible, onTaskId]);
 
   const resolveManual = () => {
+    // Reaproveita a mesma regra de extração para a alternativa sem câmera.
     const taskId = taskIdFromQr(manualCode);
     if (taskId) onTaskId(taskId);
     else setStatus("Informe um QR válido ou o número da tarefa.");

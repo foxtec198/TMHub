@@ -1,17 +1,25 @@
+// Estilos
 import "./pcd.css";
 
+// React
 import { useEffect, useMemo, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
 import { Tag } from "primereact/tag";
 
+// Utilitários
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
+// Tema
 import { useChartTheme } from "../../theme/useTheme";
 
+// Padroniza a apresentação dos principais indicadores do dashboard.
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
     return (
         <article className={`pcd-dashboard-summary-card tm-dashboard-card is-${tone}`}>
@@ -36,6 +44,7 @@ function EmptyChart({ text }) {
     );
 }
 
+// Exibe a distribuição de colaboradores PCD por status, tipo e filial.
 export function PcdDashboard() {
     const chartTheme = useChartTheme();
     const [data, setData] = useState(null);
@@ -43,6 +52,7 @@ export function PcdDashboard() {
     const setGlobalLoading = useLoading();
     const { showToast } = useToast();
 
+  // Atualiza o painel quando outro usuário altera indicadores PCD.
     useEffect(() => {
         const updateDashboard = () => (
             setRefresh((value) => value + 1)
@@ -59,6 +69,7 @@ export function PcdDashboard() {
     useEffect(() => {
         let cancelled = false;
 
+  // Busca os dados do painel e mantém uma mensagem tratável em caso de falha.
         const loadDashboard = async () => {
             setGlobalLoading(true);
             try {
@@ -102,6 +113,7 @@ export function PcdDashboard() {
     const missingPcd = Math.max(targetHeadcount - totalPcd, 0);
     const targetReached = totalEmployees > 0 && missingPcd === 0;
 
+  // Prepara a distribuição por situação para o gráfico principal.
     const statusChart = useMemo(() => ({
         labels: branches.map((branch) => branch.nome),
         datasets: [
@@ -150,6 +162,7 @@ export function PcdDashboard() {
         },
     }), [chartTheme]);
 
+  // Prepara a distribuição por tipo de PCD para comparação visual.
     const typeChart = useMemo(() => ({
         labels: disabilityTypes.map((item) => item.tipo),
         datasets: [{

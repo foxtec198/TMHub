@@ -1,18 +1,13 @@
-// Controle de Faltas - FaltsControl.jsx
-// Utils
+// Utilitários
 import { useEffect, useMemo, useRef, useState } from "react";
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
-import {
-  CombinedFiltersProvider,
-  CombinedMultiSelect,
-  useCombinedFilters,
-} from "../../contexts/CombinedFiltersContext";
-
-// Widgets
+import {CombinedFiltersProvider,CombinedMultiSelect,useCombinedFilters,} from "../../contexts/CombinedFiltersContext";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
@@ -24,12 +19,10 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
-
-// Components
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
-
-// Styles
+// Estilos
 import "./styles.css";
 
 // Remanejamento é uma alteração de alocação; não deve gerar nem ser tratado
@@ -50,6 +43,7 @@ const CURRENT_MONTH = [
   new Date(loadedAt.getFullYear(), loadedAt.getMonth() + 1, 0, 23, 59, 59, 999),
 ];
 
+// Calcula o tempo restante para anexar documentos dentro do prazo.
 function remaining(deadline, now) {
   if (!deadline) return null;
   const milliseconds = new Date(deadline).getTime() - now;
@@ -98,6 +92,7 @@ const FILTER_DEFINITIONS = {
   },
 };
 
+// Consulta, filtra e regulariza ocorrências de ausência.
 function AbsenceControlPage() {
   const [records, setRecords] = useState([]);
   const [search, setSearch] = useState("");
@@ -149,6 +144,7 @@ function AbsenceControlPage() {
     return () => { window.clearInterval(timer); socketio.off("absence_control_update", reload); socketio.off("new_request", reload); };
   }, []);
 
+  // Consolida os totais usados nos indicadores de controle.
   const summary = useMemo(() => records.reduce((result, record) => {
     result.total += 1;
     if (record.status === "tratada") result.treated += 1;
@@ -157,6 +153,7 @@ function AbsenceControlPage() {
     return result;
   }, { total: 0, pending: 0, expired: 0, treated: 0 }), [records, now]);
 
+  // Aplica a busca textual após os filtros compartilhados da página.
   const filtered = useMemo(() => combinedFilteredRecords.filter((record) => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
     const recordDate = new Date(record.data_falta);
@@ -184,6 +181,7 @@ function AbsenceControlPage() {
     setSearch("");
   };
 
+  // Copia a ocorrência selecionada para edição sem alterar a lista original.
   const open = (record) => {
     setEditing(record);
     setForm({
@@ -214,6 +212,7 @@ function AbsenceControlPage() {
     } finally { setLoading(false); }
   };
 
+  // Reabre uma ocorrência concluída para correção documental.
   const reopen = async () => {
     setLoading(true);
     try {
@@ -242,6 +241,7 @@ function AbsenceControlPage() {
     });
   };
 
+  // Valida os campos obrigatórios antes de criar uma ocorrência manual.
   const saveManual = async () => {
     if (!manualForm?.colaborador_id || !manualForm.supervisor_id || !manualForm.motivo || !manualForm.data_falta) {
       return showToast("warn", "Lançamento manual", "Selecione o colaborador, supervisor, motivo e data da falta.");

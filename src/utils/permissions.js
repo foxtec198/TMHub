@@ -1,3 +1,4 @@
+// Mantém a chave de permissões e as exceções do modelo legado.
 const STORAGE_KEY = "permissions";
 const LEGACY_RESTRICTED = new Set(["controle_faltas", "controle_glosas", "dashboard_faltas"]);
 

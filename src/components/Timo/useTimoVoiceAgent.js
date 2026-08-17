@@ -1,8 +1,11 @@
+// React
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+// Utilitários
 import { socketio } from "../../utils/socketio";
 import connect from "../../utils/request";
 
+// Seleciona a preferência do usuário antes do agente marcado como padrão.
 function preferredAgent(agents, preferences) {
   return agents.find((agent) => agent.id === preferences?.agente_preferido_id)
     || agents.find((agent) => agent.preferido)
@@ -14,6 +17,7 @@ export function useTimoVoiceAgent({ onResponse } = {}) {
   const [preferences, setPreferences] = useState({ habilitado: false });
   const [loading, setLoading] = useState(true);
 
+  // Carrega agentes pareados e suas preferências em uma única requisição.
   const refresh = useCallback(async () => {
     const { data } = await connect.get("/timo/agentes");
     const nextAgents = data?.agentes || [];
@@ -23,6 +27,7 @@ export function useTimoVoiceAgent({ onResponse } = {}) {
     return { agents: nextAgents, preferences: nextPreferences };
   }, []);
 
+  // Escuta o status e as respostas do agente enquanto o hook estiver montado.
   useEffect(() => {
     let alive = true;
     refresh().catch(() => {
@@ -58,11 +63,13 @@ export function useTimoVoiceAgent({ onResponse } = {}) {
     [agents, preferences]
   );
 
+  // Solicita um código temporário para parear outro computador.
   const createPairing = useCallback(async () => {
     const { data } = await connect.post("/timo/agentes/pareamentos");
     return data;
   }, []);
 
+  // Ativa ou pausa o agente e sincroniza a preferência devolvida pela API.
   const control = useCallback(async (agentId, enabled) => {
     const { data } = await connect.patch(`/timo/agentes/${agentId}/controle`, {
       habilitado: enabled,
@@ -78,6 +85,7 @@ export function useTimoVoiceAgent({ onResponse } = {}) {
     return data;
   }, []);
 
+  // Marca o agente preferido que receberá os próximos comandos de voz.
   const select = useCallback(async (agentId) => {
     const { data } = await connect.patch(`/timo/agentes/${agentId}/selecionar`);
     setPreferences((current) => ({ ...current, agente_preferido_id: agentId }));
@@ -88,6 +96,7 @@ export function useTimoVoiceAgent({ onResponse } = {}) {
     return data;
   }, []);
 
+  // Revoga a credencial do computador e atualiza a lista local.
   const revoke = useCallback(async (agentId) => {
     await connect.delete(`/timo/agentes/${agentId}`);
     setAgents((current) => current.filter((item) => item.id !== agentId));

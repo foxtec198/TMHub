@@ -1,17 +1,25 @@
+// React
 import { useEffect, useMemo, useRef, useState } from "react";
+// PrimeReact
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 
+// Componentes
 import { PageHeader } from "../../components/PageHeader";
+// Contextos
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+// Tema
 import { useChartTheme } from "../../theme/useTheme";
+// Utilitários
 import connect from "../../utils/request";
+// Estilos
 import "./projects.css";
 
+// Usa o ano atual como período inicial dos indicadores.
 const yearPeriod = () => {
   const today = new Date();
   return [new Date(today.getFullYear(), 0, 1), new Date(today.getFullYear(), 11, 31)];
@@ -29,6 +37,7 @@ function Summary({ icon, label, value, detail, tone = "neutral" }) {
   return <article className={`project-dashboard-summary-card tm-dashboard-card is-${tone}`}><span className="project-dashboard-summary-card__icon"><i className={icon} /></span><span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span></article>;
 }
 
+// Consulta glosas e resume valores, cobertura e evolução mensal.
 export function GlosaDashboard() {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(null);
@@ -38,6 +47,7 @@ export function GlosaDashboard() {
   const setLoading = useLoading();
   const { showToast } = useToast();
 
+  // Atualiza os indicadores ao mudar período ou filtros selecionados.
   useEffect(() => {
     if (!filters.periodo?.[0] || !filters.periodo?.[1]) return undefined;
     setLoading(true);
@@ -51,6 +61,7 @@ export function GlosaDashboard() {
   const options = data?.filtros || {};
   const activeFilterCount = ["cobertura", "departamento", "contrato", "colaborador"].filter((key) => filters[key]?.length).length;
   const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
+  // Converte a evolução mensal em série de barras para o gráfico.
   const chart = useMemo(() => ({ labels: (data?.evolucao_mensal || []).map((row) => row.competencia), datasets: [{ label: "Valor", data: (data?.evolucao_mensal || []).map((row) => row.valor), backgroundColor: chartTheme.danger, borderRadius: 8 }] }), [data, chartTheme]);
 
   return <main className="project-dashboard">

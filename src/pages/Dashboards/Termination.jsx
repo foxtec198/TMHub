@@ -1,7 +1,10 @@
+// Estilos
 import './Termination.css'
 import './pcd.css';
 
+// React
 import { useEffect, useMemo, useRef, useState } from 'react';
+// PrimeReact
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Chart } from 'primereact/chart';
@@ -10,14 +13,20 @@ import { DataTable } from 'primereact/datatable';
 import { MultiSelect } from 'primereact/multiselect';
 import { OverlayPanel } from 'primereact/overlaypanel';
 
+// Utilitários
 import connect from '../../utils/request';
+// Contextos
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
+// Componentes
 import { PageHeader } from '../../components/PageHeader';
+// Tema
 import { useChartTheme } from '../../theme/useTheme';
 
+// Fornece rótulos curtos para a série mensal de desligamentos.
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
+// Converte o período escolhido no parâmetro civil esperado pela API.
 function dateParam(value) {
     return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
 }
@@ -94,6 +103,7 @@ function TerminationFilterButton({ panelRef, activeCount = 0 }) {
     );
 }
 
+// Mantém filtros temporários no painel antes de aplicá-los ao dashboard.
 function TerminationFilterPanel({
     panelRef,
     period,
@@ -159,6 +169,7 @@ function TerminationFilterPanel({
     );
 }
 
+// Consulta desligamentos e prepara indicadores, gráficos e ranking de custos.
 export function TerminationDashboard() {
     const chartTheme = useChartTheme();
     const now = new Date();
@@ -174,6 +185,7 @@ export function TerminationDashboard() {
     const { showToast } = useToast();
     const filterPanel = useRef(null);
 
+  // Atualiza o dashboard quando o período ou os filtros aplicados mudarem.
     useEffect(() => {
         if (!period?.[0] || !period?.[1]) return undefined;
         let cancelled = false;
@@ -209,6 +221,7 @@ export function TerminationDashboard() {
         (item) => Number(item.quantidade || 0) > 0 || Number(item.custo_total || 0) > 0,
     ), [data]);
 
+  // Organiza a série mensal em conjuntos de volume e custo.
     const monthlyChart = useMemo(() => ({
         labels: monthsWithData.map((item) => monthLabel(item.mes)),
         datasets: [
@@ -263,6 +276,7 @@ export function TerminationDashboard() {
     const filterOptions = data?.filtros || {};
     const activeFilterCount = Object.values(filters).filter((value) => value.length).length;
     const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
+  // Limpa todos os filtros mantendo o período padrão do ano corrente.
     const clearFilters = () => {
         setPeriod(defaultPeriod());
         setFilters(emptyFilters());
@@ -280,6 +294,7 @@ export function TerminationDashboard() {
     const moneyColumn = (field) => (row) => formatCurrency(row[field]);
     const mainReason = data?.motivos?.[0];
     const highestImpactBranch = data?.filiais?.[0];
+  // Encontra o mês de maior custo para o destaque do resumo.
     const highestCostMonth = useMemo(() => [...monthsWithData]
         .sort((first, second) => Number(second.custo_total || 0) - Number(first.custo_total || 0))[0], [monthsWithData]);
 

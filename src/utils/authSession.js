@@ -1,6 +1,6 @@
 const TOKEN_KEY = "token";
 
-/**
+/*
  * Mantém a sessão disponível após atualizar a página ou reabrir o navegador.
  * A validade continua sendo decidida pela API a partir do JWT.
  */
@@ -17,6 +17,7 @@ export function getAccessToken() {
 }
 
 export function setAccessToken(token) {
+  // Remove os dois armazenamentos quando a API não fornece um token válido.
   if (!token) {
     clearAccessToken();
     return;
@@ -27,6 +28,7 @@ export function setAccessToken(token) {
 }
 
 export function clearAccessToken() {
+  // Encerra a sessão atual tanto na aba quanto nas próximas aberturas.
   sessionStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(TOKEN_KEY);
 }

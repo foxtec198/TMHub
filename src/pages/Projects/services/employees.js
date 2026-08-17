@@ -1,5 +1,7 @@
+// Utilitários
 import connect from "../utils/request";
 
+// Envia a busca apenas com ao menos três caracteres.
 export async function getEmployees(search = "") {
     const params = {};
 
