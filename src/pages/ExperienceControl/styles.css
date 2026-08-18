@@ -73,6 +73,7 @@
 
 .experience-toolbar > label .p-dropdown,
 .experience-filters > label .p-dropdown,
+.experience-filters > label .p-multiselect,
 .experience-search,
 .experience-search .p-inputtext {
   width: 100%;
@@ -173,7 +174,24 @@
 }
 
 .experience-search > .p-input-icon-left {
+  position: relative;
+  display: block;
   width: 100%;
+}
+
+.experience-search > .p-input-icon-left > i {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: .8rem;
+  margin-top: 0;
+  color: var(--text-secondary);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.experience-search > .p-input-icon-left .p-inputtext {
+  padding-left: 2.35rem;
 }
 
 .experience-person {
@@ -375,6 +393,71 @@
   gap: .15rem;
 }
 
+/* Confirma a baixa manual com o mesmo contraste e espaçamento da tela de RH. */
+.experience-manual-completion-dialog {
+  width: min(30rem, calc(100vw - 2rem));
+}
+
+.experience-manual-completion-dialog .p-dialog-header {
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.experience-manual-completion-dialog .p-dialog-content {
+  padding: 1.25rem;
+}
+
+.experience-manual-completion-dialog .p-dialog-footer {
+  padding: .9rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.experience-manual-completion-content {
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+}
+
+.experience-manual-completion-icon {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--status-success);
+  background: color-mix(in srgb, var(--status-success) 12%, transparent);
+  border-radius: 50%;
+}
+
+.experience-manual-completion-icon i {
+  font-size: 1.05rem;
+}
+
+.experience-manual-completion-content strong {
+  display: block;
+  margin-bottom: .35rem;
+  color: var(--text-primary);
+}
+
+.experience-manual-completion-content p {
+  max-width: 22rem;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.experience-manual-completion-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
+.experience-manual-completion-actions .p-button {
+  min-width: 7.5rem;
+  justify-content: center;
+}
+
 @media (max-width: 860px) {
   .experience-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -438,6 +521,18 @@
 
   .experience-dialog-actions,
   .experience-dialog-actions .p-button {
+    width: 100%;
+  }
+
+  .experience-manual-completion-dialog .p-dialog-header,
+  .experience-manual-completion-dialog .p-dialog-content,
+  .experience-manual-completion-dialog .p-dialog-footer {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .experience-manual-completion-actions,
+  .experience-manual-completion-actions .p-button {
     width: 100%;
   }
 }
