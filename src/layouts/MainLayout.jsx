@@ -23,6 +23,7 @@ import './main.css'
 const REALTIME_CHANNELS_BY_ROUTE = {
   "/configuracoes": ["configuracoes", "colaboradores"],
   "/controle-faltas": ["controle_faltas"],
+  "/avaliacoes-experiencia": ["avaliacoes_experiencia"],
   "/controle-glosas": ["glosas"],
   "/indicadores/pcd": ["pcd", "colaboradores"],
   "/admissao/vagas": ["admissao"],
@@ -232,6 +233,12 @@ export function MainLayout() {
           icon: 'pi pi-calendar-times',
           visible: can("controle_faltas"),
           command: () => { navigateTo("/controle-faltas") }
+        },
+        {
+          label: "Experiências",
+          icon: "pi pi-file-edit",
+          visible: can("controle_experiencia_rh"),
+          command: () => { navigateTo("/avaliacoes-experiencia"); },
         },
         {
           label: 'Glosas',
