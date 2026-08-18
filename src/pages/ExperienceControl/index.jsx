@@ -8,6 +8,7 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
@@ -61,7 +62,7 @@ const STATUS_OPTIONS = Object.entries(STATUS)
   .map(([value, item]) => ({ label: item.label, value }));
 
 const ADMIN_STATUS_OPTIONS = STATUS_OPTIONS.filter(({ value }) => (
-  ["aberta", "em_preenchimento", "atrasada", "aguardando_rh"].includes(value)
+  ["aberta", "em_preenchimento", "atrasada", "aguardando_rh", "concluida"].includes(value)
 ));
 
 function dateLabel(value, withTime = false) {
@@ -114,14 +115,16 @@ function statusTag(status) {
 export function ExperienceControl() {
   // A tela interna concentra a gestão do RH e preserva as permissões existentes.
   const [supervisors, setSupervisors] = useState([]);
-  const [selectedSupervisor, setSelectedSupervisor] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedSupervisors, setSelectedSupervisors] = useState([]);
+  const [selectedDepartments, setSelectedDepartments] = useState([]);
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [rhRecords, setRhRecords] = useState([]);
   const [employeesInExperience, setEmployeesInExperience] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
   const [form, setForm] = useState(formFromEvaluation(null));
   const [exporting, setExporting] = useState(false);
+  const [manualCompletionVisible, setManualCompletionVisible] = useState(false);
   const [revision, setRevision] = useState(0);
   const filterPanel = useRef(null);
   const setLoading = useLoading();
@@ -257,8 +260,9 @@ export function ExperienceControl() {
   };
 
   const clearFilters = () => {
-    setSelectedSupervisor(null);
-    setSelectedStatus(null);
+    setSelectedSupervisors([]);
+    setSelectedDepartments([]);
+    setSelectedStatuses([]);
     setSearch("");
   };
 
@@ -279,11 +283,28 @@ export function ExperienceControl() {
     }
   };
 
+  const requestTaskStatusChange = () => {
+    if (!selectedEvaluation || !isAdmin || form.status === selectedEvaluation.status) return;
+    if (form.status === "concluida") {
+      setManualCompletionVisible(true);
+      return;
+    }
+    changeTaskStatus();
+  };
+
+  const confirmManualCompletion = () => {
+    setManualCompletionVisible(false);
+    changeTaskStatus();
+  };
+
   const filteredRhRecords = useMemo(() => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
     return rhRecords.filter((item) => {
-      const matchesSupervisor = !selectedSupervisor || item.supervisor?.id === selectedSupervisor;
-      const matchesStatus = !selectedStatus || item.status === selectedStatus;
+      const matchesSupervisor = !selectedSupervisors.length
+        || selectedSupervisors.includes(item.supervisor?.id);
+      const matchesDepartment = !selectedDepartments.length
+        || selectedDepartments.includes(String(item.colaborador?.departamento || ""));
+      const matchesStatus = !selectedStatuses.length || selectedStatuses.includes(item.status);
       const matchesSearch = !term || [
       item.colaborador?.nome,
       item.colaborador?.matricula,
@@ -291,12 +312,21 @@ export function ExperienceControl() {
       item.supervisor?.nome,
       item.status,
       ].some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
-      return matchesSupervisor && matchesStatus && matchesSearch;
+      return matchesSupervisor && matchesDepartment && matchesStatus && matchesSearch;
     });
-  }, [rhRecords, search, selectedStatus, selectedSupervisor]);
+  }, [rhRecords, search, selectedDepartments, selectedStatuses, selectedSupervisors]);
 
-  const activeFilterCount = Number(Boolean(selectedSupervisor))
-    + Number(Boolean(selectedStatus))
+  const departmentOptions = useMemo(() => (
+    [...new Set(rhRecords
+      .map((item) => String(item.colaborador?.departamento || "").trim())
+      .filter(Boolean))]
+      .sort((first, second) => first.localeCompare(second, "pt-BR"))
+      .map((department) => ({ label: department, value: department }))
+  ), [rhRecords]);
+
+  const activeFilterCount = Number(Boolean(selectedSupervisors.length))
+    + Number(Boolean(selectedDepartments.length))
+    + Number(Boolean(selectedStatuses.length))
     + Number(Boolean(search.trim()));
 
   const summary = useMemo(() => filteredRhRecords.reduce((result, item) => {
@@ -367,7 +397,13 @@ export function ExperienceControl() {
         {canCompleteRh && <Button label="Assinar e concluir" icon="pi pi-check" disabled={!rhReady || !selectedEvaluation.assinatura_rh_registrada} onClick={() => saveRh(true)} />}
       </>}
       {canChangeStatus && form.status !== selectedEvaluation.status && (
-        <Button label="Alterar estado" icon="pi pi-sync" severity="warning" outlined onClick={changeTaskStatus} />
+        <Button
+          label={form.status === "concluida" ? "Finalizar tarefa" : "Alterar estado"}
+          icon={form.status === "concluida" ? "pi pi-check" : "pi pi-sync"}
+          severity={form.status === "concluida" ? "success" : "warning"}
+          outlined
+          onClick={requestTaskStatusChange}
+        />
       )}
     </div>
   );
@@ -419,10 +455,33 @@ export function ExperienceControl() {
         <div className="experience-filter-title"><div><strong>Filtrar avaliações</strong><span>Os indicadores e a lista acompanham este recorte.</span></div><Button icon="pi pi-filter-slash" rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
         <div className="experience-filters">
           <label className="experience-search is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left"><i className="pi pi-search" /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula ou contrato" /></span></label>
-          <label><span>Supervisor</span><Dropdown value={selectedSupervisor} options={supervisors} onChange={(event) => setSelectedSupervisor(event.value)} placeholder="Todos os supervisores" filter showClear /></label>
-          <label><span>Situação</span><Dropdown value={selectedStatus} options={STATUS_OPTIONS} onChange={(event) => setSelectedStatus(event.value)} placeholder="Todas as situações" showClear /></label>
+          <label><span>Departamento</span><MultiSelect value={selectedDepartments} options={departmentOptions} onChange={(event) => setSelectedDepartments(event.value || [])} placeholder="Todos os departamentos" filter showClear /></label>
+          <label><span>Supervisor</span><MultiSelect value={selectedSupervisors} options={supervisors} onChange={(event) => setSelectedSupervisors(event.value || [])} placeholder="Todos os supervisores" filter showClear /></label>
+          <label><span>Situação</span><MultiSelect value={selectedStatuses} options={STATUS_OPTIONS} onChange={(event) => setSelectedStatuses(event.value || [])} placeholder="Todas as situações" showClear /></label>
         </div>
       </OverlayPanel>
+
+      <Dialog
+        header="Finalizar tarefa"
+        visible={manualCompletionVisible}
+        modal
+        className="experience-manual-completion-dialog"
+        onHide={() => setManualCompletionVisible(false)}
+        footer={<div className="experience-manual-completion-actions">
+          <Button label="Cancelar" outlined onClick={() => setManualCompletionVisible(false)} />
+          <Button label="Finalizar tarefa" icon="pi pi-check" severity="success" onClick={confirmManualCompletion} />
+        </div>}
+      >
+        <div className="experience-manual-completion-content">
+          <span className="experience-manual-completion-icon">
+            <i className="pi pi-check-circle" aria-hidden="true" />
+          </span>
+          <div>
+            <strong>Confirmar conclusão manual</strong>
+            <p>A tarefa será marcada como concluída e a ação ficará registrada em seu usuário. Nenhuma assinatura será criada automaticamente.</p>
+          </div>
+        </div>
+      </Dialog>
 
       <Dialog header={`Avaliação de experiência · ${selectedEvaluation?.colaborador?.nome || ""}`} visible={Boolean(selectedEvaluation)} modal className="experience-dialog" footer={evaluationFooter} onHide={() => setSelectedEvaluation(null)}>
         {selectedEvaluation && <div className="experience-form">

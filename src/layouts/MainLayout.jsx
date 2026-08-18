@@ -242,7 +242,7 @@ export function MainLayout() {
         },
         {
           label: "Experiências",
-          icon: "pi pi-file-edit",
+          icon: "pi pi-clipboard",
           visible: can("controle_experiencia_rh"),
           command: () => { navigateTo("/avaliacoes-experiencia"); },
         },

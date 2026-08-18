@@ -1,8 +1,16 @@
 /* Tela pública do supervisor, baseada no formulário de requisições. */
 .experience-public-page {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
   padding: 2rem 1rem 3rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   color: var(--text-primary);
   background: var(--app-bg);
 }
@@ -289,10 +297,6 @@
 @media (max-width: 680px) {
   .experience-public-page {
     padding: 1.1rem .7rem 2rem;
-    height: auto;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
   }
 
   .experience-public-header {
