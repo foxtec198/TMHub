@@ -58,6 +58,8 @@ import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
 import { TicketDetail, TicketsDashboard } from "./pages/Tickets";
 import { TicketManagement } from "./pages/Tickets/TicketManagement";
 import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasures.jsx";
+import { ExperienceControl } from "./pages/ExperienceControl";
+import { ExperiencePublic } from "./pages/ExperienceControl/supervisor";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -184,6 +186,7 @@ export function AppRoutes() {
         />
         <Route path="/schedular/*" element={<LegacyTMOpsRedirect />} />
         <Route path="/schedular" element={<LegacyTMOpsRedirect />} />
+        <Route path="/avaliacoes-experiencia/avaliar" element={<ExperiencePublic />} />
 
         <Route element={<MainLayout />}>
           {/* Init Page */}
@@ -214,6 +217,14 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="controle_faltas">
                 <AbsenceControl />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/avaliacoes-experiencia"
+            element={
+              <PermissionGate screen="controle_experiencia_rh">
+                <ExperienceControl />
               </PermissionGate>
             }
           />

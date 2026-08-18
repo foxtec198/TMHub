@@ -1,0 +1,15 @@
+/* Campo de assinatura */
+.experience-signature-action { display: flex; align-items: center; justify-content: space-between; gap: .85rem; padding: .85rem 0 0; }
+.experience-signature-action > div { display: grid; gap: .15rem; }
+.experience-signature-action strong { color: var(--text-primary); }
+.experience-signature-action span { color: var(--text-secondary); font-size: .8rem; }
+.experience-signature-dialog { width: min(94vw, 34rem); }
+.experience-signature-content { display: grid; gap: .8rem; }
+.experience-signature-content p { margin: 0; color: var(--text-secondary); font-size: .88rem; }
+.experience-signature-content > div { display: flex; justify-content: flex-end; gap: .55rem; }
+.experience-signature-pad { width: 100%; height: 210px; touch-action: none; border: 2px dashed var(--border-strong, var(--border)); border-radius: 14px; background: #f9fdf9; }
+
+@media (max-width: 680px) {
+  .experience-signature-action { align-items: flex-start; flex-direction: column; }
+  .experience-signature-action .p-button { width: 100%; justify-content: center; }
+}
