@@ -1,0 +1,443 @@
+/* Controle interno do RH para avaliações de período de experiência. */
+.experience-page {
+  min-height: 100%;
+  padding: 1.5rem;
+  color: var(--text-primary);
+  background: var(--app-bg);
+}
+
+.experience-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.experience-summary article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .95rem 1.1rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.experience-summary small {
+  color: var(--text-secondary);
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.experience-summary strong {
+  color: var(--primary);
+  font-size: 1.5rem;
+}
+
+.experience-summary .is-danger strong {
+  color: var(--status-danger);
+}
+
+.experience-summary .is-success strong {
+  color: var(--status-success);
+}
+
+.experience-panel {
+  padding: 1rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.experience-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.experience-toolbar > label,
+.experience-filters > label {
+  display: flex;
+  width: min(100%, 28rem);
+  flex-direction: column;
+  gap: .4rem;
+  color: var(--text-secondary);
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.experience-toolbar > label .p-dropdown,
+.experience-filters > label .p-dropdown,
+.experience-search,
+.experience-search .p-inputtext {
+  width: 100%;
+}
+
+.experience-toolbar > span {
+  color: var(--text-secondary);
+  font-size: .85rem;
+}
+
+.experience-filters {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(12rem, 1fr) minmax(11rem, .8fr) minmax(15rem, 1.35fr);
+  gap: .75rem;
+}
+
+.experience-filter-panel {
+  width: min(27rem, calc(100vw - 2rem));
+}
+
+.experience-filter-panel .p-overlaypanel-content {
+  padding: 1.15rem;
+}
+
+.experience-filter-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.experience-filter-title > div {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.experience-filter-title span,
+.experience-state-section p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: .8rem;
+}
+
+.experience-filter-title > .p-button {
+  color: var(--primary);
+}
+
+.experience-filter-panel .experience-filters {
+  grid-template-columns: 1fr;
+  gap: .85rem;
+}
+
+.experience-filter-panel .experience-filters > label {
+  width: 100%;
+}
+
+.experience-filter-panel .experience-search {
+  margin-bottom: .15rem;
+  padding-bottom: .95rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.experience-list-meta {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+  font-size: .85rem;
+}
+
+.experience-state-section {
+  padding-top: .25rem;
+}
+
+.experience-state-section p {
+  margin: -.35rem 0 .7rem;
+}
+
+.experience-state-section label {
+  display: flex;
+  max-width: 22rem;
+  flex-direction: column;
+  gap: .4rem;
+  color: var(--text-secondary);
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.experience-state-section .p-dropdown {
+  width: 100%;
+}
+
+.experience-filters > label {
+  width: auto;
+}
+
+.experience-search > .p-input-icon-left {
+  width: 100%;
+}
+
+.experience-person {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.experience-person strong {
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.experience-person small {
+  color: var(--text-secondary);
+}
+
+.experience-dialog {
+  width: min(920px, 94vw);
+}
+
+/* Nomes e contratos longos não podem competir com o botão de fechar do diálogo. */
+.experience-dialog .p-dialog-header {
+  align-items: flex-start;
+  gap: .75rem;
+}
+
+.experience-dialog .p-dialog-content {
+  padding-top: 1.15rem;
+}
+
+.experience-dialog .p-dialog-title {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: .5rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.experience-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.experience-context {
+  display: grid;
+  align-items: flex-start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: .7rem;
+  margin-bottom: .15rem;
+  padding-bottom: .9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.experience-context > div {
+  display: flex;
+  flex: 1 1 18rem;
+  min-width: 0;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.experience-context-contract {
+  width: 100%;
+}
+
+.experience-context-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .45rem .7rem;
+}
+
+.experience-context-meta .p-tag {
+  flex: 0 0 auto;
+}
+
+.experience-context strong,
+.experience-context span {
+  display: block;
+  min-width: 0;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.experience-context span {
+  color: var(--text-secondary);
+}
+
+
+.experience-dates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .65rem;
+}
+
+.experience-dates span {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  padding: .65rem .75rem;
+  color: var(--text-secondary);
+  font-size: .8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.experience-dates strong {
+  color: var(--text-primary);
+  font-size: .9rem;
+}
+
+.experience-history,
+.experience-section {
+  padding-top: .1rem;
+}
+
+.experience-history h2,
+.experience-section h2 {
+  margin: 0 0 .75rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.experience-history > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .65rem;
+}
+
+.experience-history > div span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .65rem .75rem;
+  color: var(--text-secondary);
+  font-size: .84rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.experience-history strong {
+  color: var(--primary);
+  font-size: 1.05rem;
+}
+
+.experience-history > small {
+  display: block;
+  margin-top: .6rem;
+  color: var(--text-secondary);
+}
+
+.experience-competencies,
+.experience-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.experience-competencies label,
+.experience-fields label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .4rem;
+  color: var(--text-secondary);
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.experience-competencies label:last-child,
+.experience-fields .is-wide {
+  grid-column: 1 / -1;
+}
+
+.experience-competencies .p-dropdown,
+.experience-fields .p-dropdown,
+.experience-fields .p-inputtextarea {
+  width: 100%;
+}
+
+.experience-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
+.experience-row-actions {
+  display: flex;
+  align-items: center;
+  gap: .15rem;
+}
+
+@media (max-width: 860px) {
+  .experience-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .experience-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .experience-filters .experience-search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 680px) {
+  .experience-page {
+    padding: 1rem;
+  }
+
+  .experience-summary,
+  .experience-dates,
+  .experience-history > div,
+  .experience-competencies,
+  .experience-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .experience-toolbar,
+  .experience-context {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .experience-context {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .experience-list-meta {
+    justify-content: flex-start;
+    line-height: 1.45;
+  }
+
+  .experience-toolbar > label,
+  .experience-filters > label {
+    width: 100%;
+  }
+
+  .experience-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .experience-filters .experience-search {
+    grid-column: auto;
+  }
+
+  .experience-competencies label:last-child,
+  .experience-fields .is-wide {
+    grid-column: auto;
+  }
+
+  .experience-dialog-actions,
+  .experience-dialog-actions .p-button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,413 @@
+/* Tela pública do supervisor, baseada no formulário de requisições. */
+.experience-public-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 2rem 1rem 3rem;
+  color: var(--text-primary);
+  background: var(--app-bg);
+}
+
+.experience-public-header {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: .35rem;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+.experience-public-logo {
+  width: min(10rem, 72vw);
+  max-width: 10rem;
+  margin-bottom: .45rem;
+}
+
+.experience-public-header > span {
+  color: var(--primary);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.experience-public-header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+}
+
+.experience-public-header p {
+  max-width: 36rem;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.experience-public-shell {
+  width: min(100%, 62rem);
+  margin: 0 auto;
+  padding: 1.15rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.experience-public-shell .p-stepper,
+.experience-public-shell .p-stepper-nav,
+.experience-public-shell .p-stepper-panels,
+.experience-public-shell .p-stepper-panel,
+.experience-public-shell .p-stepper-content {
+  color: var(--text-primary);
+  background: transparent;
+}
+
+/* O tema padrão do PrimeReact define este painel como branco. */
+.experience-public-shell .p-stepper-panels,
+.experience-public-shell .p-stepper-content {
+  background: transparent !important;
+}
+
+.experience-public-shell .p-stepper-panels {
+  padding: 1rem 0 0;
+}
+
+.experience-public-shell .p-stepper-action,
+.experience-public-shell .p-stepper-title {
+  color: var(--text-secondary);
+  background: transparent !important;
+}
+
+.experience-public-shell .p-stepper-header.p-highlight .p-stepper-title {
+  color: var(--primary);
+}
+
+.experience-public-shell .p-stepper-number {
+  color: var(--accent-contrast);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.experience-public-shell .p-stepper-separator {
+  background: var(--border-strong);
+}
+
+.experience-public-identification {
+  display: flex;
+  width: min(100%, 32rem);
+  flex-direction: column;
+  gap: .9rem;
+  margin: 1.25rem auto .5rem;
+}
+
+.experience-public-step {
+  align-self: center;
+  padding: .3rem .65rem;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.experience-public-identification h2 {
+  margin: .1rem 0 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.experience-public-identification p {
+  margin: 0;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.experience-public-tasks {
+  padding: .75rem 0 0;
+}
+
+.experience-public-task-cards {
+  display: none;
+}
+
+.experience-public-task-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface-2, var(--surface-1));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.experience-public-task-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.experience-public-task-card-top .p-tag {
+  flex: 0 0 auto;
+  font-size: .65rem;
+}
+
+.experience-public-task-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .8rem;
+  margin: 0;
+}
+
+.experience-public-task-details div:last-child {
+  grid-column: 1 / -1;
+}
+
+.experience-public-task-details dt {
+  margin-bottom: .2rem;
+  color: var(--text-secondary);
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.experience-public-task-details dd {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+.experience-public-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: .45rem;
+  padding: 2.25rem 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+}
+
+.experience-public-empty i {
+  color: var(--primary);
+  font-size: 1.8rem;
+}
+
+.experience-public-empty strong {
+  color: var(--text-primary);
+}
+
+.experience-public-tasks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.experience-public-tasks-header > div,
+.experience-public-person,
+.experience-public-context {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .2rem;
+}
+
+.experience-public-tasks-header strong,
+.experience-public-person strong,
+.experience-public-context strong {
+  color: var(--text-primary);
+}
+
+.experience-public-tasks-header span,
+.experience-public-person small,
+.experience-public-context span {
+  color: var(--text-secondary);
+}
+
+.experience-public-overdue {
+  color: var(--status-danger);
+  font-weight: 700;
+}
+
+.experience-public-dialog {
+  width: min(850px, 94vw);
+}
+
+.experience-public-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.experience-public-context {
+  padding-bottom: .85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.experience-public-competencies,
+.experience-public-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+.experience-public-competencies label,
+.experience-public-fields label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .4rem;
+  color: var(--text-secondary);
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.experience-public-competencies label:last-child,
+.experience-public-fields .is-wide {
+  grid-column: 1 / -1;
+}
+
+.experience-public-competencies .p-dropdown,
+.experience-public-fields .p-dropdown,
+.experience-public-fields .p-inputtextarea {
+  width: 100%;
+}
+
+.experience-public-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
+@media (max-width: 680px) {
+  .experience-public-page {
+    padding: 1.1rem .7rem 2rem;
+    height: auto;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .experience-public-header {
+    align-items: flex-start;
+    margin-bottom: 1.1rem;
+    text-align: left;
+  }
+
+  .experience-public-logo {
+    width: min(8.25rem, 58vw);
+    max-width: 8.25rem;
+    margin-bottom: .2rem;
+  }
+
+  .experience-public-header h1 {
+    font-size: 1.38rem;
+    line-height: 1.2;
+  }
+
+  .experience-public-header p {
+    font-size: .9rem;
+    line-height: 1.45;
+  }
+
+  .experience-public-shell {
+    padding: .85rem .7rem;
+    border-radius: 14px;
+  }
+
+  .experience-public-shell .p-stepper-nav {
+    margin: 0 -.1rem;
+  }
+
+  .experience-public-shell .p-stepper-header .p-stepper-title {
+    font-size: .74rem;
+  }
+
+  .experience-public-identification {
+    margin-top: 1rem;
+  }
+
+  .experience-public-identification .p-dropdown,
+  .experience-public-identification .p-button,
+  .experience-public-task-card .p-button {
+    min-height: 3rem;
+  }
+
+  .experience-public-tasks-table {
+    display: none;
+  }
+
+  .experience-public-task-cards {
+    display: grid;
+    gap: .8rem;
+  }
+
+  .experience-public-tasks-header,
+  .experience-public-dialog-actions,
+  .experience-public-dialog-actions .p-button {
+    width: 100%;
+  }
+
+  .experience-public-tasks-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .experience-public-competencies,
+  .experience-public-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .experience-public-competencies label:last-child,
+  .experience-public-fields .is-wide {
+    grid-column: auto;
+  }
+
+  .experience-public-dialog {
+    width: 100vw;
+    max-height: 100vh;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .experience-public-dialog .p-dialog-header {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .experience-public-dialog .p-dialog-title {
+    padding-right: .5rem;
+    font-size: 1rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .experience-public-dialog .p-dialog-content {
+    padding: .5rem 1rem 1rem;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .experience-public-dialog .p-dialog-footer {
+    padding: .75rem 1rem max(.9rem, env(safe-area-inset-bottom));
+  }
+
+  .experience-public-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .experience-public-dialog-actions .p-button {
+    min-height: 3rem;
+    justify-content: center;
+  }
+}
