@@ -146,6 +146,12 @@ export function MainLayout() {
               command: () => { navigateTo("/reports/pcd") }
             },
             {
+              label: 'QL',
+              icon: 'pi pi-users',
+              visible: can("dashboard_ql"),
+              command: () => { navigateTo("/reports/ql") }
+            },
+            {
               label: "Rescisões",
               icon: "pi pi-user-minus",
               visible: can("dashboard_rescisoes"),

@@ -46,6 +46,7 @@ import { AbsenceDashboard } from "./pages/Dashboards/Absence";
 import { DashboardLogistic } from "./pages/Dashboards/logistic";
 import { Pcd } from "./pages/Indicators/pcd";
 import { PcdDashboard } from "./pages/Dashboards/Pcd";
+import { QLDashboard } from "./pages/Dashboards/QL";
 import { ProjectDashboard } from "./pages/Dashboards/Projects";
 import { GlosaDashboard } from "./pages/Dashboards/Dissallownces";
 import { RocadaDashboard } from "./pages/Dashboards/Rocada";
@@ -302,6 +303,14 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="dashboard_pcd">
                 <PcdDashboard />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/reports/ql"
+            element={
+              <PermissionGate screen="dashboard_ql">
+                <QLDashboard />
               </PermissionGate>
             }
           />

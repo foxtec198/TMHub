@@ -10,8 +10,8 @@ import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 
 export function CapacityDepartmentSettings() {
-  const [data, setData] = useState({ centros_custo: [], departamentos: [] });
-  const [editingCenter, setEditingCenter] = useState(null);
+  const [data, setData] = useState({ departamentos: [] });
+  const [editingDepartment, setEditingDepartment] = useState(null);
   const [capacity, setCapacity] = useState(null);
   const [refresh, setRefresh] = useState(0);
   const { showToast } = useToast();
@@ -20,7 +20,6 @@ export function CapacityDepartmentSettings() {
   useEffect(() => {
     connect.get("/centro/configuracoes")
       .then(({ data: response }) => setData({
-        centros_custo: Array.isArray(response?.centros_custo) ? response.centros_custo : [],
         departamentos: Array.isArray(response?.departamentos) ? response.departamentos : [],
       }))
       .catch((error) => showToast(
@@ -32,9 +31,6 @@ export function CapacityDepartmentSettings() {
 
   const mergeSavedSettings = (response) => {
     setData((current) => {
-      const changedCenters = new Map(
-        (response?.centros_custo || []).map((center) => [center.id, center]),
-      );
       const changedDepartments = new Map(
         (response?.departamentos || []).map((department) => [
           department.departamento,
@@ -43,10 +39,6 @@ export function CapacityDepartmentSettings() {
       );
 
       return {
-        centros_custo: current.centros_custo.map((center) => ({
-          ...center,
-          ...(changedCenters.get(center.id) || {}),
-        })),
         departamentos: current.departamentos.map((department) => ({
           ...department,
           ...(changedDepartments.get(department.departamento) || {}),
@@ -56,20 +48,20 @@ export function CapacityDepartmentSettings() {
   };
 
   const saveCapacity = async () => {
-    if (!editingCenter) return;
+    if (!editingDepartment) return;
     setLoading(true);
     try {
       const { data: response } = await connect.patch("/centro/configuracoes", {
-        capacidades: [{
-          centro_custo_id: editingCenter.id,
+        capacidades_departamentos: [{
+          departamento: editingDepartment.departamento,
           capacidade_pessoas: capacity,
         }],
       });
       mergeSavedSettings(response);
-      setEditingCenter(null);
-      showToast("success", "Capacidade atualizada", "O limite planejado do centro de custo foi salvo.");
+      setEditingDepartment(null);
+      showToast("success", "Meta de QL atualizada", "A quantidade esperada do departamento foi salva.");
     } catch (error) {
-      showToast("error", "Capacidade", error.response?.data || "Informe uma capacidade válida.");
+      showToast("error", "Meta de QL", error.response?.data || "Informe uma capacidade válida.");
     } finally {
       setLoading(false);
     }
@@ -90,32 +82,6 @@ export function CapacityDepartmentSettings() {
     }
   };
 
-  const centerColumns = [
-    { header: "Centro de custo", field: "local", sortable: true },
-    { header: "DPTO.", field: "departamento", sortable: true, style: { width: "7rem" } },
-    {
-      header: "Capacidade planejada",
-      body: (center) => center.capacidade_pessoas == null
-        ? <span className="capacity-unset">Não definida</span>
-        : `${center.capacidade_pessoas} pessoa(s)`,
-    },
-    {
-      header: "Ações",
-      style: { width: "6rem" },
-      body: (center) => <Button
-        icon="pi pi-users"
-        rounded
-        text
-        aria-label={`Definir capacidade de ${center.local}`}
-        tooltip="Definir capacidade"
-        onClick={() => {
-          setEditingCenter(center);
-          setCapacity(center.capacidade_pessoas ?? null);
-        }}
-      />,
-    },
-  ];
-
   const departmentColumns = [
     { header: "Departamento", body: (department) => `DPTO. ${department.departamento}`, sortable: true },
     {
@@ -126,6 +92,16 @@ export function CapacityDepartmentSettings() {
       />,
     },
     {
+      header: "Meta de QL",
+      body: (department) => department.capacidade_pessoas == null
+        ? <span className="capacity-unset">Não definida</span>
+        : `${department.capacidade_pessoas} pessoa(s)`,
+    },
+    {
+      header: "Trabalhando",
+      body: (department) => `${department.colaboradores_cadastrados || 0} pessoa(s)`,
+    },
+    {
       header: "Ativar",
       style: { width: "6rem" },
       body: (department) => <InputSwitch
@@ -134,40 +110,47 @@ export function CapacityDepartmentSettings() {
         aria-label={`Alterar situação do departamento ${department.departamento}`}
       />,
     },
+    {
+      header: "Meta",
+      style: { width: "5rem" },
+      body: (department) => <Button
+        icon="pi pi-users"
+        rounded
+        text
+        aria-label={`Definir meta do departamento ${department.departamento}`}
+        tooltip="Definir meta de QL"
+        onClick={() => {
+          setEditingDepartment(department);
+          setCapacity(department.capacidade_pessoas ?? null);
+        }}
+      />,
+    },
   ];
 
   return <div className="capacity-settings-layout">
-    <article className="settings-card capacity-centers-card">
-      <div className="settings-card-title">
-        <i className="pi pi-building" />
-        <div><h2>Capacidade dos centros de custo</h2><p>Defina quantas pessoas cada contrato pode comportar.</p></div>
-      </div>
-      <Table data={data.centros_custo} columns={centerColumns} search rows={10} rowsPerPageOptions={[10, 25, 50]} />
-    </article>
-
     <article className="settings-card capacity-departments-card">
       <div className="settings-card-title">
         <i className="pi pi-sitemap" />
-        <div><h2>Situação dos departamentos</h2><p>O status ficará disponível para as próximas regras operacionais.</p></div>
+        <div><h2>Planejamento por departamento</h2><p>Defina a meta de QL e a situação de cada departamento.</p></div>
       </div>
       <Table data={data.departamentos} columns={departmentColumns} search rows={10} rowsPerPageOptions={[10, 25, 50]} />
       <Button label="Atualizar" icon="pi pi-refresh" text onClick={() => setRefresh((value) => value + 1)} />
     </article>
 
     <Dialog
-      header="Capacidade planejada"
-      visible={Boolean(editingCenter)}
+      header="Meta de QL por departamento"
+      visible={Boolean(editingDepartment)}
       modal
       className="capacity-dialog"
-      onHide={() => setEditingCenter(null)}
-      footer={<div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEditingCenter(null)} /><Button label="Salvar" icon="pi pi-check" onClick={saveCapacity} /></div>}
+      onHide={() => setEditingDepartment(null)}
+      footer={<div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEditingDepartment(null)} /><Button label="Salvar" icon="pi pi-check" onClick={saveCapacity} /></div>}
     >
       <div className="capacity-form">
-        <strong>{editingCenter?.local}</strong>
-        <small>DPTO. {editingCenter?.departamento ?? "—"}</small>
-        <label htmlFor="center-capacity">Quantidade máxima de pessoas</label>
+        <strong>DPTO. {editingDepartment?.departamento ?? "—"}</strong>
+        <small>{editingDepartment?.colaboradores_cadastrados || 0} colaborador(es) trabalhando hoje.</small>
+        <label htmlFor="department-capacity">Quantidade esperada de pessoas</label>
         <InputNumber
-          id="center-capacity"
+          id="department-capacity"
           value={capacity}
           onValueChange={(event) => setCapacity(event.value ?? null)}
           useGrouping={false}

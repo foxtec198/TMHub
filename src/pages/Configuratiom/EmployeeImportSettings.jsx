@@ -66,12 +66,12 @@ export function CollaboratorImportSettings() {
 
   const selectFile = (selected) => {
     if (!selected) return;
-    if (!selected.name.toLowerCase().endsWith(".json")) {
-      showToast("warn", "Arquivo inválido", "Selecione o arquivo de colaboradores no formato .json.");
+    if (!/\.(json|xls|xlsx)$/i.test(selected.name)) {
+      showToast("warn", "Arquivo inválido", "Selecione o relatório de colaboradores em .json, .xls ou .xlsx.");
       return;
     }
-    if (selected.size > 60 * 1024 * 1024) {
-      showToast("warn", "Arquivo muito grande", "O JSON deve ter no máximo 60 MB.");
+    if (selected.size > 100 * 1024 * 1024) {
+      showToast("warn", "Arquivo muito grande", "O arquivo deve ter no máximo 100 MB.");
       return;
     }
     setFile(selected);
@@ -124,7 +124,7 @@ export function CollaboratorImportSettings() {
         : error.response?.data?.message;
       const message = error.response?.status === 413
         ? "O servidor recusou o tamanho enviado. Tente novamente ou contate o suporte."
-        : serverMessage || "Não foi possível enviar o JSON. Verifique a conexão e tente novamente.";
+        : serverMessage || "Não foi possível enviar o arquivo. Verifique a conexão e tente novamente.";
       showToast("error", "Importação de colaboradores", message);
     }
   };
@@ -172,14 +172,14 @@ export function CollaboratorImportSettings() {
           <input
             ref={inputRef}
             type="file"
-            accept=".json,application/json"
+            accept=".json,.xls,.xlsx,application/json,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             hidden
             disabled={processing}
             onChange={(event) => selectFile(event.target.files?.[0])}
           />
           <i className={`pi ${file ? "pi-file" : "pi-cloud-upload"}`} />
-          <strong>{file?.name || "Arraste ou clique para selecionar o JSON"}</strong>
-          <span>{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "Arquivo funcionarios.json · máximo 60 MB"}</span>
+          <strong>{file?.name || "Arraste ou clique para selecionar o relatório"}</strong>
+          <span>{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "JSON, XLS ou XLSX · máximo 100 MB"}</span>
         </div>
 
         {stage !== "idle" && (
