@@ -127,14 +127,13 @@ export function CapacityDepartmentSettings() {
     },
   ];
 
-  return <div className="capacity-settings-layout">
-    <article className="settings-card capacity-departments-card">
+  return <div>
+    <article className="settings-card">
       <div className="settings-card-title">
         <i className="pi pi-sitemap" />
         <div><h2>Planejamento por departamento</h2><p>Defina a meta de QL e a situação de cada departamento.</p></div>
       </div>
-      <Table data={data.departamentos} columns={departmentColumns} search rows={10} rowsPerPageOptions={[10, 25, 50]} />
-      <Button label="Atualizar" icon="pi pi-refresh" text onClick={() => setRefresh((value) => value + 1)} />
+      <Table data={data.departamentos} columns={departmentColumns} search rows={5} rowsPerPageOptions={[5, 10, 25, 50]} />
     </article>
 
     <Dialog
@@ -146,7 +145,7 @@ export function CapacityDepartmentSettings() {
       footer={<div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEditingDepartment(null)} /><Button label="Salvar" icon="pi pi-check" onClick={saveCapacity} /></div>}
     >
       <div className="capacity-form">
-        <strong>DPTO. {editingDepartment?.departamento ?? "—"}</strong>
+        <strong >DPTO. {editingDepartment?.departamento ?? "—"}</strong>
         <small>{editingDepartment?.colaboradores_cadastrados || 0} colaborador(es) trabalhando hoje.</small>
         <label htmlFor="department-capacity">Quantidade esperada de pessoas</label>
         <InputNumber

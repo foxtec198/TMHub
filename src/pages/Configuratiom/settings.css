@@ -6,7 +6,9 @@
   overflow: auto;
 
 }
-.p-password, .p-icon-field {
+
+.p-password,
+.p-icon-field {
   width: 100% !important;
 }
 
@@ -873,12 +875,22 @@
   gap: 0.55rem;
 }
 
+.p-dialog-title {
+  color: var(--primary) !important;
+}
+
+.capacity-form>strong {
+  color: var(--text-on-color) !important;
+}
+
+
 .capacity-form>small,
 .capacity-form>span {
-  color: var(--text-color-secondary);
+  color: var(--text-secondary) !important;
 }
 
 .capacity-form>label {
+  color: var(--text-color-secondary);
   margin-top: 0.75rem;
   font-size: 0.85rem;
   font-weight: 700;
