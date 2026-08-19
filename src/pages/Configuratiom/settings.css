@@ -254,6 +254,40 @@
   bottom: 0;
 }
 
+.users-speed-dial .p-speeddial-action {
+  overflow: visible;
+}
+
+.users-speed-dial .p-speeddial-action::before {
+  position: absolute;
+  right: calc(100% + .55rem);
+  padding: .35rem .55rem;
+  color: var(--text-primary);
+  content: attr(data-pr-tooltip);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: .4rem;
+  box-shadow: var(--shadow-sm);
+  font-size: .75rem;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(.25rem);
+  transition: opacity .15s ease, transform .15s ease;
+  white-space: nowrap;
+}
+
+.users-speed-dial .p-speeddial-action:hover::before,
+.users-speed-dial .p-speeddial-action:focus-visible::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.registered-signature-form > small {
+  color: var(--text-secondary);
+  font-size: .75rem;
+}
+
 .users-readonly {
   display: flex;
   align-items: center;
@@ -1752,4 +1786,91 @@
   .timo-learning-card__actions {
     justify-content: flex-start;
   }
+}
+
+.registered-signature-form {
+  display: grid;
+  gap: .7rem;
+  padding-top: 1.25rem;
+}
+
+.registered-signature-form > p {
+  margin: 0 0 .35rem;
+  color: var(--text-secondary);
+}
+
+.registered-signature-form > label {
+  color: var(--text-primary);
+  font-size: .84rem;
+  font-weight: 700;
+}
+
+.registered-signature-form .p-dropdown,
+.registered-signature-form input[type="file"] {
+  width: 100%;
+}
+
+.registered-signature-form input[type="file"] {
+  padding: .85rem;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: .65rem;
+}
+
+.registered-signature-form .registered-signature-file {
+  color: var(--primary);
+}
+
+.registered-signature-crop {
+  display: grid;
+  gap: .4rem;
+  padding: .8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: .7rem;
+}
+
+.registered-signature-crop > strong {
+  color: var(--text-primary);
+  font-size: .84rem;
+}
+
+.registered-signature-crop > small {
+  color: var(--text-secondary);
+  font-size: .76rem;
+}
+
+.registered-signature-crop__canvas {
+  position: relative;
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
+  max-height: 24rem;
+  margin: 0 auto;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+  background: #151515;
+  border-radius: .5rem;
+}
+
+.registered-signature-crop__canvas img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 24rem;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.registered-signature-crop__selection {
+  position: absolute;
+  box-sizing: border-box;
+  display: block;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 48%);
+  pointer-events: none;
 }
