@@ -110,7 +110,7 @@ export function QLDashboard() {
   }), [chartTheme, evolution]);
 
   const departmentColumns = [
-    { header: "Departamento", body: (row) => <strong>DPTO. {row.departamento}</strong>, sortable: true },
+    { header: "Departamento", field: "departamento",  body: (row) => <strong>DPTO. {row.departamento}</strong>, sortable: true },
     { header: "Colaboradores", field: "colaboradores_ativos", sortable: true },
     {
       header: "Meta de QL",
@@ -132,13 +132,12 @@ export function QLDashboard() {
   ];
 
   const filterCount = filters.departamentos.length;
-  return <main className="ql-dashboard">
+  return <main className="ql-dashboard p-4">
     <PageHeader
       section="Dashboards"
       title="Dashboard de QL"
       description="Acompanhe o quadro de lotação por departamento e a evolução diária do efetivo."
       actions={<>
-        <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
         <Button
           icon="pi pi-filter-fill"
           label={filterCount ? `Filtros (${filterCount})` : "Filtros"}
