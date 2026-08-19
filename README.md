@@ -72,11 +72,11 @@ Usuário
 
 - Node.js 20 ou superior.
 - npm.
-- API TM Hub em execução na porta `8590`.
+- API em produção.
 
 ```powershell
-git clone https://github.com/foxtec198/tmhub.git
-cd tmhub
+git clone https://github.com/foxtec198/TMHub.git
+cd TMHub
 npm.cmd install
 npm.cmd run dev
 ```
@@ -93,8 +93,6 @@ Comandos úteis:
 | `npm.cmd run dev:mobile` | Expõe o Vite para testes na rede local. |
 | `npm.cmd run build` | Gera e valida o bundle de produção. |
 | `npm.cmd run lint` | Executa o ESLint. |
-| `npm.cmd run work:new -- -Type feat -Name "nome"` | Sincroniza `dev` e cria uma branch de trabalho. |
-| `npm.cmd run deploy:pr -- -Message "feat: resumo"` | Envia a branch e abre PR para `dev`. |
 
 ## Estrutura do frontend
 
