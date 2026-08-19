@@ -1,8 +1,29 @@
-/* Campo de assinatura */
-.experience-signature-action { display: flex; align-items: center; justify-content: space-between; gap: .85rem; padding: .85rem 0 0; }
-.experience-signature-action > div { display: grid; gap: .15rem; }
-.experience-signature-action strong { color: var(--text-primary); }
-.experience-signature-action span { color: var(--text-secondary); font-size: .8rem; }
+/* Seleção de assinatura cadastrada. */
+.experience-signature-action { display: flex; align-items: flex-end; justify-content: flex-end; gap: .7rem; padding-top: .9rem; border-top: 1px solid var(--border); }
+.experience-signature-action > label { display: grid; gap: .35rem; color: var(--text-primary); font-size: .78rem; font-weight: 600; }
+.experience-signature-action > .experience-state-select { width: min(100%, 14rem); margin-right: auto; }
+.experience-signature-action > .experience-signer-select { width: min(100%, 26rem); }
+.experience-signature-action > label .p-dropdown { width: 100%; }
+.experience-signature-action > .p-button { flex: 0 0 auto; min-width: 10.5rem; }
+
+/* A descrição da assinatura ocupa o espaço restante sem invadir o botão. */
+.experience-signature-action > div {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: .2rem;
+}
+
+.experience-signature-action > div strong,
+.experience-signature-action > div span {
+  display: block;
+}
+
+.experience-signature-action > div span {
+  color: var(--text-secondary);
+  font-size: .8rem;
+  line-height: 1.35;
+}
 .experience-signature-dialog { width: min(94vw, 34rem); }
 .experience-signature-content { display: grid; gap: .8rem; }
 .experience-signature-content p { margin: 0; color: var(--text-secondary); font-size: .88rem; }
@@ -11,5 +32,7 @@
 
 @media (max-width: 680px) {
   .experience-signature-action { align-items: flex-start; flex-direction: column; }
+  .experience-signature-action > .experience-state-select,
+  .experience-signature-action > .experience-signer-select { width: 100%; margin-right: 0; }
   .experience-signature-action .p-button { width: 100%; justify-content: center; }
 }

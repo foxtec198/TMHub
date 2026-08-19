@@ -85,6 +85,22 @@
   background: transparent !important;
 }
 
+/* O destaque pertence apenas ao botão da etapa atual, nunca ao conector. */
+/* Sobrescreve a regra global :root[data-theme] .p-highlight. */
+:root[data-theme] .experience-public-shell .p-stepper-header.p-highlight {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.experience-public-shell .p-stepper-header .p-stepper-action {
+  flex: 0 0 auto !important;
+}
+
+.experience-public-shell .p-stepper-header.p-highlight .p-stepper-action {
+  padding: .7rem .75rem;
+  background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
+
 .experience-public-shell .p-stepper-header.p-highlight .p-stepper-title {
   color: var(--primary);
 }
@@ -96,7 +112,12 @@
 }
 
 .experience-public-shell .p-stepper-separator {
-  background: var(--border-strong);
+  background-color: var(--border-strong) !important;
+}
+
+/* Mantém a linha neutra quando o PrimeReact destaca uma etapa posterior. */
+.experience-public-shell .p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator {
+  background-color: var(--border-strong) !important;
 }
 
 .experience-public-identification {
@@ -136,79 +157,6 @@
   padding: .75rem 0 0;
 }
 
-.experience-public-task-cards {
-  display: none;
-}
-
-.experience-public-task-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--surface-2, var(--surface-1));
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: var(--shadow-sm);
-}
-
-.experience-public-task-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: .75rem;
-}
-
-.experience-public-task-card-top .p-tag {
-  flex: 0 0 auto;
-  font-size: .65rem;
-}
-
-.experience-public-task-details {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .8rem;
-  margin: 0;
-}
-
-.experience-public-task-details div:last-child {
-  grid-column: 1 / -1;
-}
-
-.experience-public-task-details dt {
-  margin-bottom: .2rem;
-  color: var(--text-secondary);
-  font-size: .72rem;
-  font-weight: 700;
-}
-
-.experience-public-task-details dd {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: .86rem;
-  font-weight: 700;
-}
-
-.experience-public-empty {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: .45rem;
-  padding: 2.25rem 1rem;
-  color: var(--text-secondary);
-  text-align: center;
-  border: 1px dashed var(--border);
-  border-radius: 14px;
-}
-
-.experience-public-empty i {
-  color: var(--primary);
-  font-size: 1.8rem;
-}
-
-.experience-public-empty strong {
-  color: var(--text-primary);
-}
-
 .experience-public-tasks-header {
   display: flex;
   align-items: center;
@@ -243,8 +191,33 @@
   font-weight: 700;
 }
 
+/* Na tabela desktop, o atraso é indicado pela tag de situação, não pela data. */
+.experience-public-tasks-table .p-datatable-tbody > tr > td {
+  vertical-align: middle;
+}
+
+.experience-public-table-date {
+  display: inline-block;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .experience-public-tasks-table .tm-table-card-value > .p-button {
+    min-width: 8rem;
+    white-space: nowrap;
+  }
+}
+
 .experience-public-dialog {
   width: min(850px, 94vw);
+}
+
+/* Separa o cabeçalho da identificação do colaborador no diálogo desktop. */
+.experience-public-dialog .p-dialog-content {
+  padding: 1.25rem 1.1rem 1.1rem;
 }
 
 .experience-public-form {
@@ -254,8 +227,33 @@
 }
 
 .experience-public-context {
+  gap: .4rem;
+  margin-top: .6rem;
   padding-bottom: .85rem;
   border-bottom: 1px solid var(--border);
+}
+
+/* Mantém as datas legíveis e permite a quebra somente entre informações completas. */
+.experience-public-context-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem .8rem;
+}
+
+.experience-public-context-details span {
+  white-space: nowrap;
+}
+
+@media (min-width: 681px) {
+  .experience-public-context-details {
+    gap: 0;
+  }
+
+  .experience-public-context-details span + span {
+    margin-left: 1.15rem;
+    padding-left: 1.15rem;
+    border-left: 1px solid var(--border);
+  }
 }
 
 .experience-public-competencies,
@@ -339,18 +337,8 @@
   }
 
   .experience-public-identification .p-dropdown,
-  .experience-public-identification .p-button,
-  .experience-public-task-card .p-button {
+  .experience-public-identification .p-button {
     min-height: 3rem;
-  }
-
-  .experience-public-tasks-table {
-    display: none;
-  }
-
-  .experience-public-task-cards {
-    display: grid;
-    gap: .8rem;
   }
 
   .experience-public-tasks-header,
