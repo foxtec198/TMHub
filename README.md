@@ -35,6 +35,7 @@ aplicação inteira.
 | **Glosas** | Cobertura integral ou parcial, valores, evidências, filtros, XLSX, dashboard e métrica específica da Roçada. |
 | **Admissões e rescisões** | Vagas de substituição e aditivos, SLA em dias úteis, dashboard e controle de desligamentos. |
 | **Estoque e logística** | Produtos, categorias, movimentações, destinatários por colaborador, locais automáticos, códigos de barras e dashboard logístico. |
+| **Experiências** | Controle de contratos de experiências, desde a avaliação até o documento. |
 | **Estrutura** | Filiais, departamentos, contratos, supervisor, locais, subestruturas ilimitadas, ativos e patrimônio. |
 | **TM Ops / Scheduler** | Rotinas, vínculos por estrutura, checklists, tarefas recorrentes, workflows, Executor mobile, evidências e geolocalização. |
 | **Projetos** | Kanban, cards, datas, membros, comentários, anexos e dashboard de projetos. |
