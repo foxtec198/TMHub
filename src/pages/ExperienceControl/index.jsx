@@ -17,7 +17,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
-import { SignaturePad } from "./SignaturePad";
+import "./signature.css";
 import "./styles.css";
 
 
@@ -120,11 +120,14 @@ export function ExperienceControl() {
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [rhRecords, setRhRecords] = useState([]);
   const [employeesInExperience, setEmployeesInExperience] = useState([]);
+  const [registeredSigners, setRegisteredSigners] = useState([]);
+  const [selectedSignerId, setSelectedSignerId] = useState(null);
   const [search, setSearch] = useState("");
   const [selectedEvaluation, setSelectedEvaluation] = useState(null);
   const [form, setForm] = useState(formFromEvaluation(null));
   const [exporting, setExporting] = useState(false);
   const [manualCompletionVisible, setManualCompletionVisible] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
   const [revision, setRevision] = useState(0);
   const filterPanel = useRef(null);
   const setLoading = useLoading();
@@ -146,16 +149,18 @@ export function ExperienceControl() {
     // Carrega a fila de avaliações e a visão geral dos colaboradores em experiência.
     if (!canRh) return;
     try {
-      const [evaluationsResponse, employeesResponse] = await Promise.all([
+      const [evaluationsResponse, employeesResponse, signaturesResponse] = await Promise.all([
         connect.get("/avaliacoes-experiencia"),
         connect.get("/avaliacoes-experiencia/em-experiencia"),
+        ...(isAdmin ? [connect.get("/avaliacoes-experiencia/assinaturas-cadastradas")] : []),
       ]);
       setRhRecords(Array.isArray(evaluationsResponse.data) ? evaluationsResponse.data : []);
       setEmployeesInExperience(Array.isArray(employeesResponse.data) ? employeesResponse.data : []);
+      if (isAdmin) setRegisteredSigners(Array.isArray(signaturesResponse?.data) ? signaturesResponse.data : []);
     } catch (error) {
       showToast("error", "Período de experiência", errorMessage(error, "Não foi possível carregar o controle do RH."));
     }
-  }, [canRh, showToast]);
+  }, [canRh, isAdmin, showToast]);
 
   useEffect(() => { loadSupervisors(); }, [loadSupervisors, revision]);
   useEffect(() => { loadRh(); }, [loadRh, revision]);
@@ -167,6 +172,7 @@ export function ExperienceControl() {
       const { data } = await connect.get(`/avaliacoes-experiencia/${evaluationId}`);
       setSelectedEvaluation(data);
       setForm(formFromEvaluation(data));
+      setSelectedSignerId(null);
     } catch (error) {
       showToast("error", "Avaliação", errorMessage(error, "Não foi possível carregar a avaliação."));
     } finally {
@@ -266,13 +272,13 @@ export function ExperienceControl() {
     setSearch("");
   };
 
-  const changeTaskStatus = async () => {
-    if (!selectedEvaluation || !isAdmin || form.status === selectedEvaluation.status) return;
+  const changeTaskStatus = async (status) => {
+    if (!selectedEvaluation || !isAdmin || status === selectedEvaluation.status) return;
     setLoading(true);
     try {
       const { data } = await connect.patch(
         `/avaliacoes-experiencia/${selectedEvaluation.id}/estado`,
-        { status: form.status },
+        { status },
       );
       refreshAfterMutation(data);
       showToast("success", "Estado da tarefa", "O estado da avaliação foi atualizado.");
@@ -283,18 +289,20 @@ export function ExperienceControl() {
     }
   };
 
-  const requestTaskStatusChange = () => {
-    if (!selectedEvaluation || !isAdmin || form.status === selectedEvaluation.status) return;
-    if (form.status === "concluida") {
+  const requestTaskStatusChange = (status) => {
+    if (!selectedEvaluation || !isAdmin || status === selectedEvaluation.status) return;
+    if (status === "concluida") {
+      setPendingStatus(status);
       setManualCompletionVisible(true);
       return;
     }
-    changeTaskStatus();
+    changeTaskStatus(status);
   };
 
   const confirmManualCompletion = () => {
     setManualCompletionVisible(false);
-    changeTaskStatus();
+    changeTaskStatus(pendingStatus);
+    setPendingStatus(null);
   };
 
   const filteredRhRecords = useMemo(() => {
@@ -339,8 +347,8 @@ export function ExperienceControl() {
 
   const adminCanEdit = isAdmin && Boolean(selectedEvaluation);
   const rhCanEdit = canRh && (selectedEvaluation?.status === "aguardando_rh" || adminCanEdit);
-  const canCompleteRh = canRh && selectedEvaluation?.status === "aguardando_rh";
-  const canChangeStatus = isAdmin && Boolean(selectedEvaluation);
+  const isAwaitingRh = selectedEvaluation?.status === "aguardando_rh";
+  const canCompleteRh = canRh && isAwaitingRh;
   const rhReady = PROFILE_OPTIONS.some((option) => option.value === form.classificacao_perfil)
     && DECISION_OPTIONS.some((option) => option.value === form.decisao_supervisor);
   const updateRhForm = (change) => {
@@ -348,11 +356,18 @@ export function ExperienceControl() {
     setForm((current) => ({ ...current, ...change }));
   };
 
-  const uploadRhSignature = async (file) => {
+  const statusOptions = useMemo(() => {
+    const current = STATUS_OPTIONS.find((item) => item.value === selectedEvaluation?.status);
+    return current && !ADMIN_STATUS_OPTIONS.some((item) => item.value === current.value)
+      ? [current, ...ADMIN_STATUS_OPTIONS]
+      : ADMIN_STATUS_OPTIONS;
+  }, [selectedEvaluation?.status]);
+
+  const useRegisteredRhSignature = async () => {
     if (!selectedEvaluation) return;
     setLoading(true);
     try {
-      // Salva primeiro os campos do RH, exatamente como a etapa do supervisor.
+      // Salva os campos antes de aplicar a assinatura, pois uma edição a invalida.
       const savePayload = {
         classificacao_perfil: form.classificacao_perfil,
         decisao_supervisor: form.decisao_supervisor,
@@ -366,27 +381,18 @@ export function ExperienceControl() {
         `/avaliacoes-experiencia/${selectedEvaluation.id}/rh`,
         savePayload,
       );
-      const payload = new FormData();
-      payload.append("arquivo", file);
       const { data } = await connect.post(
-        `/avaliacoes-experiencia/${savedEvaluation.id}/rh/assinatura`,
-        payload,
+        `/avaliacoes-experiencia/${savedEvaluation.id}/rh/assinatura-cadastrada`,
+        isAdmin ? { usuario_id: selectedSignerId } : {},
       );
       refreshAfterMutation(data);
-      showToast("success", "Assinatura", "Assinatura do RH registrada com sucesso.");
+      showToast("success", "Assinatura", "Assinatura aplicada com sucesso.");
     } catch (error) {
-      showToast("error", "Assinatura", errorMessage(error, "Não foi possível salvar a assinatura."));
+      showToast("error", "Assinatura", errorMessage(error, "Não foi possível aplicar a assinatura."));
     } finally {
       setLoading(false);
     }
   };
-  const statusOptions = useMemo(() => {
-    const current = STATUS_OPTIONS.find((item) => item.value === selectedEvaluation?.status);
-    return current && !ADMIN_STATUS_OPTIONS.some((item) => item.value === current.value)
-      ? [current, ...ADMIN_STATUS_OPTIONS]
-      : ADMIN_STATUS_OPTIONS;
-  }, [selectedEvaluation?.status]);
-
   const evaluationFooter = selectedEvaluation && (
     <div className="experience-dialog-actions">
       {canRh && selectedEvaluation.status === "concluida" && (
@@ -396,15 +402,6 @@ export function ExperienceControl() {
         <Button label={adminCanEdit ? "Salvar alterações" : "Salvar rascunho"} icon="pi pi-save" outlined onClick={() => saveRh(false)} />
         {canCompleteRh && <Button label="Assinar e concluir" icon="pi pi-check" disabled={!rhReady || !selectedEvaluation.assinatura_rh_registrada} onClick={() => saveRh(true)} />}
       </>}
-      {canChangeStatus && form.status !== selectedEvaluation.status && (
-        <Button
-          label={form.status === "concluida" ? "Finalizar tarefa" : "Alterar estado"}
-          icon={form.status === "concluida" ? "pi pi-check" : "pi pi-sync"}
-          severity={form.status === "concluida" ? "success" : "warning"}
-          outlined
-          onClick={requestTaskStatusChange}
-        />
-      )}
     </div>
   );
 
@@ -466,20 +463,15 @@ export function ExperienceControl() {
         visible={manualCompletionVisible}
         modal
         className="experience-manual-completion-dialog"
-        onHide={() => setManualCompletionVisible(false)}
+        onHide={() => { setManualCompletionVisible(false); setPendingStatus(null); }}
         footer={<div className="experience-manual-completion-actions">
-          <Button label="Cancelar" outlined onClick={() => setManualCompletionVisible(false)} />
+          <Button label="Cancelar" outlined onClick={() => { setManualCompletionVisible(false); setPendingStatus(null); }} />
           <Button label="Finalizar tarefa" icon="pi pi-check" severity="success" onClick={confirmManualCompletion} />
         </div>}
       >
         <div className="experience-manual-completion-content">
-          <span className="experience-manual-completion-icon">
-            <i className="pi pi-check-circle" aria-hidden="true" />
-          </span>
-          <div>
-            <strong>Confirmar conclusão manual</strong>
-            <p>A tarefa será marcada como concluída e a ação ficará registrada em seu usuário. Nenhuma assinatura será criada automaticamente.</p>
-          </div>
+          <span className="experience-manual-completion-icon"><i className="pi pi-check-circle" aria-hidden="true" /></span>
+          <div><strong>Confirmar conclusão manual</strong><p>A tarefa será marcada como concluída e a ação ficará registrada em seu usuário. Nenhuma assinatura será criada automaticamente.</p></div>
         </div>
       </Dialog>
 
@@ -516,15 +508,16 @@ export function ExperienceControl() {
               <label><span>Decisão do RH</span><Dropdown value={form.decisao_supervisor} options={DECISION_OPTIONS} disabled={!rhCanEdit} showClear={rhCanEdit} onChange={(event) => updateRhForm({ decisao_supervisor: event.value })} placeholder="Selecione" /></label>
               <label className="is-wide"><span>Observações do RH</span><InputTextarea value={form.observacoes_rh} disabled={!rhCanEdit} rows={4} autoResize onChange={(event) => updateRhForm({ observacoes_rh: event.target.value })} /></label>
             </div>
-            {canCompleteRh && rhReady && <SignaturePad label="Assinatura do avaliador - RH" signed={selectedEvaluation.assinatura_rh_registrada} onSave={uploadRhSignature} />}
-            {canCompleteRh && !rhReady && <small className="experience-signature-hint">Preencha a classificação e a decisão para liberar a assinatura.</small>}
+            {(isAdmin || (canCompleteRh && rhReady)) && <div className="experience-signature-action">
+              {isAdmin && <label className="experience-state-select"><span>Estado da tarefa</span><Dropdown value={selectedEvaluation.status} options={statusOptions} onChange={(event) => requestTaskStatusChange(event.value)} /></label>}
+              {canCompleteRh && rhReady && <>
+                {isAdmin && <label className="experience-signer-select"><span>Assinatura cadastrada</span><Dropdown value={selectedSignerId} options={registeredSigners} optionLabel="nome" optionValue="id" onChange={(event) => setSelectedSignerId(event.value)} placeholder="Escolha uma assinatura" filter showClear /></label>}
+                <Button label={selectedEvaluation.assinatura_rh_registrada ? "Aplicar novamente" : isAdmin ? "Aplicar assinatura" : "Usar minha assinatura"} icon="pi pi-verified" outlined disabled={isAdmin && !selectedSignerId} onClick={useRegisteredRhSignature} />
+              </>}
+            </div>}
+            {canRh && isAwaitingRh && !rhReady && <small className="experience-signature-hint">Preencha a classificação e a decisão para liberar a assinatura.</small>}
           </section>
 
-          {canChangeStatus && <section className="experience-section experience-state-section">
-            <h2>Estado da tarefa</h2>
-            <p>Somente administradores podem devolver uma tarefa para uma etapa anterior.</p>
-            <label><span>Novo estado</span><Dropdown value={form.status} options={statusOptions} onChange={(event) => setForm((current) => ({ ...current, status: event.value }))} placeholder="Selecione o estado" /></label>
-          </section>}
         </div>}
       </Dialog>
     </section>
