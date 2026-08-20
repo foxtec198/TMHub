@@ -1,0 +1,176 @@
+.maintenance-page {
+    --maintenance-surface: color-mix(in srgb, var(--surface-card, #08120d) 88%, #000);
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    position: relative;
+    padding: clamp(1.25rem, 5vw, 4rem);
+    color: var(--text-color, #f7fffa);
+    background:
+        radial-gradient(circle at 50% 120%, color-mix(in srgb, var(--primary-color, #35d36f) 23%, transparent), transparent 43%),
+        linear-gradient(135deg, #020705 0%, #07160e 52%, #020705 100%);
+}
+
+.maintenance-page__aurora {
+    position: absolute;
+    width: min(58vw, 50rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(10px);
+    opacity: .25;
+    pointer-events: none;
+    background: var(--primary-color, #35d36f);
+}
+
+.maintenance-page__aurora--one { top: -34rem; left: -23rem; }
+.maintenance-page__aurora--two { right: -28rem; bottom: -36rem; opacity: .15; }
+
+.maintenance-card {
+    width: min(100%, 44rem);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--primary-color, #35d36f) 42%, transparent);
+    border-radius: 2rem;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--maintenance-surface) 94%, white), var(--maintenance-surface));
+    box-shadow: 0 2rem 5rem rgba(0, 0, 0, .42), 0 0 3rem color-mix(in srgb, var(--primary-color, #35d36f) 11%, transparent);
+}
+
+.maintenance-card__logo {
+    display: block;
+    width: min(11rem, 45%);
+    height: auto;
+    margin: clamp(1.35rem, 4vw, 2.25rem) auto 0;
+    object-fit: contain;
+}
+
+.maintenance-card__content {
+    padding: clamp(1.7rem, 6vw, 3.75rem) clamp(1.35rem, 7vw, 5rem) clamp(2rem, 5vw, 3.3rem);
+    text-align: center;
+}
+
+.maintenance-card__timo-wrap {
+    width: 11rem;
+    height: 10.25rem;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 1.3rem;
+    position: relative;
+}
+
+.maintenance-card__timo-wrap::before {
+    content: "";
+    position: absolute;
+    width: 8.5rem;
+    height: 8.5rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary-color, #35d36f) 25%, transparent);
+    filter: blur(20px);
+    animation: maintenanceGlow 2.8s ease-in-out infinite;
+}
+
+.maintenance-card__timo {
+    width: 8.7rem;
+    max-height: 10rem;
+    z-index: 1;
+    object-fit: contain;
+    filter: drop-shadow(0 .85rem .9rem rgba(0, 0, 0, .25));
+    animation: maintenanceFloat 3.6s ease-in-out infinite;
+}
+
+.maintenance-card__signal {
+    position: absolute;
+    right: .4rem;
+    top: .65rem;
+    width: .85rem;
+    height: .85rem;
+    z-index: 2;
+    border-radius: 50%;
+    background: var(--primary-color, #35d36f);
+    border: 3px solid var(--maintenance-surface);
+    box-shadow: 0 0 0 .35rem color-mix(in srgb, var(--primary-color, #35d36f) 17%, transparent);
+}
+
+.maintenance-card__eyebrow {
+    display: inline-flex;
+    gap: .45rem;
+    align-items: center;
+    color: var(--primary-color, #35d36f);
+    font-size: .73rem;
+    font-weight: 800;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
+.maintenance-card h1 {
+    max-width: 30rem;
+    margin: .75rem auto;
+    color: var(--text-color, #f7fffa);
+    font-size: clamp(2rem, 6vw, 3.55rem);
+    line-height: 1.04;
+    letter-spacing: -.045em;
+}
+
+.maintenance-card p {
+    max-width: 33rem;
+    margin: 0 auto;
+    color: var(--text-color-secondary, #b6c5bd);
+    font-size: clamp(.96rem, 2vw, 1.07rem);
+    line-height: 1.65;
+}
+
+.maintenance-card__status {
+    width: fit-content;
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    margin-top: 1.7rem;
+    padding: .7rem .95rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary-color, #35d36f) 12%, transparent);
+    color: var(--text-color, #f7fffa);
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.maintenance-card__pulse {
+    width: .55rem;
+    height: .55rem;
+    border-radius: 50%;
+    background: var(--primary-color, #35d36f);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary-color, #35d36f) 50%, transparent);
+    animation: maintenancePulse 2s infinite;
+}
+
+.maintenance-card footer {
+    padding: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--primary-color, #35d36f) 17%, transparent);
+    color: var(--text-color-secondary, #b6c5bd);
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+@keyframes maintenanceFloat {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-.55rem) rotate(1deg); }
+}
+
+@keyframes maintenanceGlow {
+    0%, 100% { opacity: .48; transform: scale(.9); }
+    50% { opacity: .9; transform: scale(1.1); }
+}
+
+@keyframes maintenancePulse {
+    70% { box-shadow: 0 0 0 .55rem transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .maintenance-card__timo,
+    .maintenance-card__timo-wrap::before,
+    .maintenance-card__pulse { animation: none; }
+}

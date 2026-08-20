@@ -61,6 +61,7 @@ import { TicketManagement } from "./pages/Tickets/TicketManagement";
 import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasures.jsx";
 import { ExperienceControl } from "./pages/ExperienceControl";
 import { ExperiencePublic } from "./pages/ExperienceControl/supervisor";
+import { Maintenance } from "./pages/Maintenance";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -176,6 +177,7 @@ export function AppRoutes() {
         <Route path="" element={<Auth />} />
         <Route path="/" element={<Auth />} />
         <Route path="/login" element={<Auth />} />
+        <Route path="/manutencao" element={<Maintenance />} />
         <Route path="/reposicoes/requisicao" element={<Request />} />
         <Route path="/reports/reposicoes/ods" element={<RequestsODS />} />
         <Route path="/tm-ops/login" element={<TMOps />} />
