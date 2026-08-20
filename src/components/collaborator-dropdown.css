@@ -33,3 +33,13 @@
 
 :root[data-mode="dark"] .collaborator-dropdown-option strong { color: #f1f7f3; }
 :root[data-mode="dark"] .collaborator-dropdown-option small { color: #a9b8ad; }
+
+/* Usado em listas públicas com poucos resultados, onde a prioridade é exibir
+   o contexto inteiro do colaborador em vez de truncar o texto. */
+.collaborator-dropdown--wrap .collaborator-dropdown-option strong,
+.collaborator-dropdown--wrap .collaborator-dropdown-option small {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
+}
