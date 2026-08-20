@@ -19,6 +19,13 @@ const PHASE_LABELS = {
 
 const UPLOAD_CHUNK_SIZE = 512 * 1024;
 
+const COMPANY_BY_STANDARD_FILE = [
+  { matcher: /costa/i, company: "COSTA OESTE" },
+  { matcher: /facilit/i, company: "FACILITIES" },
+  { matcher: /grabin/i, company: "GRABIN" },
+  { matcher: /mag[\s_-]*sul/i, company: "MAG SUL" },
+];
+
 export function CollaboratorImportSettings() {
   const [file, setFile] = useState(null);
   const [stage, setStage] = useState("idle");
@@ -96,6 +103,8 @@ export function CollaboratorImportSettings() {
     setJob(null);
     setStage("idle");
     setUploadProgress(0);
+    const suggestedCompany = COMPANY_BY_STANDARD_FILE.find(({ matcher }) => matcher.test(selected.name))?.company;
+    if (suggestedCompany) setCompanyName(suggestedCompany);
   };
 
   const startImport = async () => {
@@ -183,12 +192,11 @@ export function CollaboratorImportSettings() {
           <Dropdown
             value={companyName}
             options={companies}
-            editable
             filter
             showClear
             disabled={processing}
             onChange={(event) => setCompanyName(event.value)}
-            placeholder="Selecione ou informe a empresa"
+            placeholder="Selecione a empresa deste relatório"
           />
         </label>
 
@@ -216,7 +224,10 @@ export function CollaboratorImportSettings() {
           />
           <i className={`pi ${file ? "pi-file" : "pi-cloud-upload"}`} />
           <strong>{file?.name || "Arraste ou clique para selecionar o relatório"}</strong>
-          <span>{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "JSON, XLS ou XLSX · máximo 100 MB"}</span>
+          <span>{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "RELAÇÃO DE EMPREGADOS II em XLS/XLSX ou JSON · máximo 100 MB"}</span>
+          {file && COMPANY_BY_STANDARD_FILE.find(({ matcher }) => matcher.test(file.name)) && (
+            <small>Empresa sugerida pelo nome do arquivo: {companyName || "selecione a empresa"}</small>
+          )}
         </div>
 
         {stage !== "idle" && (
