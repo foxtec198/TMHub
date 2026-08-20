@@ -122,6 +122,10 @@
     color: var(--text-color-secondary)
 }
 
+.absence-table .p-datatable-tbody>tr>td {
+    vertical-align: top
+}
+
 .absence-timer {
     display: inline-flex;
     align-items: center;
@@ -313,6 +317,14 @@
     }
 }
 
+@media(max-width:768px) {
+    .absence-table .absence-person {
+        min-width: 0;
+        align-items: flex-end;
+        text-align: right
+    }
+}
+
 @media(max-width:520px) {
     .absence-page {
         padding: 1rem
@@ -347,6 +359,7 @@
     .absence-form .dialog-actions .p-button {
         width: 100%
     }
+
 }
 
 .absence-manual-dialog {
@@ -369,6 +382,19 @@
 .absence-manual-form label>span {
     font-size: .78rem;
     font-weight: 800
+}
+
+.absence-manual-coverage-toggle {
+    flex-direction: row !important;
+    align-items: center;
+    gap: .55rem !important;
+    width: fit-content;
+    padding: .15rem 0;
+    cursor: pointer
+}
+
+.absence-manual-coverage-toggle>span {
+    font-size: .88rem !important
 }
 
 .absence-manual-form .is-wide {

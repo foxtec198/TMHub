@@ -74,6 +74,11 @@ export function Request() {
     const [absentDetails, setAbsentDetails] = useState(null)
     const [disciplinaryContext, setDisciplinaryContext] = useState(null)
     const [disciplinaryLoading, setDisciplinaryLoading] = useState(false)
+    const [additionalContext, setAdditionalContext] = useState(null)
+    const [additionalLoading, setAdditionalLoading] = useState(false)
+    const [manualCoverage, setManualCoverage] = useState(null)
+    const [activeStep, setActiveStep] = useState(0)
+    const [additionalStepReleased, setAdditionalStepReleased] = useState(false)
     const [warning, selectedWarning] = useState(null)
     const [reason, selectedReason] = useState(null)
     const [obs, setObs] = useState("")
@@ -98,8 +103,33 @@ export function Request() {
 
     const stepperRef = useRef(null)
     const disciplinaryRequestRef = useRef(0)
+    const additionalRequestRef = useRef(0)
     const setLoading = useLoading();
     const { showToast } = useToast();
+
+    function changeStep(step) {
+        // Mantém o estado do React e o Stepper sincronizados quando a etapa
+        // é alterada por um botão ou por uma navegação permitida no cabeçalho.
+        setActiveStep(step);
+        stepperRef.current?.setActiveStep(step);
+    }
+
+    function handleStepChange(event) {
+        const { index } = event;
+        const canGoBack = index < activeStep;
+        const canOpenReservation = index === 1 && Boolean(user);
+        const canOpenAdditional = index === 2 && additionalStepReleased;
+
+        // O supervisor pode voltar às etapas anteriores, mas só avança quando
+        // a etapa necessária já foi concluída e liberada pela regra de negócio.
+        if (index === activeStep || canGoBack || canOpenReservation || canOpenAdditional) {
+            setActiveStep(index);
+            return;
+        }
+
+        event.originalEvent?.preventDefault?.();
+        window.requestAnimationFrame(() => stepperRef.current?.setActiveStep(activeStep));
+    }
 
     function selectedRequestDate() {
         // A API exige o horário real de envio, mesmo quando a data selecionada é amanhã.
@@ -139,16 +169,77 @@ export function Request() {
         }
     }
 
+    async function loadAdditionalContext(collaboratorId, reserveId) {
+        const requestId = ++additionalRequestRef.current;
+        setAdditionalContext(null);
+
+        if (!collaboratorId) {
+            setAdditionalLoading(false);
+            return;
+        }
+
+        setAdditionalLoading(true);
+        try {
+            const { data } = await connect.post("/repo/request/contexto-adicional", {
+                ausente_id: collaboratorId,
+                reserva_id: reserveId || 0,
+            });
+            if (requestId === additionalRequestRef.current) setAdditionalContext(data);
+        } catch (error) {
+            if (requestId === additionalRequestRef.current) {
+                setAdditionalContext({
+                    modo: "desabilitado",
+                    motivo: error.response?.data || "Não foi possível validar o adicional do cargo.",
+                });
+            }
+        } finally {
+            if (requestId === additionalRequestRef.current) setAdditionalLoading(false);
+        }
+    }
+
+    function advanceToAdditional() {
+        const disciplinaryMeasureInformed = reason !== "INJUSTIFICADA" || Boolean(warning);
+        const reservationSelected = checked || replace;
+
+        if (!absent || !reason || !disciplinaryMeasureInformed || !reservationSelected) {
+            showToast("warn", "Complete a reserva", "Informe o ausente, o motivo e a reserva técnica ou a ausência dela.");
+            return;
+        }
+
+        if (additionalLoading || !additionalContext) {
+            showToast("warn", "Aguarde", "Estamos verificando se o cargo exige cobertura de adicional.");
+            return;
+        }
+
+        // Quando não há adicional, o passo 3 permanece bloqueado e o envio
+        // acontece diretamente no passo de Reserva.
+        if (additionalContext.modo !== "selecionar_cobertura") {
+            createRequest();
+            return;
+        }
+
+        setAdditionalStepReleased(true);
+        changeStep(2);
+    }
+
     // Valida os campos obrigatórios e envia a nova requisição ao backend.
     async function createRequest() {
         setLoading(true);
         try {
             const disciplinaryMeasureInformed = reason !== "INJUSTIFICADA" || Boolean(warning);
-            if(user && absent && reason && disciplinaryMeasureInformed && (checked || replace)){
+            const manualCoverageRequired = additionalContext?.modo === "selecionar_cobertura";
+            const requestReady = user
+                && absent
+                && reason
+                && disciplinaryMeasureInformed
+                && (checked || replace)
+                && (!manualCoverageRequired || manualCoverage);
+            if (requestReady) {
                 const data = {
                     supervisor_id: user.id,
                     ausente_id: absent,
-                    reserva_id: checked ? 0 : replace.id,
+                    reserva_id: checked ? 0 : replace?.id,
+                    cobertura_colaborador_id: checked ? manualCoverage?.id : null,
                     motivo: reason,
                     advertencia: warning,
                     data: selectedRequestDate(),
@@ -157,13 +248,13 @@ export function Request() {
                     // supervisor não limite os colaboradores atendidos.
                     publico: true,
                 }
-                const response = await connect.post("/repo/request", data)
+                await connect.post("/repo/request", data)
                 showToast("success", "Sucesso na requisição", "Sua requisição foi criada com sucesso, aguarde novidades por email!")
-                selectedReplace(null); selectedAbsent(null); setAbsentDetails(null); setDisciplinaryContext(null); selectedReason(null); setObs(""); selectedWarning(null); setDateChoice("today")
+                selectedReplace(null); selectedAbsent(null); setAbsentDetails(null); setDisciplinaryContext(null); setAdditionalContext(null); setManualCoverage(null); selectedReason(null); setObs(""); selectedWarning(null); setChecked(false); setDateChoice("today"); setAdditionalStepReleased(false)
             }
             else{showToast("warn", "Atenção!", "Preencha todos os dados")}
         }
-        catch (err) { console.warn(err); showToast("error", "Erro ao enviar requisição", err.response.data) }
+        catch (err) { console.warn(err); showToast("error", "Erro ao enviar requisição", err.response?.data || "Não foi possível enviar a requisição.") }
         finally { setLoading(false) }
 
     }
@@ -216,26 +307,42 @@ export function Request() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dateChoice, user?.id])
 
+    // Revalida o item 3 quando o ausente ou a reserva técnica forem alterados.
+    useEffect(() => {
+        // Agenda a consulta após a renderização e evita atualizar o estado de
+        // uma seleção anterior enquanto o usuário troca os campos rapidamente.
+        const timer = window.setTimeout(() => {
+            loadAdditionalContext(absent, checked ? 0 : replace?.id);
+        }, 0);
+        return () => window.clearTimeout(timer);
+    }, [absent, checked, replace?.id])
+
+    // Qualquer alteração dos dados que definem a regra do adicional exige uma
+    // nova validação no passo 2 antes de liberar novamente o passo 3.
+    useEffect(() => {
+        setAdditionalStepReleased(false);
+    }, [absent, checked, replace?.id, reason, warning])
+
     // Formulário público e responsivo de abertura de reposição.
     return (
         <>
-            <div className="request-create-page flex min-h-screen px-4 py-6 flex-column justify-content-between align-items-center">
+            <div className="request-create-page flex min-h-screen px-4 py-6 flex-column justify-content-start align-items-center">
                 {/* HEADER */}
-                <div className="flex flex-column align-items-center justify-content-center text-center">
+                <header className="request-create-header fadeinleft animation-duration-1000">
                     <ThemeLogo
                         alt="TM Hub"
-                        className="request-create-logo px-5 fadein animation-duration-2000"
+                        className="request-create-logo"
                     />
-
-                    <span
-                        className="font-bold fadeinleft animation-duration-1000 text-2xl text-secondary inter uppercase">
-                        Gestão de Reposições
-                    </span>
-                </div>
+                    <div>
+                        <span>Gestão de reposições</span>
+                        <h1>Solicitação de cobertura</h1>
+                        <p>Informe uma ausência e a cobertura necessária para o posto.</p>
+                    </div>
+                </header>
 
                 {/* MAIN */}
-                <div className="request-stepper-shell flex" style={{ minWidth: "22rem" }}>
-                    <Stepper ref={stepperRef}>
+                <div className={`request-stepper-shell ${additionalStepReleased ? "is-additional-released" : "is-additional-locked"}`}>
+                    <Stepper ref={stepperRef} activeStep={activeStep} onChangeStep={handleStepChange}>
                         <StepperPanel header="Login">
                             <div className="flex flex-column text-medium text-center">
                                 <span className="font-xl mb-4">Selecione seu nome na lista, caso não encontre, entre em contato com o suporte!</span>
@@ -247,7 +354,11 @@ export function Request() {
                                         selectedAbsent(null);
                                         setAbsentDetails(null);
                                         setDisciplinaryContext(null);
+                                        setAdditionalContext(null);
+                                        setManualCoverage(null);
+                                        setAdditionalStepReleased(false);
                                         disciplinaryRequestRef.current += 1;
+                                        additionalRequestRef.current += 1;
                                         selectedReplace(null);
                                         setReplaces([]);
                                     }}
@@ -262,7 +373,7 @@ export function Request() {
                                     iconPos="right"
                                     onClick={() => {
                                         user
-                                            ? stepperRef.current.nextCallback()
+                                            ? changeStep(1)
                                             : showToast("error", "Erro no Login", "Selecione um usuário primeiro!")
                                     }}
                                 />
@@ -270,20 +381,19 @@ export function Request() {
                         </StepperPanel>
 
                         <StepperPanel header="Reserva">
-                            <div className="flex flex-column p-4 text-medium" style={{
-                                maxWidth: "40rem",
-                                flexGrow: 1,
-                                width: "90dvw"
-                            }}>
+                            <div className="request-reservation-step request-form-step flex flex-column">
                                 <CollaboratorDropdown
                                     appendTo="self"
                                     panelStyle={{ width: '100%' }}
-                                    className="w-full mb-3"
+                                    className="w-full mb-3 collaborator-dropdown--wrap"
                                     value={absent}
                                     queryParams={{ publico: 1 }}
+                                    virtualScrollerOptions={null}
                                     onChange={(id, collaborator) => {
                                         selectedAbsent(id);
                                         setAbsentDetails(collaborator);
+                                        setManualCoverage(null);
+                                        setAdditionalStepReleased(false);
                                         loadDisciplinaryContext(id);
                                     }}
                                     placeholder="Busque quem faltou"
@@ -303,19 +413,26 @@ export function Request() {
                                     panelStyle={{ width: '100%' }}
                                     className={`w-full mb-3 ${checked? "hidden":null}`}
                                     value={replace}
-                                    virtualScrollerOptions={{ itemSize: 38 }}
-                                    onChange={(e) => selectedReplace(e.value)}
+                                    // Os textos de cargo e situação podem ocupar mais de uma linha
+                                    // no celular; sem altura fixa, cada opção cresce quando necessário.
+                                    virtualScrollerOptions={null}
+                                    onChange={(e) => {
+                                        selectedReplace(e.value);
+                                        setManualCoverage(null);
+                                        setAdditionalStepReleased(false);
+                                    }}
                                     options={replaces}
                                     placeholder="Quem vai repor?"
                                     optionLabel="name"
                                     optionDisabled="disabled"
                                     loading={loadingReplaces}
                                     itemTemplate={(option) => (
-                                        <div className="request-reserve-option">
+                                        <div className="request-reserve-option request-reserve-option--availability">
                                             <span>{option.name}</span>
-                                            <small className={option.disabled ? "request-reserve-unavailable" : "request-reserve-available"}>
-                                                {[option.cargo, option.disabled ? "Indisponível nesta data" : "Disponível"].filter(Boolean).join(" · ")}
-                                            </small>
+                                            <small>{option.cargo || "Cargo não informado"}</small>
+                                            <em className={option.disabled ? "request-reserve-unavailable" : "request-reserve-available"}>
+                                                {option.disabled ? "Indisponível nesta data" : "Disponível"}
+                                            </em>
                                         </div>
                                     )}
                                     valueTemplate={(option, props) => option ? (
@@ -333,6 +450,7 @@ export function Request() {
                                     value={reason}
                                     onChange={(e) => {
                                         selectedReason(e.value);
+                                        setAdditionalStepReleased(false);
                                         if (e.value !== "INJUSTIFICADA") selectedWarning(null);
                                     }}
                                     options={reasonOptions}
@@ -345,7 +463,10 @@ export function Request() {
                                     panelStyle={{ width: "100%" }}
                                     className={`w-full mb-3 ${reason != "INJUSTIFICADA" ? "hidden" : null}`}
                                     value={warning}
-                                    onChange={(e) => selectedWarning(e.value)}
+                                    onChange={(e) => {
+                                        selectedWarning(e.value);
+                                        setAdditionalStepReleased(false);
+                                    }}
                                     options={["Aplicado", "Não Aplicado"]}
                                     placeholder="Medida disciplinar"
                                     optionLabel="name"
@@ -360,13 +481,95 @@ export function Request() {
                                 
                                 <div className="flex justify-content-between align-items-center gap-3 mb-4">
                                     <span className="font-medium">Data da ausência</span>
-                                    <SelectButton value={dateChoice} options={dateOptions} onChange={(e) => e.value && setDateChoice(e.value)} allowEmpty={false} />
+                                    <SelectButton
+                                        id="request-date-choice"
+                                        value={dateChoice}
+                                        options={dateOptions}
+                                        onChange={(e) => e.value && setDateChoice(e.value)}
+                                        allowEmpty={false}
+                                    />
                                 </div>
 
                                 <div className="flex justify-content-end align-items-center text-end">
-                                    <Checkbox inputId="req" name="pizza" value="Cheese" onChange={(e) => setChecked(e.checked)} checked={checked} />
-                                    <label htmlFor="req" className="ml-2">Posto sem Cobertura?</label>
+                                    <Checkbox
+                                        inputId="req"
+                                        name="sem-reserva"
+                                        onChange={(e) => {
+                                            setChecked(e.checked);
+                                            if (e.checked) selectedReplace(null);
+                                            if (!e.checked) setManualCoverage(null);
+                                            setAdditionalStepReleased(false);
+                                        }}
+                                        checked={checked}
+                                    />
+                                    <label htmlFor="req" className="ml-2">Sem reserva técnica?</label>
                                 </div>
+
+                                <Button
+                                    label={additionalContext?.modo === "selecionar_cobertura" ? "Continuar" : "Enviar Requisição"}
+                                    icon={additionalContext?.modo === "selecionar_cobertura" ? "pi pi-arrow-right" : "pi pi-send"}
+                                    iconPos="right"
+                                    className="w-full mt-4"
+                                    onClick={advanceToAdditional}
+                                />
+                            </div>
+                        </StepperPanel>
+
+                        <StepperPanel header="Adicional">
+                            <div className="request-additional-step request-form-step flex flex-column">
+                                <section className={`request-additional-coverage ${additionalContext?.modo !== "selecionar_cobertura" ? "is-disabled" : ""}`}>
+                                    <div className="request-additional-coverage__heading">
+                                        <span>3</span>
+                                        <div>
+                                            <strong>Cobertura para adicional</strong>
+                                            <small>Use somente quando não houver reserva técnica.</small>
+                                        </div>
+                                    </div>
+
+                                    {additionalLoading && <p className="request-additional-coverage__message"><i className="pi pi-spin pi-spinner" /> Verificando o cargo selecionado...</p>}
+
+                                    {!additionalLoading && additionalContext?.modo === "selecionar_cobertura" && (
+                                        <>
+                                            <dl className="request-additional-coverage__summary">
+                                                <div><dt>Colaborador</dt><dd>{absentDetails?.nome || "Não informado"}</dd></div>
+                                                <div><dt>Matrícula</dt><dd>{absentDetails?.matricula || "Não informada"}</dd></div>
+                                                <div><dt>Centro de custo</dt><dd>{absentDetails?.centro_id || "Não informado"}</dd></div>
+                                                <div><dt>Departamento</dt><dd>{absentDetails?.departamento || "Não informado"}</dd></div>
+                                                <div className="is-wide"><dt>Motivo</dt><dd>{reason || "Selecione o motivo da ausência"}</dd></div>
+                                            </dl>
+                                            <Dropdown
+                                                appendTo="self"
+                                                panelStyle={{ width: "100%" }}
+                                                className="w-full"
+                                                value={manualCoverage}
+                                                onChange={(e) => {
+                                                    setManualCoverage(e.value);
+                                                    setChecked(true);
+                                                }}
+                                                options={additionalContext.candidatos || []}
+                                                optionLabel="nome"
+                                                placeholder="Selecione quem cobrirá o posto"
+                                                filter
+                                                itemTemplate={(option) => (
+                                                    <div className="request-reserve-option">
+                                                        <span>{option.nome}</span>
+                                                        <small>{[option.matricula && `Matrícula ${option.matricula}`, option.cargo].filter(Boolean).join(" · ")}</small>
+                                                    </div>
+                                                )}
+                                                valueTemplate={(option, props) => option ? (
+                                                    <div className="request-reserve-option">
+                                                        <span>{option.nome}</span>
+                                                        <small>{option.cargo || "Cargo não informado"}</small>
+                                                    </div>
+                                                ) : <span className="p-placeholder">{props.placeholder}</span>}
+                                            />
+                                        </>
+                                    )}
+
+                                    {!additionalLoading && additionalContext?.modo !== "selecionar_cobertura" && (
+                                        <p className="request-additional-coverage__message">{additionalContext?.motivo || "Selecione o colaborador ausente para verificar esta etapa."}</p>
+                                    )}
+                                </section>
 
 
                                 <Button

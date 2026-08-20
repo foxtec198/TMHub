@@ -15,6 +15,7 @@ import {
 // Widgets
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
+import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
@@ -28,6 +29,7 @@ import { Tag } from "primereact/tag";
 // Components
 import { PageHeader } from "../../components/PageHeader";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+import "../../components/tables/index.css";
 
 // Styles
 import "./styles.css";
@@ -125,6 +127,15 @@ const FILTER_DEFINITIONS = {
   },
 };
 
+function responsiveCell(label, content) {
+  return (
+    <div className="tm-table-cell">
+      <span className="tm-table-card-label">{label}</span>
+      <div className="tm-table-card-value">{content ?? "—"}</div>
+    </div>
+  );
+}
+
 function AbsenceControlPage() {
   const [records, setRecords] = useState([]);
   const [search, setSearch] = useState("");
@@ -134,6 +145,7 @@ function AbsenceControlPage() {
   const [manualForm, setManualForm] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [supervisors, setSupervisors] = useState([]);
+  const [loadingSupervisors, setLoadingSupervisors] = useState(false);
   const [now, setNow] = useState(0);
   const [refresh, setRefresh] = useState(0);
   const filterPanel = useRef(null);
@@ -162,13 +174,38 @@ function AbsenceControlPage() {
       .catch((error) => showToast("error", "Controle de Faltas", error.response?.data || "Não foi possível carregar os registros."));
   }, [refresh, showToast]);
 
+  const manualCenterId = manualForm?.centro_custo_id;
+
   useEffect(() => {
-    connect.get("/supervisores")
-      .then(({ data }) => setSupervisors((Array.isArray(data) ? data : [])
-        .map((supervisor) => ({ label: supervisor.nome, value: supervisor.id }))
-        .sort((left, right) => left.label.localeCompare(right.label, "pt-BR"))))
-      .catch(() => setSupervisors([]));
-  }, []);
+    if (!manualCenterId) {
+      setSupervisors([]);
+      return undefined;
+    }
+
+    let active = true;
+    setLoadingSupervisors(true);
+    connect.get("/supervisores", { params: { centro_id: manualCenterId } })
+      .then(({ data }) => {
+        if (!active) return;
+        setSupervisors((Array.isArray(data) ? data : [])
+          .map((supervisor) => ({ label: supervisor.nome, value: supervisor.id }))
+          .sort((left, right) => left.label.localeCompare(right.label, "pt-BR")));
+      })
+      .catch((error) => {
+        if (!active) return;
+        setSupervisors([]);
+        showToast(
+          "error",
+          "Supervisores",
+          error.response?.data || "Não foi possível carregar o supervisor responsável pelo local.",
+        );
+      })
+      .finally(() => {
+        if (active) setLoadingSupervisors(false);
+      });
+
+    return () => { active = false; };
+  }, [manualCenterId, showToast]);
 
   useEffect(() => {
     const timer = window.setInterval(() => { setNow(Date.now()); setRefresh((value) => value + 1); }, 60_000);
@@ -320,9 +357,14 @@ function AbsenceControlPage() {
       colaborador_id: null,
       colaborador_nome: "",
       colaborador_matricula: "",
+      centro_custo_id: null,
       contrato: "",
       departamento: "",
       supervisor_id: null,
+      houve_cobertura: false,
+      cobertura_colaborador_id: null,
+      cobertura_nome: "",
+      cobertura_matricula: "",
       motivo: null,
       tipo_ausencia: "integral",
       quantidade_horas: null,
@@ -337,6 +379,9 @@ function AbsenceControlPage() {
     }
     if (manualForm.tipo_ausencia === "parcial" && !manualForm.quantidade_horas) {
       return showToast("warn", "Lançamento manual", "Informe quantas horas correspondem à falta parcial.");
+    }
+    if (manualForm.houve_cobertura && !manualForm.cobertura_colaborador_id) {
+      return showToast("warn", "Lançamento manual", "Selecione quem realizou a cobertura.");
     }
     setLoading(true);
     try {
@@ -364,6 +409,25 @@ function AbsenceControlPage() {
         ? { label: "INJUSTIFICADA", severity: "danger" }
         : { label: "EM ANÁLISE", severity: "warning" };
     return <Tag value={config.label} severity={config.severity} />;
+  };
+
+  const additionalBody = (record) => {
+    if (!record.adicional_tipo || record.adicional_valor_diaria == null) return "—";
+    const value = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(Number(record.adicional_valor_diaria));
+    return <div className="absence-person"><strong>{value} por dia</strong><small>{record.adicional_tipo}</small></div>;
+  };
+
+  const additionalRecipientBody = (record) => {
+    if (!record.adicional_tipo || !record.beneficiario_adicional) return "—";
+    return (
+      <div className="absence-person">
+        <strong>{record.beneficiario_adicional}</strong>
+        <small>Matrícula {record.beneficiario_adicional_matricula || "—"}</small>
+      </div>
+    );
   };
 
   return <section className="absence-page">
@@ -397,15 +461,17 @@ function AbsenceControlPage() {
           <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador, matrícula ou contrato" />
         </span>
       </div>
-      <DataTable value={filtered} paginator rows={10} rowsPerPageOptions={[10, 25, 50, 100]} stripedRows emptyMessage="Nenhuma falta encontrada." dataKey="id" size="small">
-        <Column field="data_falta" header="Data" sortable body={(record) => new Date(record.data_falta).toLocaleDateString("pt-BR")} />
-        <Column field="colaborador" header="Colaborador" sortable body={(record) => <div className="absence-person"><strong>{record.colaborador}</strong><small>Matrícula {record.matricula}</small></div>} />
-        <Column field="contrato" header="Contrato" sortable body={(record) => <div className="absence-person"><strong>{record.contrato}</strong><small>DPTO. {record.departamento ?? "—"}</small></div>} />
-        <Column field="motivo" header="Motivo" sortable body={(record) => <div className="absence-person"><strong>{record.motivo}</strong><small>{record.tipo_ausencia === "parcial" ? `Parcial · ${record.quantidade_horas || 0}h` : "Integral"}</small></div>} />
-        <Column header="Prazo do documento" body={timerBody} />
-        <Column header="Classificação" field="classificacao" sortable body={classificationBody} />
-        <Column field="status" header="Tratativa" sortable body={(record) => <Tag value={record.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={record.status === "tratada" ? "success" : "info"} />} />
-        {canEdit && <Column header="Ações" body={(record) => <Button icon="pi pi-pencil" rounded text aria-label={`Tratar falta de ${record.colaborador}`} onClick={() => open(record)} />} />}
+      <DataTable value={filtered} paginator rows={10} rowsPerPageOptions={[10, 25, 50, 100]} stripedRows emptyMessage="Nenhuma falta encontrada." dataKey="id" size="small" className="tm-responsive-table absence-table" tableStyle={{ minWidth: "90rem" }}>
+        <Column field="data_falta" header="Data" sortable body={(record) => responsiveCell("Data", new Date(record.data_falta).toLocaleDateString("pt-BR"))} />
+        <Column field="colaborador" header="Colaborador" sortable body={(record) => responsiveCell("Colaborador", <div className="absence-person"><strong>{record.colaborador}</strong><small>Matrícula {record.matricula}</small></div>)} />
+        <Column field="contrato" header="Contrato" sortable body={(record) => responsiveCell("Contrato", <div className="absence-person"><strong>{record.contrato}</strong><small>DPTO. {record.departamento ?? "—"}</small></div>)} />
+        <Column field="motivo" header="Motivo" sortable body={(record) => responsiveCell("Motivo", <div className="absence-person"><strong>{record.motivo}</strong><small>{record.tipo_ausencia === "parcial" ? `Parcial · ${record.quantidade_horas || 0}h` : "Integral"}</small></div>)} />
+        <Column header="Adicional" body={(record) => responsiveCell("Adicional", additionalBody(record))} />
+        <Column header="Nominal" body={(record) => responsiveCell("Nominal", additionalRecipientBody(record))} />
+        <Column header="Prazo do documento" body={(record) => responsiveCell("Prazo do documento", timerBody(record))} />
+        <Column header="Classificação" field="classificacao" sortable body={(record) => responsiveCell("Classificação", classificationBody(record))} />
+        <Column field="status" header="Tratativa" sortable body={(record) => responsiveCell("Tratativa", <Tag value={record.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={record.status === "tratada" ? "success" : "info"} />)} />
+        {canEdit && <Column header="Ações" body={(record) => responsiveCell("Ações", <Button icon="pi pi-pencil" rounded text aria-label={`Tratar falta de ${record.colaborador}`} onClick={() => open(record)} />)} />}
       </DataTable>
     </div>
 
@@ -458,8 +524,13 @@ function AbsenceControlPage() {
               colaborador_id: employeeId,
               colaborador_nome: employee?.nome || "",
               colaborador_matricula: employee?.matricula || "",
+              centro_custo_id: employee?.centro_id || null,
               contrato: employee?.centro_local || "",
               departamento: employee?.departamento || "",
+              supervisor_id: null,
+              cobertura_colaborador_id: null,
+              cobertura_nome: "",
+              cobertura_matricula: "",
             }))}
             placeholder="Selecione ou pesquise o colaborador"
           />
@@ -471,10 +542,48 @@ function AbsenceControlPage() {
         </div>}
 
         <label><span>Data e hora da falta</span><Calendar value={manualForm.data_falta} onChange={(event) => setManualForm({ ...manualForm, data_falta: event.value })} dateFormat="dd/mm/yy" showTime hourFormat="24" showIcon /></label>
-        <label><span>Supervisor responsável</span><Dropdown value={manualForm.supervisor_id} options={supervisors} onChange={(event) => setManualForm({ ...manualForm, supervisor_id: event.value })} placeholder="Selecione" filter /></label>
+        <label><span>Supervisor responsável</span><Dropdown value={manualForm.supervisor_id} options={supervisors} onChange={(event) => setManualForm({ ...manualForm, supervisor_id: event.value })} placeholder="Selecione" filter loading={loadingSupervisors} disabled={!manualCenterId || loadingSupervisors} emptyMessage="Nenhum supervisor vinculado a este local" emptyFilterMessage="Nenhum supervisor encontrado" /></label>
         <label><span>Motivo</span><Dropdown value={manualForm.motivo} options={REASONS} onChange={(event) => setManualForm({ ...manualForm, motivo: event.value })} placeholder="Selecione o motivo" /></label>
         <label><span>Tipo da falta</span><Dropdown value={manualForm.tipo_ausencia} options={ABSENCE_TYPES} onChange={(event) => setManualForm({ ...manualForm, tipo_ausencia: event.value, quantidade_horas: null })} /></label>
         {manualForm.tipo_ausencia === "parcial" && <label className="is-wide"><span>Quantidade de horas da falta</span><InputNumber value={manualForm.quantidade_horas} onValueChange={(event) => setManualForm({ ...manualForm, quantidade_horas: event.value })} min={0.01} max={23.99} minFractionDigits={0} maxFractionDigits={2} suffix=" h" placeholder="Ex.: 2 horas" /></label>}
+        <label className="absence-manual-coverage-toggle is-wide" htmlFor="manual-absence-has-coverage">
+          <Checkbox
+            inputId="manual-absence-has-coverage"
+            checked={manualForm.houve_cobertura}
+            onChange={(event) => setManualForm((current) => ({
+              ...current,
+              houve_cobertura: Boolean(event.checked),
+              cobertura_colaborador_id: event.checked ? current.cobertura_colaborador_id : null,
+              cobertura_nome: event.checked ? current.cobertura_nome : "",
+              cobertura_matricula: event.checked ? current.cobertura_matricula : "",
+            }))}
+          />
+          <span>Houve cobertura?</span>
+        </label>
+        {manualForm.houve_cobertura && <label className="is-wide">
+          <span>Quem realizou a cobertura</span>
+          <CollaboratorDropdown
+            value={manualForm.cobertura_colaborador_id}
+            selectedOption={manualForm.cobertura_colaborador_id ? {
+              id: manualForm.cobertura_colaborador_id,
+              nome: manualForm.cobertura_nome,
+              matricula: manualForm.cobertura_matricula,
+            } : null}
+            queryParams={{
+              centro_id: manualForm.centro_custo_id,
+              situacao: 1,
+              excluir_id: manualForm.colaborador_id,
+            }}
+            onChange={(employeeId, employee) => setManualForm((current) => ({
+              ...current,
+              cobertura_colaborador_id: employeeId,
+              cobertura_nome: employee?.nome || "",
+              cobertura_matricula: employee?.matricula || "",
+            }))}
+            placeholder="Selecione quem cobriu a falta"
+            emptyMessage="Nenhum colaborador ativo encontrado neste local"
+          />
+        </label>}
         <label className="is-wide"><span>Observação</span><InputTextarea value={manualForm.observacao} onChange={(event) => setManualForm({ ...manualForm, observacao: event.target.value })} rows={4} autoResize placeholder="Descreva informações importantes sobre esta falta" /></label>
         <div className="dialog-actions is-wide">
           <Button label="Cancelar" text onClick={() => setManualForm(null)} />
