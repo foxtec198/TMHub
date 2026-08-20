@@ -45,6 +45,14 @@ const statusLabel = (status) => ({
   SEM_DADOS: "SEM DADOS",
 }[status] || "—");
 
+function DailyMetaReal({ meta, real, status }) {
+  return <span className={`ql-daily-value is-${statusSeverity(status)}`}>
+    <strong>{meta ?? "—"}</strong>
+    <span className="ql-daily-value__separator">x</span>
+    <b>{real ?? "—"}</b>
+  </span>;
+}
+
 export function QLDashboard() {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(null);
@@ -137,12 +145,10 @@ export function QLDashboard() {
       field: day,
       body: (row) => {
         const value = row.dias?.find((item) => item.data === day);
-        const meta = value?.capacidade_esperada;
-        const real = value?.colaboradores_ativos;
-        return <Tag
-          value={`${meta ?? "—"} x ${real ?? "—"}`}
-          severity={statusSeverity(value?.situacao)}
-          rounded
+        return <DailyMetaReal
+          meta={value?.capacidade_esperada}
+          real={value?.colaboradores_ativos}
+          status={value?.situacao}
         />;
       },
       style: { minWidth: "8.25rem" },
@@ -150,11 +156,11 @@ export function QLDashboard() {
     {
       header: "Média final",
       field: "percentual",
-      body: (row) => <Tag
-        value={row.percentual == null ? statusLabel(row.situacao_mes) : `${Number(row.percentual).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`}
-        severity={statusSeverity(row.situacao_mes)}
-        rounded
-      />,
+      body: (row) => <strong className={`ql-daily-average is-${statusSeverity(row.situacao_mes)}`}>
+        {row.percentual == null
+          ? statusLabel(row.situacao_mes)
+          : `${Number(row.percentual).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`}
+      </strong>,
       sortable: true,
       style: { minWidth: "9rem" },
     },

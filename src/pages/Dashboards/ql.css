@@ -24,5 +24,14 @@
 .ql-muted { color: var(--text-color-secondary); }
 .ql-negative { color: var(--red-500, #ef4444); font-weight: 800; }
 .ql-positive { color: var(--green-500, #22c55e); font-weight: 800; }
+.ql-daily-value { display: inline-flex; align-items: baseline; gap: .32rem; font-variant-numeric: tabular-nums; font-size: .88rem; letter-spacing: .01em; white-space: nowrap; }
+.ql-daily-value strong { font-weight: 800; }
+.ql-daily-value b { font-weight: 700; }
+.ql-daily-value__separator { color: var(--text-color-secondary); font-size: .75rem; font-weight: 700; }
+.ql-daily-value.is-success, .ql-daily-average.is-success { color: var(--green-500, #22c55e); }
+.ql-daily-value.is-info, .ql-daily-average.is-info { color: var(--primary-color); }
+.ql-daily-value.is-danger, .ql-daily-average.is-danger { color: var(--red-500, #ef4444); }
+.ql-daily-value.is-secondary, .ql-daily-average.is-secondary { color: var(--text-color-secondary); }
+.ql-daily-average { display: inline-block; font-variant-numeric: tabular-nums; font-size: .9rem; font-weight: 800; white-space: nowrap; }
 @media (max-width: 1100px) { .ql-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ql-dashboard-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .ql-summary-grid { grid-template-columns: 1fr; } .ql-panel { padding: 1rem; } .ql-panel > header { display: grid; } .ql-panel header small { text-align: left; } .ql-chart { height: 16rem; } }
