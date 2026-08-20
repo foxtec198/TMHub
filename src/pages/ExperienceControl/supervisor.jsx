@@ -2,8 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -12,6 +10,7 @@ import { StepperPanel } from "primereact/stepperpanel";
 import { Tag } from "primereact/tag";
 
 import { ThemeLogo } from "../../components/ThemeLogo";
+import { Table } from "../../components/tables/Table";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
@@ -208,6 +207,39 @@ export function ExperiencePublic() {
     </div>
   );
 
+  const taskColumns = [
+    {
+      header: "Colaborador",
+      body: (row) => <div className="experience-public-person"><strong>{row.colaborador?.nome}</strong><small>Matrícula {row.colaborador?.matricula || "—"}</small></div>,
+      style: { minWidth: "18rem" },
+    },
+    {
+      header: "Contrato",
+      body: (row) => <div className="experience-public-person"><strong>{row.colaborador?.centro_custo || "—"}</strong><small>DPTO. {row.colaborador?.departamento || "—"}</small></div>,
+      style: { minWidth: "16rem" },
+    },
+    {
+      header: "Fim da experiência",
+      body: (row) => dateLabel(row.colaborador?.data_fim_experiencia),
+      style: { minWidth: "10rem" },
+    },
+    {
+      header: "Prazo",
+      body: (row) => <time className="experience-public-table-date" dateTime={row.prazo_supervisor_em || undefined}>{dateLabel(row.prazo_supervisor_em, true)}</time>,
+      style: { minWidth: "12rem" },
+    },
+    {
+      header: "Situação",
+      body: (row) => <Tag value={STATUS[row.status]?.label || row.status} severity={STATUS[row.status]?.severity || "secondary"} />,
+      style: { minWidth: "10rem" },
+    },
+    {
+      header: "Ação",
+      body: (row) => <Button label="Avaliar" icon="pi pi-file-edit" text onClick={() => openEvaluation(row.id)} />,
+      style: { minWidth: "8rem" },
+    },
+  ];
+
   return (
     <main className="experience-public-page">
       <header className="experience-public-header">
@@ -242,29 +274,7 @@ export function ExperiencePublic() {
                 <div><strong>{supervisors.find((item) => item.value === supervisor)?.label || "Supervisor"}</strong><span>{tasks.length} avaliação(ões) pendente(s)</span></div>
                 <Button label="Trocar nome" icon="pi pi-user-edit" text onClick={() => stepperRef.current?.prevCallback?.()} />
               </div>
-              <DataTable className="experience-public-tasks-table" value={tasks} loading={loadingTasks} paginator rows={8} rowsPerPageOptions={[8, 16, 32]} stripedRows size="small" dataKey="id" emptyMessage="Não há avaliações pendentes para este supervisor." tableStyle={{ minWidth: "50rem" }}>
-                <Column header="Colaborador" body={(row) => <div className="experience-public-person"><strong>{row.colaborador?.nome}</strong><small>Matrícula {row.colaborador?.matricula || "—"}</small></div>} style={{ minWidth: "18rem" }} />
-                <Column header="Contrato" body={(row) => <div className="experience-public-person"><strong>{row.colaborador?.centro_custo || "—"}</strong><small>DPTO. {row.colaborador?.departamento || "—"}</small></div>} style={{ minWidth: "16rem" }} />
-                <Column header="Fim da experiência" body={(row) => dateLabel(row.colaborador?.data_fim_experiencia)} style={{ minWidth: "10rem" }} />
-                <Column header="Prazo" body={(row) => <span className={row.status === "atrasada" ? "experience-public-overdue" : ""}>{dateLabel(row.prazo_supervisor_em, true)}</span>} style={{ minWidth: "12rem" }} />
-                <Column header="Situação" body={(row) => <Tag value={STATUS[row.status]?.label || row.status} severity={STATUS[row.status]?.severity || "secondary"} />} style={{ minWidth: "10rem" }} />
-                <Column header="Ação" body={(row) => <Button label="Avaliar" icon="pi pi-file-edit" text onClick={() => openEvaluation(row.id)} />} style={{ width: "8rem" }} />
-              </DataTable>
-              <div className="experience-public-task-cards">
-                {tasks.length === 0 && !loadingTasks && <div className="experience-public-empty"><i className="pi pi-check-circle" /><strong>Nenhuma pendência no momento</strong><span>Quando houver uma avaliação para preencher, ela aparecerá aqui.</span></div>}
-                {tasks.map((task) => <article className="experience-public-task-card" key={task.id}>
-                  <div className="experience-public-task-card-top">
-                    <div className="experience-public-person"><strong>{task.colaborador?.nome || "Colaborador não informado"}</strong><small>Matrícula {task.colaborador?.matricula || "—"}</small></div>
-                    <Tag value={STATUS[task.status]?.label || task.status} severity={STATUS[task.status]?.severity || "secondary"} />
-                  </div>
-                  <dl className="experience-public-task-details">
-                    <div><dt>Contrato</dt><dd>{task.colaborador?.centro_custo || "—"}</dd></div>
-                    <div><dt>Fim da experiência</dt><dd>{dateLabel(task.colaborador?.data_fim_experiencia)}</dd></div>
-                    <div><dt>Prazo para preencher</dt><dd className={task.status === "atrasada" ? "experience-public-overdue" : ""}>{dateLabel(task.prazo_supervisor_em, true)}</dd></div>
-                  </dl>
-                  <Button label="Avaliar colaborador" icon="pi pi-file-edit" iconPos="right" onClick={() => openEvaluation(task.id)} />
-                </article>)}
-              </div>
+              <Table data={tasks} columns={taskColumns} loading={loadingTasks} rows={8} rowsPerPageOptions={[8, 16, 32]} tableClassName="experience-public-tasks-table" tableStyle={{ minWidth: "50rem" }} />
             </div>
           </StepperPanel>
         </Stepper>
@@ -272,7 +282,13 @@ export function ExperiencePublic() {
 
       <Dialog header={`Avaliação de experiência · ${evaluation?.colaborador?.nome || ""}`} visible={Boolean(evaluation)} modal className="experience-public-dialog" footer={footer} onHide={() => setEvaluation(null)}>
         {evaluation && <div className="experience-public-form">
-          <div className="experience-public-context"><strong>{evaluation.colaborador?.centro_custo || "Contrato não informado"}</strong><span>Admissão: {dateLabel(evaluation.colaborador?.data_admissao)} · Fim da experiência: {dateLabel(evaluation.colaborador?.data_fim_experiencia)}</span></div>
+          <div className="experience-public-context">
+            <strong>{evaluation.colaborador?.centro_custo || "Contrato não informado"}</strong>
+            <div className="experience-public-context-details">
+              <span>Admissão: {dateLabel(evaluation.colaborador?.data_admissao)}</span>
+              <span>Fim da experiência: {dateLabel(evaluation.colaborador?.data_fim_experiencia)}</span>
+            </div>
+          </div>
           <div className="experience-public-competencies">
             {COMPETENCIES.map((item) => <label key={item.key}><span>{item.label}</span><Dropdown value={form.competencias[item.key] || null} options={RATING_OPTIONS} onChange={(event) => updateSupervisorForm({ competencias: { ...form.competencias, [item.key]: event.value } })} placeholder="Selecione" /></label>)}
           </div>

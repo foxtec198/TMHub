@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -38,11 +38,19 @@ export function UsersSettings() {
   const [refresh, setRefresh] = useState(0);
   const [userDialog, setUserDialog] = useState(false);
   const [bulkDialog, setBulkDialog] = useState(false);
+  const [signatureDialog, setSignatureDialog] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [spreadsheet, setSpreadsheet] = useState(null);
+  const [signatureUserId, setSignatureUserId] = useState(null);
+  const [signatureFile, setSignatureFile] = useState(null);
+  const [signaturePreview, setSignaturePreview] = useState("");
+  const [signatureCrop, setSignatureCrop] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [registeringSignature, setRegisteringSignature] = useState(false);
   const fileInput = useRef(null);
+  const signatureFileInput = useRef(null);
+  const signatureCropStart = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
   const canManage = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
@@ -79,6 +87,56 @@ export function UsersSettings() {
     setEditingId(user.id);
     setForm({ nome: user.nome || "", cpf: user.cpf || "", email: user.email || "", role: user.role || "USER", password: "", filial_ids: user.filial_ids || [], gerencia_faltas: Boolean(user.gerencia_faltas), permissions: user.permissions || [] });
     setUserDialog(true);
+  };
+
+  const openSignatureRegistration = () => {
+    setSignatureUserId(null);
+    setSignatureFile(null);
+    if (signaturePreview) URL.revokeObjectURL(signaturePreview);
+    setSignaturePreview("");
+    setSignatureCrop(null);
+    if (signatureFileInput.current) signatureFileInput.current.value = "";
+    setSignatureDialog(true);
+  };
+
+  const selectSignatureFile = (file) => {
+    if (signaturePreview) URL.revokeObjectURL(signaturePreview);
+    setSignatureFile(file || null);
+    setSignatureCrop(null);
+    setSignaturePreview(file?.type?.startsWith("image/") ? URL.createObjectURL(file) : "");
+  };
+
+  const cropPoint = (event) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    return {
+      x: Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width)),
+      y: Math.min(1, Math.max(0, (event.clientY - bounds.top) / bounds.height)),
+    };
+  };
+
+  const startSignatureCrop = (event) => {
+    const point = cropPoint(event);
+    signatureCropStart.current = point;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setSignatureCrop({ x: point.x, y: point.y, width: 0, height: 0 });
+  };
+
+  const updateSignatureCrop = (event) => {
+    if (!signatureCropStart.current) return;
+    const point = cropPoint(event);
+    const start = signatureCropStart.current;
+    setSignatureCrop({
+      x: Math.min(start.x, point.x),
+      y: Math.min(start.y, point.y),
+      width: Math.abs(point.x - start.x),
+      height: Math.abs(point.y - start.y),
+    });
+  };
+
+  const finishSignatureCrop = (event) => {
+    if (!signatureCropStart.current) return;
+    signatureCropStart.current = null;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
   };
 
   const saveUser = async (event) => {
@@ -139,10 +197,38 @@ export function UsersSettings() {
     }
   };
 
-  const speedDialItems = useMemo(() => [
-    { label: "Criar um usuário", icon: "pi pi-user-plus", command: openCreate },
-    { label: "Importar planilha", icon: "pi pi-file-excel", command: () => setBulkDialog(true) },
-  ], []);
+  const registerSignature = async (event) => {
+    event.preventDefault();
+    if (!signatureUserId) return showToast("warn", "Assinatura", "Selecione o usuário titular da assinatura.");
+    if (!signatureFile) return showToast("warn", "Assinatura", "Selecione um arquivo de assinatura.");
+    if (signatureFile.size > 5 * 1024 * 1024) return showToast("warn", "Assinatura", "O arquivo deve ter no máximo 5 MB.");
+
+    const data = new FormData();
+    data.append("arquivo", signatureFile);
+    if (signaturePreview && (!signatureCrop || signatureCrop.width < .03 || signatureCrop.height < .03)) {
+      return showToast("warn", "Assinatura", "Arraste uma área que contenha somente a assinatura.");
+    }
+    if (signatureCrop) data.append("recorte", JSON.stringify(signatureCrop));
+    setRegisteringSignature(true);
+    try {
+      const { data: response } = await connect.post(`/usuarios/${signatureUserId}/assinatura-cadastrada`, data, { timeout: 120000 });
+      showToast("success", "Assinatura", response?.message || "Assinatura cadastrada com sucesso.");
+      setSignatureDialog(false);
+      setSignatureFile(null);
+      if (signatureFileInput.current) signatureFileInput.current.value = "";
+      setRefresh((current) => current + 1);
+    } catch (error) {
+      showToast("error", "Assinatura", error.response?.data || "Não foi possível cadastrar a assinatura.");
+    } finally {
+      setRegisteringSignature(false);
+    }
+  };
+
+  const speedDialItems = [
+    { label: "Criar uma conta", icon: "pi pi-user-plus", command: openCreate },
+    { label: "Vincular assinatura", icon: "pi pi-pencil", command: openSignatureRegistration },
+    { label: "Importar arquivo XLSX", icon: "pi pi-file-excel", command: () => setBulkDialog(true) },
+  ];
 
   const permissionValue = (screen, action) => Boolean(form.permissions.find((item) => item.screen === screen)?.[action]);
 
@@ -166,6 +252,7 @@ export function UsersSettings() {
     { header: "CPF", field: "cpf", body: (user) => user.cpf || "Restrito" },
     { header: "Último acesso", field: "last_login", body: (user) => formatDate(user.last_login) },
     { header: "Perfil", field: "role", body: (user) => <Tag value={user.role || "USER"} severity={user.role === "ADMIN" ? "success" : "secondary"} /> },
+    { header: "Assinatura", body: (user) => <Tag value={user.assinatura_cadastrada ? "CADASTRADA" : "NÃO CADASTRADA"} severity={user.assinatura_cadastrada ? "success" : "secondary"} /> },
     { header: "Filiais", body: (user) => user.filial_ids?.length || 0 },
     { header: "Telas", body: (user) => user.permissions?.filter((permission) => permission.view).length || 0 },
     ...(canManage ? [{
@@ -184,7 +271,7 @@ export function UsersSettings() {
     </article>
 
     <div className="users-speed-dial">
-      <SpeedDial model={speedDialItems} direction="up" showIcon="pi pi-plus" hideIcon="pi pi-times" />
+      <SpeedDial model={speedDialItems} direction="up" showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações de usuários" />
     </div>
 
     <Dialog header={editingId ? "Editar usuário" : "Criar usuário"} visible={userDialog} modal className="user-dialog" onHide={() => setUserDialog(false)}>
@@ -233,6 +320,50 @@ export function UsersSettings() {
         <input ref={fileInput} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={importing} onChange={(event) => setSpreadsheet(event.target.files?.[0] || null)} />
         {spreadsheet ? <small>Arquivo selecionado: {spreadsheet.name}</small> : null}
         <div className="dialog-actions"><Button type="button" label="Cancelar" text disabled={importing} onClick={() => setBulkDialog(false)} /><Button type="submit" label={importing ? "Importando..." : "Importar usuários"} icon="pi pi-upload" loading={importing} disabled={!spreadsheet || importing} /></div>
+      </form>
+    </Dialog>
+
+    <Dialog header="Cadastrar assinatura" visible={signatureDialog} modal className="user-dialog" closable={!registeringSignature} closeOnEscape={!registeringSignature} onHide={() => !registeringSignature && setSignatureDialog(false)}>
+      <form className="registered-signature-form" onSubmit={registerSignature}>
+        <p>A assinatura será tratada e salva em PNG transparente para uso nos documentos do sistema.</p>
+        <label htmlFor="signature-user">Usuário titular</label>
+        <Dropdown
+          inputId="signature-user"
+          value={signatureUserId}
+          options={users}
+          optionLabel="nome"
+          optionValue="id"
+          filter
+          placeholder="Selecione o usuário"
+          disabled={registeringSignature}
+          onChange={(event) => setSignatureUserId(event.value)}
+        />
+        <label htmlFor="signature-file">Arquivo da assinatura</label>
+        <input
+          ref={signatureFileInput}
+          id="signature-file"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,application/pdf,.png,.jpg,.jpeg,.webp,.pdf"
+          disabled={registeringSignature}
+          onChange={(event) => selectSignatureFile(event.target.files?.[0] || null)}
+        />
+        <small>PNG, JPG, JPEG, WEBP ou PDF · máximo de 5 MB. Em PDF, será utilizada a primeira página.</small>
+        {signatureFile && <small className="registered-signature-file">Arquivo selecionado: {signatureFile.name}</small>}
+        {signaturePreview && <div className="registered-signature-crop">
+          <strong>Recorte a assinatura</strong>
+          <small>Arraste sobre o traço, sem incluir as bordas do papel ou o fundo da foto.</small>
+          <div
+            className="registered-signature-crop__canvas"
+            onPointerDown={startSignatureCrop}
+            onPointerMove={updateSignatureCrop}
+            onPointerUp={finishSignatureCrop}
+            onPointerCancel={finishSignatureCrop}
+          >
+            <img src={signaturePreview} alt="Prévia do arquivo de assinatura" draggable="false" />
+            {signatureCrop && <span className="registered-signature-crop__selection" style={{ left: `${signatureCrop.x * 100}%`, top: `${signatureCrop.y * 100}%`, width: `${signatureCrop.width * 100}%`, height: `${signatureCrop.height * 100}%` }} />}
+          </div>
+        </div>}
+        <div className="dialog-actions"><Button type="button" label="Cancelar" text disabled={registeringSignature} onClick={() => setSignatureDialog(false)} /><Button type="submit" label="Cadastrar assinatura" icon="pi pi-check" loading={registeringSignature} disabled={!signatureUserId || !signatureFile || registeringSignature} /></div>
       </form>
     </Dialog>
   </div>;
