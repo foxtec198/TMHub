@@ -253,6 +253,20 @@ export function Requests() {
             }
         },
         {
+            field: "origem",
+            header: "Origem",
+            body: (row) => {
+                const fromAbsenceControl = row.origem === "controle_faltas";
+                return (
+                    <Tag
+                        value={fromAbsenceControl ? "CONTROLE DE FALTAS" : "REQUISIÇÃO"}
+                        severity={fromAbsenceControl ? "warning" : "info"}
+                        rounded
+                    />
+                );
+            },
+        },
+        {
             field: "ausencia",
             header: "Ausente",
             class: "text-truncate",
