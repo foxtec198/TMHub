@@ -38,6 +38,9 @@ export function Structure() {
     const [dialog, setDialog] = useState(null);
     const [supervisorDialog, setSupervisorDialog] = useState(null);
     const [selectedSupervisorId, setSelectedSupervisorId] = useState(null);
+    const [companyDialog, setCompanyDialog] = useState(null);
+    const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+    const [companies, setCompanies] = useState([]);
     const [routineDialog, setRoutineDialog] = useState(null);
     const [dragLocationId, setDragLocationId] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
@@ -54,6 +57,7 @@ export function Structure() {
     const { showToast } = useToast();
     const canEdit = can("estrutura", "edit");
     const canCreateRoutine = can("tm_ops", "create");
+    const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
 
     useEffect(() => {
         let active = true;
@@ -75,6 +79,18 @@ export function Structure() {
             .finally(() => active && setLoading(false));
         return () => { active = false; };
     }, [refresh, setLoading, showToast]);
+
+    useEffect(() => {
+        if (!isAdmin) return undefined;
+        let active = true;
+        connect.get("/centro/empresas")
+            .then(({ data }) => {
+                if (!active) return;
+                setCompanies((Array.isArray(data) ? data : []).filter((company) => company.ativa));
+            })
+            .catch((error) => showToast("error", "Estrutura", error.response?.data || "Não foi possível carregar as empresas."));
+        return () => { active = false; };
+    }, [isAdmin, showToast]);
 
     const totals = useMemo(() => departments.reduce((summary, department) => {
         summary.contracts += department.contratos.length;
@@ -164,6 +180,38 @@ export function Structure() {
         event.stopPropagation();
         setSupervisorDialog(contract);
         setSelectedSupervisorId(contract.supervisor_id || null);
+    };
+
+    const openCompanyEdit = (event, contract) => {
+        event.stopPropagation();
+        setCompanyDialog(contract);
+        setSelectedCompanyId(contract.empresa_id || null);
+    };
+
+    const updateCompany = async () => {
+        if (!companyDialog || !selectedCompanyId) {
+            showToast("warn", "Estrutura", "Selecione uma empresa.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const { data } = await connect.patch(
+                `/estrutura/contratos/${companyDialog.id}/empresa`,
+                { empresa_id: selectedCompanyId },
+            );
+            setDepartments((current) => current.map((department) => ({
+                ...department,
+                contratos: department.contratos.map((contract) => (
+                    contract.id === data.contrato.id ? { ...contract, ...data.contrato } : contract
+                )),
+            })));
+            setCompanyDialog(null);
+            showToast("success", "Estrutura", data.message);
+        } catch (error) {
+            showToast("error", "Estrutura", error.response?.data || "Não foi possível alterar a empresa.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const updateSupervisor = async () => {
@@ -273,6 +321,10 @@ export function Structure() {
                 <i className="pi pi-user" />
                 {contract.supervisor}
             </span>
+            <span className="structure-supervisor">
+                <i className="pi pi-building" />
+                {contract.empresa_nome || "SEM EMPRESA"}
+            </span>
             {canEdit && (
                 <Button
                     type="button"
@@ -282,6 +334,17 @@ export function Structure() {
                     aria-label={`Alterar supervisor de ${contract.contrato}`}
                     tooltip="Alterar supervisor"
                     onClick={(event) => openSupervisorEdit(event, contract)}
+                />
+            )}
+            {isAdmin && (
+                <Button
+                    type="button"
+                    icon="pi pi-building"
+                    rounded
+                    text
+                    aria-label={`Alterar empresa de ${contract.contrato}`}
+                    tooltip="Alterar empresa"
+                    onClick={(event) => openCompanyEdit(event, contract)}
                 />
             )}
             <Button
@@ -509,6 +572,46 @@ export function Structure() {
                             placeholder="Selecione o supervisor"
                             emptyMessage="Nenhum supervisor disponível"
                             onChange={(event) => setSelectedSupervisorId(event.value)}
+                        />
+                    </label>
+                </div>
+            </Dialog>
+
+            <Dialog
+                header={companyDialog ? `Empresa — ${companyDialog.id}` : "Alterar empresa"}
+                visible={Boolean(companyDialog)}
+                modal
+                className="structure-supervisor-dialog"
+                onHide={() => setCompanyDialog(null)}
+                footer={(
+                    <div className="structure-dialog-footer">
+                        <Button label="Cancelar" severity="secondary" text onClick={() => setCompanyDialog(null)} />
+                        <Button
+                            label="Confirmar alteração"
+                            icon="pi pi-check"
+                            onClick={updateCompany}
+                            disabled={!selectedCompanyId || selectedCompanyId === companyDialog?.empresa_id}
+                        />
+                    </div>
+                )}
+            >
+                <div className="structure-supervisor-form">
+                    <div className="structure-current-supervisor">
+                        <span>Empresa atual</span>
+                        <strong><i className="pi pi-building" /> {companyDialog?.empresa_nome || "SEM EMPRESA"}</strong>
+                    </div>
+                    <label>
+                        Nova empresa
+                        <Dropdown
+                            value={selectedCompanyId}
+                            options={companies}
+                            optionLabel="nome"
+                            optionValue="id"
+                            filter
+                            filterBy="nome"
+                            placeholder="Selecione a empresa"
+                            emptyMessage="Nenhuma empresa disponível"
+                            onChange={(event) => setSelectedCompanyId(event.value)}
                         />
                     </label>
                 </div>

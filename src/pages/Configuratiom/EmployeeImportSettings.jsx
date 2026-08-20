@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { ProgressBar } from "primereact/progressbar";
 import { Tag } from "primereact/tag";
+import { Dropdown } from "primereact/dropdown";
 import connect from "../../utils/request";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -24,8 +25,25 @@ export function CollaboratorImportSettings() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [jobId, setJobId] = useState(null);
   const [job, setJob] = useState(null);
+  const [companies, setCompanies] = useState([]);
+  const [companyName, setCompanyName] = useState(null);
   const inputRef = useRef(null);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    let active = true;
+    connect.get("/importacao-colaboradores/empresas")
+      .then(({ data }) => {
+        if (!active) return;
+        setCompanies((Array.isArray(data) ? data : [])
+          .filter((company) => company.ativa)
+          .map((company) => ({ label: company.nome, value: company.nome })));
+      })
+      .catch((error) => {
+        if (active) showToast("error", "Empresas", error.response?.data || "Não foi possível carregar as empresas.");
+      });
+    return () => { active = false; };
+  }, [showToast]);
 
   useEffect(() => {
     if (!jobId) return undefined;
@@ -82,6 +100,10 @@ export function CollaboratorImportSettings() {
 
   const startImport = async () => {
     if (!file) return;
+    if (!String(companyName || "").trim()) {
+      showToast("warn", "Empresa obrigatória", "Selecione ou informe a empresa deste arquivo.");
+      return;
+    }
     setStage("uploading");
     setUploadProgress(0);
     setJob(null);
@@ -91,6 +113,7 @@ export function CollaboratorImportSettings() {
         filename: file.name,
         size: file.size,
         chunks: totalChunks,
+        empresa_nome: companyName,
       });
       setJob(upload);
 
@@ -151,9 +174,23 @@ export function CollaboratorImportSettings() {
           <i className="pi pi-database" />
           <div>
             <h2>Importar colaboradores</h2>
-            <p>Sincronize colaboradores, centros de custo, cargos e supervisores pelo JSON.</p>
+            <p>Importe um arquivo por empresa para preservar a identidade de centros, departamentos e matrículas.</p>
           </div>
         </div>
+
+        <label className="settings-field">
+          <span>Empresa do arquivo *</span>
+          <Dropdown
+            value={companyName}
+            options={companies}
+            editable
+            filter
+            showClear
+            disabled={processing}
+            onChange={(event) => setCompanyName(event.value)}
+            placeholder="Selecione ou informe a empresa"
+          />
+        </label>
 
         <div
           className={`collaborator-json-dropzone ${file ? "has-file" : ""}`}
@@ -191,7 +228,7 @@ export function CollaboratorImportSettings() {
 
         <div className="collaborator-import-actions">
           <Button label="Limpar" icon="pi pi-times" text disabled={processing || !file} onClick={reset} />
-          <Button label={processing ? "Importação em andamento" : "Iniciar importação"} icon="pi pi-upload" disabled={!file || processing} onClick={startImport} />
+          <Button label={processing ? "Importação em andamento" : "Iniciar importação"} icon="pi pi-upload" disabled={!file || !String(companyName || "").trim() || processing} onClick={startImport} />
         </div>
       </article>
 
