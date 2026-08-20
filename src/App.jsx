@@ -464,8 +464,6 @@ export function AppRoutes() {
             }
           />
         </Route>
-        </Route>
-
         <Route path="*" element={<Navigate to={token() ? "/init" : "/"} />} />
       </Routes>
       <AuthRequirementsGate />
