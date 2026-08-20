@@ -48,6 +48,7 @@ export function CollaboratorDropdown({
     disabled = false,
     appendTo,
     panelStyle,
+    virtualScrollerOptions = { itemSize: 62 },
     onError,
 }) {
     const [options, setOptions] = useState([]);
@@ -138,7 +139,7 @@ export function CollaboratorDropdown({
             filter
             resetFilterOnHide
             loading={loading}
-            virtualScrollerOptions={{ itemSize: 62 }} // Duas linhas por opção sem renderizar a lista inteira.
+            virtualScrollerOptions={virtualScrollerOptions}
             itemTemplate={(option) => <CollaboratorOption collaborator={option} />}
             valueTemplate={(option, props) => option
                 ? <CollaboratorOption collaborator={option} selected />

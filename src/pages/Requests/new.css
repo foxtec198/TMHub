@@ -1,11 +1,12 @@
-/* Public request form keeps the original 50vh stepper footprint across both themes. */
 .request-create-page {
   width: 100%;
   height: 100dvh;
   min-height: 100dvh;
+  gap: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+  padding-top: clamp(1.5rem, 5vh, 3rem);
   padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
   background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 34%), var(--surface-2);
 }
@@ -16,9 +17,46 @@
   object-fit: contain;
 }
 
+.request-create-header {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  align-items: center;
+  width: min(100%, 42rem);
+  margin: 0 auto clamp(1.5rem, 4vh, 2.75rem);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.request-create-header > div {
+  min-width: 0;
+}
+
+.request-create-header > div > span {
+  display: block;
+  margin-bottom: .15rem;
+  color: var(--primary);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.request-create-header h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  line-height: 1.15;
+}
+
+.request-create-header p {
+  margin: .35rem 0 0;
+  color: var(--text-secondary);
+  font-size: .9rem;
+}
+
 .request-stepper-shell {
   height: auto;
-  min-height: 50vh;
+  min-height: 0;
   flex: 0 0 auto;
 }
 
@@ -30,18 +68,48 @@
 
 .request-reserve-option {
   display: flex;
+  min-width: 0;
   width: 100%;
-  gap: .75rem;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: .18rem;
+}
+
+.request-reserve-option > span,
+.request-reserve-option small {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .request-reserve-option small {
-  white-space: nowrap;
+  color: var(--text-secondary);
+  font-size: .76rem;
+  line-height: 1.25;
+}
+
+.request-reserve-option--availability {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: .75rem;
+  align-items: center;
+}
+
+.request-reserve-option--availability > span,
+.request-reserve-option--availability > small {
+  grid-column: 1;
+}
+
+.request-reserve-option--availability > em {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-size: .73rem;
+  font-style: normal;
+  font-weight: 700;
+  text-align: right;
 }
 
 .request-reserve-available {
-  color: var(--status-success);
+  color: var(--status-success) !important;
 }
 
 .request-reserve-unavailable {
@@ -139,44 +207,60 @@
   background: radial-gradient(circle at 50% -8%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 38%), var(--app-bg);
 }
 
-:root[data-mode="dark"] .request-create-logo {
-  filter: drop-shadow(0 10px 24px color-mix(in srgb, var(--accent) 20%, transparent));
-}
-
-:root[data-mode="dark"] .request-stepper-shell .p-stepper,
-:root[data-mode="dark"] .request-stepper-shell .p-stepper-nav {
+/* O Stepper usa tokens do tema ativo em ambos os modos de visualização. */
+:root[data-theme] .request-stepper-shell .p-stepper,
+:root[data-theme] .request-stepper-shell .p-stepper-nav {
   background: transparent !important;
 }
 
-:root[data-mode="dark"] .request-stepper-shell .p-stepper-panels {
+:root[data-theme] .request-stepper-shell .p-stepper-panels {
   color: var(--text-primary);
   background: transparent !important;
   border-color: transparent;
   box-shadow: none;
 }
 
-:root[data-mode="dark"] .request-stepper-shell .p-stepper-action {
+:root[data-theme] .request-stepper-shell .p-stepper-action {
   color: var(--text-secondary);
   background: transparent !important;
 }
 
-:root[data-mode="dark"] .request-stepper-shell .p-stepper-title {
+:root[data-theme] .request-stepper-shell .p-stepper-action:hover,
+:root[data-theme] .request-stepper-shell .p-stepper-action:focus-visible {
+  background: transparent !important;
+}
+
+:root[data-theme] .request-stepper-shell .p-stepper-title {
   color: var(--text-secondary);
   background: transparent !important;
 }
 
-:root[data-mode="dark"] .request-stepper-shell .p-stepper-header.p-highlight .p-stepper-title {
-  color: var(--accent-hover);
+:root[data-theme] .request-stepper-shell .p-stepper-number {
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
 }
 
-:root[data-mode="dark"] .request-stepper-shell .p-stepper-number {
+:root[data-theme] .request-stepper-shell .p-stepper-header.p-highlight .p-stepper-number {
   color: var(--accent-contrast);
   background: var(--accent-hover);
   border-color: var(--accent-hover);
 }
 
-:root[data-mode="dark"] .request-stepper-shell .p-stepper-separator {
-  background: var(--border-strong);
+:root[data-theme] .request-stepper-shell .p-stepper-header.p-highlight {
+  background: transparent !important;
+}
+
+:root[data-theme] .request-stepper-shell .p-stepper-header.p-highlight .p-stepper-action {
+  background: transparent !important;
+}
+
+:root[data-theme] .request-stepper-shell .p-stepper-separator {
+  background: var(--border);
+}
+
+:root[data-theme] .request-stepper-shell .p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator {
+  background: var(--border) !important;
 }
 
 :root[data-mode="dark"] .request-stepper-shell .p-dropdown,
@@ -193,7 +277,7 @@
 }
 
 :root[data-mode="dark"] .request-reserve-available {
-  color: var(--accent-hover);
+  color: var(--status-success) !important;
 }
 
 :root[data-mode="dark"] .request-reserve-unavailable {
@@ -221,26 +305,256 @@
   border-radius: 8px;
 }
 
+/* A regra global de botões possui vários :not() e alta especificidade.
+   O id mantém esta exceção limitada ao seletor de data da requisição. */
+#request-date-choice .p-button:not(.p-highlight) {
+  color: var(--text-primary) !important;
+  background: var(--surface-2) !important;
+  border-color: var(--border-strong) !important;
+}
+
+#request-date-choice .p-button.p-highlight,
+#request-date-choice .p-button.p-highlight:hover,
+#request-date-choice .p-button.p-highlight:focus {
+  color: var(--accent-contrast) !important;
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-hover) 55%, transparent) !important;
+}
+
+.request-stepper-shell {
+  display: block;
+  width: min(100%, 42rem);
+  padding: .85rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.request-stepper-shell .p-stepper-header.p-disabled .p-stepper-action {
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.request-stepper-shell .p-stepper-header.p-disabled .p-stepper-number {
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+/* O passo 3 só é liberado após a validação do passo de Reserva. */
+.request-stepper-shell.is-additional-locked .p-stepper-header:nth-child(3) .p-stepper-action {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.request-stepper-shell.is-additional-locked .p-stepper-header:nth-child(3) .p-stepper-number {
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.request-additional-step {
+  width: 100%;
+}
+
+.request-reservation-step {
+  width: 100%;
+}
+
+/* Espaçamento local do formulário, sem alterar os componentes globais. */
+.request-form-step {
+  padding: .85rem 0 .2rem;
+  font-size: .875rem;
+}
+
+.request-additional-coverage {
+  display: grid;
+  gap: .8rem;
+  margin: 1rem 0;
+  padding: .9rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+}
+
+.request-additional-coverage.is-disabled {
+  opacity: .72;
+}
+
+.request-additional-coverage__heading {
+  display: flex;
+  gap: .65rem;
+  align-items: center;
+}
+
+.request-additional-coverage__heading > span {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  color: var(--accent-contrast);
+  background: var(--primary);
+  border-radius: 50%;
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.request-additional-coverage__heading strong,
+.request-additional-coverage__heading small {
+  display: block;
+}
+
+.request-additional-coverage__heading small,
+.request-additional-coverage__message {
+  color: var(--text-secondary);
+  font-size: .8rem;
+}
+
+.request-additional-coverage__message {
+  display: flex;
+  gap: .45rem;
+  align-items: center;
+  margin: 0;
+}
+
+.request-additional-coverage__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem .9rem;
+  margin: 0;
+}
+
+.request-additional-coverage__summary > div {
+  min-width: 0;
+}
+
+.request-additional-coverage__summary .is-wide {
+  grid-column: 1 / -1;
+}
+
+.request-additional-coverage__summary dt {
+  margin-bottom: .15rem;
+  color: var(--text-secondary);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.request-additional-coverage__summary dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: .86rem;
+  font-weight: 600;
+}
+
 @media(max-width: 560px) {
   .request-create-page {
     justify-content: flex-start !important;
-    gap: 2rem;
-    padding-inline: 1rem !important;
+    gap: 0;
+    padding-top: 1.5rem !important;
+    padding-inline: .75rem !important;
   }
 
   .request-create-logo {
     width: min(280px, 86vw);
-    padding-inline: 1rem !important;
+    max-height: 10rem;
+  }
+
+  .request-create-header {
+    gap: .5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .request-create-header span {
+    font-size: .62rem;
+  }
+
+  .request-create-header h1 {
+    font-size: 1.08rem;
+  }
+
+  .request-create-header p {
+    font-size: .72rem;
+    line-height: 1.35;
   }
 
   .request-stepper-shell {
     min-width: 0 !important;
     width: 100%;
     min-height: 0;
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    padding: .55rem;
+    padding-bottom: calc(.75rem + env(safe-area-inset-bottom));
+  }
+
+  /* Três etapas precisam de uma navegação mais compacta em telas estreitas. */
+  .request-stepper-shell .p-stepper-nav {
+    margin: 0;
+  }
+
+  .request-stepper-shell .p-stepper-header {
+    min-width: 0;
+  }
+
+  .request-stepper-shell .p-stepper-action {
+    justify-content: center;
+    gap: .35rem;
+    padding: .5rem .3rem;
+  }
+
+  .request-stepper-shell .p-stepper-number {
+    width: 1.45rem;
+    min-width: 1.45rem;
+    height: 1.45rem;
+    font-size: .72rem;
+  }
+
+  .request-stepper-shell .p-stepper-title {
+    overflow: hidden;
+    font-size: .72rem;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .request-stepper-shell .p-dropdown-panel {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .request-stepper-shell .p-dropdown-item {
+    white-space: normal;
+  }
+
+  .request-reserve-option--availability {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: .22rem;
+  }
+
+  .request-reserve-option--availability > em {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .request-form-step {
+    padding-top: .7rem;
+    font-size: .82rem;
+  }
+
+  .request-additional-step {
+    width: 100%;
   }
 
   .request-collaborator-summary dl {
+    grid-template-columns: 1fr;
+  }
+
+  .request-additional-coverage__summary {
     grid-template-columns: 1fr;
   }
 }
