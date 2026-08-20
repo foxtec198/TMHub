@@ -2,6 +2,7 @@ import "./ql.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -15,7 +16,12 @@ import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 
-const initialFilters = () => ({ departamentos: [] });
+const currentMonth = () => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+};
+
+const initialFilters = () => ({ departamentos: [], mes: currentMonth() });
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
   return <article className={`ql-summary-card tm-dashboard-card is-${tone}`}>
@@ -36,11 +42,13 @@ const statusLabel = (status) => ({
   ACIMA: "ACIMA DA META",
   DEFICIT: "DÉFICIT",
   SEM_META: "SEM META",
+  SEM_DADOS: "SEM DADOS",
 }[status] || "—");
 
 export function QLDashboard() {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(null);
+  const [dailyData, setDailyData] = useState(null);
   const [filters, setFilters] = useState(initialFilters);
   const [refresh, setRefresh] = useState(0);
   const filterPanel = useRef(null);
@@ -60,13 +68,19 @@ export function QLDashboard() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    connect.get("/dash/ql", {
-      params: filters.departamentos.length
-        ? { departamento: filters.departamentos.join(",") }
-        : undefined,
-    })
-      .then(({ data: response }) => {
-        if (!cancelled) setData(response);
+    const params = filters.departamentos.length
+      ? { departamento: filters.departamentos.join(",") }
+      : {};
+    const month = `${filters.mes.getFullYear()}-${String(filters.mes.getMonth() + 1).padStart(2, "0")}`;
+    Promise.all([
+      connect.get("/dash/ql", { params }),
+      connect.get("/dash/ql/diario", { params: { ...params, mes: month } }),
+    ])
+      .then(([overview, daily]) => {
+        if (!cancelled) {
+          setData(overview.data);
+          setDailyData(daily.data);
+        }
       })
       .catch((error) => {
         if (!cancelled) showToast(
@@ -109,27 +123,42 @@ export function QLDashboard() {
     ],
   }), [chartTheme, evolution]);
 
-  const departmentColumns = [
-    { header: "Departamento", field: "departamento",  body: (row) => <strong>DPTO. {row.departamento}</strong>, sortable: true },
-    { header: "Colaboradores", field: "colaboradores_ativos", sortable: true },
+  const dailyRows = dailyData?.departamentos || [];
+  const dailyColumns = useMemo(() => [
     {
-      header: "Meta de QL",
-      body: (row) => row.capacidade_esperada ?? <span className="ql-muted">Não definida</span>,
+      header: "DPTO",
+      field: "departamento",
+      body: (row) => <strong>DPTO. {row.departamento}</strong>,
       sortable: true,
+      style: { minWidth: "8rem" },
     },
+    ...(dailyData?.dias || []).map((day) => ({
+      header: `Dia ${new Date(`${day}T12:00:00`).getDate()}`,
+      field: day,
+      body: (row) => {
+        const value = row.dias?.find((item) => item.data === day);
+        const meta = value?.capacidade_esperada;
+        const real = value?.colaboradores_ativos;
+        return <Tag
+          value={`${meta ?? "—"} x ${real ?? "—"}`}
+          severity={statusSeverity(value?.situacao)}
+          rounded
+        />;
+      },
+      style: { minWidth: "8.25rem" },
+    })),
     {
-      header: "Saldo",
-      body: (row) => row.saldo == null
-        ? <span className="ql-muted">—</span>
-        : <span className={row.saldo < 0 ? "ql-negative" : "ql-positive"}>{row.saldo > 0 ? "+" : ""}{row.saldo}</span>,
+      header: "Média final",
+      field: "percentual",
+      body: (row) => <Tag
+        value={row.percentual == null ? statusLabel(row.situacao_mes) : `${Number(row.percentual).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`}
+        severity={statusSeverity(row.situacao_mes)}
+        rounded
+      />,
       sortable: true,
+      style: { minWidth: "9rem" },
     },
-    { header: "Centros de custo", field: "centros_quantidade", sortable: true },
-    {
-      header: "Situação",
-      body: (row) => <Tag value={statusLabel(row.situacao)} severity={statusSeverity(row.situacao)} />,
-    },
-  ];
+  ], [dailyData?.dias]);
 
   const filterCount = filters.departamentos.length;
   return <main className="ql-dashboard p-4">
@@ -177,8 +206,16 @@ export function QLDashboard() {
     </section>
 
     <section className="ql-panel tm-dashboard-panel ql-table-panel">
-      <header><div><span>Detalhamento</span><h2>Quadro por departamento</h2></div><small>Meta e efetivo atual por departamento ativo.</small></header>
-      <Table data={data?.departamentos || []} columns={departmentColumns} search rows={10} rowsPerPageOptions={[10, 25, 50]} />
+      <header><div><span>Detalhamento diário</span><h2>Meta x real por departamento</h2></div><small>O consolidado usa somente os dias já registrados no mês selecionado.</small></header>
+      <Table
+        data={dailyRows}
+        columns={dailyColumns}
+        search
+        rows={10}
+        rowsPerPageOptions={[10, 25, 50]}
+        tableClassName="ql-daily-table"
+        tableStyle={{ minWidth: `${Math.max((dailyColumns.length * 135) + 150, 900)}px` }}
+      />
     </section>
 
     <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
@@ -187,7 +224,8 @@ export function QLDashboard() {
         <Button icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
       <div className="dashboard-filter-grid">
-        <label className="is-wide"><span>Departamento</span><MultiSelect value={filters.departamentos} options={options} onChange={(event) => setFilters({ departamentos: event.value || [] })} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        <label><span>Mês de referência</span><Calendar value={filters.mes} onChange={(event) => setFilters((current) => ({ ...current, mes: event.value || currentMonth() }))} view="month" dateFormat="mm/yy" readOnlyInput showIcon className="w-full" /></label>
+        <label className="is-wide"><span>Departamento</span><MultiSelect value={filters.departamentos} options={options} onChange={(event) => setFilters((current) => ({ ...current, departamentos: event.value || [] }))} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
       </div>
     </OverlayPanel>
   </main>;
