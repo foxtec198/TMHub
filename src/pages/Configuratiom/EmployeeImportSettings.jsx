@@ -3,6 +3,7 @@ import { Button } from "primereact/button";
 import { ProgressBar } from "primereact/progressbar";
 import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
+import { Checkbox } from "primereact/checkbox";
 import connect from "../../utils/request";
 import { useToast } from "../../contexts/ToastContext";
 
@@ -34,6 +35,7 @@ export function CollaboratorImportSettings() {
   const [job, setJob] = useState(null);
   const [companies, setCompanies] = useState([]);
   const [companyName, setCompanyName] = useState(null);
+  const [syncCenterCatalog, setSyncCenterCatalog] = useState(false);
   const inputRef = useRef(null);
   const { showToast } = useToast();
 
@@ -103,6 +105,7 @@ export function CollaboratorImportSettings() {
     setJob(null);
     setStage("idle");
     setUploadProgress(0);
+    setSyncCenterCatalog(false);
     const suggestedCompany = COMPANY_BY_STANDARD_FILE.find(({ matcher }) => matcher.test(selected.name))?.company;
     if (suggestedCompany) setCompanyName(suggestedCompany);
   };
@@ -123,6 +126,7 @@ export function CollaboratorImportSettings() {
         size: file.size,
         chunks: totalChunks,
         empresa_nome: companyName,
+        sincronizar_catalogo_centros: syncCenterCatalog,
       });
       setJob(upload);
 
@@ -167,6 +171,7 @@ export function CollaboratorImportSettings() {
     setJobId(null);
     setStage("idle");
     setUploadProgress(0);
+    setSyncCenterCatalog(false);
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -199,6 +204,25 @@ export function CollaboratorImportSettings() {
             placeholder="Selecione a empresa deste relatório"
           />
         </label>
+
+        <div className="settings-field collaborator-import-catalog-toggle">
+          <span>Catálogo de centros de custo</span>
+          <div className="collaborator-import-catalog-toggle__content">
+            <Checkbox
+              inputId="sync-center-catalog"
+              checked={syncCenterCatalog}
+              disabled={processing}
+              onChange={(event) => setSyncCenterCatalog(Boolean(event.checked))}
+            />
+            <label htmlFor="sync-center-catalog">
+              Sincronizar nomes e locais dos centros a partir desta planilha
+            </label>
+          </div>
+          <small>
+            Use somente na planilha completa da empresa. No dia a dia, deixe desmarcado:
+            a importação resolve o centro por empresa + código e preserva o catálogo aprovado.
+          </small>
+        </div>
 
         <div
           className={`collaborator-json-dropzone ${file ? "has-file" : ""}`}

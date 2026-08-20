@@ -17,6 +17,7 @@ import { Dialog } from "primereact/dialog";
 import { InputOtp } from "primereact/inputotp";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
+import { Checkbox } from "primereact/checkbox";
 import { TabPanel, TabView } from "primereact/tabview";
 import { PageHeader } from "../../components/PageHeader";
 import { UserAvatar } from "../../components/UserAvatar";
@@ -50,6 +51,8 @@ export function Settings() {
   const [newEmail, setNewEmail] = useState("");
   const [emailDialog, setEmailDialog] = useState(false);
   const [otp, setOtp] = useState("");
+  const [maintenanceActive, setMaintenanceActive] = useState(false);
+  const [maintenanceSaving, setMaintenanceSaving] = useState(false);
   const fileRef = useRef(null);
   const { showToast } = useToast();
   const setLoading = useLoading();
@@ -65,6 +68,19 @@ export function Settings() {
       error.response?.data || "Não foi possível carregar seu perfil.",
     ));
   }, [showToast]);
+
+  useEffect(() => {
+    if (!isAdmin) return undefined;
+    let active = true;
+    connect.get("/usuarios/manutencao")
+      .then(({ data }) => {
+        if (active) setMaintenanceActive(Boolean(data?.manutencao_ativa));
+      })
+      .catch(() => {
+        if (active) showToast("error", "Manutenção", "Não foi possível carregar o estado da operação.");
+      });
+    return () => { active = false; };
+  }, [isAdmin, showToast]);
 
   // Ponto único para alterações de nome, foto e senha.
   const save = async (payload, message) => {
@@ -102,6 +118,23 @@ export function Settings() {
     setMode(nextMode);
     if (!(await save({ modo_tema: nextMode }, "Modo de exibição atualizado."))) {
       setMode(previous);
+    }
+  };
+
+  const changeMaintenance = async (active) => {
+    setMaintenanceSaving(true);
+    try {
+      const { data } = await connect.patch("/usuarios/manutencao", { manutencao_ativa: active });
+      setMaintenanceActive(Boolean(data?.manutencao_ativa));
+      showToast(
+        "success",
+        "Manutenção",
+        active ? "Operação bloqueada para usuários não administradores." : "Operação liberada.",
+      );
+    } catch (error) {
+      showToast("error", "Manutenção", error.response?.data || "Não foi possível alterar a operação.");
+    } finally {
+      setMaintenanceSaving(false);
     }
   };
 
@@ -220,6 +253,26 @@ export function Settings() {
               <p className="password-hint"><i className="pi pi-info-circle" /> Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial.</p>
               <Button label="Atualizar senha" icon="pi pi-shield" onClick={changePassword} />
             </article>
+
+            {isAdmin && (
+              <article className="settings-card">
+                <div className="settings-card-title"><i className="pi pi-wrench" /><div><h2>Manutenção da operação</h2><p>Bloqueia o uso do TM Hub para usuários não administradores.</p></div></div>
+                <div className="settings-inline">
+                  <div>
+                    <strong>{maintenanceActive ? "Manutenção ativa" : "Operação liberada"}</strong>
+                    <small>{maintenanceActive ? "Administradores continuam com acesso." : "Todos os usuários autorizados podem operar normalmente."}</small>
+                  </div>
+                  <Checkbox
+                    inputId="maintenance-mode"
+                    binary
+                    checked={maintenanceActive}
+                    disabled={maintenanceSaving}
+                    onChange={(event) => changeMaintenance(Boolean(event.checked))}
+                  />
+                  <label htmlFor="maintenance-mode">Ativar manutenção</label>
+                </div>
+              </article>
+            )}
 
           </div>
         </div>
