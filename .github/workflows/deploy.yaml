@@ -22,5 +22,5 @@ jobs: # Jobs will run
             cd /home/guibs/tmhub
             sudo git stash
             sudo git pull origin main
-            sudo npm install
-            sudo npm run build
+            npm install
+            npm run build
