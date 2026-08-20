@@ -358,11 +358,11 @@ export function History() {
         {
             header: "Observações",
             field: "obs",
-            body: (row) => (
-                <span style={{ whiteSpace: "normal", overflowWrap: "anywhere" }}>
-                    {row.obs || "—"}
+            body: (row) => {
+                return <span className="text-truncate">
+                    {row.obs}
                 </span>
-            ),
+            } 
         },
         {
             header: "Status",
@@ -426,6 +426,7 @@ export function History() {
                     search
                     data={tableData}
                     columns={columns}
+                    rows={10}
                     dateValue={dateFilter}
                     handleSetDate={setDateFilter}
                     setRefresh={setRefresh}

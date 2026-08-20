@@ -433,7 +433,7 @@ export function Requests() {
 
     // Renderiza indicadores, tabela operacional e diálogos de confirmação.
     return (
-        <main className="flex flex-column gap-1 p-2">
+        <main className="flex flex-column gap-1 p-4">
             <ConfirmDialog />
 
             <PageHeader
@@ -476,11 +476,12 @@ export function Requests() {
                     value={requestSummary.expired}
                 />
             </div>
-            <div className="flex flex-column overflow-auto h-full">
+
+            <div className="flex flex-column overflow-auto h-full mt-5">
                 <Table
                     data={requests}
                     tableClassName="w-full h-full"
-                    rows={5}
+                    rows={10}
                     search={true}
                     style={{
                         width: "100%",
@@ -491,6 +492,7 @@ export function Requests() {
                     setRefresh={setRefresh}
                 />
             </div>
+
             <QuickRequestDialog visible={quickDialog} onHide={() => setQuickDialog(false)} onCreated={() => setRefresh((value) => value + 1)} />
             <RequestImportDialog visible={importDialog} onHide={() => setImportDialog(false)} onImported={() => setRefresh((value) => value + 1)} />
             <Dialog header="Uso diário das reservas" visible={usageDialog} modal className="reserve-usage-dialog" onHide={() => setUsageDialog(false)}>
