@@ -11,7 +11,7 @@ import { useNavigate } from "react-router";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
-import { setAccessToken } from "../../utils/authSession";
+import { clearAccessToken, setAccessToken } from "../../utils/authSession";
 import { applyProfileAppearance } from "../../theme/theme";
 import { LOGIN_INFORMATIVES } from "./informativos";
 import { ThemeLogo } from "../../components/ThemeLogo";
@@ -105,6 +105,12 @@ export function Auth() {
             };
 
             const res = await connect.post("/login", { username: user, password: pwd });
+            if (res.data.manutencao_bloqueada) {
+                clearAccessToken();
+                localStorage.removeItem("auth_requirements");
+                navigate("/manutencao", { replace: true });
+                return;
+            }
             setTentativas(0);
             localStorage.removeItem("tentativas");
             localStorage.setItem("display_name", res.data.display_name);

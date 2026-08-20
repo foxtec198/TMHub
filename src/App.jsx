@@ -1,6 +1,6 @@
 // Utils
 import { MainLayout } from "./layouts/MainLayout";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import { useEffect } from "react";
 import { addLocale } from "primereact/api";
@@ -117,6 +117,11 @@ function LegacyTMOpsRedirect() {
   return <Navigate to={`${target}${location.search}${location.hash}`} replace />;
 }
 
+function MaintenanceGate() {
+  const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
+  return isAdmin ? <Outlet /> : <Navigate to="/manutencao" replace />;
+}
+
 export function AppRoutes() {
   const token = function () {
     return !!getAccessToken();
@@ -154,6 +159,15 @@ export function AppRoutes() {
           );
         }
         if (
+          error.response?.status === 503
+          && error.response?.data?.code === "SYSTEM_MAINTENANCE"
+          && window.location.pathname !== "/manutencao"
+        ) {
+          clearAccessToken();
+          localStorage.removeItem("auth_requirements");
+          window.location.href = "/manutencao";
+        }
+        if (
           error.response?.status === 401
           && !isLoginRequest
           && isCurrentAuthenticatedRequest
@@ -178,20 +192,21 @@ export function AppRoutes() {
         <Route path="/" element={<Auth />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/manutencao" element={<Maintenance />} />
-        <Route path="/reposicoes/requisicao" element={<Request />} />
-        <Route path="/reports/reposicoes/ods" element={<RequestsODS />} />
-        <Route path="/tm-ops/login" element={<TMOps />} />
-        <Route path="/tm-ops" element={<TMOps />} />
-        <Route path="/tm-ops/tarefa/:taskId" element={<TMOps />} />
-        <Route
-          path="/tm-ops/tarefa/:taskId/executar"
-          element={<TMOps />}
-        />
-        <Route path="/schedular/*" element={<LegacyTMOpsRedirect />} />
-        <Route path="/schedular" element={<LegacyTMOpsRedirect />} />
-        <Route path="/avaliacoes-experiencia/avaliar" element={<ExperiencePublic />} />
+        <Route element={<MaintenanceGate />}>
+          <Route path="/reposicoes/requisicao" element={<Request />} />
+          <Route path="/reports/reposicoes/ods" element={<RequestsODS />} />
+          <Route path="/tm-ops/login" element={<TMOps />} />
+          <Route path="/tm-ops" element={<TMOps />} />
+          <Route path="/tm-ops/tarefa/:taskId" element={<TMOps />} />
+          <Route
+            path="/tm-ops/tarefa/:taskId/executar"
+            element={<TMOps />}
+          />
+          <Route path="/schedular/*" element={<LegacyTMOpsRedirect />} />
+          <Route path="/schedular" element={<LegacyTMOpsRedirect />} />
+          <Route path="/avaliacoes-experiencia/avaliar" element={<ExperiencePublic />} />
 
-        <Route element={<MainLayout />}>
+          <Route element={<MainLayout />}>
           {/* Init Page */}
           <Route path="/init" element={<Init />} />
           <Route
@@ -451,6 +466,7 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
+        </Route>
         </Route>
 
         <Route path="*" element={<Navigate to={token() ? "/init" : "/"} />} />
