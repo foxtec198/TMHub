@@ -15,6 +15,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
 import { ThemeLogo } from "../components/ThemeLogo";
 import { UserAvatar } from "../components/UserAvatar";
+import { BrowserNotificationCenter } from "../components/BrowserNotificationCenter";
 import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
 
 // Styles
@@ -34,6 +35,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/reposicoes/historico": ["reposicoes.historico"],
   "/reports/colaboradores-departamento": ["colaboradores"],
   "/reports/ponto-48-horas": ["ponto48"],
+  "/reports/ql": ["ql"],
   "/reports/admissoes": ["admissao"],
   "/reports/faltas": ["controle_faltas"],
   "/reports/logistica": ["estoque.movimentos"],
@@ -47,6 +49,9 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/controle-medidas-disciplinares": ["medidas_disciplinares"],
   "/reports/medidas-disciplinares": ["medidas_disciplinares"],
   "/tickets": ["tickets"],
+  "/tm-ops/gestao": ["tm_ops"],
+  "/tm-ops/checklists": ["tm_ops"],
+  "/tm-ops/tarefas": ["tm_ops"],
 };
 
 export function MainLayout() {
@@ -559,6 +564,7 @@ export function MainLayout() {
         </div>
 
         <div className="flex gap-2 align-items-center flipup animation-duration-500">
+          <BrowserNotificationCenter showToast={showToast} />
           <div className="layout-user-info flex flex-column text-right">
             <span className="font-bold">{displayName}</span>
             <span className="text-700 font-italic">{role}</span>

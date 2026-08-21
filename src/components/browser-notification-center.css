@@ -1,0 +1,52 @@
+.browser-notification-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  color: var(--text-color-secondary, var(--text-secondary));
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.15s ease), border-color var(--transition-fast, 0.15s ease), color var(--transition-fast, 0.15s ease), transform var(--transition-fast, 0.15s ease);
+}
+
+.browser-notification-toggle:hover,
+.browser-notification-toggle:focus-visible {
+  color: var(--accent, var(--primary-color));
+  border-color: color-mix(in srgb, var(--accent, var(--primary-color)) 48%, transparent);
+  background: color-mix(in srgb, var(--accent, var(--primary-color)) 12%, var(--surface-card, transparent));
+  outline: none;
+}
+
+.browser-notification-toggle:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--primary-color)) 25%, transparent);
+}
+
+.browser-notification-toggle:active {
+  transform: scale(0.94);
+}
+
+.browser-notification-toggle.is-enabled {
+  color: var(--accent, var(--primary-color));
+}
+
+.browser-notification-status {
+  position: absolute;
+  top: 0.34rem;
+  right: 0.32rem;
+  width: 0.48rem;
+  height: 0.48rem;
+  border: 2px solid var(--surface-card, #fff);
+  border-radius: 50%;
+  background: var(--accent, var(--primary-color));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browser-notification-toggle {
+    transition: none;
+  }
+}
