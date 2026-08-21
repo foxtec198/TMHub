@@ -173,6 +173,14 @@ export function MainLayout() {
               },
             },
             {
+              label: "Experiências",
+              icon: "pi pi-id-card",
+              visible: can("controle_experiencia_rh"),
+              command: () => {
+                navigateTo("/reports/experiencias");
+              },
+            },
+            {
               label: "Glosas",
               items: [
                 {

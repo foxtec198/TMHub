@@ -1,0 +1,327 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
+import { Chart } from "primereact/chart";
+import { MultiSelect } from "primereact/multiselect";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Skeleton } from "primereact/skeleton";
+import { Tag } from "primereact/tag";
+
+import { DashboardMetricCard } from "../../components/DashboardMetricCard";
+import { DashboardPanel } from "../../components/DashboardPanel";
+import { PageHeader } from "../../components/PageHeader";
+import { Table } from "../../components/tables/Table";
+import { useToast } from "../../contexts/ToastContext";
+import { useChartTheme } from "../../theme/useTheme";
+import connect from "../../utils/request";
+
+import "./experience.css";
+
+
+const MONTHS = [
+  "jan", "fev", "mar", "abr", "mai", "jun",
+  "jul", "ago", "set", "out", "nov", "dez",
+];
+
+const STATUS_SEVERITY = {
+  aberta: "info",
+  em_preenchimento: "warning",
+  aguardando_rh: "warning",
+  atrasada: "danger",
+  concluida: "success",
+  cancelada: "secondary",
+};
+
+function initialPeriod() {
+  const today = new Date();
+  return [new Date(today.getFullYear(), 0, 1), new Date(today.getFullYear(), 11, 31)];
+}
+
+function initialFilters() {
+  return {
+    period: initialPeriod(),
+    department: [],
+    costCenter: [],
+    supervisor: [],
+    status: [],
+  };
+}
+
+function dateParam(value) {
+  return [
+    value.getFullYear(),
+    String(value.getMonth() + 1).padStart(2, "0"),
+    String(value.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+
+function dateLabel(value, withTime = false) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (withTime) {
+    return date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  }
+  return date.toLocaleDateString("pt-BR");
+}
+
+function monthLabel(value) {
+  const [year, month] = String(value).split("-").map(Number);
+  return `${MONTHS[month - 1]}/${String(year).slice(-2)}`;
+}
+
+function errorMessage(error) {
+  const response = error.response?.data;
+  if (typeof response === "string") return response;
+  return response?.message || "Não foi possível carregar o dashboard.";
+}
+
+function StatusTag({ status, label }) {
+  return <Tag value={label || status || "Não informado"} severity={STATUS_SEVERITY[status] || "secondary"} />;
+}
+
+function LoadingState() {
+  return (
+    <div className="experience-dashboard-loading" aria-busy="true">
+      <div className="experience-dashboard-summary">
+        {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} height="7.4rem" borderRadius="14px" />)}
+      </div>
+      <div className="experience-dashboard-grid">
+        <Skeleton height="23rem" borderRadius="16px" />
+        <Skeleton height="23rem" borderRadius="16px" />
+      </div>
+      <Skeleton height="19rem" borderRadius="16px" />
+    </div>
+  );
+}
+
+function EmptyState({ icon = "pi-chart-bar", message }) {
+  return <div className="experience-dashboard-empty"><i className={`pi ${icon}`} /><span>{message}</span></div>;
+}
+
+export function ExperienceDashboard() {
+  const chartTheme = useChartTheme();
+  const filterPanel = useRef(null);
+  const { showToast } = useToast();
+  const [filters, setFilters] = useState(initialFilters);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [revision, setRevision] = useState(0);
+  const [activeDetail, setActiveDetail] = useState("priorities");
+
+  const reload = useCallback(() => setRevision((current) => current + 1), []);
+  const periodComplete = Boolean(filters.period?.[0] && filters.period?.[1]);
+
+  useEffect(() => {
+    if (!periodComplete) return undefined;
+    const controller = new AbortController();
+
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data: response } = await connect.get("/dash/experiencias", {
+          signal: controller.signal,
+          params: {
+            inicio: dateParam(filters.period[0]),
+            fim: dateParam(filters.period[1]),
+            departamento: filters.department.join(",") || undefined,
+            centro_custo: filters.costCenter.join(",") || undefined,
+            supervisor: filters.supervisor.join(",") || undefined,
+            status: filters.status.join(",") || undefined,
+          },
+        });
+        if (!controller.signal.aborted) setData(response);
+      } catch (requestError) {
+        if (controller.signal.aborted || requestError.code === "ERR_CANCELED") return;
+        const message = errorMessage(requestError);
+        setError(message);
+        showToast("error", "Dashboard de experiência", message);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+
+    load();
+    return () => controller.abort();
+  }, [filters, periodComplete, revision, showToast]);
+
+  const indicators = data?.indicadores || {};
+  const options = data?.filtros || {};
+  const activeFilterCount = ["department", "costCenter", "supervisor", "status"]
+    .filter((key) => filters[key].length).length;
+
+  const chartOptions = useMemo(() => ({
+    maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: { position: "top", align: "end", labels: { color: chartTheme.text, usePointStyle: true, boxWidth: 8 } },
+    },
+    scales: {
+      x: { ticks: { color: chartTheme.textSecondary }, grid: { display: false }, border: { display: false } },
+      y: { beginAtZero: true, ticks: { color: chartTheme.textSecondary, precision: 0 }, grid: { color: chartTheme.grid }, border: { display: false } },
+    },
+  }), [chartTheme]);
+
+  const monthlyChart = useMemo(() => ({
+    labels: (data?.mensal || []).map((item) => monthLabel(item.mes)),
+    datasets: [
+      {
+        label: "Avaliações",
+        data: (data?.mensal || []).map((item) => item.total),
+        backgroundColor: chartTheme.palette[0],
+        borderRadius: 6,
+        maxBarThickness: 38,
+      },
+      {
+        label: "Concluídas",
+        data: (data?.mensal || []).map((item) => item.concluidas),
+        backgroundColor: chartTheme.palette[1],
+        borderRadius: 6,
+        maxBarThickness: 38,
+      },
+      {
+        label: "Atrasadas",
+        data: (data?.mensal || []).map((item) => item.atrasadas),
+        backgroundColor: chartTheme.palette[3],
+        borderRadius: 6,
+        maxBarThickness: 38,
+      },
+    ],
+  }), [chartTheme, data]);
+
+  const columns = useMemo(() => [
+    {
+      header: "Colaborador",
+      mobileHeader: "Colaborador",
+      body: (row) => <div className="experience-dashboard-person"><strong>{row.colaborador}</strong><small>Matrícula {row.matricula}</small></div>,
+    },
+    {
+      header: "Contrato",
+      mobileHeader: "Contrato",
+      body: (row) => <div className="experience-dashboard-person"><strong>{row.centro_custo}</strong><small>DPTO. {row.departamento}</small></div>,
+    },
+    { header: "Supervisor", mobileHeader: "Supervisor", field: "supervisor" },
+    { header: "Fim da experiência", mobileHeader: "Fim da experiência", body: (row) => dateLabel(row.fim_experiencia) },
+    { header: "Prazo", mobileHeader: "Prazo", body: (row) => dateLabel(row.prazo_supervisor, true) },
+    { header: "Situação", mobileHeader: "Situação", body: (row) => <StatusTag status={row.situacao} label={data?.situacoes?.find((item) => item.situacao === row.situacao)?.label} /> },
+  ], [data?.situacoes]);
+
+  const employeesInExperienceColumns = useMemo(() => [
+    {
+      header: "Colaborador",
+      mobileHeader: "Colaborador",
+      body: (row) => <div className="experience-dashboard-person"><strong>{row.colaborador}</strong><small>Matrícula {row.matricula}</small></div>,
+    },
+    {
+      header: "Contrato",
+      mobileHeader: "Contrato",
+      body: (row) => <div className="experience-dashboard-person"><strong>{row.centro_custo}</strong><small>DPTO. {row.departamento}</small></div>,
+    },
+    { header: "Supervisor", mobileHeader: "Supervisor", field: "supervisor" },
+    { header: "Admissão", mobileHeader: "Admissão", body: (row) => dateLabel(row.admissao) },
+    { header: "Fim da experiência", mobileHeader: "Fim da experiência", body: (row) => dateLabel(row.fim_experiencia) },
+  ], []);
+
+  const setFilter = (key, value) => {
+    setFilters((current) => ({ ...current, [key]: value || [] }));
+  };
+
+  const clearFilters = () => setFilters(initialFilters());
+  const totalDecisions = (data?.decisoes || []).reduce((total, item) => total + Number(item.total || 0), 0);
+  const executiveTitle = indicators.atrasadas
+    ? "Prazos exigem acompanhamento"
+    : indicators.aguardando_rh
+      ? "Tratativas aguardam o RH"
+      : indicators.abertas
+        ? "Avaliações em andamento"
+        : "Fila de experiência regular";
+  const executiveDescription = indicators.avaliacoes
+    ? `${indicators.concluidas || 0} de ${indicators.avaliacoes} avaliação(ões) foram concluídas no recorte selecionado.`
+    : "Não há avaliações de experiência no recorte selecionado.";
+
+  return (
+    <section className="experience-dashboard">
+      <PageHeader
+        section="Recursos humanos"
+        title="Resumo de período de experiência"
+        description="Acompanhe tarefas, prazos e decisões das avaliações de 90 dias."
+        actions={<>
+          <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+        </>}
+      />
+
+      {loading && !data ? <LoadingState /> : error && !data ? (
+        <div className="experience-dashboard-error" role="alert"><i className="pi pi-exclamation-triangle" /><div><strong>Não foi possível abrir o dashboard</strong><span>{error}</span></div><Button label="Tentar novamente" icon="pi pi-refresh" outlined onClick={reload} /></div>
+      ) : <>
+        <div className="experience-dashboard-summary">
+          <DashboardMetricCard title="Em experiência" value={indicators.em_experiencia || 0} detail="colaboradores ativos no período" icon="pi pi-users" tone="primary" />
+          <DashboardMetricCard title="Avaliações" value={indicators.avaliacoes || 0} detail="no recorte selecionado" icon="pi pi-file-edit" tone="info" />
+          <DashboardMetricCard title="Em andamento" value={indicators.abertas || 0} detail="com o supervisor" icon="pi pi-pencil" tone="warning" />
+          <DashboardMetricCard title="Aguardando RH" value={indicators.aguardando_rh || 0} detail="prontas para tratativa" icon="pi pi-briefcase" tone="info" />
+          <DashboardMetricCard title="Atrasadas" value={indicators.atrasadas || 0} detail="requerem acompanhamento" icon="pi pi-clock" tone="danger" />
+          <DashboardMetricCard title="Concluídas" value={indicators.concluidas || 0} detail="avaliações finalizadas" icon="pi pi-check-circle" tone="success" />
+        </div>
+
+        <div className="experience-dashboard-analysis">
+          <DashboardPanel className="experience-dashboard-panel experience-dashboard-panel--wide">
+            <header><div><span>Previsão</span><h2>Fim do período de experiência</h2></div></header>
+            <div className="experience-dashboard-chart">
+              <Chart type="bar" data={monthlyChart} options={chartOptions} />
+            </div>
+          </DashboardPanel>
+
+          <DashboardPanel className="experience-dashboard-panel experience-dashboard-insight">
+            <span>Leitura executiva</span>
+            <h2>{executiveTitle}</h2>
+            <p>{executiveDescription}</p>
+            <div className="experience-dashboard-insight-row">
+              <span><small>Em andamento</small><strong>{indicators.abertas || 0}</strong></span>
+              <em>{indicators.atrasadas || 0} atrasada(s)</em>
+            </div>
+            <div className="experience-dashboard-insight-row">
+              <span><small>Aguardando RH</small><strong>{indicators.aguardando_rh || 0}</strong></span>
+              <em>{indicators.concluidas || 0} concluída(s)</em>
+            </div>
+            <div className="experience-dashboard-decision-title"><span>Decisões do RH</span><small>{totalDecisions} registrada(s)</small></div>
+            <div className="experience-dashboard-decisions">
+              {(data?.decisoes || []).map((item) => <article className={`is-${item.decisao}`} key={item.decisao}><strong>{item.total}</strong><span>{item.label}</span></article>)}
+            </div>
+          </DashboardPanel>
+        </div>
+
+        <DashboardPanel className="experience-dashboard-details">
+          <nav className="experience-dashboard-detail-tabs" aria-label="Informações de acompanhamento">
+            <button className={activeDetail === "priorities" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("priorities")}><i className="pi pi-exclamation-circle" /><span>Tarefas que exigem acompanhamento</span><em>{data?.prioridades?.length || 0}</em></button>
+            <button className={activeDetail === "supervisors" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("supervisors")}><i className="pi pi-users" /><span>Pendências por supervisor</span><em>{data?.supervisores?.length || 0}</em></button>
+            <button className={activeDetail === "employees" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("employees")}><i className="pi pi-id-card" /><span>Colaboradores em experiência</span><em>{indicators.em_experiencia || 0}</em></button>
+          </nav>
+          <div className="experience-dashboard-detail-content">
+            {activeDetail === "priorities" ? <Table data={data?.prioridades || []} columns={columns} rows={10} rowsPerPageOptions={[10, 25, 50]} emptyMessage="Nenhuma tarefa pendente no recorte." /> : activeDetail === "employees" ? (
+              <Table data={data?.colaboradores_em_experiencia || []} columns={employeesInExperienceColumns} rows={10} rowsPerPageOptions={[10, 25]} emptyMessage="Nenhum colaborador ativo em experiência no recorte." />
+            ) : (
+              (data?.supervisores || []).length ? <div className="experience-dashboard-supervisor-list">
+                {data.supervisores.map((item) => <article key={item.supervisor}>
+                  <div><strong>{item.supervisor}</strong><small>{item.total} avaliação(ões) no recorte</small></div>
+                  <div><span className="is-warning">{item.pendentes} pendente(s)</span><span className="is-danger">{item.atrasadas} atrasada(s)</span></div>
+                </article>)}
+              </div> : <EmptyState icon="pi-user-minus" message="Não há supervisores no recorte." />
+            )}
+          </div>
+        </DashboardPanel>
+      </>}
+
+      <OverlayPanel ref={filterPanel} className="experience-dashboard-filter-panel">
+        <div className="experience-dashboard-filter-header"><div><strong>Filtrar dashboard</strong><span>Indicadores, gráficos e lista usam o mesmo recorte.</span></div><Button icon="pi pi-filter-slash" rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
+        <div className="experience-dashboard-filters">
+          <label><span>Fim da experiência</span><Calendar value={filters.period} onChange={(event) => setFilters((current) => ({ ...current, period: event.value }))} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput showIcon /></label>
+          <label><span>Departamento</span><MultiSelect value={filters.department} options={options.departamentos || []} onChange={(event) => setFilter("department", event.value)} placeholder="Todos os departamentos" filter showClear /></label>
+          <label><span>Centro de custo</span><MultiSelect value={filters.costCenter} options={options.centros_custo || []} onChange={(event) => setFilter("costCenter", event.value)} placeholder="Todos os centros" filter showClear /></label>
+          <label><span>Supervisor</span><MultiSelect value={filters.supervisor} options={options.supervisores || []} onChange={(event) => setFilter("supervisor", event.value)} placeholder="Todos os supervisores" filter showClear /></label>
+          <label><span>Situação</span><MultiSelect value={filters.status} options={options.situacoes || []} onChange={(event) => setFilter("status", event.value)} placeholder="Todas as situações" filter showClear /></label>
+        </div>
+      </OverlayPanel>
+    </section>
+  );
+}
