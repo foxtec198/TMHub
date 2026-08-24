@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { ButtonGroup } from "primereact/buttongroup";
+import { Calendar } from "primereact/calendar";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
+import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 import { Timeline } from "primereact/timeline";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -11,8 +13,14 @@ import { DropdownWS } from "../../components/DropdownWithSearch";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { PageHeader } from "../../components/PageHeader";
 import { UserAvatar } from "../../components/UserAvatar";
+import {
+    CombinedFiltersProvider,
+    CombinedMultiSelect,
+    useCombinedFilters,
+} from "../../contexts/CombinedFiltersContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
+import { exportRequestHistoryXlsx } from "../../utils/exportRequestHistoryXlsx";
 import { socketio } from "../../utils/socketio";
 
 // Endpoints do fluxo de histórico agrupados para evitar URLs espalhadas.
@@ -61,6 +69,45 @@ const STATUS_MAP = {
     pending: "PENDENTE",
 };
 
+const HISTORY_FILTER_DEFINITIONS = {
+    status: {
+        getValue: (record) => record.status || "",
+        getLabel: (record) => STATUS_MAP[record.status] || record.status,
+    },
+    departamento: {
+        getValue: (record) => String(record.dpto ?? ""),
+        getLabel: (record) => `DPTO. ${record.dpto}`,
+    },
+    supervisor: {
+        getValue: (record) => record.supervisor || "",
+        getLabel: (record) => record.supervisor,
+    },
+    motivo: {
+        getValue: (record) => record.motivo || "",
+        getLabel: (record) => record.motivo,
+    },
+    local: {
+        getValue: (record) => record.local || "",
+        getLabel: (record) => record.local,
+    },
+    ausente: {
+        getValue: (record) => record.ausente || "",
+        getLabel: (record) => record.ausente,
+    },
+    reserva: {
+        getValue: (record) => record.reserva || "",
+        getLabel: (record) => record.reserva,
+    },
+};
+
+function currentMonthRange() {
+    const now = new Date();
+    return [
+        new Date(now.getFullYear(), now.getMonth(), 1),
+        new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999),
+    ];
+}
+
 function formatDate(value) {
     // Datas inválidas são exibidas como fallback em vez de quebrar a tabela.
     if (!value) return "—";
@@ -93,10 +140,11 @@ function shortName(name) {
     return `${parts[0]} ${parts.at(-1)}`;
 }
 
-export function History() {
+function HistoryPage() {
     // Estado da consulta, edição, timeline e feedback de operações assíncronas.
-    const [dateFilter, setDateFilter] = useState(null);
+    const [dateFilter, setDateFilter] = useState(currentMonthRange);
     const [tableData, setTableData] = useState([]);
+    const [search, setSearch] = useState("");
     const [refresh, setRefresh] = useState(0);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -105,6 +153,7 @@ export function History() {
     const [timelineLoading, setTimelineLoading] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
     const [timelineEvents, setTimelineEvents] = useState([]);
+    const filterPanel = useRef(null);
     const [editForm, setEditForm] = useState({
         ausente_id: null,
         reserva_id: null,
@@ -112,6 +161,42 @@ export function History() {
     });
 
     const { showToast } = useToast();
+    const {
+        options: filterOptions,
+        clearFilters: clearCombinedFilters,
+        filteredData: combinedFilteredHistory,
+        activeFilterCount,
+    } = useCombinedFilters(tableData);
+
+    const filteredHistory = useMemo(() => {
+        const term = search.trim().toLocaleLowerCase("pt-BR");
+        if (!term) return combinedFilteredHistory;
+
+        return combinedFilteredHistory.filter((record) => [
+            record.ausente,
+            record.reserva,
+            record.local,
+            record.supervisor,
+            record.motivo,
+            record.obs,
+            record.dpto,
+        ].some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term)));
+    }, [combinedFilteredHistory, search]);
+
+    const clearFilters = () => {
+        clearCombinedFilters();
+        setDateFilter(currentMonthRange());
+        setSearch("");
+    };
+
+    const exportHistory = () => {
+        if (!filteredHistory.length) {
+            showToast("warn", "Exportação", "Não há registros para exportar com os filtros atuais.");
+            return;
+        }
+        exportRequestHistoryXlsx(filteredHistory);
+        showToast("success", "Exportação concluída", "A planilha foi baixada com os filtros aplicados.");
+    };
 
     // Carrega o histórico de acordo com a data selecionada.
     useEffect(() => {
@@ -418,18 +503,68 @@ export function History() {
                     section="Reposições"
                     title="Histórico"
                     description="Consulte requisições concluídas por período, edite informações e acompanhe cada evento da timeline."
+                    actions={<>
+                        <Button
+                            className="dashboard-filter-trigger"
+                            icon="pi pi-filter-fill"
+                            label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
+                            onClick={(event) => filterPanel.current?.toggle(event)}
+                        />
+                        <Button
+                            icon="pi pi-file-excel"
+                            label="Exportar XLSX"
+                            outlined
+                            disabled={!filteredHistory.length}
+                            onClick={exportHistory}
+                        />
+                    </>}
                 />
             </div>
+
+            <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
+                <div className="dashboard-filter-title">
+                    <div>
+                        <strong>Filtrar histórico</strong>
+                        <span>Período e opções são combinados para evitar resultados vazios.</span>
+                    </div>
+                    <Button
+                        icon="pi pi-filter-slash"
+                        label="Limpar filtros"
+                        text
+                        onClick={clearFilters}
+                    />
+                </div>
+                <div className="dashboard-filter-grid">
+                    <label className="is-wide">
+                        <span>Período</span>
+                        <Calendar
+                            value={dateFilter}
+                            onChange={(event) => setDateFilter(event.value)}
+                            selectionMode="range"
+                            readOnlyInput
+                            hideOnRangeSelection
+                            showIcon
+                            dateFormat="dd/mm/yy"
+                        />
+                    </label>
+                    <CombinedMultiSelect name="status" label="Status" options={filterOptions.status} placeholder="Todos os status" panelClassName="dashboard-filter-dropdown" />
+                    <CombinedMultiSelect name="motivo" label="Motivo" options={filterOptions.motivo} placeholder="Todos os motivos" panelClassName="dashboard-filter-dropdown" />
+                    <CombinedMultiSelect name="departamento" label="Departamento" options={filterOptions.departamento} placeholder="Todos os departamentos" panelClassName="dashboard-filter-dropdown" />
+                    <CombinedMultiSelect name="supervisor" label="Supervisor" options={filterOptions.supervisor} placeholder="Todos os supervisores" panelClassName="dashboard-filter-dropdown" />
+                    <CombinedMultiSelect name="local" label="Local / contrato" options={filterOptions.local} placeholder="Todos os locais" className="is-wide" panelClassName="dashboard-filter-dropdown" />
+                    <CombinedMultiSelect name="ausente" label="Ausente" options={filterOptions.ausente} placeholder="Todos os ausentes" panelClassName="dashboard-filter-dropdown" />
+                    <CombinedMultiSelect name="reserva" label="Reserva" options={filterOptions.reserva} placeholder="Todas as reservas" panelClassName="dashboard-filter-dropdown" />
+                </div>
+            </OverlayPanel>
 
             <div className="p-3 ms-3 border-round-xl shadow-6">
                 <Table
                     search
-                    data={tableData}
+                    searchValue={search}
+                    onSearchChange={setSearch}
+                    data={filteredHistory}
                     columns={columns}
                     rows={10}
-                    dateValue={dateFilter}
-                    handleSetDate={setDateFilter}
-                    setRefresh={setRefresh}
                     tableClassName="overflow-scroll"
                 />
             </div>
@@ -521,5 +656,13 @@ export function History() {
                         : <div className="text-center text-600 p-5">Nenhum evento encontrado.</div>}
             </Dialog>
         </>
+    );
+}
+
+export function History() {
+    return (
+        <CombinedFiltersProvider definitions={HISTORY_FILTER_DEFINITIONS}>
+            <HistoryPage />
+        </CombinedFiltersProvider>
     );
 }

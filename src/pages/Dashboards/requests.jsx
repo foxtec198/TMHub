@@ -29,25 +29,23 @@ import "./request.css"
 // MOCKS
 const totalOfReplaces = 19
 
-function getReferencePeriodDays(range) {
-    const firstReference = range?.[0] instanceof Date && !Number.isNaN(range[0].getTime())
-        ? range[0]
-        : new Date();
-    const lastReference = range?.[1] instanceof Date && !Number.isNaN(range[1].getTime())
-        ? range[1]
-        : firstReference;
+function matchesDashboardFilters(item, filters) {
+    if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
+    if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
+    if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
+    if (filters.colaborador.length && !filters.colaborador.includes(item.ausente)) return false;
+    if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
+    if (filters.status.length && !filters.status.includes(item.status)) return false;
+    return true;
+}
+
+function isToday(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return false;
     const today = new Date();
-    const periodStart = new Date(firstReference.getFullYear(), firstReference.getMonth(), 1);
-    const includesCurrentMonth = lastReference.getFullYear() === today.getFullYear()
-        && lastReference.getMonth() === today.getMonth();
-    const periodEnd = includesCurrentMonth
-        ? today
-        : new Date(lastReference.getFullYear(), lastReference.getMonth() + 1, 0);
-
-    const startUtc = Date.UTC(periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate());
-    const endUtc = Date.UTC(periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate());
-
-    return Math.max(Math.floor((endUtc - startUtc) / 86400000) + 1, 0);
+    return date.getFullYear() === today.getFullYear()
+        && date.getMonth() === today.getMonth()
+        && date.getDate() === today.getDate();
 }
 
 // Dados de fallback mantidos apenas para desenvolvimento visual sem API.
@@ -142,6 +140,7 @@ export function RequestReport() {
 
     // Historico de reposições
     const [histOriginal, setHistOriginal] = useState([]);
+    const [faltasReservasOriginal, setFaltasReservasOriginal] = useState([]);
 
     // Filtros
     const hoje = new Date();
@@ -157,7 +156,8 @@ export function RequestReport() {
     const [postosDescobertos, setPostoDescobertos] = useState(0);
     const [localComMaisFaltas, setLocalComMaisFaltas] = useState(0);
     const [valorDoLocalComMaisFaltas, setValorDoLocalComMaisFaltas] = useState(0);
-    const [totalDeMultas, setTotalDeMultas] = useState(0);
+    const [faltasReservasMes, setFaltasReservasMes] = useState(0);
+    const [faltasReservasHoje, setFaltasReservasHoje] = useState(0);
     const [departamentos, setDepartamentos] = useState([]);
 
     // Dados para CHARTS
@@ -187,23 +187,14 @@ export function RequestReport() {
         if (!totalRequisicoes || !value) return 0;
         return Math.max(1, Math.round((value / totalRequisicoes) * 100));
     };
-    const referencePeriodDays = getReferencePeriodDays(filter);
-    const averageDailyCost = referencePeriodDays
-        ? totalDeMultas / referencePeriodDays
-        : 0;
-
     // Use Memo para setar 
     const hist = useMemo(() => {
-        return histOriginal.filter(item => {
-            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
-            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
-            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
-            if (filters.colaborador.length && !filters.colaborador.includes(item.ausente)) return false;
-            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
-            if (filters.status.length && !filters.status.includes(item.status)) return false;
-            return true;
-        });
+        return histOriginal.filter(item => matchesDashboardFilters(item, filters));
     }, [histOriginal, filters.contrato, filters.departamento, filters.supervisor, filters.colaborador, filters.motivo, filters.status]);
+
+    const faltasReservas = useMemo(() => {
+        return faltasReservasOriginal.filter(item => matchesDashboardFilters(item, filters));
+    }, [faltasReservasOriginal, filters.contrato, filters.departamento, filters.supervisor, filters.colaborador, filters.motivo, filters.status]);
 
     const clearFilters = () => {
         setFilters(() => ({ ...defaultFilters }));
@@ -305,6 +296,7 @@ export function RequestReport() {
             const res = await connect.post("/dash/reposicoes", filterData);
 
             setHistOriginal(res.data.historico);
+            setFaltasReservasOriginal(res.data.faltas_reservas || []);
             setAbertas(res.data.abertas);
         }; getData();
     }, [refresh]);
@@ -329,8 +321,6 @@ export function RequestReport() {
                 new Date(item.created_at).toLocaleDateString("pt-BR", { day: "2-digit" })
             )
         )].sort((a, b) => a - b);
-
-        const totalMulta = hist.reduce((acc, item) => acc + item.multa, 0);
 
         // Contratos
         const contratos = hist.reduce((acc, { local }) => {
@@ -371,7 +361,6 @@ export function RequestReport() {
         // Cards
         setRealizadas(total);
         setAbertas(abertas);
-        setTotalDeMultas(totalMulta);
 
         setLocalComMaisFaltas(locaisLabels[0]);
 
@@ -446,6 +435,11 @@ export function RequestReport() {
         ]);
 
     }, [hist, abertas]);
+
+    useEffect(() => {
+        setFaltasReservasMes(faltasReservas.length);
+        setFaltasReservasHoje(faltasReservas.filter((item) => isToday(item.created_at)).length);
+    }, [faltasReservas]);
 
     // Configuração compartilhada pelos doughnuts de departamento.
     const optionsDptos = {
@@ -582,9 +576,102 @@ export function RequestReport() {
                 section="Dashboards"
                 title="Dashboard de Reposições"
                 description="Acompanhe volume, cobertura, motivos e desempenho das requisições."
+                actions={(
+                    <Button
+                        type="button"
+                        icon="pi pi-filter-fill"
+                        label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
+                        aria-label={activeFilterCount ? `Abrir filtros (${activeFilterCount} ativos)` : "Abrir filtros"}
+                        onClick={(event) => op_filters.current?.toggle(event)}
+                    />
+                )}
             />
-            <div className="dashboard-toolbar flex justify-content-between align-items-center w-full">
-                <div className="dashboard-summary flex gap-2 p-2 w-full">
+            <OverlayPanel ref={op_filters} className="dashboard-filter-panel p-3 flex flex-column w-25rem">
+                <span className="inter mb-5 font-bold">Filtre os dados do Dashboard.</span>
+
+                <Divider className="my-5"></Divider>
+
+                <FloatLabel className="w-full mb-4">
+                    <Calendar
+                        inputId="dashboard-period"
+                        locale="pt-BR"
+                        value={filter}
+                        placeholder="Selecione um período."
+                        dateFormat="dd/mm/yy"
+                        onChange={(e) => { setFilter(e.value); setRefresh(prev => !prev) }}
+                        selectionMode="range"
+                        readOnlyInput
+                        className="w-full"
+                    />
+                    <label htmlFor="dashboard-period">Selecione um período</label>
+                </FloatLabel>
+
+                <FloatLabel className="w-full mb-4">
+                    <MultiSelect
+                        inputId="dashboard-contract"
+                        filter
+                        appendTo="self"
+                        className="w-full"
+                        panelClassName="w-full dashboard-filter-dropdown"
+                        value={filters.contrato}
+                        options={contratosOptions}
+                        onChange={(e) => setFilters(prev => ({ ...prev, contrato: e.value }))}
+                    />
+                    <label htmlFor="dashboard-contract">Contratos: </label>
+                </FloatLabel>
+
+                <FloatLabel className="w-full mb-4">
+                    <MultiSelect
+                        inputId="dashboard-department"
+                        panelClassName="dashboard-filter-dropdown"
+                        className="w-full"
+                        value={filters.departamento}
+                        options={dptoOptions}
+                        onChange={(e) => setFilters(prev => ({ ...prev, departamento: e.value }))}
+                    />
+                    <label htmlFor="dashboard-department">Departamentos: </label>
+                </FloatLabel>
+
+                <FloatLabel className="w-full mb-4">
+                    <MultiSelect
+                        inputId="dashboard-reason"
+                        panelClassName="dashboard-filter-dropdown"
+                        options={motivoOptions}
+                        value={filters.motivo}
+                        className="w-full"
+                        onChange={(e) => setFilters(prev => ({ ...prev, motivo: e.value }))}
+                    />
+                    <label htmlFor="dashboard-reason">Motivos: </label>
+                </FloatLabel>
+
+                <FloatLabel className="w-full mb-4">
+                    <MultiSelect
+                        inputId="dashboard-supervisor"
+                        panelClassName="dashboard-filter-dropdown"
+                        options={supervisorOptions}
+                        value={filters.supervisor}
+                        className="w-full"
+                        onChange={(e) => setFilters(prev => ({ ...prev, supervisor: e.value }))}
+                    />
+                    <label htmlFor="dashboard-supervisor">Supervisores: </label>
+                </FloatLabel>
+
+                <FloatLabel className="w-full mb-4">
+                    <MultiSelect
+                        inputId="dashboard-status"
+                        panelClassName="dashboard-filter-dropdown"
+                        options={statusOptions}
+                        value={filters.status}
+                        className="w-full"
+                        onChange={(e) => setFilters(prev => ({ ...prev, status: e.value }))}
+                    />
+                    <label htmlFor="dashboard-status">Status: </label>
+                </FloatLabel>
+
+                <Divider className="mt-4" />
+                <Button className="font-bold w-full border-none" icon="pi pi-filter-slash" label="Limpar Filtros" onClick={clearFilters} />
+            </OverlayPanel>
+            <div className="dashboard-summary flex gap-2 p-2 w-full">
                     <DashCard
                         icon="pi pi-verified"
                         title="Total"
@@ -629,22 +716,20 @@ export function RequestReport() {
                         contClassName="request-metric-tag request-metric-tag-uncovered"
                     />
                     <DashCard
-                        icon="pi pi-dollar"
-                        title="Custo Total"
-                        className="tm-dashboard-card dashboard-financial-card flex-grow-1"
-                        detail="multas no período"
-                        tone="info"
-                        value={to_real(totalDeMultas)}
-                        valueClassName="text-2xl"
+                        icon="pi pi-user-minus"
+                        title="Faltas de reservas"
+                        className="tm-dashboard-card dashboard-reserve-card flex-grow-1"
+                        detail="no mês selecionado"
+                        tone="danger"
+                        value={faltasReservasMes}
                     />
                     <DashCard
-                        icon="pi pi-chart-line"
-                        title="Média por dia"
-                        className="tm-dashboard-card dashboard-financial-card flex-grow-1"
-                        detail="custo médio diário"
-                        tone="violet"
-                        value={to_real(averageDailyCost)}
-                        valueClassName="text-2xl"
+                        icon="pi pi-calendar-times"
+                        title="Faltas de reservas"
+                        className="tm-dashboard-card dashboard-reserve-card flex-grow-1"
+                        detail="registradas hoje"
+                        tone="warning"
+                        value={faltasReservasHoje}
                     />
                     <div
                         className="tm-card tm-dashboard-card dashboard-highlight flex justify-content-center flex-grow-1 gap-2 align-items-center p-3">
@@ -662,136 +747,6 @@ export function RequestReport() {
                             <span className="inter" style={{ maxWidth: "250px" }}>{localComMaisFaltas}</span>
                         </div>
                     </div>
-                </div>
-
-                <OverlayPanel ref={op_filters} className="dashboard-filter-panel p-3 flex flex-column w-25rem">
-                    <span className="inter mb-5 font-bold">Filtre os dados do Dashboard.</span>
-
-                    <Divider className="my-5"></Divider>
-
-                    <FloatLabel className="w-full mb-4">
-                        <Calendar
-                            inputId="dashboard-period"
-                            locale="pt-BR"
-                            value={filter}
-                            placeholder="Selecione um período."
-                            dateFormat="dd/mm/yy"
-                            onChange={(e) => { setFilter(e.value); setRefresh(prev => !prev) }}
-                            selectionMode="range"
-                            readOnlyInput
-                            // showButtonBar
-                            className="w-full"
-                        />
-                        <label htmlFor="dashboard-period">Selecione um período</label>
-                    </FloatLabel>
-
-                    <FloatLabel className="w-full mb-4">
-                        <MultiSelect
-                            inputId="dashboard-contract"
-                            filter
-                            appendTo="self"
-                            className="w-full"
-                            panelClassName="w-full dashboard-filter-dropdown"
-                            value={filters.contrato}
-                            options={contratosOptions}
-                            onChange={(e) =>
-                                setFilters(prev => ({
-                                    ...prev,
-                                    contrato: e.value
-                                }))
-                            }
-                        />
-                        <label htmlFor="dashboard-contract">Contratos: </label>
-                    </FloatLabel>
-
-                    <FloatLabel className="w-full mb-4">
-                        <MultiSelect
-                            inputId="dashboard-department"
-                            panelClassName="dashboard-filter-dropdown"
-                            className="w-full"
-                            value={filters.departamento}
-                            options={dptoOptions}
-                            onChange={(e) =>
-                                setFilters(prev => ({
-                                    ...prev,
-                                    departamento: e.value
-                                }))
-                            }
-                        />
-                        <label htmlFor="dashboard-department">Departamentos: </label>
-                    </FloatLabel>
-
-                    <FloatLabel className="w-full mb-4">
-                        <MultiSelect
-                            inputId="dashboard-reason"
-                            panelClassName="dashboard-filter-dropdown"
-                            options={motivoOptions}
-                            value={filters.motivo}
-                            className="w-full"
-                            onChange={(e) =>
-                                setFilters(prev => ({
-                                    ...prev,
-                                    motivo: e.value
-                                }))
-                            }
-                        />
-                        <label htmlFor="dashboard-reason">Motivos: </label>
-                    </FloatLabel>
-
-                    <FloatLabel className="w-full mb-4">
-                        <MultiSelect
-                            inputId="dashboard-supervisor"
-                            panelClassName="dashboard-filter-dropdown"
-                            options={supervisorOptions}
-                            value={filters.supervisor}
-                            className="w-full"
-                            onChange={(e) =>
-                                setFilters(prev => ({
-                                    ...prev,
-                                    supervisor: e.value
-                                }))
-                            }
-                        />
-                        <label htmlFor="dashboard-supervisor">Supervisores: </label>
-                    </FloatLabel>
-
-                    <FloatLabel className="w-full mb-4">
-                        <MultiSelect
-                            inputId="dashboard-status"
-                            panelClassName="dashboard-filter-dropdown"
-                            options={statusOptions}
-                            value={filters.status}
-                            className="w-full"
-                            onChange={(e) =>
-                                setFilters(prev => ({
-                                    ...prev,
-                                    status: e.value
-                                }))
-                            }
-                        />
-                        <label htmlFor="dashboard-status">Status: </label>
-                    </FloatLabel>
-
-                    <Divider className="mt-4" />
-                    <Button
-                        className="font-bold w-full border-none"
-                        icon="pi pi-filter-slash"
-                        label="Limpar Filtros"
-                        onClick={clearFilters}
-                    />
-                </OverlayPanel>
-
-                <Button
-                    icon="pi pi-filter-fill"
-                    className="dashboard-filter-button border-round-lg shadow-6"
-                    aria-label={activeFilterCount ? `Abrir filtros (${activeFilterCount} ativos)` : "Abrir filtros"}
-                    onClick={(event) => op_filters.current?.toggle(event)}
-                    style={{
-                        background: "ghostwhite",
-                        border: "1px solid ghostwhite",
-                        color: "#3a3535",
-                    }}
-                />
             </div>
 
             <div className="dashboard-content flex w-full min-h-full gap-4">

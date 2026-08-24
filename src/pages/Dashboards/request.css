@@ -57,7 +57,6 @@
     padding: 0 !important;
 }
 
-.dashboard-toolbar,
 .dashboard-content,
 .dashboard-main,
 .dashboard-charts,
@@ -73,7 +72,7 @@
     min-height: 5rem;
 }
 
-.dashboard-summary > .dashboard-financial-card {
+.dashboard-summary > .dashboard-reserve-card {
     flex: 1.25 1 17rem;
     min-width: 17rem;
 }
@@ -228,15 +227,6 @@
 
 
 @media screen and (max-width: 1280px) {
-    .dashboard-filter-button{
-        width: 40px;
-        height: 40px;
-    }
-
-    .dashboard-toolbar {
-        align-items: flex-start !important;
-    }
-
     .dashboard-content {
         flex-direction: column;
     }
@@ -254,12 +244,6 @@
         padding: 0.75rem !important;
     }
 
-    .dashboard-toolbar {
-        position: relative;
-        display: block !important;
-        padding-top: 3.5rem;
-    }
-
     .dashboard-summary {
         display: flex !important;
         gap: 0.75rem !important;
@@ -273,7 +257,7 @@
         min-height: 6.5rem;
     }
 
-    .dashboard-summary > .dashboard-financial-card {
+    .dashboard-summary > .dashboard-reserve-card {
         flex: 1 1 100%;
         min-width: 0;
     }
@@ -292,16 +276,6 @@
 
     .dashboard-highlight .p-knob {
         flex: 0 0 auto;
-    }
-
-    .dashboard-filter-button {
-        position: absolute;
-        top: 0.25rem;
-        right: 0.25rem;
-        width: 2.75rem !important;
-        height: 2.75rem !important;
-        padding: 0 !important;
-        z-index: 3;
     }
 
     .dashboard-filter-panel {

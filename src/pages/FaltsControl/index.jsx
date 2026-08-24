@@ -215,14 +215,6 @@ function AbsenceControlPage() {
     return () => { window.clearInterval(timer); socketio.off("absence_control_update", reload); socketio.off("new_request", reload); };
   }, []);
 
-  const summary = useMemo(() => records.reduce((result, record) => {
-    result.total += 1;
-    if (record.status === "tratada") result.treated += 1;
-    else result.pending += 1;
-    if (record.status === "pendente" && hasDocumentDeadline(record.motivo) && remaining(record.prazo_atestado, now)?.expired) result.expired += 1;
-    return result;
-  }, { total: 0, pending: 0, expired: 0, treated: 0 }), [records, now]);
-
   const filtered = useMemo(() => combinedFilteredRecords.filter((record) => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
     const recordDate = new Date(record.data_falta);
@@ -243,6 +235,16 @@ function AbsenceControlPage() {
       record.motivo,
     ].some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
   }), [combinedFilteredRecords, search, dateRange]);
+
+  // Os indicadores precisam refletir o mesmo recorte da tabela: período,
+  // busca e todos os filtros avançados aplicados pelo usuário.
+  const summary = useMemo(() => filtered.reduce((result, record) => {
+    result.total += 1;
+    if (record.status === "tratada") result.treated += 1;
+    else result.pending += 1;
+    if (record.status === "pendente" && hasDocumentDeadline(record.motivo) && remaining(record.prazo_atestado, now)?.expired) result.expired += 1;
+    return result;
+  }, { total: 0, pending: 0, expired: 0, treated: 0 }), [filtered, now]);
 
   const clearFilters = () => {
     clearCombinedFilters();

@@ -21,10 +21,18 @@ export function Table({
     tableStyle,
     search,
     handleSetDate,
+    searchValue,
+    onSearchChange,
 }) {
     const [globalFilterDash, setGlobalFilterDash] = useState("");
     const searchInputId = useId();
     const dateInputId = useId();
+    const resolvedSearchValue = searchValue ?? globalFilterDash;
+
+    const updateSearch = (value) => {
+        setGlobalFilterDash(value);
+        onSearchChange?.(value);
+    };
 
     const renderResponsiveCell = (column) => (rowData, options) => {
         const content = typeof column.body === "function"
@@ -45,8 +53,8 @@ export function Table({
                 ? <FloatLabel className="mt-3">
                     <InputText
                         id={searchInputId}
-                        value={globalFilterDash}
-                        onChange={(e) => setGlobalFilterDash(e.target.value)}
+                        value={resolvedSearchValue}
+                        onChange={(e) => updateSearch(e.target.value)}
                     />
                     <label htmlFor={searchInputId}>Buscar...</label>
                 </FloatLabel> : null
@@ -78,7 +86,7 @@ export function Table({
         <DataTable
             value={data}
             loading={loading}
-            globalFilter={globalFilterDash}
+            globalFilter={resolvedSearchValue}
             header={header}
             emptyMessage="Nenhum resultado encontrado."
             paginator={mode === "paginate"}
