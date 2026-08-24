@@ -59,6 +59,7 @@ import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
 import { TicketDetail, TicketsDashboard } from "./pages/Tickets";
 import { TicketManagement } from "./pages/Tickets/TicketManagement";
 import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasures.jsx";
+import { ExperienceDashboard } from "./pages/Dashboards/Experience.jsx";
 import { ExperienceControl } from "./pages/ExperienceControl";
 import { ExperiencePublic } from "./pages/ExperienceControl/supervisor";
 
@@ -333,6 +334,14 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="dashboard_medidas_disciplinares">
                 <DisciplinaryMeasuresDashboard />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/reports/experiencias"
+            element={
+              <PermissionGate screen="controle_experiencia_rh">
+                <ExperienceDashboard />
               </PermissionGate>
             }
           />
