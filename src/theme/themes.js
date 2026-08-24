@@ -29,7 +29,9 @@ export const THEME_OPTIONS = Object.freeze([
 
 export function getAvailableThemeOptions(unlockedThemes) {
   if (!Array.isArray(unlockedThemes)) {
-    return THEME_OPTIONS.filter((option) => !option.hiddenUntilUnlocked);
+    // A API é a fonte de verdade. Sem uma liberação explícita, mantém apenas
+    // a identidade institucional para não expor temas em testes.
+    return THEME_OPTIONS.filter((option) => option.default);
   }
   const unlocked = new Set(unlockedThemes.map((value) => normalizeTheme(value)));
   return THEME_OPTIONS.filter((option) => option.default || unlocked.has(option.id));

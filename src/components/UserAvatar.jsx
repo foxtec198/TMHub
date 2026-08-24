@@ -37,23 +37,22 @@ export function UserAvatar({ user, userId, nome, foto_perfil, style, className, 
   const id = Number(user?.id ?? userId);
   const suppliedName = nome ?? user?.nome;
   const [cachedUser, setCachedUser] = useState(() => findCachedUser(id));
-  const resolvedUser = cachedUser || findCachedUser(id);
+  // O DataTable reaproveita a mesma instância de célula ao trocar de linha.
+  // Nunca use o cache de outro usuário, senão uma foto acaba aparecendo na
+  // pessoa seguinte enquanto o diretório ainda é resolvido.
+  const cachedForCurrentUser = Number(cachedUser?.id) === id ? cachedUser : null;
+  const resolvedUser = cachedForCurrentUser || findCachedUser(id);
   const displayName = suppliedName ?? resolvedUser?.nome ?? "Usuário";
   const image = foto_perfil ?? user?.foto_perfil ?? resolvedUser?.foto_perfil;
 
   useEffect(() => {
+    if (image || findCachedUser(id) || !Number.isInteger(id) || id <= 0) return undefined;
+
     let active = true;
-    if (image) return undefined;
-    const cached = findCachedUser(id);
-    if (cached) {
-      setCachedUser(cached);
-      return undefined;
-    }
-    if (!Number.isInteger(id) || id <= 0) return undefined;
 
     loadUserDirectory()
       .then(() => {
-        if (active) setCachedUser(findCachedUser(id));
+        if (active) setCachedUser(findCachedUser(id) || null);
       })
       .catch(() => {
         // As iniciais continuam sendo um fallback visual seguro.
@@ -75,5 +74,3 @@ export function UserAvatar({ user, userId, nome, foto_perfil, style, className, 
     />
   );
 }
-
-export { getInitials };

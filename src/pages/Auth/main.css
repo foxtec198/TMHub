@@ -477,27 +477,27 @@
   text-align: center;
 }
 
-:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-panel {
+:root[data-theme][data-mode="dark"]:not([data-theme="tmhub"]) .auth-login-panel {
   background:
-    radial-gradient(circle at 100% 0%, rgba(71, 213, 110, .12), transparent 28%),
-    var(--accent-contrast);
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 28%),
+    var(--app-bg);
 }
 
-:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-card {
+:root[data-theme][data-mode="dark"]:not([data-theme="tmhub"]) .auth-login-card {
   color: var(--text-primary);
-  background: #121813;
-  border-color: #35453a;
+  background: var(--surface-1);
+  border-color: var(--border);
   box-shadow: 0 24px 60px rgba(0, 0, 0, .38);
 }
 
-:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-brand h1 {
-  color: #f3f8f4;
+:root[data-theme][data-mode="dark"]:not([data-theme="tmhub"]) .auth-login-brand h1 {
+  color: var(--text-primary);
 }
 
-:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-brand p,
-:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-card .text-accent,
-:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-password-help {
-  color: #aeb9b1;
+:root[data-theme][data-mode="dark"]:not([data-theme="tmhub"]) .auth-login-brand p,
+:root[data-theme][data-mode="dark"]:not([data-theme="tmhub"]) .auth-login-card .text-accent,
+:root[data-theme][data-mode="dark"]:not([data-theme="tmhub"]) .auth-password-help {
+  color: var(--text-secondary);
 }
 
 @media(max-width: 900px) {
