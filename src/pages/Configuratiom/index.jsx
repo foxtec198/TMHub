@@ -41,7 +41,7 @@ export function Settings() {
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   // Perfil, preferência visual e estados dos fluxos de senha/e-mail.
   const [profile, setProfile] = useState({ nome: "", email: "", foto_perfil: null, tema: "tmhub", modo_tema: "light" });
-  const { theme, mode, setTheme, setMode } = useTheme();
+  const { theme, mode, particlesEnabled, setTheme, setMode, setParticlesEnabled } = useTheme();
   const availableThemes = useMemo(
     () => getAvailableThemeOptions(profile.temas_disponiveis),
     [profile.temas_disponiveis],
@@ -119,6 +119,14 @@ export function Settings() {
     setMode(nextMode);
     if (!(await save({ modo_tema: nextMode }, "Modo de exibição atualizado."))) {
       setMode(previous);
+    }
+  };
+
+  const changeParticles = async (enabled) => {
+    const previous = particlesEnabled;
+    setParticlesEnabled(enabled);
+    if (!(await save({ particulas_ativas: enabled }, enabled ? "Partículas ativadas." : "Partículas desativadas."))) {
+      setParticlesEnabled(previous);
     }
   };
 
@@ -247,11 +255,10 @@ export function Settings() {
                   </button>
                 ))}
               </div>
-              {isAdmin ?
-                <section>
-                  <span className="appearance-label">Identidade visual</span>
-                  <div className="theme-grid" role="radiogroup" aria-label="Identidade visual">
-                    {availableThemes.map((option) => (
+              <section>
+                <span className="appearance-label">Identidade visual</span>
+                <div className="theme-grid" role="radiogroup" aria-label="Identidade visual">
+                  {availableThemes.map((option) => (
                       <button
                         key={option.id}
                         type="button"
@@ -265,10 +272,21 @@ export function Settings() {
                         <small>{option.description}</small>
                         {theme === option.id && <i className="pi pi-check-circle theme-card__check" aria-hidden="true" />}
                       </button>
-                    ))}
-                  </div>
-                </section> : null
-              }
+                  ))}
+                </div>
+              </section>
+              <div className="appearance-effects">
+                <div>
+                  <strong>Partículas ambientais</strong>
+                  <small>Detalhes leves de cor no fundo. Você pode desligar para priorizar desempenho.</small>
+                </div>
+                <Checkbox
+                  inputId="appearance-particles"
+                  binary
+                  checked={particlesEnabled}
+                  onChange={(event) => changeParticles(Boolean(event.checked))}
+                />
+              </div>
             </article>
 
             <article className="settings-card password-card">

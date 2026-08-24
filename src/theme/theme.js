@@ -7,6 +7,20 @@ import {
 } from "./themes";
 
 export const THEME_EVENT = "tmhub:theme-change";
+export const PARTICLES_STORAGE_KEY = "particlesEnabled";
+export const PARTICLES_EVENT = "tmhub:particles-change";
+
+export function getStoredParticles() {
+  return localStorage.getItem(PARTICLES_STORAGE_KEY) !== "false";
+}
+
+export function applyParticles(enabled, { notify = true } = {}) {
+  const next = Boolean(enabled);
+  document.documentElement.dataset.particles = next ? "enabled" : "disabled";
+  localStorage.setItem(PARTICLES_STORAGE_KEY, String(next));
+  if (notify) window.dispatchEvent(new CustomEvent(PARTICLES_EVENT, { detail: { enabled: next } }));
+  return next;
+}
 
 export function getStoredAppearance() {
   return appearanceFromLegacyTheme(
@@ -62,6 +76,11 @@ export function applyProfileAppearance(profile, options) {
     theme: legacyMode ? "tmhub" : candidate,
     mode: profile?.modo_tema || legacyMode || getStoredMode(),
   }, options);
+}
+
+export function applyProfileParticles(profile, options) {
+  if (profile?.particulas_ativas == null) return getStoredParticles();
+  return applyParticles(Boolean(profile.particulas_ativas), options);
 }
 
 export function getThemeColor(variable, fallback = "") {

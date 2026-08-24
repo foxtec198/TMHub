@@ -1497,11 +1497,11 @@
 }
 
 .theme-card--christmas {
-  --theme-card-bg: #0b3518;
-  --theme-card-text: #ffffff;
-  --theme-card-muted: #c5ddca;
-  --theme-card-border: #9d2938;
-  --theme-card-accent: #ff4d61;
+  --theme-card-bg: #0d2b1c;
+  --theme-card-text: #f7fbf8;
+  --theme-card-muted: #bfd0c5;
+  --theme-card-border: #8f3442;
+  --theme-card-accent: #f4d58d;
 }
 
 .theme-card--tmhub .theme-card__preview i:nth-child(1) {
@@ -1558,20 +1558,69 @@
 }
 
 .theme-card--christmas .theme-card__preview i:nth-child(1) {
-  background: #0b3518;
+  background: #0d2118;
 }
 
+.theme-card--aurora { --theme-card-bg: #1a1c37; --theme-card-text: #f7f5ff; --theme-card-muted: #c4c2db; --theme-card-border: #5b5998; --theme-card-accent: #b4a9ff; }
+.theme-card--ocean { --theme-card-bg: #0b2b38; --theme-card-text: #effdff; --theme-card-muted: #b5d2dc; --theme-card-border: #347185; --theme-card-accent: #72e0f1; }
+.theme-card--sunset { --theme-card-bg: #351828; --theme-card-text: #fff6f7; --theme-card-muted: #e2bfca; --theme-card-border: #8c5269; --theme-card-accent: #ffc18b; }
+.theme-card--forest { --theme-card-bg: #173323; --theme-card-text: #f0f8f0; --theme-card-muted: #c0d2c1; --theme-card-border: #577b60; --theme-card-accent: #d7b96b; }
+.theme-card--terminal { --theme-card-bg: #0b1210; --theme-card-text: #eaffee; --theme-card-muted: #bad2bd; --theme-card-border: #4c7560; --theme-card-accent: #77ff9d; }
+.theme-card--paper { --theme-card-bg: #f4eddf; --theme-card-text: #26332b; --theme-card-muted: #627168; --theme-card-border: #b9c7b8; --theme-card-accent: #285d45; }
+
 .theme-card--christmas .theme-card__preview i:nth-child(2) {
-  background: #16da4e;
+  background: #43d477;
 }
 
 .theme-card--christmas .theme-card__preview i:nth-child(3) {
-  background: #ff334f;
+  background: #e84b5f;
 }
 
 .theme-card--christmas .theme-card__preview i:nth-child(4) {
-  background: #f5df87;
+  background: #f4d58d;
 }
+
+.theme-card--aurora .theme-card__preview i:nth-child(1) { background: #1a1c37; }
+.theme-card--aurora .theme-card__preview i:nth-child(2) { background: #8b7cff; }
+.theme-card--aurora .theme-card__preview i:nth-child(3) { background: #e579ff; }
+.theme-card--aurora .theme-card__preview i:nth-child(4) { background: #42dfb3; }
+.theme-card--ocean .theme-card__preview i:nth-child(1) { background: #0b2b38; }
+.theme-card--ocean .theme-card__preview i:nth-child(2) { background: #29c9e6; }
+.theme-card--ocean .theme-card__preview i:nth-child(3) { background: #38a9ff; }
+.theme-card--ocean .theme-card__preview i:nth-child(4) { background: #5ce1b3; }
+.theme-card--sunset .theme-card__preview i:nth-child(1) { background: #351828; }
+.theme-card--sunset .theme-card__preview i:nth-child(2) { background: #ff9a57; }
+.theme-card--sunset .theme-card__preview i:nth-child(3) { background: #ff647f; }
+.theme-card--sunset .theme-card__preview i:nth-child(4) { background: #d275ff; }
+.theme-card--forest .theme-card__preview i:nth-child(1) { background: #173323; }
+.theme-card--forest .theme-card__preview i:nth-child(2) { background: #69cd8a; }
+.theme-card--forest .theme-card__preview i:nth-child(3) { background: #d7b96b; }
+.theme-card--forest .theme-card__preview i:nth-child(4) { background: #78cdb6; }
+.theme-card--terminal .theme-card__preview i:nth-child(1) { background: #0b1210; }
+.theme-card--terminal .theme-card__preview i:nth-child(2) { background: #77ff9d; }
+.theme-card--terminal .theme-card__preview i:nth-child(3) { background: #50dfd1; }
+.theme-card--terminal .theme-card__preview i:nth-child(4) { background: #e8cf65; }
+.theme-card--paper .theme-card__preview i:nth-child(1) { background: #fffdf7; }
+.theme-card--paper .theme-card__preview i:nth-child(2) { background: #285d45; }
+.theme-card--paper .theme-card__preview i:nth-child(3) { background: #b66b48; }
+.theme-card--paper .theme-card__preview i:nth-child(4) { background: #507f9c; }
+
+.appearance-effects {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: .85rem .95rem;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.appearance-effects > div { display: grid; gap: .22rem; }
+.appearance-effects small { color: var(--text-secondary); line-height: 1.4; }
+.appearance-effects .p-checkbox { flex: 0 0 auto; }
 
 @media (max-width: 560px) {
 

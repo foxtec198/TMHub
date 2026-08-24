@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { socketio } from "../utils/socketio";
-import "./browser-notification-center.css";
 
-const PREFERENCE_KEY = "tmhub_browser_notifications_enabled";
 const NOTIFICATION_ICON = "/brands/main_fav.png";
 const DEDUPE_WINDOW_MS = 1_500;
 
@@ -130,10 +128,6 @@ function browserNotificationsSupported() {
   return typeof window !== "undefined" && "Notification" in window;
 }
 
-function savedPreference() {
-  return window.localStorage.getItem(PREFERENCE_KEY) === "true";
-}
-
 function eventDetails(event = {}) {
   if (event.channel && CHANNEL_DETAILS[event.channel]) {
     return CHANNEL_DETAILS[event.channel];
@@ -151,54 +145,48 @@ export function BrowserNotificationCenter({ showToast }) {
   const [permission, setPermission] = useState(() => (
     browserNotificationsSupported() ? Notification.permission : "unsupported"
   ));
-  const [enabled, setEnabled] = useState(() => (
-    browserNotificationsSupported() && Notification.permission === "granted" && savedPreference()
-  ));
   const recentNotifications = useMemo(() => new Map(), []);
+  const requestingPermission = useRef(false);
 
-  const persistEnabled = useCallback((value) => {
-    window.localStorage.setItem(PREFERENCE_KEY, String(value));
-    setEnabled(value);
-  }, []);
+  const requestPermission = useCallback(async () => {
+    if (
+      requestingPermission.current
+      || !browserNotificationsSupported()
+      || Notification.permission !== "default"
+    ) return;
 
-  const toggleNotifications = useCallback(async () => {
-    if (!browserNotificationsSupported()) {
-      showToast("warn", "Notificações indisponíveis", "Este navegador não oferece notificações nativas.");
-      return;
-    }
-
-    if (permission === "denied") {
-      showToast("warn", "Notificações bloqueadas", "Libere as notificações do TM Hub nas permissões do Chrome.");
-      return;
-    }
-
-    if (permission !== "granted") {
+    requestingPermission.current = true;
+    try {
       const nextPermission = await Notification.requestPermission();
       setPermission(nextPermission);
 
-      if (nextPermission !== "granted") {
-        persistEnabled(false);
-        showToast("warn", "Permissão não concedida", "As notificações do navegador permanecem desativadas.");
-        return;
+      if (nextPermission === "denied") {
+        showToast(
+          "warn",
+          "Notificações bloqueadas",
+          "Libere as notificações do TM Hub nas permissões do navegador para receber atualizações."
+        );
       }
-
-      persistEnabled(true);
-      showToast("success", "Notificações ativadas", "Você será avisado quando houver atualizações enquanto estiver fora da tela.");
-      return;
+    } finally {
+      requestingPermission.current = false;
     }
+  }, [showToast]);
 
-    const nextEnabled = !enabled;
-    persistEnabled(nextEnabled);
-    showToast(
-      "info",
-      nextEnabled ? "Notificações ativadas" : "Notificações desativadas",
-      nextEnabled ? "Os alertas do navegador estão ativos." : "Os alertas do navegador foram pausados neste dispositivo."
-    );
-  }, [enabled, permission, persistEnabled, showToast]);
+  // O navegador exige interação do usuário para mostrar a solicitação. Não há
+  // preferência interna para desligar: uma vez permitidas, elas ficam ativas.
+  useEffect(() => {
+    if (!browserNotificationsSupported() || permission !== "default") return undefined;
+    window.addEventListener("pointerdown", requestPermission, { capture: true, once: true });
+    window.addEventListener("keydown", requestPermission, { capture: true, once: true });
+    return () => {
+      window.removeEventListener("pointerdown", requestPermission, { capture: true });
+      window.removeEventListener("keydown", requestPermission, { capture: true });
+    };
+  }, [permission, requestPermission]);
 
   useEffect(() => {
     const showBrowserNotification = (event = {}) => {
-      if (!enabled || !browserNotificationsSupported() || Notification.permission !== "granted") return;
+      if (!browserNotificationsSupported() || Notification.permission !== "granted") return;
       if (event.source_socket && event.source_socket === socketio.id) return;
       if (document.visibilityState === "visible" && document.hasFocus()) return;
 
@@ -240,27 +228,7 @@ export function BrowserNotificationCenter({ showToast }) {
       socketio.off("system_notification", showBrowserNotification);
       asyncHandlers.forEach(([eventName, handler]) => socketio.off(eventName, handler));
     };
-  }, [enabled, navigate, recentNotifications]);
+  }, [navigate, recentNotifications]);
 
-  const title = !browserNotificationsSupported()
-    ? "Notificações indisponíveis neste navegador"
-    : permission === "denied"
-      ? "Notificações bloqueadas no Chrome"
-      : enabled
-        ? "Desativar notificações do navegador"
-        : "Ativar notificações do navegador";
-
-  return (
-    <button
-      type="button"
-      className={`browser-notification-toggle ${enabled ? "is-enabled" : ""}`}
-      aria-pressed={enabled}
-      aria-label={title}
-      title={title}
-      onClick={toggleNotifications}
-    >
-      <i className={`pi ${enabled ? "pi-bell" : "pi-bell-slash"}`} aria-hidden="true" />
-      {enabled ? <span className="browser-notification-status" aria-hidden="true" /> : null}
-    </button>
-  );
+  return null;
 }

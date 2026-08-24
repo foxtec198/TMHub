@@ -1,4 +1,7 @@
-export const THEMES = Object.freeze(["tmhub", "cyberpunk", "pride", "christmas"]);
+export const THEMES = Object.freeze([
+  "tmhub", "cyberpunk", "pride", "christmas", "aurora", "ocean",
+  "sunset", "forest", "terminal", "paper",
+]);
 export const MODES = Object.freeze(["light", "dark"]);
 
 export const DEFAULT_THEME = "tmhub";
@@ -15,7 +18,13 @@ export const THEME_OPTIONS = Object.freeze([
   { id: "tmhub", label: "TMHub", icon: "pi pi-building", description: "Identidade corporativa", default: true },
   { id: "cyberpunk", label: "Cyberpunk", icon: "pi pi-bolt", description: "Cyan e vermelho neon" },
   { id: "pride", label: "Orgulho", icon: "pi pi-heart", description: "Cores do orgulho" },
-  { id: "christmas", label: "Natal", icon: "pi pi-gift", description: "Identidade natalina", hiddenUntilUnlocked: true },
+  { id: "christmas", label: "Natal", icon: "pi pi-gift", description: "Pinheiro, vinho e dourado" },
+  { id: "aurora", label: "Aurora", icon: "pi pi-sparkles", description: "Índigo, violeta e verde-luz" },
+  { id: "ocean", label: "Ocean", icon: "pi pi-wave-pulse", description: "Azul oceano e ciano" },
+  { id: "sunset", label: "Sunset", icon: "pi pi-sun", description: "Âmbar, coral e noite" },
+  { id: "forest", label: "Forest", icon: "pi pi-tree", description: "Verde profundo e dourado" },
+  { id: "terminal", label: "Terminal", icon: "pi pi-code", description: "Grafite e verde phosphor" },
+  { id: "paper", label: "Paper", icon: "pi pi-file", description: "Papel claro, tinta e elegância" },
 ]);
 
 export function getAvailableThemeOptions(unlockedThemes) {
