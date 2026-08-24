@@ -4,26 +4,116 @@
   background: var(--app-bg);
   color: var(--text-primary);
   overflow: auto;
-
 }
 
-.usage-control { display:flex; flex-direction:column; gap:1rem; }
-.usage-control__header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
-.usage-control__header h2 { margin:0; font-size:1.2rem; }
-.usage-control__header p { margin:.3rem 0 0; color:var(--text-color-secondary); max-width:46rem; }
-.usage-control__summary { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:.75rem; }
-.usage-control__summary article { display:flex; align-items:center; gap:.75rem; padding:.9rem; border:1px solid var(--surface-border); border-radius:14px; background:var(--surface-card); }
-.usage-control__summary article > i { display:grid; place-items:center; width:2.35rem; height:2.35rem; border-radius:10px; background:var(--accent-soft); color:var(--accent); }
-.usage-control__summary small { display:block; color:var(--text-color-secondary); }
-.usage-control__summary strong { font-size:1.15rem; }
-.usage-user-cell { display:flex; align-items:center; gap:.55rem; }
-.usage-edinho { color:var(--accent); font-weight:800; white-space:nowrap; }
-.usage-timeline-button { border:0; background:transparent; color:var(--accent); font:inherit; font-weight:700; cursor:pointer; }
-.usage-timeline-button:hover { text-decoration:underline; }
-.usage-timeline-dialog { width:min(42rem,calc(100vw - 2rem)); }
-:root[data-mode="dark"] .usage-control__summary article { background:var(--surface-2); border-color:var(--border-strong); }
-@media (max-width:900px) { .usage-control__summary { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-@media (max-width:600px) { .usage-control__header { flex-direction:column; } .usage-control__summary { grid-template-columns:1fr; } }
+.usage-control {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.usage-control__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.usage-control__header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.usage-control__header p {
+  margin: .3rem 0 0;
+  color: var(--text-color-secondary);
+  max-width: 46rem;
+}
+
+.usage-control__summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.usage-control__summary article {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .9rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: var(--surface-card);
+}
+
+.usage-control__summary article>i {
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.usage-control__summary small {
+  display: block;
+  color: var(--text-color-secondary);
+}
+
+.usage-control__summary strong {
+  font-size: 1.15rem;
+}
+
+.usage-user-cell {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.usage-edinho {
+  color: var(--accent);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.usage-timeline-button {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.usage-timeline-button:hover {
+  text-decoration: underline;
+}
+
+.usage-timeline-dialog {
+  width: min(42rem, calc(100vw - 2rem));
+}
+
+:root[data-mode="dark"] .usage-control__summary article {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+@media (max-width:900px) {
+  .usage-control__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width:600px) {
+  .usage-control__header {
+    flex-direction: column;
+  }
+
+  .usage-control__summary {
+    grid-template-columns: 1fr;
+  }
+}
 
 .p-password,
 .p-icon-field {
@@ -55,7 +145,7 @@
 }
 
 .settings-grid {
-  max-width: 1180px;
+  /* max-width: 1180px; */
   margin: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -303,7 +393,7 @@
   transform: translateX(0);
 }
 
-.registered-signature-form > small {
+.registered-signature-form>small {
   color: var(--text-secondary);
   font-size: .75rem;
 }
@@ -1824,12 +1914,12 @@
   padding-top: 1.25rem;
 }
 
-.registered-signature-form > p {
+.registered-signature-form>p {
   margin: 0 0 .35rem;
   color: var(--text-secondary);
 }
 
-.registered-signature-form > label {
+.registered-signature-form>label {
   color: var(--text-primary);
   font-size: .84rem;
   font-weight: 700;
@@ -1861,12 +1951,12 @@
   border-radius: .7rem;
 }
 
-.registered-signature-crop > strong {
+.registered-signature-crop>strong {
   color: var(--text-primary);
   font-size: .84rem;
 }
 
-.registered-signature-crop > small {
+.registered-signature-crop>small {
   color: var(--text-secondary);
   font-size: .76rem;
 }

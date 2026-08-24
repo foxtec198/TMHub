@@ -185,7 +185,7 @@ export function Settings() {
   // Cards separam preferências visuais de operações sensíveis da conta.
   return <section className="settings-page">
     <PageHeader section="Sistema" title="Configurações" description="Personalize seu perfil, acesso e aparência do TM Hub." />
-    <TabView className="settings-tabs">
+    <TabView>
       <TabPanel header="Minha conta" leftIcon="pi pi-user mr-2">
         <div className="settings-grid">
           <div className="settings-column">
@@ -202,6 +202,29 @@ export function Settings() {
               <div className="settings-card-title"><i className="pi pi-envelope" /><div><h2>E-mail</h2><p>Atual: {profile.email || "Não informado"}</p></div></div>
               <label>Novo e-mail</label><div className="settings-inline"><InputText autoComplete="off" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="voce@empresa.com" /><Button label="Verificar" icon="pi pi-send" onClick={requestCode} /></div>
             </article>
+
+            {isAdmin && (
+              <article className="settings-card">
+                <div className="settings-card-title"><i className="pi pi-wrench" /><div><h2>Manutenção da operação</h2><p>Bloqueia o uso do TM Hub para usuários não administradores.</p></div></div>
+                <div className="align-items-center flex justify-content-between ">
+                  <div>
+                    <strong>{maintenanceActive ? "Manutenção ativa" : "Operação liberada"}</strong>
+                    <br />
+                    <small>{maintenanceActive ? "Administradores continuam com acesso." : "Todos os usuários autorizados podem operar normalmente."}</small>
+                  </div>
+                  <div className="flex gap-2">
+                    <Checkbox
+                      inputId="maintenance-mode"
+                      binary
+                      checked={maintenanceActive}
+                      disabled={maintenanceSaving}
+                      onChange={(event) => changeMaintenance(Boolean(event.checked))}
+                    />
+                    <label htmlFor="maintenance-mode">Ativar manutenção</label>
+                  </div>
+                </div>
+              </article>
+            )}
           </div>
 
           <div className="settings-column">
@@ -254,27 +277,6 @@ export function Settings() {
               <p className="password-hint"><i className="pi pi-info-circle" /> Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial.</p>
               <Button label="Atualizar senha" icon="pi pi-shield" onClick={changePassword} />
             </article>
-
-            {isAdmin && (
-              <article className="settings-card">
-                <div className="settings-card-title"><i className="pi pi-wrench" /><div><h2>Manutenção da operação</h2><p>Bloqueia o uso do TM Hub para usuários não administradores.</p></div></div>
-                <div className="settings-inline">
-                  <div>
-                    <strong>{maintenanceActive ? "Manutenção ativa" : "Operação liberada"}</strong>
-                    <small>{maintenanceActive ? "Administradores continuam com acesso." : "Todos os usuários autorizados podem operar normalmente."}</small>
-                  </div>
-                  <Checkbox
-                    inputId="maintenance-mode"
-                    binary
-                    checked={maintenanceActive}
-                    disabled={maintenanceSaving}
-                    onChange={(event) => changeMaintenance(Boolean(event.checked))}
-                  />
-                  <label htmlFor="maintenance-mode">Ativar manutenção</label>
-                </div>
-              </article>
-            )}
-
           </div>
         </div>
       </TabPanel>
