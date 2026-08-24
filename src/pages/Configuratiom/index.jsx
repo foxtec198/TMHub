@@ -29,6 +29,7 @@ import { CollaboratorImportSettings } from "./EmployeeImportSettings";
 import { NewsSettings } from "./NewsSettings";
 import { TMOpsAccessSettings } from "./TMOpsAccessSettings";
 import { TimoSettings } from "./TimoSettings";
+import { UsageControlSettings } from "./UsageControlSettings";
 
 // Styles
 import "./settings.css";
@@ -301,6 +302,9 @@ export function Settings() {
       </TabPanel>}
       {isAdmin && <TabPanel header="Notícias" leftIcon="pi pi-megaphone mr-2">
         <NewsSettings />
+      </TabPanel>}
+      {isAdmin && <TabPanel header="Uso do TMHub" leftIcon="pi pi-chart-line mr-2">
+        <UsageControlSettings />
       </TabPanel>}
     </TabView>
 

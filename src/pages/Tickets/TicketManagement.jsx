@@ -61,6 +61,7 @@ export function TicketManagement() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     const reload = (event = {}) => {
+      if (event.source_socket && event.source_socket === socketio.id) return;
       if (!event.channel || event.channel === "tickets") load();
     };
     socketio.on("ticket_update", reload);

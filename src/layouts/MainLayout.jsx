@@ -17,6 +17,7 @@ import { ThemeLogo } from "../components/ThemeLogo";
 import { UserAvatar } from "../components/UserAvatar";
 import { BrowserNotificationCenter } from "../components/BrowserNotificationCenter";
 import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
+import { UsageTelemetryTracker } from "../components/UsageTelemetryTracker";
 
 // Styles
 import './main.css'
@@ -67,7 +68,6 @@ export function MainLayout() {
   const [isMenuVisible, setIsMenuVisible] = useState(
     () => !window.matchMedia("(max-width: 960px)").matches
   );
-  const [dataRevision, setDataRevision] = useState(0);
   const [profileStatus, setProfileStatus] = useState("loading");
 
   const { showToast } = useToast();
@@ -501,7 +501,6 @@ export function MainLayout() {
     const ids = (event.value || []).map(Number);
     setSelectedFilialIds(ids);
     localStorage.setItem("selected_filial_ids", JSON.stringify(ids));
-    setDataRevision((revision) => revision + 1);
     window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
       detail: { filialIds: ids },
     }));
@@ -523,7 +522,6 @@ export function MainLayout() {
       if (!event.channel || !routeChannels.includes(event.channel)) return;
       window.clearTimeout(refreshTimer);
       refreshTimer = window.setTimeout(() => {
-        setDataRevision((revision) => revision + 1);
         window.dispatchEvent(new CustomEvent("tmhub:data-changed", { detail: event }));
       }, 350);
     };
@@ -546,6 +544,7 @@ export function MainLayout() {
 
   return (
     <div className={`app-layout ${isMenuVisible ? "menu-open" : "menu-closed"}`}>
+      <UsageTelemetryTracker />
       {/* DOCKER */}
       <header className="layout-header shadow-6 px-3">
         <div className="flex align-items-center gap-2">
@@ -627,7 +626,7 @@ export function MainLayout() {
 
         {/* PANEL FRAME */}
         <main className="layout-outlet">
-          <Outlet key={dataRevision} />
+          <Outlet />
         </main>
       </div>
     </div>

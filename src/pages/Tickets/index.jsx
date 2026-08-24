@@ -344,6 +344,7 @@ function useTicketRealtime(reload) {
   useEffect(() => {
     let timer;
     const schedule = (event = {}) => {
+      if (event.source_socket && event.source_socket === socketio.id) return;
       if (event.channel && event.channel !== "tickets") return;
       window.clearTimeout(timer);
       timer = window.setTimeout(reload, 250);

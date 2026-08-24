@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from 'primereact/button';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { AvatarGroup } from 'primereact/avatargroup';
@@ -15,6 +15,7 @@ import MembersDialog from '../../components/MembersDialog';
 import NewProjectDialog from '../../components/NewProjectDialog';
 import ProjectMemberAvatar from '../../components/ProjectMemberAvatar';
 import { useToast } from '../../contexts/ToastContext';
+import { socketio } from '../../utils/socketio';
 import './ProjetosPage.css';
 
 function enrichMembersWithPhotos(project, usersById) {
@@ -253,11 +254,23 @@ export function ProjetosPage() {
     [projetoAtivo]
   );
 
+  const loadProjects = useCallback(async () => {
+    try {
+      const data = await getProjects();
+      const users = hasSerializedMemberPhoto(data) ? [] : await getUsers();
+      const usersById = new Map(users.map((user) => [user.id, user]));
+      setUsuarios(users);
+      setProjetos(data.map((project) => enrichMembersWithPhotos(project, usersById)));
+    } catch (error) {
+      console.error('Não foi possível sincronizar os projetos em tempo real.', error);
+    }
+  }, []);
+
   // A lista de usuários pode ser muito grande e só é necessária nos diálogos de membros.
   useEffect(() => {
     let active = true;
 
-    async function loadProjects() {
+    async function loadInitialProjects() {
       const data = await getProjects();
       const users = hasSerializedMemberPhoto(data) ? [] : await getUsers();
       if (!active) return;
@@ -267,12 +280,28 @@ export function ProjetosPage() {
       setProjetos(data.map((project) => enrichMembersWithPhotos(project, usersById)));
     }
 
-    loadProjects();
+    loadInitialProjects();
 
     return () => {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    let syncTimer;
+    const syncProjects = (event = {}) => {
+      if (event.source_socket && event.source_socket === socketio.id) return;
+      if (event.channel !== 'projetos') return;
+      window.clearTimeout(syncTimer);
+      syncTimer = window.setTimeout(loadProjects, 250);
+    };
+
+    socketio.on('data_changed', syncProjects);
+    return () => {
+      window.clearTimeout(syncTimer);
+      socketio.off('data_changed', syncProjects);
+    };
+  }, [loadProjects]);
 
   // Orquestra sidebar, board Kanban e diálogos; regras internas ficam nos filhos.
   return (
