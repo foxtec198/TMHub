@@ -1,4 +1,5 @@
 import connect from "../../../utils/request";
+import { serializeProjectUpdate } from "./projectPayload";
 
 export async function getProjects() {
     const { data } = await connect.get("/projetos");
@@ -23,7 +24,10 @@ export async function renameProject(id, nome) {
 }
 
 export async function updateProject(id, body) {
-    const { data } = await connect.patch(`/projetos?id=${id}`, body);
+    const { data } = await connect.patch(
+        `/projetos?id=${id}`,
+        serializeProjectUpdate(body)
+    );
     return data;
 }
 
