@@ -52,12 +52,12 @@ body { transition: background-color .18s ease, color .18s ease; }
   box-shadow: var(--auth-news-card-shadow, 0 24px 65px rgba(0, 0, 0, .32)) !important;
 }
 :root[data-theme] .auth-login-panel { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--auth-primary, var(--primary)) 10%, transparent), transparent 28%), var(--auth-panel-bg, var(--app-bg)); }
-:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-card { color: var(--text-primary); background: var(--surface-1); border-color: var(--border); }
-:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-brand h1 { color: var(--text-primary); }
-:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-brand p,
-:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-card .text-accent,
-:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-password-help { color: var(--text-secondary); }
-:root:is([data-theme="cyberpunk"], [data-theme="pride"]) .auth-login-card .text-accent strong { color: var(--primary); }
+:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-card { color: var(--text-primary); background: var(--surface-1); border-color: var(--border); }
+:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-brand h1 { color: var(--text-primary); }
+:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-brand p,
+:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-card .text-accent,
+:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-password-help { color: var(--text-secondary); }
+:root:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"])[data-mode="dark"] .auth-login-card .text-accent strong { color: var(--primary); }
 :root[data-theme] .auth-login-brand .theme-logo { background: var(--logo-inverse-gradient, var(--logo-gradient)); }
 :root[data-mode="light"]:is([data-theme="cyberpunk"], [data-theme="pride"], [data-theme="christmas"]) .auth-login-brand .theme-logo {
   background: var(--logo-gradient);
