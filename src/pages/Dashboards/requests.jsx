@@ -1,929 +1,346 @@
-// Widgets
-import { Chart } from "primereact/chart"
-import { MeterGroup } from "primereact/metergroup"
-import { Calendar } from "primereact/calendar"
-import { Divider } from "primereact/divider"
-import { TabView } from "primereact/tabview"
-import { TabPanel } from "primereact/tabview"
-import { Knob } from 'primereact/knob';
-import { Button } from "primereact/button"
-import { OverlayPanel } from "primereact/overlaypanel"
-import { FloatLabel } from "primereact/floatlabel"
-import { MultiSelect } from "primereact/multiselect"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-// Components
-import { DashCard } from "../../components/DashCard"
-import { Table } from "../../components/tables/Table"
-import { PageHeader } from "../../components/PageHeader"
+import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
+import { Chart } from "primereact/chart";
+import { MultiSelect } from "primereact/multiselect";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Tag } from "primereact/tag";
 
-// Utils
-import { useEffect, useState, useRef, useMemo } from "react"
-import { to_real } from "../../utils/ui"
-import connect from "../../utils/request"
-import { useChartTheme } from "../../theme/useTheme"
+import { DashCard } from "../../components/DashCard";
+import { DashboardPanel } from "../../components/DashboardPanel";
+import { PageHeader } from "../../components/PageHeader";
+import { Placeholder } from "../../components/Placeholder";
+import { Table } from "../../components/tables/Table";
+import { useToast } from "../../contexts/ToastContext";
+import { useChartTheme } from "../../theme/useTheme";
+import connect from "../../utils/request";
+import { socketio } from "../../utils/socketio";
 
-// CSS
-import "./request.css"
+import "./request.css";
 
+const STATUS_META = {
+  pending: { label: "Aberta", severity: "warning" },
+  updated: { label: "Atualizada", severity: "info" },
+  approved: { label: "Coberta", severity: "success" },
+  reproved: { label: "Sem cobertura", severity: "danger" },
+};
 
-// MOCKS
-const totalOfReplaces = 19
+const FILTER_FIELDS = {
+  contrato: (item) => item.local,
+  departamento: (item) => item.dpto,
+  supervisor: (item) => item.supervisor || "Sem supervisor",
+  motivo: (item) => item.motivo || "Não informado",
+  status: (item) => item.status,
+  colaborador: (item) => item.ausente,
+};
 
-function matchesDashboardFilters(item, filters) {
-    if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
-    if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
-    if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
-    if (filters.colaborador.length && !filters.colaborador.includes(item.ausente)) return false;
-    if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
-    if (filters.status.length && !filters.status.includes(item.status)) return false;
-    return true;
+function defaultPeriod() {
+  const now = new Date();
+  return [new Date(now.getFullYear(), now.getMonth(), 1), now];
 }
 
-function isToday(value) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return false;
-    const today = new Date();
-    return date.getFullYear() === today.getFullYear()
-        && date.getMonth() === today.getMonth()
-        && date.getDate() === today.getDate();
+function initialFilters() {
+  return { contrato: [], departamento: [], supervisor: [], motivo: [], status: [], colaborador: [] };
 }
 
-// Dados de fallback mantidos apenas para desenvolvimento visual sem API.
-const MOCK = {
-    res: {
-        "data": {
-            "abertas": 0
-        }
-    },
-    hist: [
-        {
-            "ausente": "LINCOLN GUSTAVO MENDES",
-            "created_at": "Fri, 22 Jun 2026 13:27:42 GMT",
-            "dpto": "87",
-            "local": "ED.LONDRINA - ENCARREGADOS",
-            "motivo": "LAVAÇÃO DE TOLDO",
-            "multa": 180,
-            "obs": "None",
-            "reserva": "SEM INFORMAÇÃO",
-            "status": "reproved",
-            "supervisor": "PAULO TORRES"
-        }, {
-            "ausente": "PAULO AQUINO DE ALMEIDA JUNIOR",
-            "created_at": "Fri, 15 Jun 2026 13:27:41 GMT",
-            "dpto": "269",
-            "local": "LONDRINA - VOLANTES ",
-            "motivo": "REMANEJAMENTO",
-            "multa": 250,
-            "obs": "None",
-            "reserva": "SEM INFORMAÇÃO",
-            "status": "approve",
-            "supervisor": "PAULO TORRES"
-        },
-        {
-            "ausente": "LUZIA DE OLIVEIRA",
-            "created_at": "Fri, 8 Jun 2026 13:27:41 GMT",
-            "dpto": "269",
-            "local": "LONDRINA - VOLANTES ",
-            "motivo": "INSS",
-            "multa": 320,
-            "obs": "None",
-            "reserva": "LUZIA CAZARIN",
-            "status": "approve",
-            "supervisor": "PAULO TORRES"
-        }, {
-            "ausente": "FULANINHO DA SILVA",
-            "created_at": "Fri, 8 Jun 2026 13:27:41 GMT",
-            "dpto": "269",
-            "local": "SCHERER - CONS A LONDRINA",
-            "motivo": "ATESTADO",
-            "multa": 0,
-            "obs": "None",
-            "reserva": null,
-            "status": "approve",
-            "supervisor": "PAULO TORRES"
-        }, {
-            "ausente": "FULANINHO DA ROÇA",
-            "created_at": "Fri, 8 Jun 2026 13:27:41 GMT",
-            "dpto": "87",
-            "local": "SCHERER - CONS A LONDRINA",
-            "motivo": "AFASTAMENTO",
-            "multa": 250,
-            "obs": "None",
-            "reserva": "FULANINHA DA COBERTURA",
-            "status": "approve",
-            "supervisor": "PAULO TORRES"
-        }
-    ]
+function dateParam(value) {
+  return [
+    value.getFullYear(),
+    String(value.getMonth() + 1).padStart(2, "0"),
+    String(value.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
-// Logic and UI
-export function RequestReport() {
-    const chartTheme = useChartTheme();
-    // Filtros enviados ao backend e referência do painel flutuante de filtros.
-    const op_filters = useRef(); // Overlay Panel Ref
-
-    const defaultFilters = {
-        contrato: [],
-        departamento: [],
-        supervisor: [],
-        motivo: [],
-        status: [],
-        colaborador: [],
-    };
-
-    // Filtros
-    const [filters, setFilters] = useState(defaultFilters);
-
-    // Dar refresh na pagina com os novos dados
-    // Alterar refresh força uma nova consulta sem acoplar os handlers ao efeito.
-    const [refresh, setRefresh] = useState(null);
-
-    // Historico de reposições
-    const [histOriginal, setHistOriginal] = useState([]);
-    const [faltasReservasOriginal, setFaltasReservasOriginal] = useState([]);
-
-    // Filtros
-    const hoje = new Date();
-    const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-    const [filter, setFilter] = useState([primeiroDia, ultimoDia]);
-
-    // Statics
-    // Indicadores consolidados exibidos nos cards superiores.
-    const [realizadas, setRealizadas] = useState(0);
-    const [abertas, setAbertas] = useState(0);
-    const [postosCobertos, setPostosCobertos] = useState(0);
-    const [postosDescobertos, setPostoDescobertos] = useState(0);
-    const [localComMaisFaltas, setLocalComMaisFaltas] = useState(0);
-    const [valorDoLocalComMaisFaltas, setValorDoLocalComMaisFaltas] = useState(0);
-    const [faltasReservasMes, setFaltasReservasMes] = useState(0);
-    const [faltasReservasHoje, setFaltasReservasHoje] = useState(0);
-    const [departamentos, setDepartamentos] = useState([]);
-
-    // Dados para CHARTS
-    // Chart de Reposicoes
-    // Séries derivadas para os gráficos Chart.js.
-    const [labelReposicoes, setLabels] = useState(null)
-    const [dadosReposicoes, setDadosReposicoes] = useState(null)
-    const [labelLocal, setlabelLocal] = useState(null)
-    const [dadosAusentes, setDadosAusentes] = useState(null)
-
-    // Dados do Vertical Bar - Locais
-    const [dadosLocais, setDadosLocais] = useState(null)
-
-    // Chart de multas
-    const [labelForMult, setlabelForMult] = useState(null)
-    const [dataForMult, setdataForMult] = useState(null)
-
-    // Dados da Tabela
-    // Recorte tabular e percentuais do MeterGroup.
-    const [dadosTabela, setDadosTabela] = useState([])
-
-    // Dados do Meter Group
-    const [meterGroupValues, setMeterGroupValues] = useState([]);
-
-    const totalRequisicoes = realizadas + abertas;
-    const percentageOfTotal = (value) => {
-        if (!totalRequisicoes || !value) return 0;
-        return Math.max(1, Math.round((value / totalRequisicoes) * 100));
-    };
-    // Use Memo para setar 
-    const hist = useMemo(() => {
-        return histOriginal.filter(item => matchesDashboardFilters(item, filters));
-    }, [histOriginal, filters.contrato, filters.departamento, filters.supervisor, filters.colaborador, filters.motivo, filters.status]);
-
-    const faltasReservas = useMemo(() => {
-        return faltasReservasOriginal.filter(item => matchesDashboardFilters(item, filters));
-    }, [faltasReservasOriginal, filters.contrato, filters.departamento, filters.supervisor, filters.colaborador, filters.motivo, filters.status]);
-
-    const clearFilters = () => {
-        setFilters(() => ({ ...defaultFilters }));
-    };
-    const activeFilterCount = Object.values(filters).filter((value) => value?.length).length;
-
-    const contratosOptions = useMemo(() => {
-        const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
-            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
-            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
-            if (filters.status.length && !filters.status.includes(item.status)) return false;
-
-            return true;
-        });
-
-        return [...new Set(histFiltro.map(i => i.local))]
-            .sort()
-            .map(i => ({ label: i, value: i }));
-
-    }, [histOriginal, filters]);
-
-    const dptoOptions = useMemo(() => {
-        const histFiltro = histOriginal.filter(item => {
-            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
-            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
-            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
-            if (filters.status.length && !filters.status.includes(item.status)) return false;
-
-            return true;
-        });
-
-        return [...new Set(histFiltro.map(i => i.dpto))]
-            .sort()
-            .map(i => ({ label: i, value: i }));
-
-    }, [histOriginal, filters]);
-
-    const motivoOptions = useMemo(() => {
-        const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
-            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
-            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
-            if (filters.status.length && !filters.status.includes(item.status)) return false;
-
-            return true;
-        });
-
-        return [...new Set(histFiltro.map(i => i.motivo))]
-            .sort()
-            .map(i => ({ label: i, value: i }));
-
-    }, [histOriginal, filters]);
-
-    const supervisorOptions = useMemo(() => {
-        const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
-            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
-            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
-            if (filters.status.length && !filters.status.includes(item.status)) return false;
-
-            return true;
-        });
-
-        return [...new Set(histFiltro.map(i => i.supervisor))]
-            .sort()
-            .map(i => ({ label: i, value: i }));
-
-    }, [histOriginal, filters]);
-
-    const statusOptions = useMemo(() => {
-        const histFiltro = histOriginal.filter(item => {
-            if (filters.departamento.length && !filters.departamento.includes(item.dpto)) return false;
-            if (filters.contrato.length && !filters.contrato.includes(item.local)) return false;
-            if (filters.supervisor.length && !filters.supervisor.includes(item.supervisor)) return false;
-            if (filters.motivo.length && !filters.motivo.includes(item.motivo)) return false;
-
-            return true;
-        });
-
-        return [...new Set(histFiltro.map(i => i.status))]
-            .sort()
-            .map(i => ({ label: i, value: i }));
-
-    }, [histOriginal, filters]);
-
-    // Use Effect para a consulta
-    // Carrega o histórico bruto sempre que o período/refresh mudar.
-    useEffect(() => {
-        async function getData() {
-
-            const filterData = filter
-                ? {
-                    init: new Date(filter[0]).toLocaleDateString("pt-BR"),
-                    end: new Date(filter[1]).toLocaleDateString("pt-BR")
-                }
-                : {};
-
-            const res = await connect.post("/dash/reposicoes", filterData);
-
-            setHistOriginal(res.data.historico);
-            setFaltasReservasOriginal(res.data.faltas_reservas || []);
-            setAbertas(res.data.abertas);
-        }; getData();
-    }, [refresh]);
-
-    // Use Effect para os filtros
-    // Recalcula cards, gráficos e tabela a partir do histórico já carregado.
-    useEffect(() => {
-        if (!hist.length) return;
-
-        const getStatus = (item) => {
-            if (item.status === "reproved") return "descoberta";
-            return "coberta";
-        };
-
-        const cobertos = hist.filter(item => getStatus(item) === "coberta").length;
-        const descobertos = hist.filter(item => getStatus(item) === "descoberta").length;
-
-        const total = hist.length;
-
-        const dias = [...new Set(
-            hist.map(item =>
-                new Date(item.created_at).toLocaleDateString("pt-BR", { day: "2-digit" })
-            )
-        )].sort((a, b) => a - b);
-
-        // Contratos
-        const contratos = hist.reduce((acc, { local }) => {
-            acc[local] = (acc[local] || 0) + 1;
-            return acc;
-        }, {});
-
-        const betters = Object.entries(contratos)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 3);
-
-        const locaisLabels = betters.map(([local]) =>
-            local.replaceAll(/\d+/g, "")
-                .replaceAll("-", "")
-                .trim()
-        );
-
-        const locaisValues = betters.map(([, quantidade]) => quantidade);
-
-        // Departamentos
-        const dptos = hist.reduce((acc, { dpto, ...item }) => {
-            acc[dpto] ??= {
-                cobertas: 0,
-                descobertas: 0
-            };
-
-            acc[dpto][
-                getStatus(item) === "coberta"
-                    ? "cobertas"
-                    : "descobertas"
-            ]++;
-
-            return acc;
-        }, {});
-
-        setDepartamentos(Object.entries(dptos));
-
-        // Cards
-        setRealizadas(total);
-        setAbertas(abertas);
-
-        setLocalComMaisFaltas(locaisLabels[0]);
-
-        setPostosCobertos(cobertos);
-        setPostoDescobertos(descobertos);
-
-        setValorDoLocalComMaisFaltas(
-            Math.round((locaisValues[0] / total) * 100) || 0
-        );
-
-
-        // Chart Locais
-        setlabelLocal(locaisLabels);
-        setDadosLocais(locaisValues);
-
-
-        // Chart Reposições
-        setLabels(dias);
-
-        setDadosAusentes(
-            dias.map(day =>
-                hist.filter(item =>
-                    new Date(item.created_at).toLocaleDateString("pt-BR", { day: "2-digit" }) === day
-                ).length
-            )
-        );
-
-        setDadosReposicoes(
-            dias.map(day =>
-                hist.filter(item =>
-                    new Date(item.created_at).toLocaleDateString("pt-BR", { day: "2-digit" }) === day &&
-                    getStatus(item) === "coberta"
-                ).length
-            )
-        );
-
-
-        // Tabela
-        setDadosTabela(hist);
-
-
-        // Chart Multas
-        setlabelForMult(dias);
-
-        setdataForMult(
-            dias.map(day =>
-                hist
-                    .filter(item =>
-                        new Date(item.created_at).toLocaleDateString("pt-BR", { day: "2-digit" }) === day
-                    )
-                    .reduce((soma, item) => soma + (Number(item.multa) || 0), 0)
-            )
-        );
-
-        // Meter Group
-        setMeterGroupValues([
-            {
-                label: "Postos Cobertos",
-                color: "#22c55e",
-                value: Math.round(cobertos / total * 100)
-            },
-            {
-                label: "Descobertos",
-                color: "#ef4444",
-                value: Math.round(descobertos / total * 100)
-            },
-            {
-                label: "Pendentes",
-                color: "#f3eb09",
-                value: Math.round(abertas / total * 100)
-            }
-        ]);
-
-    }, [hist, abertas]);
-
-    useEffect(() => {
-        setFaltasReservasMes(faltasReservas.length);
-        setFaltasReservasHoje(faltasReservas.filter((item) => isToday(item.created_at)).length);
-    }, [faltasReservas]);
-
-    // Configuração compartilhada pelos doughnuts de departamento.
-    const optionsDptos = {
-        cutout: '60%',
-        plugins: {
-            legend: false
-        }
-    };
-
-    // Datasets são recriados com o estado atual para o wrapper do Chart.js.
-    const dataRepos = {
-        labels: labelReposicoes,
-        datasets: [{
-            type: 'line',
-            tension: 0.4,
-            label: 'Reposições',
-            borderColor: chartTheme.palette[0],
-            pointBackgroundColor: chartTheme.palette[0],
-            data: dadosReposicoes,
-            borderWidth: 3,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            pointBorderWidth: 2,
-        }, {
-            type: 'bar',
-            borderRadius: 10,
-            borderSkipped: false,
-            label: 'Ausências',
-            maxBarThickness: 40,
-            categoryPercentage: 0.6,
-            barPercentage: 0.7,
-            backgroundColor: chartTheme.palette[1],
-            data: dadosAusentes,
-            borderColor: chartTheme.surface,
-            borderWidth: 2
-        },]
-    };
-
-    const dataMults = {
-        labels: labelForMult,
-        datasets: [{
-            type: "line",
-            tension: 0.4,
-            fill: true,
-            backgroundColor: 'rgba(241, 67, 67, 0.42)',
-            label: "Custo de Reservas Técnicas por dia.",
-            data: dataForMult
-        }]
-    };
-
-    const dataLocals = {
-        labels: labelLocal,
-        datasets: [{
-            type: "bar",
-            backgroundColor: chartTheme.palette[2],
-            label: "Dados",
-            data: dadosLocais,
-            barPercentage: 0.7,
-            categoryPercentage: 0.7,
-
-        }]
-    };
-
-    const dadosTabelaFiltraveis = dadosTabela.map(row => ({
-        ...row,
-        cobertura_search: `${row.ausente ?? ""} ${!row.reserva ? "SEM COBERTURA" : row.reserva}`
+function parseDate(value) {
+  if (!value) return null;
+  const raw = String(value);
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(raw) ? `${raw}T12:00:00` : raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function dateLabel(value, withTime = false) {
+  const date = parseDate(value);
+  if (!date) return "—";
+  return new Intl.DateTimeFormat("pt-BR", withTime
+    ? { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
+    : { day: "2-digit", month: "2-digit", year: "numeric" },
+  ).format(date).replace(",", " ·");
+}
+
+function dayKey(value) {
+  const date = parseDate(value);
+  return date ? dateParam(date) : "";
+}
+
+function firstAndLastName(value) {
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return parts[0] || "—";
+  return `${parts[0]} ${parts.at(-1)}`;
+}
+
+function statusMeta(status) {
+  return STATUS_META[status] || { label: status || "Não informado", severity: "secondary" };
+}
+
+function filterRecords(records, filters, omittedField = null) {
+  return records.filter((item) => Object.entries(FILTER_FIELDS).every(([field, getter]) => {
+    if (field === omittedField || !filters[field]?.length) return true;
+    return filters[field].includes(String(getter(item) ?? ""));
+  }));
+}
+
+function makeOptions(records, filters, field) {
+  const getter = FILTER_FIELDS[field];
+  const values = new Set(
+    filterRecords(records, filters, field)
+      .map((item) => getter(item))
+      .filter((value) => value !== undefined && value !== null && value !== ""),
+  );
+
+  return [...values]
+    .map((value) => String(value))
+    .sort((left, right) => left.localeCompare(right, "pt-BR", { numeric: true }))
+    .map((value) => ({
+      value,
+      label: field === "departamento"
+        ? `DPTO. ${value}`
+        : field === "status"
+          ? statusMeta(value).label
+          : value,
     }));
+}
 
-    // Contrato declarativo consumido pelo componente Table reutilizável.
-    const columns = [
-        {
-            header: "Local da Falta",
-            field: "local",
-            class: "text-truncate"
-        },
-        {
-            header: "DPTO.",
-            field: "dpto"
-        },
-        {
-            header: "Data",
-            body: (row) => new Date(row.created_at).toLocaleDateString("pt-BR",)
-        },
-        {
-            // header: "Coberturas",
-            header:
-                <div className="flex justify-content-between gap-4">
-                    <span className="text-truncate inter">Ausencias</span>
-                    <i className="pi pi-arrow-right"></i>
-                    <span className="font-bold text-truncate"> Coberturas</span>
-                </div>,
-            style: { maxWidth: "20rem" },
-            field: "cobertura_search",
-            body: (row) => {
-                return <div className="flex justify-content-between gap-2">
-                    <span className="text-truncate inter">{row.ausente.split(" ")[0]} {row.ausente.split(" ").at(-1)}</span>
-                    <i className="pi pi-arrow-right" style={{ color: `var(--${!row.reserva || row.reserva == "SEM COBERTURA" ? "red-500" : "green-500"})` }}></i>
-                    <span className="font-bold text-truncate">{row.reserva ? row.reserva.split(" ")[0] : "SEM"}  {row.reserva ? row.reserva.split(" ").at(-1) : "COBERTURA"}
-                    </span>
-                </div>
-            }
-        },
-        {
-            header: "Supervisor",
-            field: 'supervisor'
-        },
-        {
-            header: "Motivo",
-            field: "motivo"
-        },
-        {
-            header: "Observação",
-            field: "obs"
-        }
-    ];
+function errorMessage(error) {
+  const response = error.response?.data;
+  if (typeof response === "string") return response;
+  return response?.message || "Não foi possível carregar o dashboard de reposições.";
+}
 
-    const cores = [
-        ['rgba(76, 175, 80, 0.75)', 'rgba(244, 67, 54, 0.75)'],
-        ['rgba(67, 160, 71, 0.75)', 'rgba(229, 57, 53, 0.75)'],
-        ['rgba(56, 142, 60, 0.75)', 'rgba(211, 47, 47, 0.75)'],
-        ['rgba(102, 187, 106, 0.75)', 'rgba(239, 83, 80, 0.75)'],
-        ['rgba(46, 125, 50, 0.75)', 'rgba(198, 40, 40, 0.75)'],
-        ['rgba(129, 199, 132, 0.75)', 'rgba(229, 115, 115, 0.75)'],
-        ['rgba(27, 94, 32, 0.75)', 'rgba(183, 28, 28, 0.75)'],
-        ['rgba(165, 214, 167, 0.75)', 'rgba(255, 138, 128, 0.75)'],
-        ['rgba(104, 159, 56, 0.75)', 'rgba(230, 74, 25, 0.75)'],
-        ['rgba(85, 139, 47, 0.75)', 'rgba(216, 67, 21, 0.75)']
-    ];
+export function RequestReport() {
+  const chartTheme = useChartTheme();
+  const { showToast } = useToast();
+  const filterPanel = useRef(null);
+  const [period, setPeriod] = useState(defaultPeriod);
+  const [filters, setFilters] = useState(initialFilters);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [revision, setRevision] = useState(0);
 
-    // A tela é dividida em toolbar, indicadores, gráficos, tabela e painel lateral.
-    return (
-        <main className="request-dashboard flex flex-column p-2 gap-2 w-full">
-            <PageHeader
-                section="Dashboards"
-                title="Dashboard de Reposições"
-                description="Acompanhe volume, cobertura, motivos e desempenho das requisições."
-                actions={(
-                    <Button
-                        type="button"
-                        icon="pi pi-filter-fill"
-                        label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
-                        aria-label={activeFilterCount ? `Abrir filtros (${activeFilterCount} ativos)` : "Abrir filtros"}
-                        onClick={(event) => op_filters.current?.toggle(event)}
-                    />
-                )}
-            />
-            <OverlayPanel ref={op_filters} className="dashboard-filter-panel p-3 flex flex-column w-25rem">
-                <span className="inter mb-5 font-bold">Filtre os dados do Dashboard.</span>
+  const reload = useCallback(() => setRevision((current) => current + 1), []);
+  const periodComplete = Boolean(period?.[0] && period?.[1]);
+  const activeFilterCount = Object.values(filters).filter((value) => value?.length).length;
 
-                <Divider className="my-5"></Divider>
+  useEffect(() => {
+    if (!periodComplete) return undefined;
+    const controller = new AbortController();
 
-                <FloatLabel className="w-full mb-4">
-                    <Calendar
-                        inputId="dashboard-period"
-                        locale="pt-BR"
-                        value={filter}
-                        placeholder="Selecione um período."
-                        dateFormat="dd/mm/yy"
-                        onChange={(e) => { setFilter(e.value); setRefresh(prev => !prev) }}
-                        selectionMode="range"
-                        readOnlyInput
-                        className="w-full"
-                    />
-                    <label htmlFor="dashboard-period">Selecione um período</label>
-                </FloatLabel>
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const { data: response } = await connect.post("/dash/reposicoes", {
+          init: dateLabel(period[0]),
+          end: dateLabel(period[1]),
+        }, { signal: controller.signal });
+        if (!controller.signal.aborted) setData(response);
+      } catch (requestError) {
+        if (controller.signal.aborted || requestError.code === "ERR_CANCELED") return;
+        const message = errorMessage(requestError);
+        setError(message);
+        showToast("error", "Dashboard de Reposições", message);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
 
-                <FloatLabel className="w-full mb-4">
-                    <MultiSelect
-                        inputId="dashboard-contract"
-                        filter
-                        appendTo="self"
-                        className="w-full"
-                        panelClassName="w-full dashboard-filter-dropdown"
-                        value={filters.contrato}
-                        options={contratosOptions}
-                        onChange={(e) => setFilters(prev => ({ ...prev, contrato: e.value }))}
-                    />
-                    <label htmlFor="dashboard-contract">Contratos: </label>
-                </FloatLabel>
+    load();
+    return () => controller.abort();
+  }, [period, periodComplete, revision, showToast]);
 
-                <FloatLabel className="w-full mb-4">
-                    <MultiSelect
-                        inputId="dashboard-department"
-                        panelClassName="dashboard-filter-dropdown"
-                        className="w-full"
-                        value={filters.departamento}
-                        options={dptoOptions}
-                        onChange={(e) => setFilters(prev => ({ ...prev, departamento: e.value }))}
-                    />
-                    <label htmlFor="dashboard-department">Departamentos: </label>
-                </FloatLabel>
+  useEffect(() => {
+    socketio.on("new_request", reload);
+    return () => socketio.off("new_request", reload);
+  }, [reload]);
 
-                <FloatLabel className="w-full mb-4">
-                    <MultiSelect
-                        inputId="dashboard-reason"
-                        panelClassName="dashboard-filter-dropdown"
-                        options={motivoOptions}
-                        value={filters.motivo}
-                        className="w-full"
-                        onChange={(e) => setFilters(prev => ({ ...prev, motivo: e.value }))}
-                    />
-                    <label htmlFor="dashboard-reason">Motivos: </label>
-                </FloatLabel>
+  const records = useMemo(() => [
+    ...(data?.historico || []).map((item) => ({ ...item, recordType: "history" })),
+    ...(data?.abertas_registros || []).map((item) => ({ ...item, recordType: "open" })),
+  ], [data]);
+  const filteredRecords = useMemo(() => filterRecords(records, filters), [records, filters]);
+  const filteredReserveAbsences = useMemo(
+    () => filterRecords(data?.faltas_reservas || [], filters),
+    [data?.faltas_reservas, filters],
+  );
 
-                <FloatLabel className="w-full mb-4">
-                    <MultiSelect
-                        inputId="dashboard-supervisor"
-                        panelClassName="dashboard-filter-dropdown"
-                        options={supervisorOptions}
-                        value={filters.supervisor}
-                        className="w-full"
-                        onChange={(e) => setFilters(prev => ({ ...prev, supervisor: e.value }))}
-                    />
-                    <label htmlFor="dashboard-supervisor">Supervisores: </label>
-                </FloatLabel>
+  const filterOptions = useMemo(() => ({
+    contrato: makeOptions(records, filters, "contrato"),
+    departamento: makeOptions(records, filters, "departamento"),
+    supervisor: makeOptions(records, filters, "supervisor"),
+    motivo: makeOptions(records, filters, "motivo"),
+    status: makeOptions(records, filters, "status"),
+    colaborador: makeOptions(records, filters, "colaborador"),
+  }), [records, filters]);
 
-                <FloatLabel className="w-full mb-4">
-                    <MultiSelect
-                        inputId="dashboard-status"
-                        panelClassName="dashboard-filter-dropdown"
-                        options={statusOptions}
-                        value={filters.status}
-                        className="w-full"
-                        onChange={(e) => setFilters(prev => ({ ...prev, status: e.value }))}
-                    />
-                    <label htmlFor="dashboard-status">Status: </label>
-                </FloatLabel>
+  const metrics = useMemo(() => {
+    const open = filteredRecords.filter((item) => ["pending", "updated"].includes(item.status));
+    const closed = filteredRecords.filter((item) => ["approved", "reproved"].includes(item.status));
+    const covered = closed.filter((item) => item.status === "approved");
+    const uncovered = closed.filter((item) => item.status === "reproved");
+    const contractCount = filteredRecords.reduce((result, item) => {
+      const label = item.local || "Contrato não identificado";
+      result[label] = (result[label] || 0) + 1;
+      return result;
+    }, {});
+    const [topContract = "Sem registros", topContractCount = 0] = Object.entries(contractCount)
+      .sort(([, left], [, right]) => right - left)[0] || [];
+    const today = dayKey(new Date());
 
-                <Divider className="mt-4" />
-                <Button className="font-bold w-full border-none" icon="pi pi-filter-slash" label="Limpar Filtros" onClick={clearFilters} />
-            </OverlayPanel>
-            <div className="dashboard-summary flex gap-2 p-2 w-full">
-                    <DashCard
-                        icon="pi pi-verified"
-                        title="Total"
-                        className="tm-dashboard-card flex-grow-1"
-                        detail="no período filtrado"
-                        value={totalRequisicoes}
-                        cont="100%"
-                        contSeverity="info"
-                        contClassName="request-metric-tag request-metric-tag-total"
-                    />
-                    <DashCard
-                        icon="pi pi-folder-open "
-                        title="Abertas"
-                        className="tm-dashboard-card flex-grow-1"
-                        detail="aguardando atendimento"
-                        tone="warning"
-                        value={abertas}
-                        cont={`${percentageOfTotal(abertas)}%`}
-                        contSeverity="warning"
-                        contClassName="request-metric-tag request-metric-tag-open"
-                    />
-                    <DashCard
-                        icon="pi pi-calendar "
-                        title="Cobertas"
-                        className="tm-dashboard-card flex-grow-1"
-                        detail="postos com cobertura"
-                        tone="success"
-                        value={postosCobertos}
-                        cont={`${percentageOfTotal(postosCobertos)}%`}
-                        contSeverity="success"
-                        contClassName="request-metric-tag request-metric-tag-covered"
-                    />
-                    <DashCard
-                        icon="pi pi-paperclip"
-                        title="Descobertas"
-                        className="tm-dashboard-card flex-grow-1"
-                        detail="postos sem cobertura"
-                        tone="danger"
-                        value={postosDescobertos}
-                        cont={`${percentageOfTotal(postosDescobertos)}%`}
-                        contSeverity="danger"
-                        contClassName="request-metric-tag request-metric-tag-uncovered"
-                    />
-                    <DashCard
-                        icon="pi pi-user-minus"
-                        title="Faltas de reservas"
-                        className="tm-dashboard-card dashboard-reserve-card flex-grow-1"
-                        detail="no mês selecionado"
-                        tone="danger"
-                        value={faltasReservasMes}
-                    />
-                    <DashCard
-                        icon="pi pi-calendar-times"
-                        title="Faltas de reservas"
-                        className="tm-dashboard-card dashboard-reserve-card flex-grow-1"
-                        detail="registradas hoje"
-                        tone="warning"
-                        value={faltasReservasHoje}
-                    />
-                    <div
-                        className="tm-card tm-dashboard-card dashboard-highlight flex justify-content-center flex-grow-1 gap-2 align-items-center p-3">
-                        <Knob
-                            value={valorDoLocalComMaisFaltas}
-                            valueTemplate="{value}%"
-                            min={0}
-                            max={100}
-                            valueColor={valorDoLocalComMaisFaltas >= totalOfReplaces ? "var(--red-600)" : "var(--green-600)"}
-                            textColor="#fff"
-                            size={60}
-                        />
-                        <div className="flex flex-column flex-grow-1 justify-content-between">
-                            <span className="spaceg text-lg font-bold spaceg text-1xl">Contrato com mais faltas</span>
-                            <span className="inter" style={{ maxWidth: "250px" }}>{localComMaisFaltas}</span>
-                        </div>
-                    </div>
-            </div>
+    return {
+      total: filteredRecords.length,
+      open: open.length,
+      covered: covered.length,
+      uncovered: uncovered.length,
+      coverageRate: closed.length ? Math.round((covered.length / closed.length) * 100) : 0,
+      topContract,
+      topContractCount,
+      reserveAbsences: filteredReserveAbsences.length,
+      reserveAbsencesToday: filteredReserveAbsences.filter((item) => dayKey(item.created_at) === today).length,
+    };
+  }, [filteredRecords, filteredReserveAbsences]);
 
-            <div className="dashboard-content flex w-full min-h-full gap-4">
-                <div className="dashboard-main flex flex-column flex-grow-1 gap-4">
-                    {/* CHARTS FRAME */}
-                    <div className="dashboard-charts flex flex-grow-1 gap-4 max-h-15rem">
-                        <div className="tm-card tm-dashboard-panel dashboard-chart-card p-3 gap-2 flex flex-column justify-content-center align-items-center flex-grow-1">
-                            <Chart data={dataRepos}
-                                options={{
-                                    aspectRatio: 2.5,
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    y: {
-                                        beginAtZero: true,
-                                    },
-                                    plugins: {
-                                        legend: {
-                                            labels: {
-                                                usePointStyle: true,
-                                                pointStyle: 'rectRounded',
-                                                padding: 20
-                                            }
-                                        },
-                                        tooltip: {
-                                            mode: 'index',
-                                            intersect: false,
-                                            callbacks: {
-                                                title(items) {
-                                                    return `Dia ${items[0].label}`;
-                                                },
-                                                label(context) {
-                                                    return `${context.dataset.label}: ${context.raw}`;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}
-                                className="dashboard-chart flex align-items-center justify-content-center h-full"
-                            />
-                        </div>
-                        <div className="tm-card tm-dashboard-panel dashboard-chart-card p-4 flex flex-column justify-content-center align-items-center flex-grow-1">
-                            <Chart data={dataMults}
-                                className="w-full h-full"
-                                options={{
-                                    aspectRatio: 2.5,
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: {
-                                        legend: {
-                                            labels: {
-                                                usePointStyle: true,
-                                                pointStyle: 'rectRounded',
-                                                padding: 20
-                                            }
-                                        },
-                                        tooltip: {
-                                            mode: 'index',
-                                            intersect: false,
-                                            callbacks: {
-                                                title(items) {
-                                                    return `Dia ${items[0].label}`;
-                                                },
-                                                label(context) {
-                                                    return `${context.dataset.label}: ${to_real(context.raw)}`;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }}
-                            />
-                        </div>
-                    </div>
+  const daily = useMemo(() => {
+    const byDay = filteredRecords.reduce((result, item) => {
+      const key = dayKey(item.created_at);
+      if (!key) return result;
+      result[key] ||= { total: 0, covered: 0, uncovered: 0, open: 0 };
+      result[key].total += 1;
+      if (item.status === "approved") result[key].covered += 1;
+      if (item.status === "reproved") result[key].uncovered += 1;
+      if (["pending", "updated"].includes(item.status)) result[key].open += 1;
+      return result;
+    }, {});
 
-                    {/* TABLE FRAME */}
-                    <div className="tm-card tm-dashboard-panel dashboard-table flex overflow-hidden flex-grow-1 p-2">
-                        <Table
-                            tableClassName="w-full"
-                            columns={columns}
-                            data={dadosTabelaFiltraveis}
-                            rowsPerPageOptions={[3, 5, 10, 50, 100]}
-                            rows={5}
-                            style={{
-                                fontSize: "10px"
-                            }}
-                            search
-                        />
-                    </div>
-                </div>
+    return Object.entries(byDay)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([date, values]) => ({ date, ...values }));
+  }, [filteredRecords]);
 
-                {/* STATUS CARD */}
-                <div className="tm-card tm-dashboard-panel dashboard-status flex flex-column p-4 flex-grow-1">
-                    <TabView className="h-full">
-                        <TabPanel header="Departamentos">
-                            <div className="flex flex-column h-full">
-                                <div className="flex flex-wrap justify-content-between align-items-center gap-2 p-2" >
-                                    {departamentos.map((item, index) => {
-                                        const [cor1, cor2] = cores[index % cores.length];
-                                        const testeData = {
-                                            labels: ['Cobertas', 'Descobertas'],
-                                            datasets: [
-                                                {
-                                                    data: [item[1]["cobertas"], item[1]["descobertas"]],
-                                                    backgroundColor: [cor1, cor2]
-                                                }
-                                            ]
-                                        };
+  const contractRanking = useMemo(() => Object.entries(filteredRecords.reduce((result, item) => {
+    const label = item.local || "Contrato não identificado";
+    result[label] = (result[label] || 0) + 1;
+    return result;
+  }, {}))
+    .sort(([, left], [, right]) => right - left)
+    .slice(0, 8)
+    .map(([label, total]) => ({ label, total })), [filteredRecords]);
 
-                                        return (
-                                            <div key={item} className="dashboard-department-card flex flex-column flex-grow-1 justify-content-center align-items-center text-center" style={{ flexBasis: "100px" }}>
-                                                <Chart className="flex-grow-1" type="doughnut" data={testeData} options={optionsDptos} style={{
-                                                    width: '70px',
-                                                }} />
-                                                <span className="font-bold inter"> Dpto. {item[0]}</span>
-                                            </div>
-                                        )
-                                    })
-                                    }
-                                </div>
-                            </div>
-                        </TabPanel>
-                        <TabPanel header="Contratos">
-                            <Chart
-                                className="h-full"
-                                data={dataLocals}
-                                options={{
-                                    aspectRatio: 1,
-                                    autoPadding: true,
-                                    indexAxis: 'y',
-                                    plugins: {
-                                        legend: {
-                                            display: false
-                                        },
-                                        tooltip: {
-                                            callbacks: {
-                                                label: (self) => `Faltas: ${self.parsed.x}`
-                                            }
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            display: false,
-                                            ticks: {
-                                                font: { size: 5 }
-                                            }
-                                        },
-                                        y: {
-                                            display: true,
-                                            grid: {
-                                                display: false,
-                                                drawBorder: false
-                                            },
-                                            ticks: {
-                                                font: { size: 8 },
-                                                callback(value) {
-                                                    const label = this.getLabelForValue(value);
+  const departments = useMemo(() => Object.entries(filteredRecords.reduce((result, item) => {
+    const key = String(item.dpto || "Não informado");
+    result[key] ||= { total: 0, covered: 0, uncovered: 0, open: 0 };
+    result[key].total += 1;
+    if (item.status === "approved") result[key].covered += 1;
+    if (item.status === "reproved") result[key].uncovered += 1;
+    if (["pending", "updated"].includes(item.status)) result[key].open += 1;
+    return result;
+  }, {}))
+    .sort(([, left], [, right]) => right.total - left.total), [filteredRecords]);
 
-                                                    return label.length > 20
-                                                        ? label.slice(0, 20) + '...'
-                                                        : label;
-                                                }
-                                            }
-                                        }
-                                    },
-                                }}
-                            />
-                        </TabPanel>
-                    </TabView>
-                    <Divider />
-                    <span className="font-bold mb-2">Status:</span>
-                    <MeterGroup
-                        className="h-full"
-                        values={meterGroupValues}
-                        orientation="vertical"
-                        labelOrientation="vertical"
-                    />
-                </div>
-            </div>
-        </main>
-    )
+  const dailyChart = useMemo(() => ({
+    labels: daily.map((item) => dateLabel(item.date)),
+    datasets: [
+      { type: "line", label: "Total de requisições", data: daily.map((item) => item.total), borderColor: chartTheme.palette[0], backgroundColor: chartTheme.palette[0], pointBackgroundColor: chartTheme.palette[0], pointRadius: 4, pointHoverRadius: 6, tension: .35, borderWidth: 3 },
+      { type: "bar", label: "Cobertas", data: daily.map((item) => item.covered), backgroundColor: chartTheme.palette[1], borderRadius: 7, borderSkipped: false },
+      { type: "bar", label: "Sem cobertura", data: daily.map((item) => item.uncovered), backgroundColor: chartTheme.palette[3], borderRadius: 7, borderSkipped: false },
+    ],
+  }), [chartTheme, daily]);
+
+  const statusChart = useMemo(() => ({
+    labels: ["Cobertas", "Sem cobertura", "Em aberto"],
+    datasets: [{ data: [metrics.covered, metrics.uncovered, metrics.open], backgroundColor: [chartTheme.palette[1], chartTheme.palette[3], chartTheme.palette[2]], borderWidth: 0, hoverOffset: 5 }],
+  }), [chartTheme, metrics]);
+
+  const contractsChart = useMemo(() => ({
+    labels: contractRanking.map((item) => item.label),
+    datasets: [{ label: "Requisições", data: contractRanking.map((item) => item.total), backgroundColor: chartTheme.palette[0], borderRadius: 7, borderSkipped: false }],
+  }), [chartTheme, contractRanking]);
+
+  const chartOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: { position: "top", align: "end", labels: { color: chartTheme.text, usePointStyle: true, boxWidth: 8 } },
+      tooltip: { backgroundColor: chartTheme.surface, titleColor: chartTheme.text, bodyColor: chartTheme.textSecondary },
+    },
+    scales: {
+      x: { ticks: { color: chartTheme.textSecondary }, grid: { display: false }, border: { display: false } },
+      y: { beginAtZero: true, ticks: { color: chartTheme.textSecondary, precision: 0 }, grid: { color: chartTheme.grid }, border: { display: false } },
+    },
+  }), [chartTheme]);
+  const contractChartOptions = useMemo(() => ({ ...chartOptions, indexAxis: "y", plugins: { ...chartOptions.plugins, legend: { display: false } } }), [chartOptions]);
+
+  const columns = useMemo(() => [
+    { header: "Data", mobileHeader: "Abertura", body: (row) => <time dateTime={row.created_at || undefined}>{dateLabel(row.created_at, true)}</time>, sortable: true, style: { minWidth: "9rem" } },
+    { header: "Ausente", mobileHeader: "Ausente", body: (row) => <strong>{firstAndLastName(row.ausente)}</strong>, sortable: true },
+    {
+      header: "Cobertura",
+      mobileHeader: "Cobertura",
+      body: (row) => {
+        const uncovered = row.status === "reproved" || row.reserva === "SEM COBERTURA" || !row.reserva;
+        return <span className={`request-dashboard-coverage ${uncovered ? "is-uncovered" : "is-covered"}`}><i className={`pi ${uncovered ? "pi-times-circle" : "pi-check-circle"}`} />{uncovered ? "Sem cobertura" : firstAndLastName(row.reserva)}</span>;
+      },
+      sortable: true,
+    },
+    { header: "Contrato", mobileHeader: "Contrato", body: (row) => <div className="request-dashboard-contract"><strong>{row.local || "—"}</strong><small>DPTO. {row.dpto || "—"}</small></div>, sortable: true },
+    { header: "Supervisor", mobileHeader: "Supervisor", body: (row) => firstAndLastName(row.supervisor), sortable: true },
+    { header: "Motivo", mobileHeader: "Motivo", field: "motivo", sortable: true },
+    { header: "Status", mobileHeader: "Status", body: (row) => { const meta = statusMeta(row.status); return <Tag value={meta.label} severity={meta.severity} rounded />; }, sortable: true },
+  ], []);
+
+  const setFilter = (field, value) => setFilters((current) => ({ ...current, [field]: value || [] }));
+  const clearFilters = () => setFilters(initialFilters());
+
+  return (
+    <main className="request-dashboard">
+      <PageHeader
+        section="Dashboards"
+        title="Dashboard de Reposições"
+        description="Acompanhe coberturas, pendências e indisponibilidades de reservas no recorte selecionado."
+        actions={<><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={reload} loading={loading && Boolean(data)} /><Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} /></>}
+      />
+
+      <OverlayPanel ref={filterPanel} className="request-dashboard-filter-panel">
+        <div className="request-dashboard-filter-panel__heading"><div><strong>Filtros do dashboard</strong><span>As opções se ajustam ao recorte atual.</span></div><Button icon="pi pi-filter-slash" label="Limpar" text onClick={clearFilters} /></div>
+        <div className="request-dashboard-filter-grid">
+          <label className="is-wide"><span>Período</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput hideOnRangeSelection showIcon showButtonBar placeholder="Selecione o período" /></label>
+          {[["contrato", "Contrato"], ["departamento", "Departamento"], ["supervisor", "Supervisor"], ["motivo", "Motivo"], ["status", "Status"], ["colaborador", "Colaborador"]].map(([field, label]) => <label key={field}><span>{label}</span><MultiSelect value={filters[field]} options={filterOptions[field]} optionLabel="label" optionValue="value" onChange={(event) => setFilter(field, event.value)} placeholder={`Todos os ${label.toLowerCase()}s`} display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>)}
+        </div>
+      </OverlayPanel>
+
+      {loading && !data ? <Placeholder loading variant="dashboard" /> : error && !data ? (
+        <Placeholder icon="pi-exclamation-triangle" title="Não foi possível abrir o dashboard" description={error} action={<Button label="Tentar novamente" icon="pi-refresh" outlined onClick={reload} />} />
+      ) : <>
+        <section className="request-dashboard__metrics" aria-label="Indicadores de reposições">
+          <DashCard icon="pi pi-list-check" title="Requisições" detail="no recorte selecionado" value={metrics.total} cont="100%" contSeverity="info" contClassName="request-metric-tag request-metric-tag-total" />
+          <DashCard icon="pi pi-clock" title="Em aberto" detail="aguardando decisão" value={metrics.open} tone="warning" cont={`${metrics.total ? Math.round((metrics.open / metrics.total) * 100) : 0}%`} contSeverity="warning" contClassName="request-metric-tag request-metric-tag-open" />
+          <DashCard icon="pi pi-check-circle" title="Cobertas" detail="decisões aprovadas" value={metrics.covered} tone="success" cont={`${metrics.coverageRate}%`} contSeverity="success" contClassName="request-metric-tag request-metric-tag-covered" />
+          <DashCard icon="pi pi-times-circle" title="Sem cobertura" detail="decisões reprovadas" value={metrics.uncovered} tone="danger" cont={`${metrics.total ? Math.round((metrics.uncovered / metrics.total) * 100) : 0}%`} contSeverity="danger" contClassName="request-metric-tag request-metric-tag-uncovered" />
+          <DashCard icon="pi pi-user-minus" title="Faltas de reservas" detail="no período selecionado" value={metrics.reserveAbsences} tone="danger" />
+          <DashCard icon="pi pi-calendar-times" title="Faltas de reservas" detail="registradas hoje" value={metrics.reserveAbsencesToday} tone="warning" />
+        </section>
+
+        <section className="request-dashboard__analysis">
+          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--wide"><header><div><span>Volume</span><h2>Requisições por dia</h2></div><small>{metrics.total} registro(s) no recorte</small></header><div className="request-dashboard-chart">{daily.length ? <Chart type="bar" data={dailyChart} options={chartOptions} /> : <Placeholder variant="chart" title="Sem requisições no período" description="Ajuste o período ou aguarde novos registros." />}</div></DashboardPanel>
+          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--status"><header><div><span>Cobertura</span><h2>Situação das requisições</h2></div></header><div className="request-dashboard-doughnut">{metrics.total ? <><Chart type="doughnut" data={statusChart} options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }} /><div><strong>{metrics.coverageRate}%</strong><span>cobertas</span></div></> : <Placeholder variant="chart" title="Sem dados de cobertura" />}</div><div className="request-dashboard-status-legend"><span className="is-success"><i />Cobertas <strong>{metrics.covered}</strong></span><span className="is-danger"><i />Sem cobertura <strong>{metrics.uncovered}</strong></span><span className="is-warning"><i />Em aberto <strong>{metrics.open}</strong></span></div></DashboardPanel>
+          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--contracts"><header><div><span>Concentração</span><h2>Contratos com mais requisições</h2></div></header><div className="request-dashboard-chart">{contractRanking.length ? <Chart type="bar" data={contractsChart} options={contractChartOptions} /> : <Placeholder variant="chart" title="Sem contratos no período" />}</div></DashboardPanel>
+          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--highlight"><span>Maior concentração</span><h2>{metrics.topContract}</h2><p>{metrics.topContractCount} requisição(ões) no recorte selecionado.</p><div><i className="pi pi-map-marker" /><strong>{metrics.total ? Math.round((metrics.topContractCount / metrics.total) * 100) : 0}%</strong><small>do volume</small></div></DashboardPanel>
+        </section>
+
+        <DashboardPanel className="request-dashboard-departments"><header><div><span>Departamentos</span><h2>Resumo por área</h2></div><small>{departments.length} departamento(s) no recorte</small></header>{departments.length ? <div className="request-dashboard-department-grid">{departments.map(([department, values]) => <article key={department}><header><strong>DPTO. {department}</strong><span>{values.total} requisição(ões)</span></header><div><span className="is-success">{values.covered} cobertas</span><span className="is-danger">{values.uncovered} sem cobertura</span><span className="is-warning">{values.open} abertas</span></div></article>)}</div> : <Placeholder variant="content" title="Nenhum departamento no recorte" />}</DashboardPanel>
+        <DashboardPanel className="request-dashboard-table-panel"><header><div><span>Detalhamento</span><h2>Requisições do período</h2></div><small>Inclui decisões finalizadas e solicitações ainda abertas.</small></header><Table data={filteredRecords} columns={columns} loading={loading} rows={10} rowsPerPageOptions={[10, 25, 50, 100]} search emptyTitle={activeFilterCount ? "Nenhuma requisição corresponde aos filtros" : "Nenhuma requisição no período"} emptyDescription="Altere o período ou os filtros para encontrar registros." tableClassName="request-dashboard-table" /></DashboardPanel>
+      </>}
+    </main>
+  );
 }

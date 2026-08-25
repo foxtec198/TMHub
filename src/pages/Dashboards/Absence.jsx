@@ -3,12 +3,13 @@ import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
+import { DataTable } from "../../components/tables/DataTable";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
+import { Placeholder } from "../../components/Placeholder";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
@@ -27,7 +28,7 @@ const formatPeriod = (period) => period?.[0] && period?.[1] ? `${period[0].toLoc
 const formatDuration = (value) => value == null ? "—" : value >= 48 ? `${(value / 24).toFixed(1)} dias` : `${Number(value).toFixed(1)}h`;
 
 function EmptyChart({ text }) {
-  return <div className="absence-empty-chart"><i className="pi pi-chart-bar" /><span>{text}</span></div>;
+  return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
 }
 
 export function AbsenceDashboard() {

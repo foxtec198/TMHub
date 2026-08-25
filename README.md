@@ -218,6 +218,38 @@ Cada coluna aceita `field`, `header`, `mobileHeader`, `sortable`, `body`,
 Use `mode="scroll"` apenas quando o painel realmente exigir rolagem vertical;
 o padrão é paginação.
 
+### `Placeholder`
+
+É o estado visual padrão para carregamento e ausência de dados. Use-o em toda
+nova tela para evitar áreas vazias, mensagens soltas ou skeletons recriados.
+Ele respeita os tokens do tema ativo e possui as variantes `content`, `chart`,
+`table`, `card` e `dashboard`.
+
+```jsx
+import { Placeholder } from "../../components/Placeholder";
+
+if (loading && !data) {
+  return <Placeholder loading variant="dashboard" />;
+}
+
+return metrics.length ? (
+  <Chart type="bar" data={chartData} options={chartOptions} />
+) : (
+  <Placeholder
+    variant="chart"
+    icon="pi-chart-bar"
+    title="Sem movimentações no período"
+    description="Altere os filtros ou aguarde novos registros."
+  />
+);
+```
+
+`Table` já usa esse componente por padrão quando não há resultados. Para
+personalizar, passe `emptyTitle`, `emptyDescription`, `emptyIcon` e, quando
+necessário, `emptyAction`. `DashboardPanel` também aceita `loading`, `empty`,
+`placeholderVariant`, `emptyTitle`, `emptyDescription`, `emptyIcon` e
+`emptyAction`.
+
 ### `CollaboratorDropdown`
 
 É o seletor obrigatório quando a tela precisa buscar colaboradores. Ele faz

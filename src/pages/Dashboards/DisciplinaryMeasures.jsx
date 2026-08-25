@@ -9,6 +9,7 @@ import { Skeleton } from "primereact/skeleton";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
+import { Placeholder } from "../../components/Placeholder";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
@@ -65,12 +66,7 @@ function errorMessage(error) {
 }
 
 function EmptyChart({ text }) {
-  return (
-    <div className="disciplinary-dashboard-empty">
-      <i className="pi pi-chart-bar" />
-      <span>{text}</span>
-    </div>
-  );
+  return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
 }
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
@@ -207,7 +203,7 @@ export function DisciplinaryMeasuresDashboard() {
 
   const indicators = data?.indicadores || {};
   const options = data?.filtros || {};
-  const monthly = data?.mensal || [];
+  const monthly = useMemo(() => data?.mensal || [], [data]);
   const reasons = (data?.motivos || []).slice(0, 8);
   const departments = (data?.departamentos || []).slice(0, 10);
   const absenceComparisonMeta = data?.comparativo_faltas || {};

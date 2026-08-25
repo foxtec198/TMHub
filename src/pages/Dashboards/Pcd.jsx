@@ -1,7 +1,6 @@
 import "./pcd.css";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
 import { Tag } from "primereact/tag";
 
@@ -10,6 +9,7 @@ import { socketio } from "../../utils/socketio";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { PageHeader } from "../../components/PageHeader";
+import { Placeholder } from "../../components/Placeholder";
 import { useChartTheme } from "../../theme/useTheme";
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
@@ -28,12 +28,7 @@ function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
 }
 
 function EmptyChart({ text }) {
-    return (
-        <div className="pcd-dashboard-empty">
-            <i className="pi pi-chart-bar" />
-            <span>{text}</span>
-        </div>
-    );
+    return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
 }
 
 export function PcdDashboard() {

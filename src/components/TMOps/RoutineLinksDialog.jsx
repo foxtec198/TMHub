@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
-import { DataTable } from "primereact/datatable";
+import { DataTable } from "../tables/DataTable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import connect from "../../utils/request";

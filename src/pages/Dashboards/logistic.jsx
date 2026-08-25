@@ -3,13 +3,14 @@ import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
-import { DataTable } from 'primereact/datatable';
+import { DataTable } from "../../components/tables/DataTable";
 import { MultiSelect } from 'primereact/multiselect';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { Tag } from 'primereact/tag';
 
 
 import { PageHeader } from '../../components/PageHeader';
+import { Placeholder } from '../../components/Placeholder';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useChartTheme } from '../../theme/useTheme';
@@ -30,14 +31,13 @@ function isoDate(value) {
 }
 
 function EmptyChart({ label }) {
-    return <div className="logistic-empty"><i className="pi pi-chart-bar" /><span>{label}</span></div>;
+    return <Placeholder variant="chart" icon="pi pi-chart-bar" title={label} />;
 }
 
 export function DashboardLogistic() {
     const chartTheme = useChartTheme();
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
     const [data, setData] = useState(null);
-    const [refresh, setRefresh] = useState(0);
     const filterPanel = useRef(null);
     const setLoading = useLoading();
     const { showToast } = useToast();
@@ -63,7 +63,7 @@ export function DashboardLogistic() {
             ))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
-    }, [filters, refresh, setLoading, showToast]);
+    }, [filters, setLoading, showToast]);
 
     const indicators = data?.indicadores || {};
     const options = data?.filtros || {};

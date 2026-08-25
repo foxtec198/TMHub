@@ -6,6 +6,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 
 import { PageHeader } from "../../components/PageHeader";
+import { Placeholder } from "../../components/Placeholder";
 import { UserAvatar } from "../../components/UserAvatar";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -48,9 +49,7 @@ function MemberAvatar({ member, photosByUserId, small = false }) {
 }
 
 function EmptyChart({ text }) {
-  return <div className="project-dashboard-empty">
-      <span>Is Here, endpoint</span>
-    <i className="pi pi-chart-bar" /><span>{text}</span></div>;
+  return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
 }
 
 const projectDoughnutCenterPlugin = {
@@ -81,7 +80,6 @@ export function ProjectDashboard() {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(null);
   const [filters, setFilters] = useState(defaultFilters);
-  const [refresh, setRefresh] = useState(0);
   const [photosByUserId, setPhotosByUserId] = useState({});
   const filterPanel = useRef(null);
   const setLoading = useLoading();
@@ -100,7 +98,7 @@ export function ProjectDashboard() {
       .then(({ data: response }) => setData(response))
       .catch((error) => showToast("error", "Dashboard de Projetos", error.response?.data || "Não foi possível carregar os dados."))
       .finally(() => setLoading(false));
-  }, [filters, refresh, setLoading, showToast]);
+  }, [filters, setLoading, showToast]);
 
   useEffect(() => {
     const membersAlreadyHavePhotos = [

@@ -1,10 +1,10 @@
 // components/Table/index.jsx
-import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { useId, useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { FloatLabel } from "primereact/floatlabel";
+import { DataTable } from "./DataTable";
 import './index.css'
 
 export function Table({
@@ -23,6 +23,11 @@ export function Table({
     handleSetDate,
     searchValue,
     onSearchChange,
+    emptyTitle,
+    emptyMessage,
+    emptyDescription,
+    emptyIcon,
+    emptyAction,
 }) {
     const [globalFilterDash, setGlobalFilterDash] = useState("");
     const searchInputId = useId();
@@ -88,7 +93,10 @@ export function Table({
             loading={loading}
             globalFilter={resolvedSearchValue}
             header={header}
-            emptyMessage="Nenhum resultado encontrado."
+            emptyTitle={emptyTitle || emptyMessage}
+            emptyDescription={emptyDescription}
+            emptyIcon={emptyIcon}
+            emptyAction={emptyAction}
             paginator={mode === "paginate"}
             rows={rows}
             rowsPerPageOptions={rowsPerPageOptions}

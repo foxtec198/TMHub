@@ -5,12 +5,12 @@ import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { Skeleton } from "primereact/skeleton";
 import { Tag } from "primereact/tag";
 
 import { DashboardMetricCard } from "../../components/DashboardMetricCard";
 import { DashboardPanel } from "../../components/DashboardPanel";
 import { PageHeader } from "../../components/PageHeader";
+import { Placeholder } from "../../components/Placeholder";
 import { Table } from "../../components/tables/Table";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
@@ -78,25 +78,6 @@ function errorMessage(error) {
 
 function StatusTag({ status, label }) {
   return <Tag value={label || status || "Não informado"} severity={STATUS_SEVERITY[status] || "secondary"} />;
-}
-
-function LoadingState() {
-  return (
-    <div className="experience-dashboard-loading" aria-busy="true">
-      <div className="experience-dashboard-summary">
-        {Array.from({ length: 6 }, (_, index) => <Skeleton key={index} height="7.4rem" borderRadius="14px" />)}
-      </div>
-      <div className="experience-dashboard-grid">
-        <Skeleton height="23rem" borderRadius="16px" />
-        <Skeleton height="23rem" borderRadius="16px" />
-      </div>
-      <Skeleton height="19rem" borderRadius="16px" />
-    </div>
-  );
-}
-
-function EmptyState({ icon = "pi-chart-bar", message }) {
-  return <div className="experience-dashboard-empty"><i className={`pi ${icon}`} /><span>{message}</span></div>;
 }
 
 export function ExperienceDashboard() {
@@ -252,7 +233,7 @@ export function ExperienceDashboard() {
         </>}
       />
 
-      {loading && !data ? <LoadingState /> : error && !data ? (
+      {loading && !data ? <Placeholder loading variant="dashboard" /> : error && !data ? (
         <div className="experience-dashboard-error" role="alert"><i className="pi pi-exclamation-triangle" /><div><strong>Não foi possível abrir o dashboard</strong><span>{error}</span></div><Button label="Tentar novamente" icon="pi pi-refresh" outlined onClick={reload} /></div>
       ) : <>
         <div className="experience-dashboard-summary">
@@ -306,7 +287,7 @@ export function ExperienceDashboard() {
                   <div><strong>{item.supervisor}</strong><small>{item.total} avaliação(ões) no recorte</small></div>
                   <div><span className="is-warning">{item.pendentes} pendente(s)</span><span className="is-danger">{item.atrasadas} atrasada(s)</span></div>
                 </article>)}
-              </div> : <EmptyState icon="pi-user-minus" message="Não há supervisores no recorte." />
+              </div> : <Placeholder variant="chart" icon="pi-user-minus" title="Não há supervisores no recorte" />
             )}
           </div>
         </DashboardPanel>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { DataTable } from "primereact/datatable";
+import { DataTable } from "../../components/tables/DataTable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";

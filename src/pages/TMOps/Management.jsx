@@ -7,7 +7,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputSwitch } from "primereact/inputswitch";
 import { MultiSelect } from "primereact/multiselect";
 import { Tag } from "primereact/tag";
-import { DataTable } from "primereact/datatable";
+import { DataTable } from "../../components/tables/DataTable";
 import { Column } from "primereact/column";
 import { PageHeader } from "../../components/PageHeader";
 import { RoutineDialog } from "../../components/TMOps/RoutineDialog";
