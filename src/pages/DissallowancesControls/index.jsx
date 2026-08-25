@@ -426,7 +426,7 @@ function DisallowanceControlContent() {
       header: "Cobertura",
       field: "cobertura",
       sortable: true,
-      body: (record) => coverageTag(record.cobertura),
+      body: (record) => <div className="glosa-main-cell"><span>{coverageTag(record.cobertura)}</span>{record.cobertura_colaborador && <small>Por {record.cobertura_colaborador}</small>}</div>,
     },
     {
       header: "Apontamento",
