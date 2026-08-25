@@ -293,6 +293,55 @@
   --chart-5: #7b6cc1; --chart-6: #c55d72; --chart-7: #4b9e96; --chart-8: #6f8952;
 }
 
+:root[data-theme="muertos"] {
+  color-scheme: dark;
+  --browser-theme-color: #101720;
+  --app-bg: #101820;
+  --surface-1: #1b2633;
+  --surface-2: #263746;
+  --surface-3: #334757;
+  --surface-hover: #405666;
+  --surface-active: #4d6373;
+  --primary: #f5ad24;
+  --primary-hover: #ffd06a;
+  --secondary: #e35a43;
+  --accent: #b944bc;
+  --accent-hover: #e27ae4;
+  --accent-contrast: #21021f;
+  --accent-soft: rgba(185, 68, 188, .17);
+  --accent-muted: rgba(245, 173, 36, .1);
+  --text-primary: #fff4df;
+  --text-secondary: #e0c9bc;
+  --text-muted: #b79da1;
+  --text-on-color: #201326;
+  --button-primary-text: #28180a;
+  --button-secondary-bg: #4e1643;
+  --button-secondary-text: #fff4df;
+  --border: #65475d;
+  --border-strong: #a46c88;
+  --sidebar-bg: linear-gradient(180deg, #4d0057, #5b002d 56%, #2d1831);
+  --sidebar-text: #fff3df;
+  --sidebar-hover-bg: rgba(245, 173, 36, .18);
+  --sidebar-hover-text: #ffe2a0;
+  --sidebar-active-bg: rgba(185, 68, 188, .28);
+  --sidebar-active-text: #ffffff;
+  --header-bg: linear-gradient(100deg, #1b2633, #31052d 58%, #5a2b07);
+  --hero-bg: linear-gradient(135deg, #55005c, #73072d 55%, #9c4d05);
+  --showcase-bg: radial-gradient(circle at 16% 18%, rgba(185, 68, 188, .22), transparent 30%), radial-gradient(circle at 86% 76%, rgba(245, 173, 36, .2), transparent 34%), #101820;
+  --focus-ring: rgba(245, 173, 36, .3);
+  --glow: 0 0 24px rgba(185, 68, 188, .25), 0 0 12px rgba(245, 173, 36, .14);
+  --shadow-sm: 0 8px 20px rgba(0, 0, 0, .32);
+  --shadow-md: 0 18px 44px rgba(0, 0, 0, .52);
+  --scrollbar-track: rgba(37, 4, 35, .64);
+  --scrollbar-thumb: rgba(245, 173, 36, .52);
+  --scrollbar-thumb-hover: #ffd06a;
+  --chart-text: #ecd7ca;
+  --chart-grid: rgba(242, 214, 201, .15);
+  --chart-tooltip-bg: #1b2633;
+  --chart-1: #f5ad24; --chart-2: #b944bc; --chart-3: #e35a43; --chart-4: #f2dfaf;
+  --chart-5: #8ad1c4; --chart-6: #d16593; --chart-7: #b6783a; --chart-8: #fff4df;
+}
+
 :root[data-theme="paper"][data-mode="dark"] {
   color-scheme: dark;
   --browser-theme-color: #171914;

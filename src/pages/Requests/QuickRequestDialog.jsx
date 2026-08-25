@@ -80,6 +80,10 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
         ausente_id: form.absent,
         reserva_id: form.noCoverage ? 0 : form.reservation,
         centro_id: form.center,
+        // Diferencia a escolha explícita do usuário de uma reserva ainda não
+        // selecionada. Alguns cargos exigem cobertura adicional, mas a tela
+        // rápida precisa permitir registrar o posto descoberto.
+        sem_cobertura: Boolean(form.noCoverage),
         motivo: form.reason,
         advertencia: form.warning,
         obs: form.obs,

@@ -1,6 +1,6 @@
 export const THEMES = Object.freeze([
   "tmhub", "cyberpunk", "pride", "christmas", "aurora", "ocean",
-  "sunset", "forest", "terminal", "paper",
+  "sunset", "forest", "terminal", "paper", "muertos",
 ]);
 export const MODES = Object.freeze(["light", "dark"]);
 
@@ -25,6 +25,7 @@ export const THEME_OPTIONS = Object.freeze([
   { id: "forest", label: "Forest", icon: "pi pi-tree", description: "Verde profundo e dourado" },
   { id: "terminal", label: "Terminal", icon: "pi pi-code", description: "Grafite e verde phosphor" },
   { id: "paper", label: "Paper", icon: "pi pi-file", description: "Papel claro, tinta e elegância" },
+  { id: "muertos", label: "Dia de los Muertos", icon: "pi pi-sparkles", description: "Vinho, violeta e cempasúchil" },
 ]);
 
 export function getAvailableThemeOptions(unlockedThemes) {
