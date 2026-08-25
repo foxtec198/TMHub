@@ -263,12 +263,27 @@ export function Settings() {
                         key={option.id}
                         type="button"
                         className={`theme-card theme-card--${option.id}${theme === option.id ? " is-selected" : ""}`}
+                        style={{
+                          "--theme-card-bg": option.card?.[0],
+                          "--theme-card-text": option.card?.[1],
+                          "--theme-card-muted": option.card?.[2],
+                          "--theme-card-border": option.card?.[3],
+                          "--theme-card-accent": option.card?.[4],
+                        }}
                         onClick={() => changeTheme(option.id)}
                         role="radio"
                         aria-checked={theme === option.id}
                       >
                         <span className="theme-card__heading"><i className={option.icon} /><strong>{option.label}</strong></span>
-                        <span className="theme-card__preview" aria-hidden="true"><i /><i /><i /><i /></span>
+                        <span
+                          className="theme-card__preview"
+                          aria-hidden="true"
+                          style={{ gridTemplateColumns: `repeat(${option.preview?.length || 4}, minmax(0, 1fr))` }}
+                        >
+                          {(option.preview || []).map((color, index) => (
+                            <i key={`${option.id}-${index}`} style={{ background: color }} />
+                          ))}
+                        </span>
                         <small>{option.description}</small>
                         {theme === option.id && <i className="pi pi-check-circle theme-card__check" aria-hidden="true" />}
                       </button>

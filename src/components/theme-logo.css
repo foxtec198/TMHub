@@ -12,3 +12,67 @@
 .theme-logo--inverse {
   background: var(--logo-inverse-gradient, var(--logo-gradient));
 }
+
+/* Dia de los Muertos preserva a arte colorida criada para o tema, em vez de
+   transformá-la na máscara monocromática institucional. */
+:root[data-theme="muertos"] .theme-logo {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  aspect-ratio: 184.0657 / 39.154587;
+  background: url("/brands/muertos.svg") center / contain no-repeat !important;
+  -webkit-mask: none;
+  mask: none;
+  filter:
+    drop-shadow(0 3px 0 rgba(16, 24, 32, .38))
+    drop-shadow(0 0 8px rgba(245, 173, 36, .24))
+    drop-shadow(0 0 16px rgba(185, 68, 188, .2));
+  transform-origin: center;
+  transition: transform .24s ease, filter .24s ease;
+  animation: muertos-logo-altar 7s ease-in-out infinite;
+}
+
+:root[data-theme="muertos"] .theme-logo::after {
+  position: absolute;
+  z-index: -1;
+  inset: -.8rem;
+  content: "";
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(245, 173, 36, .36), rgba(185, 68, 188, .18) 44%, transparent 72%);
+  border-radius: 48%;
+  filter: blur(7px);
+  opacity: 0;
+  animation: muertos-logo-ember 13s ease-in-out 1.4s infinite;
+}
+
+:root[data-theme="muertos"] .theme-logo:hover {
+  filter:
+    drop-shadow(0 4px 0 rgba(16, 24, 32, .46))
+    drop-shadow(0 0 12px rgba(245, 173, 36, .36))
+    drop-shadow(0 0 22px rgba(185, 68, 188, .3));
+  transform: translateY(-1px) scale(1.015);
+}
+
+:root[data-theme="muertos"] .theme-logo:hover::after {
+  opacity: .84;
+  animation-play-state: paused;
+}
+
+@keyframes muertos-logo-altar {
+  0%, 100% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-1px) scale(1.006); }
+  55% { transform: translateY(-1px) scale(1.006); }
+}
+
+/* Pulso não uniforme: parece uma pequena vela acesa, sem brilho contínuo. */
+@keyframes muertos-logo-ember {
+  0%, 17%, 36%, 64%, 100% { opacity: 0; transform: scale(.9); }
+  22%, 69% { opacity: .6; transform: scale(1.02); }
+  27% { opacity: .25; transform: scale(.96); }
+  74% { opacity: .42; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="muertos"] .theme-logo,
+  :root[data-theme="muertos"] .theme-logo::after { animation: none; }
+}

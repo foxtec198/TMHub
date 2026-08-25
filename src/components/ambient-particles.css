@@ -23,10 +23,39 @@
 .ambient-particles i:nth-child(3n) { background: var(--accent); opacity: .46; }
 .ambient-particles i:nth-child(4n) { background: var(--secondary); opacity: .36; }
 
+/* Pétalas de cempasúchil para o Dia de los Muertos. */
+:root[data-theme="muertos"] .ambient-particles i {
+  width: calc(var(--particle-size) + 7px);
+  height: calc(var(--particle-size) + 2px);
+  border-radius: 90% 10% 85% 15%;
+  opacity: .68;
+  background: linear-gradient(135deg, #ffd06a 0%, #f5ad24 48%, #e35a43 100%);
+  box-shadow: 0 0 9px rgba(245, 173, 36, .34);
+  animation: muertos-petal-drift 12s cubic-bezier(.4, .05, .6, .95) var(--particle-delay) infinite;
+}
+
+:root[data-theme="muertos"] .ambient-particles i:nth-child(3n) {
+  background: linear-gradient(135deg, #f19bf3, #b944bc 62%, #70075c);
+  opacity: .56;
+}
+
+:root[data-theme="muertos"] .ambient-particles i:nth-child(4n) {
+  background: linear-gradient(135deg, #ffe7a7, #f5ad24 62%, #b6783a);
+  opacity: .62;
+}
+
 @keyframes ambient-particle-drift {
   0% { transform: translate3d(0, 0, 0) scale(.82); opacity: .28; }
   48% { transform: translate3d(34px, -42px, 0) scale(1.25); opacity: .72; }
   100% { transform: translate3d(-18px, -76px, 0) scale(.94); opacity: .38; }
+}
+
+@keyframes muertos-petal-drift {
+  0% { transform: translate3d(0, -8px, 0) rotate(8deg) scale(.72); opacity: 0; }
+  12% { opacity: .72; }
+  42% { transform: translate3d(38px, 56px, 0) rotate(154deg) scale(1.05); }
+  71% { transform: translate3d(-24px, 118px, 0) rotate(278deg) scale(.88); opacity: .58; }
+  100% { transform: translate3d(20px, 180px, 0) rotate(410deg) scale(.68); opacity: 0; }
 }
 
 @media (max-width: 640px) {
