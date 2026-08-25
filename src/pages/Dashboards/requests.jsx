@@ -227,15 +227,6 @@ export function RequestReport() {
       .map(([date, values]) => ({ date, ...values }));
   }, [filteredRecords]);
 
-  const contractRanking = useMemo(() => Object.entries(filteredRecords.reduce((result, item) => {
-    const label = item.local || "Contrato não identificado";
-    result[label] = (result[label] || 0) + 1;
-    return result;
-  }, {}))
-    .sort(([, left], [, right]) => right - left)
-    .slice(0, 8)
-    .map(([label, total]) => ({ label, total })), [filteredRecords]);
-
   const departments = useMemo(() => Object.entries(filteredRecords.reduce((result, item) => {
     const key = String(item.dpto || "Não informado");
     result[key] ||= { total: 0, covered: 0, uncovered: 0, open: 0 };
@@ -250,9 +241,20 @@ export function RequestReport() {
   const dailyChart = useMemo(() => ({
     labels: daily.map((item) => dateLabel(item.date)),
     datasets: [
-      { type: "line", label: "Total de requisições", data: daily.map((item) => item.total), borderColor: chartTheme.palette[0], backgroundColor: chartTheme.palette[0], pointBackgroundColor: chartTheme.palette[0], pointRadius: 4, pointHoverRadius: 6, tension: .35, borderWidth: 3 },
-      { type: "bar", label: "Cobertas", data: daily.map((item) => item.covered), backgroundColor: chartTheme.palette[1], borderRadius: 7, borderSkipped: false },
-      { type: "bar", label: "Sem cobertura", data: daily.map((item) => item.uncovered), backgroundColor: chartTheme.palette[3], borderRadius: 7, borderSkipped: false },
+      {
+        label: "Requisições",
+        data: daily.map((item) => item.total),
+        borderColor: chartTheme.palette[0],
+        backgroundColor: chartTheme.palette[0],
+        pointBackgroundColor: chartTheme.palette[0],
+        pointBorderColor: chartTheme.surface,
+        pointBorderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        tension: .38,
+        borderWidth: 3,
+        fill: false,
+      },
     ],
   }), [chartTheme, daily]);
 
@@ -261,17 +263,12 @@ export function RequestReport() {
     datasets: [{ data: [metrics.covered, metrics.uncovered, metrics.open], backgroundColor: [chartTheme.palette[1], chartTheme.palette[3], chartTheme.palette[2]], borderWidth: 0, hoverOffset: 5 }],
   }), [chartTheme, metrics]);
 
-  const contractsChart = useMemo(() => ({
-    labels: contractRanking.map((item) => item.label),
-    datasets: [{ label: "Requisições", data: contractRanking.map((item) => item.total), backgroundColor: chartTheme.palette[0], borderRadius: 7, borderSkipped: false }],
-  }), [chartTheme, contractRanking]);
-
   const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     interaction: { mode: "index", intersect: false },
     plugins: {
-      legend: { position: "top", align: "end", labels: { color: chartTheme.text, usePointStyle: true, boxWidth: 8 } },
+      legend: { display: false },
       tooltip: { backgroundColor: chartTheme.surface, titleColor: chartTheme.text, bodyColor: chartTheme.textSecondary },
     },
     scales: {
@@ -279,22 +276,21 @@ export function RequestReport() {
       y: { beginAtZero: true, ticks: { color: chartTheme.textSecondary, precision: 0 }, grid: { color: chartTheme.grid }, border: { display: false } },
     },
   }), [chartTheme]);
-  const contractChartOptions = useMemo(() => ({ ...chartOptions, indexAxis: "y", plugins: { ...chartOptions.plugins, legend: { display: false } } }), [chartOptions]);
-
   const columns = useMemo(() => [
-    { header: "Data", mobileHeader: "Abertura", body: (row) => <time dateTime={row.created_at || undefined}>{dateLabel(row.created_at, true)}</time>, sortable: true, style: { minWidth: "9rem" } },
-    { header: "Ausente", mobileHeader: "Ausente", body: (row) => <strong>{firstAndLastName(row.ausente)}</strong>, sortable: true },
+    { field: "created_at", header: "Data", mobileHeader: "Abertura", body: (row) => <time dateTime={row.created_at || undefined}>{dateLabel(row.created_at, true)}</time>, sortable: true, style: { minWidth: "9rem" } },
+    { field: "ausente", header: "Ausente", mobileHeader: "Ausente", body: (row) => <strong>{firstAndLastName(row.ausente)}</strong>, sortable: true },
     {
       header: "Cobertura",
       mobileHeader: "Cobertura",
+      field: "reserva",
       body: (row) => {
         const uncovered = row.status === "reproved" || row.reserva === "SEM COBERTURA" || !row.reserva;
         return <span className={`request-dashboard-coverage ${uncovered ? "is-uncovered" : "is-covered"}`}><i className={`pi ${uncovered ? "pi-times-circle" : "pi-check-circle"}`} />{uncovered ? "Sem cobertura" : firstAndLastName(row.reserva)}</span>;
       },
       sortable: true,
     },
-    { header: "Contrato", mobileHeader: "Contrato", body: (row) => <div className="request-dashboard-contract"><strong>{row.local || "—"}</strong><small>DPTO. {row.dpto || "—"}</small></div>, sortable: true },
-    { header: "Supervisor", mobileHeader: "Supervisor", body: (row) => firstAndLastName(row.supervisor), sortable: true },
+    { field: "local", header: "Contrato", mobileHeader: "Contrato", body: (row) => <div className="request-dashboard-contract"><strong>{row.local || "—"}</strong><small>DPTO. {row.dpto || "—"}</small></div>, sortable: true },
+    { field: "supervisor", header: "Supervisor", mobileHeader: "Supervisor", body: (row) => firstAndLastName(row.supervisor), sortable: true },
     { header: "Motivo", mobileHeader: "Motivo", field: "motivo", sortable: true },
     { header: "Status", mobileHeader: "Status", body: (row) => { const meta = statusMeta(row.status); return <Tag value={meta.label} severity={meta.severity} rounded />; }, sortable: true },
   ], []);
@@ -308,7 +304,7 @@ export function RequestReport() {
         section="Dashboards"
         title="Dashboard de Reposições"
         description="Acompanhe coberturas, pendências e indisponibilidades de reservas no recorte selecionado."
-        actions={<><Button icon="pi pi-refresh" label="Atualizar" outlined onClick={reload} loading={loading && Boolean(data)} /><Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} /></>}
+        actions={<Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />}
       />
 
       <OverlayPanel ref={filterPanel} className="request-dashboard-filter-panel">
@@ -331,14 +327,12 @@ export function RequestReport() {
           <DashCard icon="pi pi-calendar-times" title="Faltas de reservas" detail="registradas hoje" value={metrics.reserveAbsencesToday} tone="warning" />
         </section>
 
-        <section className="request-dashboard__analysis">
-          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--wide"><header><div><span>Volume</span><h2>Requisições por dia</h2></div><small>{metrics.total} registro(s) no recorte</small></header><div className="request-dashboard-chart">{daily.length ? <Chart type="bar" data={dailyChart} options={chartOptions} /> : <Placeholder variant="chart" title="Sem requisições no período" description="Ajuste o período ou aguarde novos registros." />}</div></DashboardPanel>
-          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--status"><header><div><span>Cobertura</span><h2>Situação das requisições</h2></div></header><div className="request-dashboard-doughnut">{metrics.total ? <><Chart type="doughnut" data={statusChart} options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }} /><div><strong>{metrics.coverageRate}%</strong><span>cobertas</span></div></> : <Placeholder variant="chart" title="Sem dados de cobertura" />}</div><div className="request-dashboard-status-legend"><span className="is-success"><i />Cobertas <strong>{metrics.covered}</strong></span><span className="is-danger"><i />Sem cobertura <strong>{metrics.uncovered}</strong></span><span className="is-warning"><i />Em aberto <strong>{metrics.open}</strong></span></div></DashboardPanel>
-          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--contracts"><header><div><span>Concentração</span><h2>Contratos com mais requisições</h2></div></header><div className="request-dashboard-chart">{contractRanking.length ? <Chart type="bar" data={contractsChart} options={contractChartOptions} /> : <Placeholder variant="chart" title="Sem contratos no período" />}</div></DashboardPanel>
-          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--highlight"><span>Maior concentração</span><h2>{metrics.topContract}</h2><p>{metrics.topContractCount} requisição(ões) no recorte selecionado.</p><div><i className="pi pi-map-marker" /><strong>{metrics.total ? Math.round((metrics.topContractCount / metrics.total) * 100) : 0}%</strong><small>do volume</small></div></DashboardPanel>
-        </section>
-
         <DashboardPanel className="request-dashboard-departments"><header><div><span>Departamentos</span><h2>Resumo por área</h2></div><small>{departments.length} departamento(s) no recorte</small></header>{departments.length ? <div className="request-dashboard-department-grid">{departments.map(([department, values]) => <article key={department}><header><strong>DPTO. {department}</strong><span>{values.total} requisição(ões)</span></header><div><span className="is-success">{values.covered} cobertas</span><span className="is-danger">{values.uncovered} sem cobertura</span><span className="is-warning">{values.open} abertas</span></div></article>)}</div> : <Placeholder variant="content" title="Nenhum departamento no recorte" />}</DashboardPanel>
+
+        <section className="request-dashboard__analysis">
+          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--wide"><header><div><span>Volume</span><h2>Requisições por dia</h2></div><small>{metrics.total} registro(s) no recorte</small></header><div className="request-dashboard-chart">{daily.length ? <Chart type="line" data={dailyChart} options={chartOptions} /> : <Placeholder variant="chart" title="Sem requisições no período" description="Ajuste o período ou aguarde novos registros." />}</div></DashboardPanel>
+          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--status"><header><div><span>Cobertura</span><h2>Situação das requisições</h2></div></header><div className="request-dashboard-status-body"><div className="request-dashboard-doughnut">{metrics.total ? <><Chart type="doughnut" data={statusChart} options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }} /><div><strong>{metrics.coverageRate}%</strong><span>cobertas</span></div></> : <Placeholder variant="chart" title="Sem dados de cobertura" />}</div><div className="request-dashboard-status-legend"><span className="is-success"><i />Cobertas <strong>{metrics.covered}</strong></span><span className="is-danger"><i />Sem cobertura <strong>{metrics.uncovered}</strong></span><span className="is-warning"><i />Em aberto <strong>{metrics.open}</strong></span></div></div><footer className="request-dashboard-top-contract"><i className="pi pi-map-marker" /><span>Maior concentração</span><strong title={metrics.topContract}>{metrics.topContract}</strong><small>{metrics.topContractCount} no período</small></footer></DashboardPanel>
+        </section>
         <DashboardPanel className="request-dashboard-table-panel"><header><div><span>Detalhamento</span><h2>Requisições do período</h2></div><small>Inclui decisões finalizadas e solicitações ainda abertas.</small></header><Table data={filteredRecords} columns={columns} loading={loading} rows={10} rowsPerPageOptions={[10, 25, 50, 100]} search emptyTitle={activeFilterCount ? "Nenhuma requisição corresponde aos filtros" : "Nenhuma requisição no período"} emptyDescription="Altere o período ou os filtros para encontrar registros." tableClassName="request-dashboard-table" /></DashboardPanel>
       </>}
     </main>
