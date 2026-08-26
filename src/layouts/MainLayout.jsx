@@ -21,6 +21,8 @@ import { UsageTelemetryTracker } from "../components/UsageTelemetryTracker";
 
 // Styles
 import './main.css'
+import { EdinhoCard } from "../components/Edinhos";
+import { Divider } from "primereact/divider";
 
 const REALTIME_CHANNELS_BY_ROUTE = {
   "/configuracoes": ["configuracoes", "colaboradores"],
@@ -34,6 +36,8 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/reposicoes/requisicoes": ["reposicoes.requisicoes"],
   "/reposicoes/reservas": ["reposicoes.reservas"],
   "/reposicoes/historico": ["reposicoes.historico"],
+  "/colaboradores": ["colaboradores"],
+  "/centros-de-custo": ["centros_custo"],
   "/reports/colaboradores-departamento": ["colaboradores"],
   "/reports/ponto-48-horas": ["ponto48"],
   "/reports/ql": ["ql"],
@@ -198,12 +202,6 @@ export function MainLayout() {
               ]
             },
           ]
-        },
-        {
-          label: 'Colaboradores',
-          icon: 'pi pi-users',
-          visible: can("dashboard_colaboradores"),
-          command: () => { navigateTo("/reports/colaboradores-departamento") }
         },
         {
           label: 'Projetos',
@@ -376,10 +374,23 @@ export function MainLayout() {
       ],
     },
     {
+      label: 'Colaboradores',
+      icon: 'pi pi-users',
+      visible: can("colaboradores") || can("dashboard_colaboradores"),
+      command: () => { navigateTo("/colaboradores") }
+    },
+    
+    {
       label: 'Estrutura',
       icon: 'pi pi-building',
       visible: can("estrutura"),
       command: () => { navigateTo("/estrutura") }
+    },
+    {
+      label: 'Centros de custo',
+      icon: 'pi pi-map-marker',
+      visible: can("estrutura"),
+      command: () => { navigateTo("/centros-de-custo") }
     },
     {
       label: 'Chamados',
@@ -577,7 +588,10 @@ export function MainLayout() {
         </div>
 
         <div className="flex gap-2 align-items-center flipup animation-duration-500">
-          <BrowserNotificationCenter showToast={showToast} />
+          <EdinhoCard />
+
+          <Divider layout="vertical" />
+
           <div className="layout-user-info flex flex-column text-right">
             <span className="font-bold">{displayName}</span>
             <span className="text-700 font-italic">{role}</span>

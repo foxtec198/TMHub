@@ -23,7 +23,8 @@ import "./index.css";
 
 // Routes
 import { RequestReport } from "./pages/Dashboards/requests";
-import { DepartmentEmployeesDashboard } from "./pages/Dashboards/DepartmentEmployees";
+import { EmployeesPage } from "./pages/Employees";
+import { CostCentersPage } from "./pages/CostCenters";
 import { Ponto48Dashboard } from "./pages/Dashboards/Ponto48";
 import { AdmissionDashboard } from "./pages/Dashboards/Admission.jsx";
 import { Requests } from "./pages/Requests/requests";
@@ -263,14 +264,9 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
-          <Route
-            path="/reports/colaboradores-departamento"
-            element={
-              <PermissionGate screen="dashboard_colaboradores">
-                <DepartmentEmployeesDashboard />
-              </PermissionGate>
-            }
-          />
+          <Route path="/colaboradores" element={<PermissionGate screen="colaboradores"><EmployeesPage /></PermissionGate>} />
+          <Route path="/centros-de-custo" element={<PermissionGate screen="estrutura"><CostCentersPage /></PermissionGate>} />
+          <Route path="/reports/colaboradores-departamento" element={<Navigate to="/colaboradores" replace />} />
           <Route
             path="/reports/ponto-48-horas"
             element={

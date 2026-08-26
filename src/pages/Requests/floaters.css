@@ -3,6 +3,13 @@
   padding: 1.25rem;
 }
 
+.floaters-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: .65rem;
+}
+
 .floaters-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
