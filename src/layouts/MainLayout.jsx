@@ -21,6 +21,8 @@ import { UsageTelemetryTracker } from "../components/UsageTelemetryTracker";
 
 // Styles
 import './main.css'
+import { EdinhoCard } from "../components/Edinhos";
+import { Divider } from "primereact/divider";
 
 const REALTIME_CHANNELS_BY_ROUTE = {
   "/configuracoes": ["configuracoes", "colaboradores"],
@@ -580,7 +582,10 @@ export function MainLayout() {
         </div>
 
         <div className="flex gap-2 align-items-center flipup animation-duration-500">
-          <BrowserNotificationCenter showToast={showToast} />
+          <EdinhoCard />
+
+          <Divider layout="vertical" />
+
           <div className="layout-user-info flex flex-column text-right">
             <span className="font-bold">{displayName}</span>
             <span className="text-700 font-italic">{role}</span>

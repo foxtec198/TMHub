@@ -1,0 +1,51 @@
+.edinho-balance {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+  color: var(--text-primary);
+}
+
+.edinho-balance__coin {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+  filter: drop-shadow(0 .22rem .36rem color-mix(in srgb, var(--text-primary) 24%, transparent));
+  animation: edinho-float 3.6s ease-in-out infinite;
+}
+
+.edinho-balance__coin img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.edinho-balance__content {
+  display: grid;
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.edinho-balance__content strong {
+  color: var(--text-primary);
+  font-size: 1.02rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.edinho-balance__content small {
+  color: var(--text-secondary);
+  font-size: .69rem;
+}
+
+@keyframes edinho-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-.16rem) rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edinho-balance__coin { animation: none; }
+}

@@ -28,6 +28,10 @@ export function Table({
     emptyDescription,
     emptyIcon,
     emptyAction,
+    lazy = false,
+    totalRecords,
+    first,
+    onPageChange,
 }) {
     const [globalFilterDash, setGlobalFilterDash] = useState("");
     const searchInputId = useId();
@@ -100,6 +104,10 @@ export function Table({
             paginator={mode === "paginate"}
             rows={rows}
             rowsPerPageOptions={rowsPerPageOptions}
+            lazy={lazy}
+            totalRecords={lazy ? totalRecords : undefined}
+            first={lazy ? first : undefined}
+            onPage={onPageChange}
 
             scrollable
             scrollHeight={mode === "scroll" ? "400px" : undefined}

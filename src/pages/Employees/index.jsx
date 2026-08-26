@@ -5,7 +5,6 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { Paginator } from "primereact/paginator";
 import { ProgressBar } from "primereact/progressbar";
 import { Tag } from "primereact/tag";
 import { PageHeader } from "../../components/PageHeader";
@@ -106,14 +105,14 @@ export function EmployeesPage() {
   const [options, setOptions] = useState({ empresas: [], departamentos: [], centros: [], cargos: [], situacoes: [] });
   const [search, setSearch] = useState("");
   const [rows, setRows] = useState([]); const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(0); const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0); const [rowsPerPage, setRowsPerPage] = useState(50); const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); const [form, setForm] = useState({});
   const [importVisible, setImportVisible] = useState(false);
 
-  const query = useMemo(() => ({ paginado: true, page: page + 1, per_page: 50, search: search || undefined,
+  const query = useMemo(() => ({ paginado: true, page: page + 1, per_page: rowsPerPage, search: search || undefined,
     empresa_ids: filters.empresas.join(",") || undefined, departamentos: filters.departamentos.join(",") || undefined,
     centro_ids: filters.centros.join(",") || undefined, cargo_ids: filters.cargos.join(",") || undefined,
-    situacao_ids: filters.situacoes.join(",") || undefined }), [filters, page, search]);
+    situacao_ids: filters.situacoes.join(",") || undefined }), [filters, page, rowsPerPage, search]);
 
   const load = useCallback(async () => {
     try { setLoading(true); const { data } = await connect.get("/funcionarios", { params: query }); setRows(data.items || []); setTotal(data.total || 0); }
@@ -146,7 +145,7 @@ export function EmployeesPage() {
 
   return <section className="entity-page">
     <PageHeader section="RH" title="Colaboradores" description="Consulte os colaboradores da filial selecionada. Dados sensíveis não são exibidos." actions={<div className="entity-page__actions">{isAdmin && <Button label="Importar" icon="pi pi-upload" outlined onClick={() => setImportVisible(true)} />}<Button label="Exportar" icon="pi pi-file-excel" outlined onClick={exportRows} /><Button label={activeFilters ? `Filtros (${activeFilters})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => overlay.current?.toggle(event)} /></div>} />
-    <article className="entity-table-card"><div className="entity-table-card__header"><div><strong>Base de colaboradores</strong><small>{total.toLocaleString("pt-BR")} registro(s) no escopo atual</small></div><InputText value={search} onChange={(event) => { setPage(0); setSearch(event.target.value); }} placeholder="Buscar nome, matrícula, cargo ou centro" /></div><Table data={rows} columns={columns} loading={loading} mode="scroll" tableStyle={{ minWidth: "1080px" }} emptyTitle="Nenhum colaborador encontrado" emptyDescription="Ajuste os filtros ou a filial global." /><Paginator first={page * 50} rows={50} totalRecords={total} onPageChange={(event) => setPage(event.page)} /></article>
+    <article className="entity-table-card"><div className="entity-table-card__header"><div><strong>Base de colaboradores</strong><small>{total.toLocaleString("pt-BR")} registro(s) no escopo atual</small></div></div><Table data={rows} columns={columns} loading={loading} search searchValue={search} onSearchChange={(value) => { setPage(0); setSearch(value); }} lazy totalRecords={total} first={page * rowsPerPage} onPageChange={(event) => { setPage(event.page); setRowsPerPage(event.rows); }} rows={rowsPerPage} rowsPerPageOptions={[25, 50, 100]} tableStyle={{ minWidth: "1080px" }} emptyTitle="Nenhum colaborador encontrado" emptyDescription="Ajuste os filtros ou a filial global." /></article>
     <OverlayPanel ref={overlay} className="entity-filter-panel"><div className="entity-filter-panel__head"><strong>Filtros de colaboradores</strong><Button icon="pi pi-filter-slash" text rounded onClick={() => { setPage(0); setFilters(EMPTY_FILTERS); }} /></div>{[["empresas", "Empresas"], ["departamentos", "Departamentos"], ["centros", "Centros de custo"], ["cargos", "Cargos"], ["situacoes", "Situações"]].map(([key, label]) => <label key={key}><span>{label}</span><MultiSelect value={filters[key]} options={options[key] || []} optionLabel="label" optionValue="value" filter display="chip" placeholder={`Todos os ${label.toLowerCase()}`} onChange={(event) => { setPage(0); setFilters((current) => ({ ...current, [key]: event.value || [] })); }} /></label>)}</OverlayPanel>
     <Dialog header="Importar colaboradores" visible={importVisible} modal className="employee-dialog entity-import-dialog" onHide={() => setImportVisible(false)}><ImportEmployees onCompleted={() => { setImportVisible(false); load(); }} /></Dialog>
     <Dialog header={`Editar ${editing?.nome || "colaborador"}`} visible={Boolean(editing)} modal className="employee-dialog" onHide={() => setEditing(null)} footer={<div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEditing(null)} /><Button label="Salvar" icon="pi pi-check" onClick={save} /></div>}><div className="employee-dialog__form"><label>Nome<InputText value={form.nome || ""} onChange={(event) => setForm({ ...form, nome: event.target.value })} /></label><label>Cargo<Dropdown value={form.cargo_id} options={options.cargos || []} optionLabel="label" optionValue="value" filter showClear onChange={(event) => setForm({ ...form, cargo_id: event.value })} /></label><label>Situação<Dropdown value={form.situacao_id} options={options.situacoes || []} optionLabel="label" optionValue="value" filter showClear onChange={(event) => setForm({ ...form, situacao_id: event.value })} /></label><label>Centro de custo<Dropdown value={form.centro_id} options={options.centros || []} optionLabel="label" optionValue="value" filter showClear onChange={(event) => setForm({ ...form, centro_id: event.value })} /></label></div></Dialog>
