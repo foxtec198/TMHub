@@ -248,6 +248,12 @@ export function MainLayout() {
           command: () => { navigateTo("/rescisoes") }
         },
         {
+          label: 'Férias',
+          icon: 'pi pi-calendar-plus',
+          visible: can("controle_ferias"),
+          command: () => { navigateTo("/ferias") }
+        },
+        {
           label: 'Faltas',
           icon: 'pi pi-calendar-times',
           visible: can("controle_faltas"),

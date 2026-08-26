@@ -28,6 +28,11 @@ export function Table({
     emptyDescription,
     emptyIcon,
     emptyAction,
+    dataKey,
+    expandedRows,
+    onRowToggle,
+    rowExpansionTemplate,
+    onRowClick,
 }) {
     const [globalFilterDash, setGlobalFilterDash] = useState("");
     const searchInputId = useId();
@@ -97,6 +102,11 @@ export function Table({
             emptyDescription={emptyDescription}
             emptyIcon={emptyIcon}
             emptyAction={emptyAction}
+            dataKey={dataKey}
+            expandedRows={expandedRows}
+            onRowToggle={onRowToggle}
+            rowExpansionTemplate={rowExpansionTemplate}
+            onRowClick={onRowClick}
             paginator={mode === "paginate"}
             rows={rows}
             rowsPerPageOptions={rowsPerPageOptions}
