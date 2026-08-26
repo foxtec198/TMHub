@@ -63,6 +63,7 @@ import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMea
 import { ExperienceDashboard } from "./pages/Dashboards/Experience.jsx";
 import { ExperienceControl } from "./pages/ExperienceControl";
 import { ExperiencePublic } from "./pages/ExperienceControl/supervisor";
+import { PeriodicExams } from "./pages/PeriodicExams";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -242,6 +243,14 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="controle_experiencia_rh">
                 <ExperienceControl />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/exames-periodicos"
+            element={
+              <PermissionGate screen="controle_exames_periodicos">
+                <PeriodicExams />
               </PermissionGate>
             }
           />

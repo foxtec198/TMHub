@@ -324,6 +324,19 @@ export function MainLayout() {
             },
           ]
         },
+        {
+          label: "SESMT",
+          icon: "pi pi-shield",
+          visible: can("controle_exames_periodicos"),
+          items: [
+            {
+              label: "Exames periódicos",
+              icon: "pi pi-heart",
+              visible: can("controle_exames_periodicos"),
+              command: () => { navigateTo("/exames-periodicos"); },
+            },
+          ],
+        },
       ]
     },
     {

@@ -70,6 +70,66 @@ function monthLabel(value) {
   return `${MONTHS[month - 1]}/${String(year).slice(-2)}`;
 }
 
+function strokeRoundedRect(context, left, top, width, height, radius) {
+  const safeRadius = Math.min(radius, width / 2, height / 2);
+
+  context.beginPath();
+  context.moveTo(left + safeRadius, top);
+  context.lineTo(left + width - safeRadius, top);
+  context.quadraticCurveTo(left + width, top, left + width, top + safeRadius);
+  context.lineTo(left + width, top + height - safeRadius);
+  context.quadraticCurveTo(left + width, top + height, left + width - safeRadius, top + height);
+  context.lineTo(left + safeRadius, top + height);
+  context.quadraticCurveTo(left, top + height, left, top + height - safeRadius);
+  context.lineTo(left, top + safeRadius);
+  context.quadraticCurveTo(left, top, left + safeRadius, top);
+  context.closePath();
+  context.stroke();
+}
+
+const futureBarsDashedBorderPlugin = {
+  id: "experience-future-bars-dashed-border",
+  afterDatasetDraw(chart, args) {
+    const dataset = chart.data.datasets[args.index];
+    if (!dataset?.isFutureProjection) return;
+
+    const { ctx } = chart;
+    ctx.save();
+    ctx.strokeStyle = dataset.borderColor;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.setLineDash([1, 4]);
+
+    chart.getDatasetMeta(args.index).data.forEach((bar) => {
+      const left = bar.x - (bar.width / 2) + 1;
+      const top = Math.min(bar.y, bar.base) + 1;
+      const width = Math.max(bar.width - 2, 0);
+      const height = Math.max(Math.abs(bar.base - bar.y) - 2, 0);
+      if (width > 0 && height > 0) strokeRoundedRect(ctx, left, top, width, height, 7);
+    });
+
+    ctx.restore();
+  },
+};
+
+function futureLegendMarker(color) {
+  if (typeof document === "undefined") return "circle";
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 20;
+  canvas.height = 8;
+  const context = canvas.getContext("2d");
+  if (!context) return "circle";
+
+  context.fillStyle = color;
+  [3, 10, 17].forEach((position) => {
+    context.beginPath();
+    context.arc(position, 4, 1.6, 0, Math.PI * 2);
+    context.fill();
+  });
+  return canvas;
+}
+
 function errorMessage(error) {
   const response = error.response?.data;
   if (typeof response === "string") return response;
@@ -132,12 +192,37 @@ export function ExperienceDashboard() {
   const options = data?.filtros || {};
   const activeFilterCount = ["department", "costCenter", "supervisor", "status"]
     .filter((key) => filters[key].length).length;
+  const monthlyRows = useMemo(() => (data?.mensal || []).filter((item) => (
+    [item.total, item.concluidas, item.atrasadas, item.futuras]
+      .some((value) => Number(value || 0) > 0)
+  )), [data]);
+  const completedColor = useMemo(() => {
+    if (chartTheme.theme === "cyberpunk") return chartTheme.palette[5];
+    if (chartTheme.theme === "pride") return chartTheme.palette[3];
+    return chartTheme.palette[1];
+  }, [chartTheme]);
+  const futureLegendPointStyle = useMemo(
+    () => futureLegendMarker(chartTheme.palette[2]),
+    [chartTheme],
+  );
 
   const chartOptions = useMemo(() => ({
     maintainAspectRatio: false,
     interaction: { mode: "index", intersect: false },
     plugins: {
-      legend: { position: "top", align: "end", labels: { color: chartTheme.text, usePointStyle: true, boxWidth: 8 } },
+      legend: { position: "top", align: "end", labels: { color: chartTheme.text, usePointStyle: true, boxWidth: 8, pointStyleWidth: 20 } },
+      tooltip: {
+        callbacks: {
+          afterBody: (items) => {
+            const descriptions = {
+              "Em avaliação": "Tarefas abertas no controle.",
+              "Concluídas": "Tarefas finalizadas pelo RH.",
+              "Tarefas previstas": "Colaboradores em experiência cuja tarefa ainda será aberta.",
+            };
+            return [...new Set(items.map((item) => descriptions[item.dataset.label]).filter(Boolean))];
+          },
+        },
+      },
     },
     scales: {
       x: { ticks: { color: chartTheme.textSecondary }, grid: { display: false }, border: { display: false } },
@@ -146,31 +231,36 @@ export function ExperienceDashboard() {
   }), [chartTheme]);
 
   const monthlyChart = useMemo(() => ({
-    labels: (data?.mensal || []).map((item) => monthLabel(item.mes)),
+    labels: monthlyRows.map((item) => monthLabel(item.mes)),
     datasets: [
       {
-        label: "Avaliações",
-        data: (data?.mensal || []).map((item) => item.total),
+        label: "Em avaliação",
+        data: monthlyRows.map((item) => item.total),
         backgroundColor: chartTheme.palette[0],
-        borderRadius: 6,
-        maxBarThickness: 38,
+        borderRadius: 7,
+        maxBarThickness: 40
+        ,
       },
       {
         label: "Concluídas",
-        data: (data?.mensal || []).map((item) => item.concluidas),
-        backgroundColor: chartTheme.palette[1],
-        borderRadius: 6,
-        maxBarThickness: 38,
+        data: monthlyRows.map((item) => item.concluidas),
+        backgroundColor: completedColor,
+        borderRadius: 7,
+        maxBarThickness: 40,
       },
       {
-        label: "Atrasadas",
-        data: (data?.mensal || []).map((item) => item.atrasadas),
-        backgroundColor: chartTheme.palette[3],
-        borderRadius: 6,
-        maxBarThickness: 38,
+        label: "Tarefas previstas",
+        data: monthlyRows.map((item) => item.futuras || 0),
+        isFutureProjection: true,
+        pointStyle: futureLegendPointStyle,
+        backgroundColor: "transparent",
+        borderColor: chartTheme.palette[2],
+        borderWidth: 0,
+        borderRadius: 7,
+        maxBarThickness: 40,
       },
     ],
-  }), [chartTheme, data]);
+  }), [chartTheme, completedColor, futureLegendPointStyle, monthlyRows]);
 
   const columns = useMemo(() => [
     {
@@ -249,7 +339,7 @@ export function ExperienceDashboard() {
           <DashboardPanel className="experience-dashboard-panel experience-dashboard-panel--wide">
             <header><div><span>Previsão</span><h2>Fim do período de experiência</h2></div></header>
             <div className="experience-dashboard-chart">
-              <Chart type="bar" data={monthlyChart} options={chartOptions} />
+              {monthlyRows.length ? <Chart type="bar" data={monthlyChart} options={chartOptions} plugins={[futureBarsDashedBorderPlugin]} /> : <EmptyState message="Não há avaliações ou tarefas previstas no período." />}
             </div>
           </DashboardPanel>
 
