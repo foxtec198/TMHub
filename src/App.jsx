@@ -40,6 +40,7 @@ import { Floaters } from "./pages/Requests/floaters";
 import { ProjetosPage } from "./pages/Projects/ProjetosPage";
 import { Vacancies } from "./pages/Admission/vacancies.jsx";
 import { TerminationControl } from "./pages/TerminationControl";
+import { VacationControl } from "./pages/VacationControl";
 import { Settings } from "./pages/Configuratiom";
 import { AbsenceControl } from "./pages/FaltsControl";
 import { DisallowanceControl } from "./pages/DissallowancesControls";
@@ -447,6 +448,16 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="controle_rescisoes">
                 <TerminationControl />
+              </PermissionGate>
+            }
+          />
+
+          {/* Férias */}
+          <Route
+            path="/ferias"
+            element={
+              <PermissionGate screen="controle_ferias">
+                <VacationControl />
               </PermissionGate>
             }
           />

@@ -28,6 +28,11 @@ export function Table({
     emptyDescription,
     emptyIcon,
     emptyAction,
+    dataKey,
+    expandedRows,
+    onRowToggle,
+    rowExpansionTemplate,
+    onRowClick,
     lazy = false,
     totalRecords,
     first,
@@ -101,6 +106,11 @@ export function Table({
             emptyDescription={emptyDescription}
             emptyIcon={emptyIcon}
             emptyAction={emptyAction}
+            dataKey={dataKey}
+            expandedRows={expandedRows}
+            onRowToggle={onRowToggle}
+            rowExpansionTemplate={rowExpansionTemplate}
+            onRowClick={onRowClick}
             paginator={mode === "paginate"}
             rows={rows}
             rowsPerPageOptions={rowsPerPageOptions}

@@ -303,8 +303,9 @@ body { transition: background-color .18s ease, color .18s ease; }
   border: 1px solid var(--border-strong);
 }
 :root[data-theme] .p-tooltip .p-tooltip-text {
-  color: var(--text-on-color);
-  background: var(--chart-tooltip-bg);
+  color: var(--text-primary);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-sm);
 }
 
