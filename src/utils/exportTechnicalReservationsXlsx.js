@@ -33,7 +33,7 @@ function formatDate(value) {
 }
 
 export function exportTechnicalReservationsXlsx(reservations) {
-  const headers = ["Matrícula", "Nome", "Cargo", "Situação", "Disponibilidade", "Motivo", "Incluído em"];
+  const headers = ["Matrícula", "Nome", "Cargo", "Situação", "Departamento", "Centro de custo", "Disponibilidade", "Motivo", "Incluído em"];
   const rows = [
     `<row r="1" ht="28" customHeight="1">${headers.map((header, index) => cell(`${columnName(index + 1)}1`, header, 1)).join("")}</row>`,
   ];
@@ -45,6 +45,8 @@ export function exportTechnicalReservationsXlsx(reservations) {
       reservation.nome,
       reservation.cargo || "Não informado",
       reservation.situacao || "Não informada",
+      reservation.departamento || "Não informado",
+      reservation.centro_custo || "Não informado",
       reservation.disponivel === false ? "Indisponível" : "Disponível",
       reservation.indisponibilidade_motivo || "—",
       formatDate(reservation.data),
@@ -56,8 +58,8 @@ export function exportTechnicalReservationsXlsx(reservations) {
   const sheetXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <sheetViews><sheetView showGridLines="0" workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
-  <cols><col min="1" max="1" width="16" customWidth="1"/><col min="2" max="2" width="38" customWidth="1"/><col min="3" max="3" width="26" customWidth="1"/><col min="4" max="4" width="18" customWidth="1"/><col min="5" max="5" width="18" customWidth="1"/><col min="6" max="6" width="18" customWidth="1"/><col min="7" max="7" width="16" customWidth="1"/></cols>
-  <sheetData>${rows.join("")}</sheetData><autoFilter ref="A1:G${lastRow}"/>
+  <cols><col min="1" max="1" width="16" customWidth="1"/><col min="2" max="2" width="38" customWidth="1"/><col min="3" max="3" width="26" customWidth="1"/><col min="4" max="4" width="18" customWidth="1"/><col min="5" max="5" width="16" customWidth="1"/><col min="6" max="6" width="52" customWidth="1"/><col min="7" max="8" width="18" customWidth="1"/><col min="9" max="9" width="16" customWidth="1"/></cols>
+  <sheetData>${rows.join("")}</sheetData><autoFilter ref="A1:I${lastRow}"/>
 </worksheet>`;
   const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
