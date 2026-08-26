@@ -34,6 +34,8 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/reposicoes/requisicoes": ["reposicoes.requisicoes"],
   "/reposicoes/reservas": ["reposicoes.reservas"],
   "/reposicoes/historico": ["reposicoes.historico"],
+  "/colaboradores": ["colaboradores"],
+  "/centros-de-custo": ["centros_custo"],
   "/reports/colaboradores-departamento": ["colaboradores"],
   "/reports/ponto-48-horas": ["ponto48"],
   "/reports/ql": ["ql"],
@@ -200,12 +202,6 @@ export function MainLayout() {
           ]
         },
         {
-          label: 'Colaboradores',
-          icon: 'pi pi-users',
-          visible: can("dashboard_colaboradores"),
-          command: () => { navigateTo("/reports/colaboradores-departamento") }
-        },
-        {
           label: 'Projetos',
           icon: 'pi pi-chart-line',
           visible: can("dashboard_projetos"),
@@ -370,10 +366,23 @@ export function MainLayout() {
       ],
     },
     {
+      label: 'Colaboradores',
+      icon: 'pi pi-users',
+      visible: can("colaboradores") || can("dashboard_colaboradores"),
+      command: () => { navigateTo("/colaboradores") }
+    },
+    
+    {
       label: 'Estrutura',
       icon: 'pi pi-building',
       visible: can("estrutura"),
       command: () => { navigateTo("/estrutura") }
+    },
+    {
+      label: 'Centros de custo',
+      icon: 'pi pi-map-marker',
+      visible: can("estrutura"),
+      command: () => { navigateTo("/centros-de-custo") }
     },
     {
       label: 'Chamados',

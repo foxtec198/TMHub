@@ -24,8 +24,6 @@ import { UserAvatar } from "../../components/UserAvatar";
 import { UsersSettings } from "./UsersSettings";
 import { BranchSettings } from "./BranchSettings";
 import { CapacityDepartmentSettings } from "./CapacityDepartmentSettings";
-import { CostCenterSettings } from "./CostCenterSettings";
-import { CollaboratorImportSettings } from "./EmployeeImportSettings";
 import { NewsSettings } from "./NewsSettings";
 import { TMOpsAccessSettings } from "./TMOpsAccessSettings";
 import { TimoSettings } from "./TimoSettings";
@@ -322,12 +320,6 @@ export function Settings() {
       </TabPanel>}
       {isAdmin && <TabPanel header="Planejamento" leftIcon="pi pi-sliders-h mr-2">
         <CapacityDepartmentSettings />
-      </TabPanel>}
-      {isAdmin && <TabPanel header="Centros de custo" leftIcon="pi pi-building mr-2">
-        <CostCenterSettings />
-      </TabPanel>}
-      {isAdmin && <TabPanel header="Importar colaboradores" leftIcon="pi pi-upload mr-2">
-        <CollaboratorImportSettings />
       </TabPanel>}
       {isAdmin && <TabPanel header="TM Ops" leftIcon="pi pi-calendar-clock mr-2">
         <TMOpsAccessSettings />

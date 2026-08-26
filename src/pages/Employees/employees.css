@@ -1,0 +1,34 @@
+.entity-page { display: grid; gap: 1rem; min-width: 0; padding: 1.5rem; color: var(--text-primary); }
+.entity-page__actions, .entity-table-card__header, .entity-filter-panel__head { display: flex; align-items: center; gap: .65rem; }
+.entity-import-card, .entity-table-card { border: 1px solid var(--border); border-radius: 16px; background: var(--surface-1); box-shadow: var(--shadow-sm); }
+.entity-import-card { display: grid; grid-template-columns: minmax(15rem, 1.5fr) minmax(14rem, 1fr) minmax(15rem, 1fr) auto; align-items: center; gap: 1rem; padding: 1rem; }
+.entity-import-card > div:first-child { display: flex; align-items: flex-start; gap: .7rem; }
+.entity-import-card > div:first-child > i { display: grid; width: 2.4rem; height: 2.4rem; place-items: center; border-radius: 10px; color: var(--accent); background: var(--accent-soft); }
+.entity-import-card strong, .entity-import-card small, .entity-table-card__header strong, .entity-table-card__header small { display: block; }
+.entity-import-card small, .entity-table-card__header small { margin-top: .25rem; color: var(--text-secondary); font-size: .78rem; }
+.entity-import-card .p-dropdown { min-width: 0; width: 100%; }
+.entity-import-card__drop { display: grid; min-width: 0; gap: .2rem; padding: .65rem .75rem; color: var(--text-secondary); border: 1px dashed var(--border-strong); border-radius: 10px; cursor: pointer; }
+.entity-import-card__drop:hover { border-color: var(--accent); color: var(--text-primary); }
+.entity-import-card__drop > i { color: var(--accent); }
+.entity-import-card__progress { display: grid; grid-column: 1 / -1; gap: .4rem; font-size: .78rem; color: var(--text-secondary); }
+.entity-import-card__result { grid-column: 1 / -1; color: var(--status-success); }
+.entity-table-card { overflow: hidden; }
+.entity-table-card__header { justify-content: space-between; padding: 1rem 1rem .7rem; border-bottom: 1px solid var(--border); }
+.entity-table-card__header .p-inputtext { width: min(26rem, 100%); }
+.entity-table-card .p-paginator { border: 0; border-top: 1px solid var(--border); background: transparent; }
+.entity-filter-panel { width: min(25rem, calc(100vw - 2rem)); }
+.entity-filter-panel__head { justify-content: space-between; margin-bottom: .6rem; }
+.entity-filter-panel label { display: grid; gap: .35rem; margin-top: .75rem; color: var(--text-secondary); font-size: .82rem; }
+.entity-filter-panel label > span { color: var(--text-primary); font-weight: 700; }
+.entity-filter-panel .p-multiselect { width: 100%; }
+.employee-dialog { width: min(42rem, calc(100vw - 2rem)); }
+.entity-import-dialog { width: min(58rem, calc(100vw - 2rem)); }
+.entity-import-dialog .entity-import-card { grid-template-columns: minmax(15rem, 1.25fr) minmax(14rem, 1fr); padding: 0; border: 0; box-shadow: none; background: transparent; }
+.entity-import-dialog .entity-import-card > div:first-child, .entity-import-dialog .entity-import-card__drop { grid-column: 1 / -1; }
+.entity-import-dialog .entity-import-card > .p-button { justify-self: end; }
+.employee-dialog__form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; }
+.employee-dialog__form label { display: grid; gap: .4rem; color: var(--text-secondary); font-size: .82rem; }
+.employee-dialog__form label:first-child, .employee-dialog__form label:last-child { grid-column: 1 / -1; }
+.employee-dialog__form .p-inputtext, .employee-dialog__form .p-dropdown { width: 100%; }
+@media (max-width: 900px) { .entity-import-card { grid-template-columns: 1fr 1fr; } .entity-import-card > div:first-child, .entity-import-card__drop { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .entity-page { padding: 1rem; } .entity-page__actions, .entity-table-card__header { align-items: stretch; flex-direction: column; } .entity-page__actions > *, .entity-table-card__header .p-inputtext { width: 100%; } .entity-import-card, .employee-dialog__form { grid-template-columns: 1fr; } .employee-dialog__form label, .employee-dialog__form label:first-child, .employee-dialog__form label:last-child { grid-column: auto; } }
