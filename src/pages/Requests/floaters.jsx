@@ -15,6 +15,7 @@ import { FloatLabel } from "primereact/floatlabel";
 import { useToast } from "../../contexts/ToastContext";
 import { get_first_name } from "../../utils/ui";
 import { can } from "../../utils/permissions";
+import { exportTechnicalReservationsXlsx } from "../../utils/exportTechnicalReservationsXlsx";
 import "./floaters.css";
 
 // Login and UI (uiiii)
@@ -24,6 +25,7 @@ export function Floaters() {
     const { showToast } = useToast();
     const canCreate = can("reservas", "create");
     const canEdit = can("reservas", "edit");
+    const canExport = can("reservas", "view");
     const [refresh, setRefresh] = useState(false);
 
     // Handles de Reservas
@@ -156,6 +158,14 @@ export function Floaters() {
         }
     }
 
+    function exportReservations() {
+        if (!reservasFiltradas.length) {
+            showToast("info", "Reservas", "Não há reservas para exportar com a busca atual.");
+            return;
+        }
+        exportTechnicalReservationsXlsx(reservasFiltradas);
+    }
+
     // Duas listas permitem promover colaboradores e remover reservas existentes.
     return (
         <main className="floaters-page">
@@ -163,15 +173,24 @@ export function Floaters() {
                 section="Reposições"
                 title="Reservas Técnicas"
                 description="Gerencie os colaboradores ativos e a equipe disponível para cobrir as reposições."
-                actions={<Button
-                    label="Utilizadas x disponíveis"
-                    icon="pi pi-calendar"
-                    outlined
-                    onClick={() => {
-                        setUsageDialog(true);
-                        loadReservationUsage();
-                    }}
-                />}
+                actions={<div className="floaters-header-actions">
+                    <Button
+                        label="Exportar"
+                        icon="pi pi-download"
+                        outlined
+                        disabled={!canExport || !reservasFiltradas.length}
+                        onClick={exportReservations}
+                    />
+                    <Button
+                        label="Utilizadas x disponíveis"
+                        icon="pi pi-calendar"
+                        outlined
+                        onClick={() => {
+                            setUsageDialog(true);
+                            loadReservationUsage();
+                        }}
+                    />
+                </div>}
             />
 
             <Splitter className="floaters-splitter" layout={isMobile ? "vertical" : "horizontal"} gutterSize={12}>
