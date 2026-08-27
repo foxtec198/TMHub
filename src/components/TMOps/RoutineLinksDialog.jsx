@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../icons/AppIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -115,7 +116,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
     confirmDialog({
       header: "Remover rotina vinculada",
       message: "A instância será removida e as tarefas ainda em aberto serão canceladas. As tarefas concluídas permanecerão no histórico.",
-      icon: "pi pi-exclamation-triangle",
+      icon: appIcon("alert-triangle"),
       acceptLabel: "Remover rotina",
       rejectLabel: "Cancelar",
       acceptClassName: "p-button-danger",
@@ -173,20 +174,20 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
             <div>
               <Button
                 label="Selecionar todos"
-                icon="pi pi-check-square"
+                icon={<AppIcon name="square-check" />}
                 outlined
                 onClick={() => setSelectedLocations(availableLocations)}
               />
               <Button
                 label="Limpar"
-                icon="pi pi-times"
+                icon={<AppIcon name="x" />}
                 text
                 onClick={() => setSelectedLocations([])}
               />
             </div>
           </div>
           <span className="p-input-icon-left tm-ops-links-search">
-            <i className="pi pi-search" />
+            <AppIcon name="search"  />
             <InputText
               value={filter}
               onChange={(event) => setFilter(event.target.value)}
@@ -220,7 +221,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
               <div key={instance.id}>
                 <span>{instance.estrutura || instance.nome}</span>
                 <Button
-                  icon="pi pi-trash"
+                  icon={<AppIcon name="trash" />}
                   severity="danger"
                   text
                   rounded
@@ -236,7 +237,7 @@ export function RoutineLinksDialog({ visible, routine, onHide, onSaved }) {
         )}
         <div className="is-wide tm-ops-routine-actions">
           <Button label="Cancelar" severity="secondary" text onClick={onHide} />
-          <Button label="Vincular locais" icon="pi pi-link" onClick={save} />
+          <Button label="Vincular locais" icon={<AppIcon name="link" />} onClick={save} />
         </div>
         </div>
       </Dialog>

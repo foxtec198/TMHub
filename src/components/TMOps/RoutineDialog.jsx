@@ -1,3 +1,4 @@
+import { AppIcon } from "../icons/AppIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { AutoComplete } from "primereact/autocomplete";
@@ -426,7 +427,7 @@ export function RoutineDialog({
           <Button label="Cancelar" severity="secondary" text onClick={onHide} />
           <Button
             label={isEditing ? "Salvar alterações" : "Criar rotina"}
-            icon="pi pi-check"
+            icon={<AppIcon name="check" />}
             onClick={save}
           />
         </div>

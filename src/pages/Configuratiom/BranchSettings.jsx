@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -77,22 +78,22 @@ export function BranchSettings() {
     { header: "Usuários", body: (branch) => branch.usuario_ids?.length || 0 },
     { header: "Contratos", body: (branch) => branch.centro_custo_ids?.length || 0 },
     { header: "Departamentos", class: 'text-truncate', body: (branch) => branch.departamentos?.join(", ") || "—" },
-    { header: "Ações", body: (branch) => <Button icon="pi pi-pencil" rounded text aria-label={`Editar ${branch.nome}`} onClick={() => openEdit(branch)} /> },
+    { header: "Ações", body: (branch) => <Button icon={<AppIcon name="pencil" />} rounded text aria-label={`Editar ${branch.nome}`} onClick={() => openEdit(branch)} /> },
   ];
 
   return <div>
     {/* Article da TABELA de filiais  */}
     <article className="settings-card branch-table-card">
-      <div className="settings-card-title"><i className="pi pi-building" /><div><h2>Filiais</h2><p>Defina os usuários e contratos de cada unidade</p></div></div>
-      {status === "loading" && <div className="settings-feedback"><i className="pi pi-spin pi-spinner" /> Carregando filiais e vínculos...</div>}
-      {status === "error" && <div className="settings-feedback is-error"><i className="pi pi-exclamation-triangle" /><span>{loadError}</span><Button label="Tentar novamente" text onClick={() => setRefresh((value) => value + 1)} /></div>}
+      <div className="settings-card-title"><AppIcon name="building"  /><div><h2>Filiais</h2><p>Defina os usuários e contratos de cada unidade</p></div></div>
+      {status === "loading" && <div className="settings-feedback"><AppIcon name="loader-2"  /> Carregando filiais e vínculos...</div>}
+      {status === "error" && <div className="settings-feedback is-error"><AppIcon name="alert-triangle"  /><span>{loadError}</span><Button label="Tentar novamente" text onClick={() => setRefresh((value) => value + 1)} /></div>}
       {status === "ready" && branches.length > 0 && <Table data={branches} columns={columns} search rows={5} rowsPerPageOptions={[5, 10, 25]} />}
       {status === "ready" && branches.length === 0 && <div className="settings-feedback">Nenhuma filial cadastrada.</div>}
     </article>
 
 
     {/* Button para criar filias */}
-    <div className="users-speed-dial"><SpeedDial onClick={openCreate} direction="up" showIcon="pi pi-plus"/></div>
+    <div className="users-speed-dial"><SpeedDial onClick={openCreate} direction="up" showIcon={<AppIcon name="plus" />} /></div>
 
     {/* Dialog de criação de filiais */}
     <Dialog header={editingId ? "Editar filial" : "Nova filial"} visible={dialog} modal className="branch-dialog" onHide={() => setDialog(false)}>
@@ -106,7 +107,7 @@ export function BranchSettings() {
         <label htmlFor="branch-users">Usuários com acesso</label>
         <MultiSelect inputId="branch-users" value={form.usuario_ids} options={options.usuarios} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, usuario_ids: event.value })} filter display="chip" placeholder="Selecione os usuários" />
         <div className="branch-active"><div><strong>Filial ativa</strong><small>Filiais inativas não liberam dados aos usuários.</small></div><InputSwitch checked={form.ativa} onChange={(event) => setForm({ ...form, ativa: event.value })} /></div>
-        <div className="dialog-actions"><Button type="button" label="Cancelar" text onClick={() => setDialog(false)} /><Button type="submit" label="Salvar filial" icon="pi pi-check" /></div>
+        <div className="dialog-actions"><Button type="button" label="Cancelar" text onClick={() => setDialog(false)} /><Button type="submit" label="Salvar filial" icon={<AppIcon name="check" />} /></div>
       </form>
     </Dialog>
   </div>;

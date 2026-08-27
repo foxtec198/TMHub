@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Widgets
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
@@ -176,14 +177,14 @@ export function Floaters() {
                 actions={<div className="floaters-header-actions">
                     <Button
                         label="Exportar"
-                        icon="pi pi-download"
+                        icon={<AppIcon name="download" />}
                         outlined
                         disabled={!canExport || !reservasFiltradas.length}
                         onClick={exportReservations}
                     />
                     <Button
                         label="Utilizadas x disponíveis"
-                        icon="pi pi-calendar"
+                        icon={<AppIcon name="calendar" />}
                         outlined
                         onClick={() => {
                             setUsageDialog(true);
@@ -217,8 +218,8 @@ export function Floaters() {
                                     <div className="floater-card-content">
                                         <strong>{colaborador.nome}</strong>
                                         <div className="floater-card-details">
-                                            <span><i className="pi pi-id-card" /> Matrícula {colaborador.matricula}</span>
-                                            <span><i className="pi pi-calendar-plus" /> Admissão {data.toLocaleDateString("pt-br")}</span>
+                                            <span><AppIcon name="id-badge"  /> Matrícula {colaborador.matricula}</span>
+                                            <span><AppIcon name="calendar-plus"  /> Admissão {data.toLocaleDateString("pt-br")}</span>
                                         </div>
                                         <div className="floater-card-tags">
                                             <Tag value={colaborador.cargo || "Cargo não informado"} rounded />
@@ -228,7 +229,7 @@ export function Floaters() {
                                     <Button
                                         rounded
                                         disabled={!canCreate}
-                                        icon={isMobile ? "pi pi-arrow-down" : "pi pi-arrow-right"}
+                                        icon={<AppIcon name={isMobile ? "arrow-down" : "arrow-right"} />}
                                         tooltip="Adicionar às reservas"
                                         aria-label={`Adicionar ${colaborador.nome} às reservas`}
                                         onClick={() => setReserva(colaborador.id, colaborador.nome)}
@@ -237,7 +238,7 @@ export function Floaters() {
                             );
                         }) : (
                             <div className="floaters-empty">
-                                <i className="pi pi-search" />
+                                <AppIcon name="search"  />
                                 <strong>Nenhum colaborador encontrado</strong>
                                 <span>Tente buscar por outro nome ou matrícula.</span>
                             </div>
@@ -268,8 +269,8 @@ export function Floaters() {
                                     <div className="floater-card-content">
                                         <strong>{reserva.nome}</strong>
                                         <div className="floater-card-details">
-                                            <span><i className="pi pi-id-card" /> Matrícula {reserva.matricula}</span>
-                                            <span><i className="pi pi-calendar" /> Incluído em {data.toLocaleDateString("pt-br")}</span>
+                                            <span><AppIcon name="id-badge"  /> Matrícula {reserva.matricula}</span>
+                                            <span><AppIcon name="calendar"  /> Incluído em {data.toLocaleDateString("pt-br")}</span>
                                         </div>
                                         <div className="floater-card-tags">
                                             <Tag value={reserva.cargo || "Cargo não informado"} rounded />
@@ -281,7 +282,7 @@ export function Floaters() {
                                         <Button
                                             rounded
                                             outlined
-                                            icon={reserva.disponivel === false ? "pi pi-check" : "pi pi-ban"}
+                                            icon={<AppIcon name={reserva.disponivel === false ? "check" : "ban"} />}
                                             disabled={!canEdit}
                                             severity={reserva.disponivel === false ? "success" : "warning"}
                                             tooltip={reserva.disponivel === false ? "Marcar como disponível" : "Marcar como indisponível"}
@@ -291,7 +292,7 @@ export function Floaters() {
                                         <Button
                                             rounded
                                             outlined
-                                            icon="pi pi-trash"
+                                            icon={<AppIcon name="trash" />}
                                             disabled={!canEdit}
                                             severity="danger"
                                             tooltip="Remover das reservas"
@@ -303,7 +304,7 @@ export function Floaters() {
                             );
                         }) : (
                             <div className="floaters-empty">
-                                <i className="pi pi-shield" />
+                                <AppIcon name="shield"  />
                                 <strong>Nenhuma reserva encontrada</strong>
                                 <span>Adicione um colaborador ativo ou ajuste a busca.</span>
                             </div>
@@ -336,7 +337,7 @@ export function Floaters() {
                                     <div className="floaters-usage-item" key={item.id}>
                                         <div className="floaters-usage-person">
                                             <strong>{item.nome}</strong>
-                                            {item.ultimo_contrato && <small><i className="pi pi-building" /> Último contrato: {item.ultimo_contrato}</small>}
+                                            {item.ultimo_contrato && <small><AppIcon name="building"  /> Último contrato: {item.ultimo_contrato}</small>}
                                         </div>
                                         <div className="floaters-usage-meta">
                                             <Tag value={item.situacao || "Sem situação"} severity={["ATIVO", "TRABALHANDO"].includes(item.situacao?.toUpperCase()) ? "success" : "warning"} rounded />
@@ -395,8 +396,8 @@ export function Floaters() {
             >
                 <p>Por que <strong>{availabilityDialog?.nome}</strong> não pode atender às reposições?</p>
                 <div className="floater-availability-options">
-                    <Button label="Falta" icon="pi pi-user-minus" severity="danger" onClick={() => updateAvailability(availabilityDialog, false, "FALTA")} />
-                    <Button label="Apoio" icon="pi pi-users" severity="warning" onClick={() => updateAvailability(availabilityDialog, false, "APOIO")} />
+                    <Button label="Falta" icon={<AppIcon name="user-minus" />} severity="danger" onClick={() => updateAvailability(availabilityDialog, false, "FALTA")} />
+                    <Button label="Apoio" icon={<AppIcon name="users" />} severity="warning" onClick={() => updateAvailability(availabilityDialog, false, "APOIO")} />
                 </div>
             </Dialog>
         </main>

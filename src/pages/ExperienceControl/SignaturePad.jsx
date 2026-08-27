@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Assinatura manuscrita
 import { useRef, useState } from "react";
 
@@ -62,7 +63,7 @@ export function SignaturePad({ label, signed = false, disabled = false, loading 
   return <>
     <div className="experience-signature-action">
       <div><strong>{label}</strong><span>{signed ? "Assinatura registrada." : "Assine antes de concluir esta etapa."}</span></div>
-      <Button label={signed ? "Substituir assinatura" : "Assinar"} icon="pi pi-pencil" outlined disabled={disabled} loading={loading} onClick={() => setVisible(true)} />
+      <Button label={signed ? "Substituir assinatura" : "Assinar"} icon={<AppIcon name="pencil" />} outlined disabled={disabled} loading={loading} onClick={() => setVisible(true)} />
     </div>
     <Dialog header="Assinatura" visible={visible} onShow={prepareSignature} onHide={() => setVisible(false)} className="experience-signature-dialog" modal>
       <div className="experience-signature-content">
@@ -70,7 +71,7 @@ export function SignaturePad({ label, signed = false, disabled = false, loading 
         <canvas ref={canvasRef} className="experience-signature-pad" onPointerDown={startDrawing} onPointerMove={draw} onPointerUp={() => { drawingRef.current = false; }} onPointerLeave={() => { drawingRef.current = false; }} />
         <div>
           <Button label="Limpar" outlined onClick={prepareSignature} />
-          <Button label="Salvar assinatura" icon="pi pi-check" loading={loading} onClick={saveSignature} />
+          <Button label="Salvar assinatura" icon={<AppIcon name="check" />} loading={loading} onClick={saveSignature} />
         </div>
       </div>
     </Dialog>

@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
@@ -282,8 +283,8 @@ export function Structure() {
             onDrop={(event) => { event.preventDefault(); moveLocation(dragLocationId, location.id); }}
             style={{ marginLeft: `${Math.min(depth, 6) * 1.1}rem` }}
         >
-            <div><strong><i className="pi pi-bars mr-2" />{location.nome}</strong>{location.descricao && <small>{location.descricao}</small>}</div>
-            <div className="structure-item-actions"><Tag value={depth ? "SUBESTRUTURA" : "LOCAL"} severity="info" />{canCreateRoutine && <Button icon="pi pi-calendar-plus" text rounded aria-label={`Criar rotina para ${location.nome}`} tooltip="Criar rotina" onClick={(event) => openRoutineCreate(event, contract, location)} />}{canEdit && <Button icon="pi pi-plus" text rounded aria-label={`Adicionar subestrutura em ${location.nome}`} tooltip="Adicionar subestrutura" onClick={(event) => openSubstructureCreate(event, contract, location)} />}{canEdit && <Button icon="pi pi-trash" severity="danger" text rounded aria-label={`Excluir local ${location.nome}`} tooltip="Excluir local" onClick={(event) => removeItem(event, "local", location)} />}</div>
+            <div><strong><AppIcon name="bars" className="mr-2"  />{location.nome}</strong>{location.descricao && <small>{location.descricao}</small>}</div>
+            <div className="structure-item-actions"><Tag value={depth ? "SUBESTRUTURA" : "LOCAL"} severity="info" />{canCreateRoutine && <Button icon={<AppIcon name="calendar-plus" />} text rounded aria-label={`Criar rotina para ${location.nome}`} tooltip="Criar rotina" onClick={(event) => openRoutineCreate(event, contract, location)} />}{canEdit && <Button icon={<AppIcon name="plus" />} text rounded aria-label={`Adicionar subestrutura em ${location.nome}`} tooltip="Adicionar subestrutura" onClick={(event) => openSubstructureCreate(event, contract, location)} />}{canEdit && <Button icon={<AppIcon name="trash" />} severity="danger" text rounded aria-label={`Excluir local ${location.nome}`} tooltip="Excluir local" onClick={(event) => removeItem(event, "local", location)} />}</div>
             {location.filhos?.map((child) => renderLocation(child, contract, depth + 1))}
         </article>
     );
@@ -295,7 +296,7 @@ export function Structure() {
             message: type === "local"
                 ? `Deseja excluir o local “${item.nome}”? Os ativos vinculados ficarão sem local definido.`
                 : `Deseja excluir o ativo “${item.nome}” (${item.patrimonio})?`,
-            icon: "pi pi-exclamation-triangle",
+            icon: appIcon("alert-triangle"),
             acceptLabel: "Excluir",
             rejectLabel: "Cancelar",
             acceptClassName: "p-button-danger",
@@ -318,17 +319,17 @@ export function Structure() {
         <div className="structure-contract-header">
             <span className="structure-contract-name">{contract.id} - {contract.contrato}</span>
             <span className="structure-supervisor">
-                <i className="pi pi-user" />
+                <AppIcon name="user"  />
                 {contract.supervisor}
             </span>
             <span className="structure-supervisor">
-                <i className="pi pi-building" />
+                <AppIcon name="building"  />
                 {contract.empresa_nome || "SEM EMPRESA"}
             </span>
             {canEdit && (
                 <Button
                     type="button"
-                    icon="pi pi-user-edit"
+                    icon={<AppIcon name="user-edit" />}
                     rounded
                     text
                     aria-label={`Alterar supervisor de ${contract.contrato}`}
@@ -339,7 +340,7 @@ export function Structure() {
             {isAdmin && (
                 <Button
                     type="button"
-                    icon="pi pi-building"
+                    icon={<AppIcon name="building" />}
                     rounded
                     text
                     aria-label={`Alterar empresa de ${contract.contrato}`}
@@ -349,7 +350,7 @@ export function Structure() {
             )}
             <Button
                 type="button"
-                icon="pi pi-plus"
+                icon={<AppIcon name="plus" />}
                 rounded
                 text
                 aria-label={`Adicionar item em ${contract.contrato}`}
@@ -368,12 +369,12 @@ export function Structure() {
                 actions={(
                     <>
                         <Button
-                            icon="pi pi-filter-fill"
+                            icon={<AppIcon name="filter-filled" />}
                             label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
                             onClick={(event) => filterPanel.current?.toggle(event)}
                         />
                         <Button
-                            icon="pi pi-refresh"
+                            icon={<AppIcon name="refresh" />}
                             outlined
                             aria-label="Atualizar estrutura"
                             onClick={() => setRefresh((value) => value + 1)}
@@ -396,7 +397,7 @@ export function Structure() {
                             key={department.departamento}
                             header={
                                 <div className="structure-department-header">
-                                    <i className="pi pi-building" />
+                                    <AppIcon name="building"  />
                                     <span>DPTO {department.departamento}</span>
                                     <Tag value={`${department.contratos.length} contratos`} />
                                 </div>
@@ -407,11 +408,11 @@ export function Structure() {
                                     <AccordionTab key={contract.id} header={contractHeader(contract)}>
                                         <div className="structure-items">
                                             <section>
-                                                <h3><i className="pi pi-map-marker" /> Locais</h3>
+                                                <h3><AppIcon name="map-pin"  /> Locais</h3>
                                                 {contract.locais.length ? (contract.estrutura || contract.locais.filter((location) => !location.parent_id)).map((location) => renderLocation(location, contract)) : <p className="structure-empty">Nenhum local cadastrado.</p>}
                                             </section>
                                             <section>
-                                                <h3><i className="pi pi-box" /> Ativos</h3>
+                                                <h3><AppIcon name="box"  /> Ativos</h3>
                                                 {contract.ativos.length ? contract.ativos.map((asset) => {
                                                     const location = contract.locais.find((item) => item.id === asset.local_id);
                                                     return (
@@ -424,7 +425,7 @@ export function Structure() {
                                                                 <Tag value={asset.patrimonio} severity="success" />
                                                                 {canEdit && (
                                                                     <Button
-                                                                        icon="pi pi-trash"
+                                                                        icon={<AppIcon name="trash" />}
                                                                         severity="danger"
                                                                         text
                                                                         rounded
@@ -447,7 +448,7 @@ export function Structure() {
                 </Accordion>
             ) : (
                 <div className="structure-zero-state">
-                    <i className="pi pi-sitemap" />
+                    <AppIcon name="hierarchy"  />
                     <h2>{activeFilterCount ? "Nenhum resultado encontrado" : "Nenhum contrato disponível"}</h2>
                     <p>{activeFilterCount
                         ? "Revise ou limpe os filtros aplicados."
@@ -462,7 +463,7 @@ export function Structure() {
                         <span>A busca considera contratos, locais e patrimônios.</span>
                     </div>
                     <Button
-                        icon="pi pi-filter-slash"
+                        icon={<AppIcon name="filter-off" />}
                         text
                         rounded
                         aria-label="Limpar filtros"
@@ -474,7 +475,7 @@ export function Structure() {
                     <label className="structure-filter-search">
                         Busca
                         <span className="p-input-icon-left">
-                            <i className="pi pi-search" />
+                            <AppIcon name="search"  />
                             <InputText
                                 value={filters.search}
                                 placeholder="Contrato, local, ativo ou patrimônio"
@@ -548,7 +549,7 @@ export function Structure() {
                         <Button label="Cancelar" severity="secondary" text onClick={() => setSupervisorDialog(null)} />
                         <Button
                             label="Confirmar alteração"
-                            icon="pi pi-check"
+                            icon={<AppIcon name="check" />}
                             onClick={updateSupervisor}
                             disabled={!selectedSupervisorId || selectedSupervisorId === supervisorDialog?.supervisor_usuario_id}
                         />
@@ -558,7 +559,7 @@ export function Structure() {
                 <div className="structure-supervisor-form">
                     <div className="structure-current-supervisor">
                         <span>Supervisor atual</span>
-                        <strong><i className="pi pi-user" /> {supervisorDialog?.supervisor}</strong>
+                        <strong><AppIcon name="user"  /> {supervisorDialog?.supervisor}</strong>
                     </div>
                     <label>
                         Novo supervisor
@@ -588,7 +589,7 @@ export function Structure() {
                         <Button label="Cancelar" severity="secondary" text onClick={() => setCompanyDialog(null)} />
                         <Button
                             label="Confirmar alteração"
-                            icon="pi pi-check"
+                            icon={<AppIcon name="check" />}
                             onClick={updateCompany}
                             disabled={!selectedCompanyId || selectedCompanyId === companyDialog?.empresa_id}
                         />
@@ -598,7 +599,7 @@ export function Structure() {
                 <div className="structure-supervisor-form">
                     <div className="structure-current-supervisor">
                         <span>Empresa atual</span>
-                        <strong><i className="pi pi-building" /> {companyDialog?.empresa_nome || "SEM EMPRESA"}</strong>
+                        <strong><AppIcon name="building"  /> {companyDialog?.empresa_nome || "SEM EMPRESA"}</strong>
                     </div>
                     <label>
                         Nova empresa
@@ -626,7 +627,7 @@ export function Structure() {
                 footer={(
                     <div className="structure-dialog-footer">
                         <Button label="Cancelar" severity="secondary" text onClick={() => setDialog(null)} />
-                        <Button label="Salvar" icon="pi pi-check" onClick={submit} disabled={!form.tipo} />
+                        <Button label="Salvar" icon={<AppIcon name="check" />} onClick={submit} disabled={!form.tipo} />
                     </div>
                 )}
             >
@@ -637,7 +638,7 @@ export function Structure() {
                         className={form.tipo === "local" ? "selected" : ""}
                         onClick={() => setForm((current) => ({ ...EMPTY_FORM, tipo: "local", parent_id: current.parent_id }))}
                     >
-                        <i className="pi pi-map-marker" />
+                        <AppIcon name="map-pin"  />
                         <strong>Local</strong>
                         <span>Base para rotinas, tarefas e checklists.</span>
                     </button>
@@ -646,7 +647,7 @@ export function Structure() {
                         className={form.tipo === "ativo" ? "selected" : ""}
                         onClick={() => setForm({ ...EMPTY_FORM, tipo: "ativo" })}
                     >
-                        <i className="pi pi-box" />
+                        <AppIcon name="box"  />
                         <strong>Ativo</strong>
                         <span>Carros, VAPs e outros bens patrimoniais.</span>
                     </button>

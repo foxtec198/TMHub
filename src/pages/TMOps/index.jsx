@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -358,7 +359,7 @@ export function TMOps() {
         {screen !== "list" ? (
           <Button
             className="executor-back"
-            icon="pi pi-arrow-left"
+            icon={<AppIcon name="arrow-left" />}
             aria-label={
               screen === "checklist"
                 ? "Voltar aos detalhes"
@@ -380,7 +381,7 @@ export function TMOps() {
         <ThemeLogo alt="TM Ops" />
         <Button
           className="executor-account"
-          icon="pi pi-sign-out"
+          icon={<AppIcon name="logout" />}
           aria-label="Sair do Executor"
           rounded
           text
@@ -394,7 +395,7 @@ export function TMOps() {
       {screen !== "list" && (
         <div className="executor-breadcrumb">
           <span>Tarefas</span>
-          <i className="pi pi-angle-right" />
+          <AppIcon name="chevron-right"  />
           <strong>
             {screen === "checklist" ? "Executar tarefa" : "Detalhes"}
           </strong>
@@ -408,7 +409,7 @@ export function TMOps() {
         {header}
         <div className="executor-task-search">
           <span className="p-input-icon-left">
-            <i className="pi pi-search" />
+            <AppIcon name="search"  />
             <InputText
               value={taskSearch}
               onChange={(event) => setTaskSearch(event.target.value)}
@@ -416,7 +417,7 @@ export function TMOps() {
             />
           </span>
           <Button
-            icon="pi pi-qrcode"
+            icon={<AppIcon name="qrcode" />}
             aria-label="Ler QR Code"
             tooltip="Ler QR Code"
             onClick={() => setScannerVisible(true)}
@@ -438,7 +439,7 @@ export function TMOps() {
                 key={task.id}
               >
                 <span className="executor-deadline">
-                  <i className="pi pi-clock" />
+                  <AppIcon name="clock"  />
                   <strong>{deadline.value}</strong>
                   <small>{deadline.label}</small>
                 </span>
@@ -459,11 +460,11 @@ export function TMOps() {
                           : "Tarefa de rotina"
                       }
                     >
-                      <i
-                        className={
+                      <AppIcon
+                        name={
                           task.origem === "workflow"
-                            ? "pi pi-sitemap"
-                            : "pi pi-sync"
+                            ? "hierarchy"
+                            : "refresh"
                         }
                       />
                     </span>
@@ -476,7 +477,7 @@ export function TMOps() {
                             : ""
                       }
                     >
-                      <i className="pi pi-circle-fill" /> {statusLabel}
+                      <AppIcon name="circle-filled"  /> {statusLabel}
                     </em>
                     <b>Estimativa: {formatEstimate(task.estimativa_minutos)}</b>
                   </span>

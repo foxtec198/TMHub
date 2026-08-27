@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -276,7 +277,7 @@ export function TimoSettings() {
         <footer>
           {configuration.personalizado ? (
             <Button
-              icon="pi pi-trash"
+              icon={<AppIcon name="trash" />}
               severity="danger"
               text
               rounded
@@ -288,7 +289,7 @@ export function TimoSettings() {
           ) : null}
           <Button
             label="Salvar automação"
-            icon="pi pi-save"
+            icon={<AppIcon name="device-floppy" />}
             loading={savingIntent === configuration.intent}
             onClick={() => save(configuration)}
           />
@@ -305,30 +306,30 @@ export function TimoSettings() {
           <p>Defina o que cada intenção reconhecida mostra no balão e qual tela o assistente pode abrir.</p>
         </div>
         <div className="timo-settings__intro-actions">
-          <Button label="Novo comando" icon="pi pi-plus" onClick={() => setCustomDialog(true)} />
+          <Button label="Novo comando" icon={<AppIcon name="plus" />} onClick={() => setCustomDialog(true)} />
         </div>
       </div>
 
       <TabView className="timo-settings__tabs">
-        <TabPanel header="Consultas e análises" leftIcon="pi pi-chart-line mr-2">
+        <TabPanel header="Consultas e análises" leftIcon={<AppIcon name="chart-line" className="mr-2" />}>
           <p className="timo-settings__tab-description">Indicadores e respostas analíticas baseadas nos dados operacionais do seu escopo.</p>
           <div className="timo-settings__list">
             {configurations.filter((item) => item.categoria === "analises").map(renderConfiguration)}
           </div>
         </TabPanel>
-        <TabPanel header="Navegação entre telas" leftIcon="pi pi-compass mr-2">
+        <TabPanel header="Navegação entre telas" leftIcon={<AppIcon name="compass" className="mr-2" />}>
           <p className="timo-settings__tab-description">Comandos para abrir telas do TMHub. O acesso final continua respeitando a permissão de cada usuário.</p>
           <div className="timo-settings__list">
             {configurations.filter((item) => item.categoria === "telas").map(renderConfiguration)}
           </div>
         </TabPanel>
-        <TabPanel header="Personalizados" leftIcon="pi pi-sparkles mr-2">
+        <TabPanel header="Personalizados" leftIcon={<AppIcon name="sparkles" className="mr-2" />}>
           <p className="timo-settings__tab-description">Frases criadas manualmente para respostas ou ações específicas.</p>
           <div className="timo-settings__list">
             {configurations.filter((item) => item.categoria === "personalizado").map(renderConfiguration)}
           </div>
         </TabPanel>
-        <TabPanel header="Aprendizado" leftIcon="pi pi-graduation-cap mr-2">
+        <TabPanel header="Aprendizado" leftIcon={<AppIcon name="school" className="mr-2" />}>
           <div className="timo-learning__intro">
             <div>
               <h3>Frases para revisão</h3>
@@ -336,7 +337,7 @@ export function TimoSettings() {
             </div>
             <Button
               label={`Treinar modelo${approvedLearningCount ? ` (${approvedLearningCount})` : ""}`}
-              icon="pi pi-refresh"
+              icon={<AppIcon name="refresh" />}
               disabled={!approvedLearningCount}
               loading={training}
               onClick={trainLearning}
@@ -360,15 +361,15 @@ export function TimoSettings() {
                 />
                 <div className="timo-learning-card__actions">
                   <Button label="Ignorar" text severity="secondary" disabled={reviewingLearningId === example.id} onClick={() => reviewLearning(example, "ignorado")} />
-                  <Button label="Aprovar" icon="pi pi-check" loading={reviewingLearningId === example.id} onClick={() => reviewLearning(example, "aprovado")} />
+                  <Button label="Aprovar" icon={<AppIcon name="check" />} loading={reviewingLearningId === example.id} onClick={() => reviewLearning(example, "aprovado")} />
                 </div>
               </article>
             )) : (
-              <div className="timo-learning__empty"><i className="pi pi-check-circle" /> Nenhuma frase aguardando revisão.</div>
+              <div className="timo-learning__empty"><AppIcon name="circle-check"  /> Nenhuma frase aguardando revisão.</div>
             )}
           </div>
         </TabPanel>
-        <TabPanel header="Voice Agent" leftIcon="pi pi-microphone mr-2">
+        <TabPanel header="Voice Agent" leftIcon={<AppIcon name="microphone" className="mr-2" />}>
           <TimoVoiceAgentSettings />
         </TabPanel>
       </TabView>
@@ -410,7 +411,7 @@ export function TimoSettings() {
         </div>
         <div className="dialog-actions">
           <Button label="Cancelar" text disabled={creatingCustom} onClick={() => setCustomDialog(false)} />
-          <Button label="Criar comando" icon="pi pi-check" loading={creatingCustom} onClick={createCustomCommand} />
+          <Button label="Criar comando" icon={<AppIcon name="check" />} loading={creatingCustom} onClick={createCustomCommand} />
         </div>
       </Dialog>
     </section>

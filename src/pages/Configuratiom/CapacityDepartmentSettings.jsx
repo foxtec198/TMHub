@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -114,7 +115,7 @@ export function CapacityDepartmentSettings() {
       header: "Meta",
       style: { width: "5rem" },
       body: (department) => <Button
-        icon="pi pi-users"
+        icon={<AppIcon name="users" />}
         rounded
         text
         aria-label={`Definir meta do departamento ${department.departamento}`}
@@ -130,7 +131,7 @@ export function CapacityDepartmentSettings() {
   return <div>
     <article className="settings-card">
       <div className="settings-card-title">
-        <i className="pi pi-sitemap" />
+        <AppIcon name="hierarchy"  />
         <div><h2>Planejamento por departamento</h2><p>Defina a meta de QL e a situação de cada departamento.</p></div>
       </div>
       <Table data={data.departamentos} columns={departmentColumns} search rows={5} rowsPerPageOptions={[5, 10, 25, 50]} />
@@ -142,7 +143,7 @@ export function CapacityDepartmentSettings() {
       modal
       className="capacity-dialog"
       onHide={() => setEditingDepartment(null)}
-      footer={<div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEditingDepartment(null)} /><Button label="Salvar" icon="pi pi-check" onClick={saveCapacity} /></div>}
+      footer={<div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEditingDepartment(null)} /><Button label="Salvar" icon={<AppIcon name="check" />} onClick={saveCapacity} /></div>}
     >
       <div className="capacity-form">
         <strong >DPTO. {editingDepartment?.departamento ?? "—"}</strong>

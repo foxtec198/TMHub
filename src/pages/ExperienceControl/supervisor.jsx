@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Tela autenticada das avaliações de experiência para supervisores.
 import { useEffect, useRef, useState } from "react";
 
@@ -192,8 +193,8 @@ export function ExperienceSupervisor() {
 
   const footer = evaluation && (
     <div className="experience-public-dialog-actions">
-      <Button label="Salvar rascunho" icon="pi pi-save" outlined onClick={() => saveEvaluation(false)} />
-      <Button label="Assinar e enviar ao RH" icon="pi pi-check" disabled={!supervisorReady || !evaluation.assinatura_supervisor_registrada} onClick={() => saveEvaluation(true)} />
+      <Button label="Salvar rascunho" icon={<AppIcon name="device-floppy" />} outlined onClick={() => saveEvaluation(false)} />
+      <Button label="Assinar e enviar ao RH" icon={<AppIcon name="check" />} disabled={!supervisorReady || !evaluation.assinatura_supervisor_registrada} onClick={() => saveEvaluation(true)} />
     </div>
   );
 
@@ -225,7 +226,7 @@ export function ExperienceSupervisor() {
     },
     {
       header: "Ação",
-      body: (row) => <Button label="Avaliar" icon="pi pi-file-edit" text onClick={() => openEvaluation(row.id)} />,
+      body: (row) => <Button label="Avaliar" icon={<AppIcon name="file-pencil" />} text onClick={() => openEvaluation(row.id)} />,
       style: { minWidth: "8rem" },
     },
   ];
@@ -249,7 +250,7 @@ export function ExperienceSupervisor() {
               <Dropdown value={supervisor} options={supervisors} onChange={(event) => changeSupervisor(event.value)} optionLabel="label" optionValue="value" placeholder="Selecione seu nome" filter className="w-full" />
               <Button
                 label="Ver pendências"
-                icon="pi pi-arrow-right"
+                icon={<AppIcon name="arrow-right" />}
                 iconPos="right"
                 loading={loadingTasks}
                 onClick={async () => {
@@ -262,7 +263,7 @@ export function ExperienceSupervisor() {
             <div className="experience-public-tasks">
               <div className="experience-public-tasks-header">
                 <div><strong>{supervisors.find((item) => item.value === supervisor)?.label || "Supervisor"}</strong><span>{tasks.length} avaliação(ões) pendente(s)</span></div>
-                <Button label="Trocar nome" icon="pi pi-user-edit" text onClick={() => stepperRef.current?.prevCallback?.()} />
+                <Button label="Trocar nome" icon={<AppIcon name="user-edit" />} text onClick={() => stepperRef.current?.prevCallback?.()} />
               </div>
               <Table data={tasks} columns={taskColumns} loading={loadingTasks} rows={8} rowsPerPageOptions={[8, 16, 32]} tableClassName="experience-public-tasks-table" tableStyle={{ minWidth: "50rem" }} />
             </div>

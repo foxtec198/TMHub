@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -96,7 +97,7 @@ export function TaskQrScanner({ visible, onHide, onTaskId }) {
           />
           <Button
             label="Abrir"
-            icon="pi pi-arrow-right"
+            icon={<AppIcon name="arrow-right" />}
             onClick={resolveManual}
           />
         </div>

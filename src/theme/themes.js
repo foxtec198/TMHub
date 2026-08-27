@@ -10,15 +10,15 @@ export const THEME_STORAGE_KEY = "theme";
 export const MODE_STORAGE_KEY = "themeMode";
 
 export const MODE_OPTIONS = Object.freeze([
-  { id: "light", label: "Claro", icon: "pi pi-sun", description: "Superfícies claras" },
-  { id: "dark", label: "Escuro", icon: "pi pi-moon", description: "Superfícies escuras" },
+  { id: "light", label: "Claro", icon: "sun", description: "Superfícies claras" },
+  { id: "dark", label: "Escuro", icon: "moon", description: "Superfícies escuras" },
 ]);
 
 export const THEME_OPTIONS = Object.freeze([
   {
     id: "tmhub",
     label: "TMHub",
-    icon: "pi pi-building",
+    icon: "building",
     description: "Identidade corporativa",
     default: true,
     preview: ["#ffffff", "#155c27", "#4bd66e", "#071009"],
@@ -27,7 +27,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "cyberpunk",
     label: "Cyberpunk",
-    icon: "pi pi-bolt",
+    icon: "bolt",
     description: "Cyan e vermelho neon",
     preview: ["#090d11", "#00f0ff", "#ff334f", "#fcee09"],
     card: ["#0c0c14", "#f5f7ff", "#9699aa", "#26454d", "#00f0ff"],
@@ -35,7 +35,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "pride",
     label: "Orgulho",
-    icon: "pi pi-heart",
+    icon: "heart",
     description: "Cores do orgulho",
     preview: ["#e40303", "#ff8c00", "#ffed00", "#008026", "#004dff", "#750787"],
     card: ["#15151c", "#ffffff", "#b9b9c4", "#49335e", "#b879ff"],
@@ -43,7 +43,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "christmas",
     label: "Natal",
-    icon: "pi pi-gift",
+    icon: "gift",
     description: "Pinheiro, vinho e dourado",
     preview: ["#0d2118", "#43d477", "#e84b5f", "#f4d58d"],
     card: ["#0d2b1c", "#f7fbf8", "#bfd0c5", "#8f3442", "#f4d58d"],
@@ -51,7 +51,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "aurora",
     label: "Aurora",
-    icon: "pi pi-sparkles",
+    icon: "sparkles",
     description: "Índigo, violeta e verde-luz",
     preview: ["#1a1c37", "#8b7cff", "#e579ff", "#42dfb3"],
     card: ["#1a1c37", "#f7f5ff", "#c4c2db", "#5b5998", "#b4a9ff"],
@@ -59,7 +59,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "ocean",
     label: "Ocean",
-    icon: "pi pi-wave-pulse",
+    icon: "activity-heartbeat",
     description: "Azul oceano e ciano",
     preview: ["#0b2b38", "#29c9e6", "#38a9ff", "#5ce1b3"],
     card: ["#0b2b38", "#effdff", "#b5d2dc", "#347185", "#72e0f1"],
@@ -67,7 +67,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "sunset",
     label: "Sunset",
-    icon: "pi pi-sun",
+    icon: "sun",
     description: "Âmbar, coral e noite",
     preview: ["#351828", "#ff9a57", "#ff647f", "#d275ff"],
     card: ["#351828", "#fff6f7", "#e2bfca", "#8c5269", "#ffc18b"],
@@ -75,7 +75,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "forest",
     label: "Forest",
-    icon: "pi pi-tree",
+    icon: "trees",
     description: "Verde profundo e dourado",
     preview: ["#173323", "#69cd8a", "#d7b96b", "#78cdb6"],
     card: ["#173323", "#f0f8f0", "#c0d2c1", "#577b60", "#d7b96b"],
@@ -83,7 +83,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "terminal",
     label: "Terminal",
-    icon: "pi pi-code",
+    icon: "code",
     description: "Grafite e verde phosphor",
     preview: ["#0b1210", "#77ff9d", "#50dfd1", "#e8cf65"],
     card: ["#0b1210", "#eaffee", "#bad2bd", "#4c7560", "#77ff9d"],
@@ -91,7 +91,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "paper",
     label: "Paper",
-    icon: "pi pi-file",
+    icon: "file",
     description: "Papel claro, tinta e elegância",
     preview: ["#fffdf7", "#285d45", "#b66b48", "#507f9c"],
     card: ["#f4eddf", "#26332b", "#627168", "#b9c7b8", "#285d45"],
@@ -99,7 +99,7 @@ export const THEME_OPTIONS = Object.freeze([
   {
     id: "muertos",
     label: "Dia de los Muertos",
-    icon: "pi pi-sparkles",
+    icon: "sparkles",
     description: "Vinho, violeta e cempasúchil",
     preview: ["#101820", "#4d0057", "#b944bc", "#f5ad24", "#e35a43"],
     card: ["#1b2633", "#fff4df", "#e0c9bc", "#a46c88", "#f5ad24"],

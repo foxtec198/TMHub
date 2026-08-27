@@ -1,3 +1,4 @@
+import { AppIcon } from "./icons/AppIcon";
 // components/CardDetailDialog.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
@@ -110,10 +111,10 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
       onHide={onHide}
       footer={
         <div className="flex justify-content-between">
-          <Button label="Excluir card" icon="pi pi-trash" severity="danger" text onClick={() => onDelete(card.id)} />
+          <Button label="Excluir card" icon={<AppIcon name="trash" />} severity="danger" text onClick={() => onDelete(card.id)} />
           <div>
             <Button label="Cancelar" text disabled={saving} onClick={onHide} />
-            <Button label="Salvar" icon="pi pi-check" loading={saving} onClick={salvar} />
+            <Button label="Salvar" icon={<AppIcon name="check" />} loading={saving} onClick={salvar} />
           </div>
         </div>
       }
@@ -149,11 +150,11 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
           <label className="block text-sm text-color-secondary">Arquivos</label>
           <div className="flex flex-wrap gap-2 align-items-center">
             <input ref={fileInputRef} type="file" hidden onChange={addFile} />
-            <Button icon="pi pi-paperclip" label="Anexar arquivo" outlined loading={sending} onClick={() => fileInputRef.current?.click()} />
+            <Button icon={<AppIcon name="paperclip" />} label="Anexar arquivo" outlined loading={sending} onClick={() => fileInputRef.current?.click()} />
             {(card.arquivos || []).map((file) => (
               <span key={file.id} className="flex align-items-center gap-1 surface-100 border-round px-2 py-1 text-sm">
                 <a href={`${import.meta.env.VITE_SERVER || ''}${file.url}`} target="_blank" rel="noreferrer">{file.nome_original}</a>
-                <Button icon="pi pi-times" text rounded severity="danger" onClick={() => removeFile(file.id)} aria-label="Excluir arquivo" />
+                <Button icon={<AppIcon name="x" />} text rounded severity="danger" onClick={() => removeFile(file.id)} aria-label="Excluir arquivo" />
               </span>
             ))}
           </div>
@@ -162,11 +163,11 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
         <div className="flex flex-column gap-2">
           <label className="block text-sm text-color-secondary">Comentários</label>
           {(card.comentarios || []).map((item) => (
-            <div key={item.id} className="surface-100 border-round p-2 text-sm flex justify-content-between gap-2"><span className="flex-1"><strong>{item.autor}</strong><br />{editingCommentId === item.id ? <InputTextarea className="w-full mt-2" value={editingComment} onChange={(event) => setEditingComment(event.target.value)} rows={2} /> : item.conteudo}</span><span className="flex align-items-start">{editingCommentId === item.id ? <><Button icon="pi pi-check" text rounded onClick={() => saveComment(item.id)} aria-label="Salvar comentário" /><Button icon="pi pi-times" text rounded onClick={() => setEditingCommentId(null)} aria-label="Cancelar edição" /></> : <Button icon="pi pi-pencil" text rounded onClick={() => { setEditingCommentId(item.id); setEditingComment(item.conteudo); }} aria-label="Editar comentário" />}<Button icon="pi pi-trash" text rounded severity="danger" onClick={() => removeComment(item.id)} aria-label="Excluir comentário" /></span></div>
+            <div key={item.id} className="surface-100 border-round p-2 text-sm flex justify-content-between gap-2"><span className="flex-1"><strong>{item.autor}</strong><br />{editingCommentId === item.id ? <InputTextarea className="w-full mt-2" value={editingComment} onChange={(event) => setEditingComment(event.target.value)} rows={2} /> : item.conteudo}</span><span className="flex align-items-start">{editingCommentId === item.id ? <><Button icon={<AppIcon name="check" />} text rounded onClick={() => saveComment(item.id)} aria-label="Salvar comentário" /><Button icon={<AppIcon name="x" />} text rounded onClick={() => setEditingCommentId(null)} aria-label="Cancelar edição" /></> : <Button icon={<AppIcon name="pencil" />} text rounded onClick={() => { setEditingCommentId(item.id); setEditingComment(item.conteudo); }} aria-label="Editar comentário" />}<Button icon={<AppIcon name="trash" />} text rounded severity="danger" onClick={() => removeComment(item.id)} aria-label="Excluir comentário" /></span></div>
           ))}
           <div className="flex gap-2">
             <InputTextarea className="flex-1" rows={2} value={comentario} onChange={(e) => setComentario(e.target.value)} placeholder="Escreva um comentário" />
-            <Button icon="pi pi-send" onClick={addComment} loading={sending} aria-label="Enviar comentário" />
+            <Button icon={<AppIcon name="send" />} onClick={addComment} loading={sending} aria-label="Enviar comentário" />
           </div>
         </div>
 

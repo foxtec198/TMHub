@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../components/icons/AppIcon";
 // Utils
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { storeProfile } from "../utils/profile";
@@ -97,7 +98,7 @@ export function MainLayout() {
   const items = [
     {
       label: 'Dashboards',
-      icon: 'pi pi-chart-line',
+      icon: appIcon("chart-line"),
       items: [
         {
           label: "Operacional",
@@ -107,13 +108,13 @@ export function MainLayout() {
               items: [
                 {
                   label: 'Reposições',
-                  icon: 'pi pi-sync',
+                  icon: appIcon("refresh"),
                   visible: can("dashboard_reposicoes"),
                   command: () => { navigateTo("/reports/reposicoes") }
                 },
                 {
                   label: 'Rep. ODS',
-                  icon: 'pi pi-external-link',
+                  icon: appIcon("external-link"),
                   visible: can("dashboard_reposicoes_ods"),
                   command: () => { navigateTo("/reports/reposicoes/ods") }
                 }
@@ -121,7 +122,7 @@ export function MainLayout() {
             },
             {
               label: 'Logística',
-              icon: 'pi pi-truck',
+              icon: appIcon("truck"),
               visible: can("dashboard_logistica"),
               command: () => { navigateTo("/reports/logistica") }
             },
@@ -132,37 +133,37 @@ export function MainLayout() {
           items: [
             {
               label: 'Ponto 48 horas',
-              icon: 'pi pi-clock',
+              icon: appIcon("clock"),
               visible: can("dashboard_ponto48"),
               command: () => { navigateTo("/reports/ponto-48-horas") }
             },
             {
               label: 'Admissões',
-              icon: 'pi pi-user-plus',
+              icon: appIcon("user-plus"),
               visible: can("dashboard_admissoes"),
               command: () => { navigateTo("/reports/admissoes") }
             },
             {
               label: 'Faltas',
-              icon: 'pi pi-chart-bar',
+              icon: appIcon("chart-bar"),
               visible: can("dashboard_faltas"),
               command: () => { navigateTo("/reports/faltas") }
             },
             {
               label: 'PCD',
-              icon: 'pi pi-heart',
+              icon: appIcon("heart"),
               visible: can("dashboard_pcd"),
               command: () => { navigateTo("/reports/pcd") }
             },
             {
               label: 'QL',
-              icon: 'pi pi-users',
+              icon: appIcon("users"),
               visible: can("dashboard_ql"),
               command: () => { navigateTo("/reports/ql") }
             },
             {
               label: "Rescisões",
-              icon: "pi pi-user-minus",
+              icon: appIcon("user-minus"),
               visible: can("dashboard_rescisoes"),
               command: () => {
                 navigateTo("/reports/rescisoes");
@@ -170,7 +171,7 @@ export function MainLayout() {
             },
             {
               label: "Disciplina",
-              icon: "pi pi-file-edit",
+              icon: appIcon("file-pencil"),
               visible: can("dashboard_medidas_disciplinares"),
               command: () => {
                 navigateTo("/reports/medidas-disciplinares");
@@ -178,7 +179,7 @@ export function MainLayout() {
             },
             {
               label: "Experiências",
-              icon: "pi pi-id-card",
+              icon: appIcon("id-badge"),
               visible: can("controle_experiencia_rh"),
               command: () => {
                 navigateTo("/reports/experiencias");
@@ -189,13 +190,13 @@ export function MainLayout() {
               items: [
                 {
                   label: 'Gerais',
-                  icon: 'pi pi-money-bill',
+                  icon: appIcon("cash"),
                   visible: can("dashboard_glosas"),
                   command: () => { navigateTo("/reports/glosas") }
                 },
                 {
                   label: 'Roçada',
-                  icon: 'pi pi-bullseye',
+                  icon: appIcon("target"),
                   visible: can("dashboard_glosas"),
                   command: () => { navigateTo("/reports/rocada") }
                 },
@@ -205,7 +206,7 @@ export function MainLayout() {
         },
         {
           label: 'Projetos',
-          icon: 'pi pi-chart-line',
+          icon: appIcon("chart-line"),
           visible: can("dashboard_projetos"),
           command: () => { navigateTo("/reports/projetos") }
         },
@@ -213,21 +214,21 @@ export function MainLayout() {
     },
     {
       label: "RH",
-      icon: "pi pi-users",
+      icon: appIcon("users"),
       items: [
         {
           label: "Admissão",
-          icon: 'pi pi-user-plus',
+          icon: appIcon("user-plus"),
           items: [
             {
               label: 'Vagas',
-              icon: 'pi pi-briefcase',
+              icon: appIcon("briefcase"),
               visible: can("admissoes"),
               command: () => { navigateTo("/admissao/vagas") }
             },
             {
               label: 'Aditivos',
-              icon: 'pi pi-plus-circle',
+              icon: appIcon("circle-plus"),
               visible: can("admissoes"),
               command: () => { navigateTo("/admissao/aditivos") }
             },
@@ -235,49 +236,49 @@ export function MainLayout() {
         },
         {
           label: "PCD's",
-          icon: 'pi pi-heart',
+          icon: appIcon("heart"),
           visible: can("indicador_pcd"),
           command: () => { navigateTo("/indicadores/pcd") }
         },
         {
           label: 'Rescisões',
-          icon: 'pi pi-user-minus',
+          icon: appIcon("user-minus"),
           visible: can("controle_rescisoes"),
           command: () => { navigateTo("/rescisoes") }
         },
         {
           label: 'Férias',
-          icon: 'pi pi-calendar-plus',
+          icon: appIcon("calendar-plus"),
           visible: can("controle_ferias"),
           command: () => { navigateTo("/ferias") }
         },
         {
           label: 'Faltas',
-          icon: 'pi pi-calendar-times',
+          icon: appIcon("calendar-x"),
           visible: can("controle_faltas"),
           command: () => { navigateTo("/controle-faltas") }
         },
         {
           label: "Experiências",
-          icon: "pi pi-clipboard",
+          icon: appIcon("clipboard"),
           visible: can("controle_experiencia_rh"),
           command: () => { navigateTo("/avaliacoes-experiencia"); },
         },
         {
           label: "Minhas avaliações",
-          icon: "pi pi-id-card",
+          icon: appIcon("id-badge"),
           visible: can("avaliacao_experiencia_supervisor"),
           command: () => { navigateTo("/avaliacoes-experiencia/supervisor"); },
         },
         {
           label: 'Glosas',
-          icon: 'pi pi-money-bill',
+          icon: appIcon("cash"),
           visible: can("controle_glosas"),
           command: () => { navigateTo("/controle-glosas") }
         },
         {
           label: 'Disciplina',
-          icon: 'pi pi-file-edit',
+          icon: appIcon("file-pencil"),
           visible: can("controle_medidas_disciplinares"),
           command: () => { navigateTo("/controle-medidas-disciplinares") }
         },
@@ -285,34 +286,34 @@ export function MainLayout() {
     },
     {
       label: "Operacional",
-      icon: "pi pi-briefcase",
+      icon: appIcon("briefcase"),
       items: [
         {
           label: 'Reposições',
-          icon: 'pi pi-sync',
+          icon: appIcon("refresh"),
           items: [
             {
               label: 'Nova requisição',
-              icon: 'pi pi-plus-circle',
+              icon: appIcon("circle-plus"),
               visible: can("reposicoes", "create"),
               command: () => { navigateTo("/reposicoes/requisicao") }
             },
             {
               label: 'Requisições',
-              icon: 'pi pi-question',
+              icon: appIcon("question"),
               visible: can("reposicoes"),
               command: () => { navigateTo("/reposicoes/requisicoes") }
             },
             {
               label: 'Histórico',
-              icon: 'pi pi-history',
+              icon: appIcon("history"),
               display: false,
               visible: can("historico_reposicoes"),
               command: () => { navigateTo("/reposicoes/historico") }
             },
             {
               label: 'Reservas',
-              icon: 'pi pi-users',
+              icon: appIcon("users"),
               visible: can("reservas"),
               command: () => { navigateTo("/reposicoes/reservas") },
             },
@@ -320,23 +321,23 @@ export function MainLayout() {
         },
         {
           label: "Estoque",
-          icon: 'pi pi-box',
+          icon: appIcon("box"),
           items: [
             {
               label: 'Produtos',
-              icon: 'pi pi-box',
+              icon: appIcon("box"),
               visible: can("estoque_produtos"),
               command: () => { navigateTo("/estoque/produtos") }
             },
             {
               label: 'Barcode',
-              icon: 'pi pi-barcode',
+              icon: appIcon("barcode"),
               visible: can("estoque_codigos"),
               command: () => { navigateTo("/estoque/codigos-de-barras") }
             },
             {
               label: 'Movimentações',
-              icon: 'pi pi-arrow-right-arrow-left',
+              icon: appIcon("arrows-exchange"),
               visible: can("estoque_movimentos"),
               command: () => { navigateTo("/estoque/movimentacoes") }
             },
@@ -344,12 +345,12 @@ export function MainLayout() {
         },
         {
           label: "SESMT",
-          icon: "pi pi-shield",
+          icon: appIcon("shield"),
           visible: can("controle_exames_periodicos"),
           items: [
             {
               label: "Exames periódicos",
-              icon: "pi pi-heart",
+              icon: appIcon("heart"),
               visible: can("controle_exames_periodicos"),
               command: () => { navigateTo("/exames-periodicos"); },
             },
@@ -361,88 +362,88 @@ export function MainLayout() {
       label: "RPA Center",
       disabled: true,
 
-      icon: 'pi pi-verified',
+      icon: appIcon("verified"),
       className: deny ? "hidden" : null,
       items: [
         {
           label: 'HK Bot',
-          icon: 'pi pi-clock',
+          icon: appIcon("clock"),
           command: () => { }
         },
       ]
     },
     {
       label: 'TM Ops',
-      icon: 'pi pi-calendar-clock',
+      icon: appIcon("calendar-time"),
       visible: can("tm_ops") && String(role || "").toUpperCase() === "ADMIN",
       items: [
         {
           label: 'Rotinas e locais',
-          icon: 'pi pi-calendar-plus',
+          icon: appIcon("calendar-plus"),
           command: () => { navigateTo("/tm-ops/gestao") },
         },
         {
           label: 'Checklists',
-          icon: 'pi pi-list-check',
+          icon: appIcon("list-check"),
           command: () => { navigateTo("/tm-ops/checklists") },
         },
         {
           label: 'Tarefas',
-          icon: 'pi pi-list',
+          icon: appIcon("list"),
           command: () => { navigateTo("/tm-ops/tarefas") },
         },
         {
           label: 'Abrir execução',
-          icon: 'pi pi-external-link',
+          icon: appIcon("external-link"),
           command: () => { window.open("/tm-ops/login", "_blank", "noopener,noreferrer") },
         },
       ],
     },
     {
       label: 'Colaboradores',
-      icon: 'pi pi-users',
+      icon: appIcon("users"),
       visible: can("colaboradores") || can("dashboard_colaboradores"),
       command: () => { navigateTo("/colaboradores") }
     },
     
     {
       label: 'Estrutura',
-      icon: 'pi pi-building',
+      icon: appIcon("building"),
       visible: can("estrutura"),
       command: () => { navigateTo("/estrutura") }
     },
     {
       label: 'Centros de custo',
-      icon: 'pi pi-map-marker',
+      icon: appIcon("map-pin"),
       visible: can("estrutura"),
       command: () => { navigateTo("/centros-de-custo") }
     },
     {
       label: 'Chamados',
-      icon: 'pi pi-headphones',
+      icon: appIcon("headphones"),
       visible: can("tickets"),
       command: () => { navigateTo("/tickets") }
     },
     {
       label: 'Gestão de chamados',
-      icon: 'pi pi-sliders-h',
+      icon: appIcon("adjustments-horizontal"),
       visible: can("tickets") && String(role || "").toUpperCase() === "ADMIN",
       command: () => { navigateTo("/tickets/gestao") }
     },
     {
       label: 'Meus Projetos',
-      icon: 'pi pi-spinner-dotted',
+      icon: appIcon("loader"),
       visible: can("projetos"),
       command: () => { navigateTo("/projetos") }
     },
     {
       label: 'Configurações',
-      icon: 'pi pi-cog',
+      icon: appIcon("settings"),
       command: () => { navigateTo("/configuracoes") }
     },
     {
       label: 'Sair',
-      icon: 'pi pi-sign-out',
+      icon: appIcon("logout"),
       command: logout
     },
   ];
@@ -599,7 +600,7 @@ export function MainLayout() {
             title={isMenuVisible ? "Ocultar menu" : "Exibir menu"}
             onClick={() => setIsMenuVisible((visible) => !visible)}
           >
-            <i className={`pi ${isMenuVisible ? "pi-angle-left" : "pi-bars"}`} aria-hidden="true" />
+            <AppIcon name={isMenuVisible ? "chevron-left" : "menu"} />
           </button>
 
           <button
@@ -666,7 +667,7 @@ export function MainLayout() {
               </FloatLabel>
             ) : null;
           })()}
-          <PanelMenu model={items} className="layout-panel-menu" />
+          <PanelMenu model={items} className="layout-panel-menu py-2" />
         </aside>
 
         {/* PANEL FRAME */}

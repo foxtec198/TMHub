@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -47,7 +48,7 @@ function uniqueOptions(items, valueKey, labelKey = valueKey) {
 function SummaryCard({ active, icon, label, value, detail, tone, onClick }) {
   return (
     <button type="button" className={`ponto48-card tm-dashboard-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
-      <span className="ponto48-card__icon"><i className={icon} /></span>
+      <span className="ponto48-card__icon">{typeof icon === "string" ? <AppIcon name={icon} /> : icon}</span>
       <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
     </button>
   );
@@ -229,7 +230,7 @@ export function Ponto48Dashboard() {
         rounded
       />,
     },
-    { header: "Batidas", body: (row) => <Button label="Ver batidas" icon="pi pi-eye" outlined size="small" aria-label={`Ver batidas de ${row.nome}`} onClick={() => setDetailEmployee(row)} /> },
+    { header: "Batidas", body: (row) => <Button label="Ver batidas" icon={<AppIcon name="eye" />} outlined size="small" aria-label={`Ver batidas de ${row.nome}`} onClick={() => setDetailEmployee(row)} /> },
   ], []);
 
   const activeFilterCount = Object.values(filters).filter((value) => value.length).length + Number(Boolean(dateRange?.[0]));
@@ -294,7 +295,7 @@ export function Ponto48Dashboard() {
     confirmDialog({
       header: "Limpar dados importados",
       message: `Deseja remover absenteísmo, horas extras, ajustes e espelho da referência ${formatPeriod(data.importacao)}? Esta ação não pode ser desfeita.`,
-      icon: "pi pi-exclamation-triangle",
+      icon: appIcon("alert-triangle"),
       acceptLabel: "Sim, limpar dados",
       rejectLabel: "Cancelar",
       acceptClassName: "p-button-danger",
@@ -327,14 +328,14 @@ export function Ponto48Dashboard() {
         description="Absenteísmo, horas extras e qualidade das batidas em uma única visão."
         actions={<>
           {data.importacoes.length ? <Dropdown value={selectedBatch} options={data.importacoes} optionValue="id" optionLabel="periodo_inicio" valueTemplate={() => formatPeriod(data.importacao)} itemTemplate={formatPeriod} onChange={(event) => loadDashboard(event.value)} /> : null}
-          {isAdmin ? <Button icon="pi pi-upload" label="Importar CSVs" outlined onClick={() => setImportVisible(true)} /> : null}
-          {isAdmin && selectedBatch ? <Button icon="pi pi-trash" label="Limpar dados" severity="danger" outlined loading={clearing} onClick={confirmClearImportedData} /> : null}
-          <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+          {isAdmin ? <Button icon={<AppIcon name="upload" />} label="Importar CSVs" outlined onClick={() => setImportVisible(true)} /> : null}
+          {isAdmin && selectedBatch ? <Button icon={<AppIcon name="trash" />} label="Limpar dados" severity="danger" outlined loading={clearing} onClick={confirmClearImportedData} /> : null}
+          <Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
         </>}
       />
 
       <OverlayPanel ref={filterPanel} className="ponto48-filter-panel">
-        <div className="ponto48-filter-title"><div><strong>Filtrar Ponto 48 horas</strong><span>Um único conjunto de filtros para as duas abas.</span></div><Button icon="pi pi-filter-slash" text rounded onClick={clearFilters} /></div>
+        <div className="ponto48-filter-title"><div><strong>Filtrar Ponto 48 horas</strong><span>Um único conjunto de filtros para as duas abas.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded onClick={clearFilters} /></div>
         <Divider />
         <label className="ponto48-filter-field"><span>Data dos ajustes</span><Calendar value={dateRange} onChange={(event) => setDateRange(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Um dia ou período" showButtonBar /></label>
         {[["departamentos", "Departamentos"], ["centros", "Centros de custo"], ["supervisores", "Supervisores"], ["vinculos", "Vínculos por nome"], ["motivos", "Motivos dos ajustes"], ["responsaveis", "Responsáveis pelos ajustes"]].map(([name, label]) => (
@@ -343,17 +344,17 @@ export function Ponto48Dashboard() {
       </OverlayPanel>
 
       <TabView activeIndex={activeTab} onTabChange={(event) => setActiveTab(event.index)} className="ponto48-tabs">
-        <TabPanel header="Absenteísmo e HE" leftIcon="pi pi-chart-bar mr-2">
+        <TabPanel header="Absenteísmo e HE" leftIcon={<AppIcon name="chart-bar" className="mr-2" />}>
       <div className="ponto48-summary">
-        <SummaryCard active={view === "all"} icon="pi pi-users" label="Colaboradores" value={filteredSummary.employees} detail="visão integrada" tone="neutral" onClick={() => setView("all")} />
-        <SummaryCard active={view === "offenders"} icon="pi pi-exclamation-triangle" label="Ofensores" value={filteredSummary.offenders} detail="com batida irregular" tone="danger" onClick={() => setView("offenders")} />
-        <SummaryCard active={view === "correct"} icon="pi pi-check-circle" label="Batidas corretas" value={filteredSummary.correct} detail="registros regulares" tone="success" onClick={() => setView("correct")} />
-        <SummaryCard active={view === "overtime"} icon="pi pi-clock" label="Horas extras" value={formatMinutes(filteredSummary.overtime)} detail="no período" tone="warning" onClick={() => setView("overtime")} />
-        <SummaryCard active={view === "absence"} icon="pi pi-calendar-times" label="Ausências" value={formatMinutes(filteredSummary.absence)} detail="no período" tone="violet" onClick={() => setView("absence")} />
+        <SummaryCard active={view === "all"} icon={<AppIcon name="users" />} label="Colaboradores" value={filteredSummary.employees} detail="visão integrada" tone="neutral" onClick={() => setView("all")} />
+        <SummaryCard active={view === "offenders"} icon={<AppIcon name="alert-triangle" />} label="Ofensores" value={filteredSummary.offenders} detail="com batida irregular" tone="danger" onClick={() => setView("offenders")} />
+        <SummaryCard active={view === "correct"} icon={<AppIcon name="circle-check" />} label="Batidas corretas" value={filteredSummary.correct} detail="registros regulares" tone="success" onClick={() => setView("correct")} />
+        <SummaryCard active={view === "overtime"} icon={<AppIcon name="clock" />} label="Horas extras" value={formatMinutes(filteredSummary.overtime)} detail="no período" tone="warning" onClick={() => setView("overtime")} />
+        <SummaryCard active={view === "absence"} icon={<AppIcon name="calendar-x" />} label="Ausências" value={formatMinutes(filteredSummary.absence)} detail="no período" tone="violet" onClick={() => setView("absence")} />
       </div>
 
       {!data.importacao && !loading ? (
-        <div className="ponto48-empty"><i className="pi pi-file-import" /><h2>Nenhum relatório importado</h2><p>Importe os CSVs de absenteísmo e horas extras para iniciar a análise.</p>{isAdmin ? <Button label="Importar relatórios" icon="pi pi-upload" onClick={() => setImportVisible(true)} /> : null}</div>
+        <div className="ponto48-empty"><AppIcon name="file-import"  /><h2>Nenhum relatório importado</h2><p>Importe os CSVs de absenteísmo e horas extras para iniciar a análise.</p>{isAdmin ? <Button label="Importar relatórios" icon={<AppIcon name="upload" />} onClick={() => setImportVisible(true)} /> : null}</div>
       ) : (
         <>
           <div className="ponto48-analysis">
@@ -368,10 +369,10 @@ export function Ponto48Dashboard() {
         </>
       )}
         </TabPanel>
-        <TabPanel header="Ajustes de ponto" leftIcon="pi pi-pencil mr-2">
+        <TabPanel header="Ajustes de ponto" leftIcon={<AppIcon name="pencil" className="mr-2" />}>
           <Ponto48Adjustments filters={filters} dateRange={dateRange} refreshKey={adjustmentsRefreshKey} referenceStart={data.importacao?.periodo_inicio} />
         </TabPanel>
-        <TabPanel header="Espelho Ponto" leftIcon="pi pi-id-card mr-2">
+        <TabPanel header="Espelho Ponto" leftIcon={<AppIcon name="id-badge" className="mr-2" />}>
           <Ponto48Mirror filters={filters} dateRange={dateRange} refreshKey={mirrorRefreshKey} referenceStart={data.importacao?.periodo_inicio} />
         </TabPanel>
       </TabView>
@@ -383,7 +384,7 @@ export function Ponto48Dashboard() {
       <ConfirmDialog />
 
       <Dialog header="Importar relatórios de ponto" visible={importVisible} modal className="ponto48-import-dialog" onHide={() => !importing && setImportVisible(false)}>
-        <div className="ponto48-import-form"><p>Os quatro relatórios serão validados e atualizados juntos. Se um falhar, nenhum dado será substituído.</p><label><span>Relatório de absenteísmo</span><input type="file" accept=".csv,text/csv" onChange={(event) => setAbsenteeismFile(event.target.files?.[0] || null)} /></label><label><span>Relatório de horas extras</span><input type="file" accept=".csv,text/csv" onChange={(event) => setOvertimeFile(event.target.files?.[0] || null)} /></label><label><span>Relatório de ajustes</span><input type="file" accept=".csv,text/csv" onChange={(event) => setAdjustmentsFile(event.target.files?.[0] || null)} /></label><label><span>Relatório de Jornada (Espelho Ponto)</span><input type="file" accept=".csv,text/csv" onChange={(event) => setMirrorFile(event.target.files?.[0] || null)} /></label><Button label="Importar os quatro relatórios" icon="pi pi-upload" loading={importing} onClick={importReports} /></div>
+        <div className="ponto48-import-form"><p>Os quatro relatórios serão validados e atualizados juntos. Se um falhar, nenhum dado será substituído.</p><label><span>Relatório de absenteísmo</span><input type="file" accept=".csv,text/csv" onChange={(event) => setAbsenteeismFile(event.target.files?.[0] || null)} /></label><label><span>Relatório de horas extras</span><input type="file" accept=".csv,text/csv" onChange={(event) => setOvertimeFile(event.target.files?.[0] || null)} /></label><label><span>Relatório de ajustes</span><input type="file" accept=".csv,text/csv" onChange={(event) => setAdjustmentsFile(event.target.files?.[0] || null)} /></label><label><span>Relatório de Jornada (Espelho Ponto)</span><input type="file" accept=".csv,text/csv" onChange={(event) => setMirrorFile(event.target.files?.[0] || null)} /></label><Button label="Importar os quatro relatórios" icon={<AppIcon name="upload" />} loading={importing} onClick={importReports} /></div>
       </Dialog>
     </section>
   );

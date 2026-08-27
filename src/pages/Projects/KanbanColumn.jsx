@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // components/KanbanColumn.jsx
 import React, { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
@@ -76,7 +77,7 @@ export default function KanbanColumn({
           aria-label={`Mover coluna ${coluna.titulo}`}
           title="Arraste para reordenar a coluna"
         >
-          <i className="pi pi-bars" aria-hidden="true" />
+          <AppIcon name="bars" aria-hidden="true"  />
         </button>
         {editandoTitulo ? (
           <InputText
@@ -101,7 +102,7 @@ export default function KanbanColumn({
         )}
         <span className="kanban-column__contador">{cards.length}</span>
         <Button
-          icon="pi pi-trash"
+          icon={<AppIcon name="trash" />}
           rounded
           text
           size="small"

@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
@@ -31,7 +32,7 @@ function isoDate(value) {
 }
 
 function EmptyChart({ label }) {
-    return <Placeholder variant="chart" icon="pi pi-chart-bar" title={label} />;
+    return <Placeholder variant="chart" icon={<AppIcon name="chart-bar" />} title={label} />;
 }
 
 export function DashboardLogistic() {
@@ -144,12 +145,12 @@ export function DashboardLogistic() {
                 actions={(
                     <>
                         <div className="logistic-period">
-                            <i className="pi pi-calendar" />
+                            <AppIcon name="calendar"  />
                             {filters.period?.[0]?.toLocaleDateString('pt-BR')} — {filters.period?.[1]?.toLocaleDateString('pt-BR')}
                         </div>
                         <Button
                             type="button"
-                            icon="pi pi-filter-fill"
+                            icon={<AppIcon name="filter-filled" />}
                             label={activeFilterCount ? `Filtros (${activeFilterCount})` : 'Filtros'}
                             aria-label="Abrir filtros do dashboard"
                             onClick={(event) => filterPanel.current?.toggle(event)}
@@ -159,13 +160,13 @@ export function DashboardLogistic() {
             />
 
             <section className="logistic-kpis">
-                <article className="tm-dashboard-card is-primary"><i className="pi pi-box" /><span>Produtos cadastrados</span><strong>{indicators.produtos || 0}</strong></article>
-                <article className="tm-dashboard-card"><i className="pi pi-database" /><span>Itens em estoque</span><strong>{indicators.itens_estoque || 0}</strong></article>
-                <article className="tm-dashboard-card is-success"><i className="pi pi-arrow-down" /><span>Entradas no período</span><strong>{indicators.entradas || 0}</strong></article>
-                <article className="tm-dashboard-card is-danger"><i className="pi pi-arrow-up" /><span>Saídas no período</span><strong>{indicators.saidas || 0}</strong></article>
-                <article className="tm-dashboard-card is-warning"><i className="pi pi-exclamation-triangle" /><span>Estoque baixo</span><strong>{indicators.estoque_baixo || 0}</strong></article>
-                <article className="tm-dashboard-card is-danger"><i className="pi pi-times-circle" /><span>Sem estoque</span><strong>{indicators.sem_estoque || 0}</strong></article>
-                <article className="tm-dashboard-card is-info"><i className="pi pi-box" /><span>Produtos entregues</span><strong>{indicators.produtos_entregues || indicators.epis_entregues || 0}</strong></article>
+                <article className="tm-dashboard-card is-primary"><AppIcon name="box"  /><span>Produtos cadastrados</span><strong>{indicators.produtos || 0}</strong></article>
+                <article className="tm-dashboard-card"><AppIcon name="database"  /><span>Itens em estoque</span><strong>{indicators.itens_estoque || 0}</strong></article>
+                <article className="tm-dashboard-card is-success"><AppIcon name="arrow-down"  /><span>Entradas no período</span><strong>{indicators.entradas || 0}</strong></article>
+                <article className="tm-dashboard-card is-danger"><AppIcon name="arrow-up"  /><span>Saídas no período</span><strong>{indicators.saidas || 0}</strong></article>
+                <article className="tm-dashboard-card is-warning"><AppIcon name="alert-triangle"  /><span>Estoque baixo</span><strong>{indicators.estoque_baixo || 0}</strong></article>
+                <article className="tm-dashboard-card is-danger"><AppIcon name="circle-x"  /><span>Sem estoque</span><strong>{indicators.sem_estoque || 0}</strong></article>
+                <article className="tm-dashboard-card is-info"><AppIcon name="box"  /><span>Produtos entregues</span><strong>{indicators.produtos_entregues || indicators.epis_entregues || 0}</strong></article>
             </section>
 
             <section className="logistic-grid logistic-grid-main">
@@ -232,7 +233,7 @@ export function DashboardLogistic() {
             <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
                 <div className="dashboard-filter-title">
                     <div><strong>Filtrar logística</strong><span>Todos os indicadores usam o mesmo recorte.</span></div>
-                    <Button icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+                    <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
                 </div>
                 <div className="dashboard-filter-grid">
                     <label className="is-wide"><span>Período</span><Calendar value={filters.period} onChange={(event) => setFilter('period', event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" showIcon /></label>

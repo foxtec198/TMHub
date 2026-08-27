@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -129,7 +130,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
       <InputText value={form.obs} onChange={(e) => setForm({ ...form, obs: e.target.value })} placeholder="Observação (opcional)" />
       <Calendar value={form.date} onChange={(e) => e.value && setForm({ ...form, date: e.value })} dateFormat="dd/mm/yy" placeholder="Data da ausência" showIcon readOnlyInput />
       <label className="flex align-items-center gap-2"><Checkbox checked={form.noCoverage} onChange={(e) => setForm({ ...form, noCoverage: e.checked, reservation: e.checked ? null : form.reservation })} />Sem cobertura</label>
-      <div className="flex justify-content-end gap-2"><Button type="button" label="Cancelar" text onClick={onHide} /><Button type="submit" label="Criar requisição" icon="pi pi-check" /></div>
+      <div className="flex justify-content-end gap-2"><Button type="button" label="Cancelar" text onClick={onHide} /><Button type="submit" label="Criar requisição" icon={<AppIcon name="check" />} /></div>
     </form>
   </Dialog>;
 }

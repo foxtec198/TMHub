@@ -12,7 +12,7 @@ export function DataTable({
   emptyMessage,
   emptyTitle,
   emptyDescription,
-  emptyIcon = "pi-search",
+  emptyIcon = "search",
   emptyAction,
   ...props
 }) {

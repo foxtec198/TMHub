@@ -16,7 +16,6 @@ import { AuthRequirementsGate } from "./components/AuthRequirementsGate";
 import { clearAccessToken, getAccessToken } from "./utils/authSession";
 
 // Styles
-import "primeicons/primeicons.css";
 import "primereact/resources/themes/saga-green/theme.css";
 import "primeflex/primeflex.css";
 import "./index.css";

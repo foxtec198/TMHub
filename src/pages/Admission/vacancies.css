@@ -249,7 +249,7 @@
     border-color: var(--primary-hover);
 }
 
-:root[data-mode="dark"] .admissao-page .interview-box .pi-calendar-plus {
+:root[data-mode="dark"] .admissao-page .interview-box .tm-icon {
     color: var(--accent-hover) !important;
 }
 
@@ -392,7 +392,7 @@
     border-radius: 10px;
 }
 
-.candidate-result-person > .pi {
+.candidate-result-person > .tm-icon {
     color: var(--primary-color);
 }
 
@@ -407,7 +407,7 @@
     border-color: var(--border);
 }
 
-:root[data-mode="dark"] .candidate-result-person > .pi {
+:root[data-mode="dark"] .candidate-result-person > .tm-icon {
     color: var(--accent-hover);
 }
 
@@ -427,7 +427,7 @@
     border-color: var(--border);
 }
 
-:root[data-mode="dark"] .completion-dialog .completion-recruiter .pi {
+:root[data-mode="dark"] .completion-dialog .completion-recruiter .tm-icon {
     color: var(--accent-hover);
 }
 
@@ -466,7 +466,7 @@
     line-height: 1.45;
 }
 
-.departure-date-hint .pi {
+.departure-date-hint .tm-icon {
     margin-top: .15rem;
     color: var(--warning);
 }

@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import './Termination.css'
 import './pcd.css';
 
@@ -71,7 +72,7 @@ function formatDate(value) {
 function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
     return (
         <article className={`termination-dashboard-card tm-dashboard-card is-${tone}`}>
-            <span className="termination-dashboard-card__icon"><i className={icon} /></span>
+            <span className="termination-dashboard-card__icon">{typeof icon === "string" ? <AppIcon name={icon} /> : icon}</span>
             <span>
                 <small>{label}</small>
                 <strong>{value}</strong>
@@ -85,7 +86,7 @@ function TerminationFilterButton({ panelRef, activeCount = 0 }) {
     return (
         <Button
             type="button"
-            icon="pi pi-filter-fill"
+            icon={<AppIcon name="filter-filled" />}
             label={activeCount ? `Filtros (${activeCount})` : 'Filtros'}
             className="dashboard-filter-trigger"
             aria-label="Abrir filtros do dashboard de rescisões"
@@ -110,7 +111,7 @@ function TerminationFilterPanel({
                 </div>
                 <Button
                     type="button"
-                    icon="pi pi-filter-slash"
+                    icon={<AppIcon name="filter-off" />}
                     label="Limpar filtros"
                     text
                     severity="secondary"
@@ -269,12 +270,12 @@ export function TerminationDashboard() {
     };
 
     const summary = [
-        { icon: 'pi pi-user-minus', label: 'Rescisões', value: formatCardNumber(indicators.total_rescisoes), detail: 'no período selecionado' },
-        { icon: 'pi pi-chart-line', label: 'Custo total', value: formatCardCurrency(indicators.custo_total), detail: 'proventos + FGTS', tone: 'primary' },
-        { icon: 'pi pi-calculator', label: 'Custo médio', value: formatCardCurrency(indicators.custo_medio), detail: 'por rescisão' },
-        { icon: 'pi pi-arrow-up-right', label: 'Proventos', value: formatCardCurrency(indicators.proventos), detail: 'valor bruto', tone: 'success' },
-        { icon: 'pi pi-arrow-down-right', label: 'Descontos', value: formatCardCurrency(indicators.descontos), detail: 'retenções informadas', tone: 'danger' },
-        { icon: 'pi pi-building-columns', label: 'FGTS rescisório', value: formatCardCurrency(indicators.fgts_rescisorio), detail: 'guias rescisórias', tone: 'warning' },
+        { icon: appIcon("user-minus"), label: 'Rescisões', value: formatCardNumber(indicators.total_rescisoes), detail: 'no período selecionado' },
+        { icon: appIcon("chart-line"), label: 'Custo total', value: formatCardCurrency(indicators.custo_total), detail: 'proventos + FGTS', tone: 'primary' },
+        { icon: appIcon("calculator"), label: 'Custo médio', value: formatCardCurrency(indicators.custo_medio), detail: 'por rescisão' },
+        { icon: appIcon("arrow-up-right"), label: 'Proventos', value: formatCardCurrency(indicators.proventos), detail: 'valor bruto', tone: 'success' },
+        { icon: appIcon("arrow-down-right"), label: 'Descontos', value: formatCardCurrency(indicators.descontos), detail: 'retenções informadas', tone: 'danger' },
+        { icon: appIcon("building-bank"), label: 'FGTS rescisório', value: formatCardCurrency(indicators.fgts_rescisorio), detail: 'guias rescisórias', tone: 'warning' },
     ];
 
     const moneyColumn = (field) => (row) => formatCurrency(row[field]);
@@ -305,7 +306,7 @@ export function TerminationDashboard() {
                             <Chart type="bar" data={monthlyChart} options={monthlyOptions} />
                         ) : (
                             <div className="termination-dashboard-empty-chart">
-                                <i className="pi pi-chart-bar" />
+                                <AppIcon name="chart-bar"  />
                                 <span>Nenhuma rescisão encontrada no período.</span>
                             </div>
                         )}
@@ -372,9 +373,9 @@ export function TerminationDashboard() {
 
             <article className="termination-dashboard-table-panel tm-dashboard-panel">
                 <nav className="termination-dashboard-tabs" aria-label="Visualizações do dashboard de rescisões">
-                    <button type="button" className={activeTable === 'branches' ? 'is-active' : ''} onClick={() => setActiveTable('branches')}><i className="pi pi-building" /><span>Por filial</span></button>
-                    <button type="button" className={activeTable === 'contracts' ? 'is-active' : ''} onClick={() => setActiveTable('contracts')}><i className="pi pi-briefcase" /><span>Por contrato</span></button>
-                    <button type="button" className={activeTable === 'recent' ? 'is-active' : ''} onClick={() => setActiveTable('recent')}><i className="pi pi-history" /><span>Rescisões recentes</span></button>
+                    <button type="button" className={activeTable === 'branches' ? 'is-active' : ''} onClick={() => setActiveTable('branches')}><AppIcon name="building"  /><span>Por filial</span></button>
+                    <button type="button" className={activeTable === 'contracts' ? 'is-active' : ''} onClick={() => setActiveTable('contracts')}><AppIcon name="briefcase"  /><span>Por contrato</span></button>
+                    <button type="button" className={activeTable === 'recent' ? 'is-active' : ''} onClick={() => setActiveTable('recent')}><AppIcon name="history"  /><span>Rescisões recentes</span></button>
                 </nav>
 
                 <div className="termination-dashboard-table-content">

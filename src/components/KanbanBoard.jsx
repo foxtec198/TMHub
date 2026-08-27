@@ -1,3 +1,4 @@
+import { AppIcon } from "./icons/AppIcon";
 // components/KanbanBoard.jsx
 import React, { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
@@ -169,13 +170,13 @@ export default function KanbanBoard({ projeto, onUpdateProjeto, onOpenCard }) {
             />
             <div className="kanban-board__nova-coluna-acoes">
               <Button label="Adicionar" size="small" onClick={confirmarNovaColuna} />
-              <Button icon="pi pi-times" text size="small" severity="secondary" onClick={() => setNovaColunaAberta(false)} />
+              <Button icon={<AppIcon name="x" />} text size="small" severity="secondary" onClick={() => setNovaColunaAberta(false)} />
             </div>
           </div>
         ) : (
           <Button
             label="Adicionar coluna"
-            icon="pi pi-plus"
+            icon={<AppIcon name="plus" />}
             text
             onClick={() => setNovaColunaAberta(true)}
           />

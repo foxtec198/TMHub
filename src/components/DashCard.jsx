@@ -1,4 +1,5 @@
 import { Tag } from "primereact/tag";
+import { AppIcon } from "./icons/AppIcon";
 
 export function DashCard({
     title,
@@ -30,7 +31,7 @@ export function DashCard({
         <article className={`tm-card tm-metric-card is-${tone} ${className}`.trim()} style={cardStyle}>
             {icon ? (
                 <span className="tm-metric-card__icon" aria-hidden="true">
-                    <i className={icon}></i>
+                    {typeof icon === "string" ? <AppIcon name={icon} /> : icon}
                 </span>
             ) : null}
 

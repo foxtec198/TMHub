@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
@@ -177,15 +178,15 @@ export function RocadaDashboard({ endpoint = "/glosas/rocada" }) {
         <Dropdown value={selectedYear} options={years} onChange={(event) => setSelectedYear(event.value)} placeholder="Selecione o ano" />
       </div>
 
-      {!months.length && <div className="rocada-metric__empty"><i className="pi pi-file-import" /><strong>Sem espelho de ponto da Roçada para este ano.</strong><span>Sem dados, consulte seu Administrator.</span></div>}
+      {!months.length && <div className="rocada-metric__empty"><AppIcon name="file-import"  /><strong>Sem espelho de ponto da Roçada para este ano.</strong><span>Sem dados, consulte seu Administrator.</span></div>}
       <div className="rocada-month-grid">
         {months.map((month) => <article className={`rocada-month-card tm-dashboard-card ${month.futuro ? "is-future" : month.glosado == null ? "is-empty" : month.glosado ? "is-risk" : "is-safe"}`} key={month.competencia}>
           <div className="rocada-month-card__top"><span>{monthName(month.competencia)}</span><Tag value={month.situacao} severity={month.futuro ? "secondary" : month.glosado == null ? "info" : month.glosado ? "danger" : "success"} /></div>
           <strong>{month.tem_dados ? month.media_trabalhados.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : "—"}</strong>
           <span className="rocada-month-card__target">{month.tem_dados ? `média trabalhada · média contratual ${month.meta}` : month.futuro ? "o indicador será definido no mês" : "aguardando histórico do período"}</span>
           <MonthChart month={month} />
-          <div className="rocada-month-card__stats"><span><i className="pi pi-calendar" /> {month.dias_operacionais} dias</span><span><i className="pi pi-chart-line" /> base {month.meta_padrao || 72}</span><span><i className="pi pi-user-minus" /> {month.media_faltantes} faltantes/dia</span></div>
-          <Button label={month.futuro ? "Aguardando mês" : "Visualizar"} icon={month.futuro ? "pi pi-clock" : "pi pi-table"} text onClick={() => openDetail(month.competencia)} loading={loadingDetail} disabled={month.futuro} />
+          <div className="rocada-month-card__stats"><span><AppIcon name="calendar"  /> {month.dias_operacionais} dias</span><span><AppIcon name="chart-line"  /> base {month.meta_padrao || 72}</span><span><AppIcon name="user-minus"  /> {month.media_faltantes} faltantes/dia</span></div>
+          <Button label={month.futuro ? "Aguardando mês" : "Visualizar"} icon={<AppIcon name={month.futuro ? "clock" : "table"} />} text onClick={() => openDetail(month.competencia)} loading={loadingDetail} disabled={month.futuro} />
         </article>)}
       </div>
 
@@ -202,10 +203,10 @@ export function RocadaDashboard({ endpoint = "/glosas/rocada" }) {
             <Column field="nome" header="Colaborador" frozen style={{ minWidth: "18rem" }} body={(row) => <strong>{row.nome}</strong>} />
             {(detail.colunas || []).map((column, index) => <Column key={column.data} header={column.dia} style={{ minWidth: "3.25rem", textAlign: "center" }} body={(row) => {
               const item = row.dias[index];
-              if (!item?.operacional) return <i className="pi pi-minus rocada-day--off" />;
+              if (!item?.operacional) return <AppIcon name="minus" className="rocada-day--off"  />;
               return item.trabalhou
-                ? <i className="pi pi-check-circle rocada-day--worked" title="Trabalhou" />
-                : <i className="pi pi-times-circle rocada-day--absent" title={item.motivo || "Faltante"} />;
+                ? <AppIcon name="circle-check" className="rocada-day--worked" title="Trabalhou"  />
+                : <AppIcon name="circle-x" className="rocada-day--absent" title={item.motivo || "Faltante"}  />;
             }} />)}
           </DataTable>
         </>}

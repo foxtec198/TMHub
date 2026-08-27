@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Index of Config
 
 // Utils
@@ -192,26 +193,26 @@ export function Settings() {
   return <section className="settings-page">
     <PageHeader section="Sistema" title="Configurações" description="Personalize seu perfil, acesso e aparência do TM Hub." />
     <TabView>
-      <TabPanel header="Minha conta" leftIcon="pi pi-user mr-2">
+      <TabPanel header="Minha conta" leftIcon={<AppIcon name="user" className="mr-2" />}>
         <div className="settings-grid">
           <div className="settings-column">
             <article className="settings-card profile-card">
-              <div className="settings-card-title"><i className="pi pi-user" /><div><h2>Perfil</h2><p>Como você aparece no TM Hub</p></div></div>
+              <div className="settings-card-title"><AppIcon name="user"  /><div><h2>Perfil</h2><p>Como você aparece no TM Hub</p></div></div>
               <div className="photo-row">
                 <UserAvatar user={profile} className="settings-avatar" />
-                <div><Button label="Trocar foto" icon="pi pi-camera" outlined onClick={() => fileRef.current?.click()} /><input ref={fileRef} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={changePhoto} /><small>PNG, JPG ou WEBP · máximo 1,5 MB</small></div>
+                <div><Button label="Trocar foto" icon={<AppIcon name="camera" />} outlined onClick={() => fileRef.current?.click()} /><input ref={fileRef} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={changePhoto} /><small>PNG, JPG ou WEBP · máximo 1,5 MB</small></div>
               </div>
               <label>Nome de usuário</label><div className="settings-inline"><InputText value={profile.nome || ""} onChange={(e) => setProfile({ ...profile, nome: e.target.value })} /><Button label="Salvar" onClick={() => save({ nome: profile.nome }, "Nome atualizado.")} /></div>
             </article>
 
             <article className="settings-card">
-              <div className="settings-card-title"><i className="pi pi-envelope" /><div><h2>E-mail</h2><p>Atual: {profile.email || "Não informado"}</p></div></div>
-              <label>Novo e-mail</label><div className="settings-inline"><InputText autoComplete="off" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="voce@empresa.com" /><Button label="Verificar" icon="pi pi-send" onClick={requestCode} /></div>
+              <div className="settings-card-title"><AppIcon name="mail"  /><div><h2>E-mail</h2><p>Atual: {profile.email || "Não informado"}</p></div></div>
+              <label>Novo e-mail</label><div className="settings-inline"><InputText autoComplete="off" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="voce@empresa.com" /><Button label="Verificar" icon={<AppIcon name="send" />} onClick={requestCode} /></div>
             </article>
 
             {isAdmin && (
               <article className="settings-card">
-                <div className="settings-card-title"><i className="pi pi-wrench" /><div><h2>Manutenção da operação</h2><p>Bloqueia o uso do TM Hub para usuários não administradores.</p></div></div>
+                <div className="settings-card-title"><AppIcon name="tool"  /><div><h2>Manutenção da operação</h2><p>Bloqueia o uso do TM Hub para usuários não administradores.</p></div></div>
                 <div className="align-items-center flex justify-content-between ">
                   <div>
                     <strong>{maintenanceActive ? "Manutenção ativa" : "Operação liberada"}</strong>
@@ -235,7 +236,7 @@ export function Settings() {
 
           <div className="settings-column">
             <article className="settings-card">
-              <div className="settings-card-title"><i className="pi pi-palette" /><div><h2>Aparência</h2><p>Combine luminosidade e identidade visual</p></div></div>
+              <div className="settings-card-title"><AppIcon name="palette"  /><div><h2>Aparência</h2><p>Combine luminosidade e identidade visual</p></div></div>
               <span className="appearance-label">Modo de exibição</span>
               <div className="mode-grid" role="radiogroup" aria-label="Modo de exibição">
                 {MODE_OPTIONS.map((option) => (
@@ -247,9 +248,9 @@ export function Settings() {
                     role="radio"
                     aria-checked={mode === option.id}
                   >
-                    <i className={option.icon} />
+                    <AppIcon name={option.icon} />
                     <span><strong>{option.label}</strong><small>{option.description}</small></span>
-                    {mode === option.id && <i className="pi pi-check-circle mode-card__check" aria-hidden="true" />}
+                    {mode === option.id && <AppIcon name="circle-check" className="mode-card__check" aria-hidden="true"  />}
                   </button>
                 ))}
               </div>
@@ -272,7 +273,7 @@ export function Settings() {
                         role="radio"
                         aria-checked={theme === option.id}
                       >
-                        <span className="theme-card__heading"><i className={option.icon} /><strong>{option.label}</strong></span>
+                        <span className="theme-card__heading"><AppIcon name={option.icon} /><strong>{option.label}</strong></span>
                         <span
                           className="theme-card__preview"
                           aria-hidden="true"
@@ -283,7 +284,7 @@ export function Settings() {
                           ))}
                         </span>
                         <small>{option.description}</small>
-                        {theme === option.id && <i className="pi pi-check-circle theme-card__check" aria-hidden="true" />}
+                        {theme === option.id && <AppIcon name="circle-check" className="theme-card__check" aria-hidden="true"  />}
                       </button>
                   ))}
                 </div>
@@ -303,34 +304,34 @@ export function Settings() {
             </article>
 
             <article className="settings-card password-card">
-              <div className="settings-card-title"><i className="pi pi-lock" /><div><h2>Alterar senha</h2><p>Proteja sua conta com uma senha forte</p></div></div>
+              <div className="settings-card-title"><AppIcon name="lock"  /><div><h2>Alterar senha</h2><p>Proteja sua conta com uma senha forte</p></div></div>
               <div className="password-fields"><Password value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} feedback={false} toggleMask placeholder="Senha atual" /><Password value={newPassword} onChange={(e) => setNewPassword(e.target.value)} toggleMask placeholder="Nova senha" promptLabel="Digite uma senha" weakLabel="Fraca" mediumLabel="Média" strongLabel="Forte" /><Password value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} feedback={false} toggleMask placeholder="Confirmar nova senha" /></div>
-              <p className="password-hint"><i className="pi pi-info-circle" /> Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial.</p>
-              <Button label="Atualizar senha" icon="pi pi-shield" onClick={changePassword} />
+              <p className="password-hint"><AppIcon name="info-circle"  /> Mínimo de 8 caracteres, com maiúscula, minúscula, número e caractere especial.</p>
+              <Button label="Atualizar senha" icon={<AppIcon name="shield" />} onClick={changePassword} />
             </article>
           </div>
         </div>
       </TabPanel>
 
-      {isAdmin && <TabPanel header="Usuários" leftIcon="pi pi-users mr-2">
+      {isAdmin && <TabPanel header="Usuários" leftIcon={<AppIcon name="users" className="mr-2" />}>
         <UsersSettings />
       </TabPanel>}
-      {isAdmin && <TabPanel header="Filiais" leftIcon="pi pi-building mr-2">
+      {isAdmin && <TabPanel header="Filiais" leftIcon={<AppIcon name="building" className="mr-2" />}>
         <BranchSettings />
       </TabPanel>}
-      {isAdmin && <TabPanel header="Planejamento" leftIcon="pi pi-sliders-h mr-2">
+      {isAdmin && <TabPanel header="Planejamento" leftIcon={<AppIcon name="adjustments-horizontal" className="mr-2" />}>
         <CapacityDepartmentSettings />
       </TabPanel>}
-      {isAdmin && <TabPanel header="TM Ops" leftIcon="pi pi-calendar-clock mr-2">
+      {isAdmin && <TabPanel header="TM Ops" leftIcon={<AppIcon name="calendar-time" className="mr-2" />}>
         <TMOpsAccessSettings />
       </TabPanel>}
-      {isAdmin && <TabPanel header="Timo" leftIcon="pi pi-sparkles mr-2">
+      {isAdmin && <TabPanel header="Timo" leftIcon={<AppIcon name="sparkles" className="mr-2" />}>
         <TimoSettings />
       </TabPanel>}
-      {isAdmin && <TabPanel header="Notícias" leftIcon="pi pi-megaphone mr-2">
+      {isAdmin && <TabPanel header="Notícias" leftIcon={<AppIcon name="speakerphone" className="mr-2" />}>
         <NewsSettings />
       </TabPanel>}
-      {isAdmin && <TabPanel header="Uso do TMHub" leftIcon="pi pi-chart-line mr-2">
+      {isAdmin && <TabPanel header="Uso do TMHub" leftIcon={<AppIcon name="chart-line" className="mr-2" />}>
         <UsageControlSettings />
       </TabPanel>}
     </TabView>

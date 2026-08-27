@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Controle de período de experiência.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -395,11 +396,11 @@ export function ExperienceControl() {
   const evaluationFooter = selectedEvaluation && (
     <div className="experience-dialog-actions">
       {canRh && selectedEvaluation.status === "concluida" && (
-        <Button label="Exportar PDF" icon="pi pi-file-pdf" outlined loading={exporting} onClick={exportPdf} />
+        <Button label="Exportar PDF" icon={<AppIcon name="file-type-pdf" />} outlined loading={exporting} onClick={exportPdf} />
       )}
       {rhCanEdit && <>
-        <Button label={adminCanEdit ? "Salvar alterações" : "Salvar rascunho"} icon="pi pi-save" outlined onClick={() => saveRh(false)} />
-        {canCompleteRh && <Button label="Assinar e concluir" icon="pi pi-check" disabled={!rhReady || !selectedEvaluation.assinatura_rh_registrada} onClick={() => saveRh(true)} />}
+        <Button label={adminCanEdit ? "Salvar alterações" : "Salvar rascunho"} icon={<AppIcon name="device-floppy" />} outlined onClick={() => saveRh(false)} />
+        {canCompleteRh && <Button label="Assinar e concluir" icon={<AppIcon name="check" />} disabled={!rhReady || !selectedEvaluation.assinatura_rh_registrada} onClick={() => saveRh(true)} />}
       </>}
     </div>
   );
@@ -422,8 +423,8 @@ export function ExperienceControl() {
         title="Período de experiência"
         description="Acompanhe as avaliações de 90 dias e as tratativas pendentes."
         actions={<>
-          <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
-          <Button label="Tela do supervisor" icon="pi pi-external-link" outlined onClick={openSupervisorPage} />
+          <Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+          <Button label="Tela do supervisor" icon={<AppIcon name="external-link" />} outlined onClick={openSupervisorPage} />
         </>}
       />
 
@@ -450,15 +451,15 @@ export function ExperienceControl() {
                 { header: "Contrato", body: (row) => <div className="experience-person"><strong>{row.colaborador?.centro_custo || "—"}</strong><small>DPTO. {row.colaborador?.departamento || "—"}</small></div>, style: { minWidth: "16rem" } },
                 { header: "Fim da experiência", body: (row) => dateLabel(row.colaborador?.data_fim_experiencia), style: { minWidth: "10rem" } },
                 { header: "Situação", body: (row) => statusTag(row.status), style: { minWidth: "11rem" } },
-                { header: "Ações", body: (row) => <div className="experience-row-actions"><Button label={isAdmin && row.status === "concluida" ? "Editar" : "Abrir"} icon={isAdmin && row.status === "concluida" ? "pi pi-pencil" : "pi pi-eye"} text onClick={() => openEvaluation(row.id)} />{isAdmin && row.status === "concluida" && <Button icon="pi pi-trash" severity="danger" rounded text aria-label={`Excluir avaliação de ${row.colaborador?.nome || "colaborador"}`} onClick={() => deleteEvaluation(row)} />}</div>, style: { width: "10rem" } },
+                { header: "Ações", body: (row) => <div className="experience-row-actions"><Button label={isAdmin && row.status === "concluida" ? "Editar" : "Abrir"} icon={<AppIcon name={isAdmin && row.status === "concluida" ? "pencil" : "eye"} />} text onClick={() => openEvaluation(row.id)} />{isAdmin && row.status === "concluida" && <Button icon={<AppIcon name="trash" />} severity="danger" rounded text aria-label={`Excluir avaliação de ${row.colaborador?.nome || "colaborador"}`} onClick={() => deleteEvaluation(row)} />}</div>, style: { width: "10rem" } },
               ]}
             />
       </article>
 
       <OverlayPanel ref={filterPanel} className="experience-filter-panel">
-        <div className="experience-filter-title"><div><strong>Filtrar avaliações</strong><span>Os indicadores e a lista acompanham este recorte.</span></div><Button icon="pi pi-filter-slash" rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
+        <div className="experience-filter-title"><div><strong>Filtrar avaliações</strong><span>Os indicadores e a lista acompanham este recorte.</span></div><Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
         <div className="experience-filters">
-          <label className="experience-search is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left"><i className="pi pi-search" /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula ou contrato" /></span></label>
+          <label className="experience-search is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left"><AppIcon name="search"  /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula ou contrato" /></span></label>
           <label><span>Departamento</span><MultiSelect value={selectedDepartments} options={departmentOptions} onChange={(event) => setSelectedDepartments(event.value || [])} placeholder="Todos os departamentos" filter showClear /></label>
           <label><span>Supervisor</span><MultiSelect value={selectedSupervisors} options={supervisors} onChange={(event) => setSelectedSupervisors(event.value || [])} placeholder="Todos os supervisores" filter showClear /></label>
           <label><span>Situação</span><MultiSelect value={selectedStatuses} options={STATUS_OPTIONS} onChange={(event) => setSelectedStatuses(event.value || [])} placeholder="Todas as situações" showClear /></label>
@@ -473,11 +474,11 @@ export function ExperienceControl() {
         onHide={() => { setManualCompletionVisible(false); setPendingStatus(null); }}
         footer={<div className="experience-manual-completion-actions">
           <Button label="Cancelar" outlined onClick={() => { setManualCompletionVisible(false); setPendingStatus(null); }} />
-          <Button label="Finalizar tarefa" icon="pi pi-check" severity="success" onClick={confirmManualCompletion} />
+          <Button label="Finalizar tarefa" icon={<AppIcon name="check" />} severity="success" onClick={confirmManualCompletion} />
         </div>}
       >
         <div className="experience-manual-completion-content">
-          <span className="experience-manual-completion-icon"><i className="pi pi-check-circle" aria-hidden="true" /></span>
+          <span className="experience-manual-completion-icon"><AppIcon name="circle-check" aria-hidden="true"  /></span>
           <div><strong>Confirmar conclusão manual</strong><p>A tarefa será marcada como concluída e a ação ficará registrada em seu usuário. Nenhuma assinatura será criada automaticamente.</p></div>
         </div>
       </Dialog>
@@ -519,7 +520,7 @@ export function ExperienceControl() {
               {isAdmin && <label className="experience-state-select"><span>Estado da tarefa</span><Dropdown value={selectedEvaluation.status} options={statusOptions} onChange={(event) => requestTaskStatusChange(event.value)} /></label>}
               {canCompleteRh && rhReady && <>
                 {isAdmin && <label className="experience-signer-select"><span>Assinatura cadastrada</span><Dropdown value={selectedSignerId} options={registeredSigners} optionLabel="nome" optionValue="id" onChange={(event) => setSelectedSignerId(event.value)} placeholder="Escolha uma assinatura" filter showClear /></label>}
-                <Button label={selectedEvaluation.assinatura_rh_registrada ? "Aplicar novamente" : isAdmin ? "Aplicar assinatura" : "Usar minha assinatura"} icon="pi pi-verified" outlined disabled={isAdmin && !selectedSignerId} onClick={useRegisteredRhSignature} />
+                <Button label={selectedEvaluation.assinatura_rh_registrada ? "Aplicar novamente" : isAdmin ? "Aplicar assinatura" : "Usar minha assinatura"} icon={<AppIcon name="verified" />} outlined disabled={isAdmin && !selectedSignerId} onClick={useRegisteredRhSignature} />
               </>}
             </div>}
             {canRh && isAwaitingRh && !rhReady && <small className="experience-signature-hint">Preencha a classificação e a decisão para liberar a assinatura.</small>}

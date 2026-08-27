@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
@@ -26,12 +27,12 @@ const STATUS = [
 ];
 
 const STATUS_META = {
-  ABERTO: { label: "Aberto", severity: "info", icon: "pi pi-inbox" },
-  EM_ANDAMENTO: { label: "Em andamento", severity: "info", icon: "pi pi-spin pi-spinner" },
-  ATRASADO: { label: "Em atraso", severity: "danger", icon: "pi pi-exclamation-triangle" },
-  RESOLVIDO: { label: "Resolvido", severity: "success", icon: "pi pi-check-circle" },
-  FECHADO: { label: "Fechado", severity: "secondary", icon: "pi pi-lock" },
-  CANCELADO: { label: "Cancelado", severity: "secondary", icon: "pi pi-times-circle" },
+  ABERTO: { label: "Aberto", severity: "info", icon: appIcon("inbox") },
+  EM_ANDAMENTO: { label: "Em andamento", severity: "info", icon: appIcon("loader-2") },
+  ATRASADO: { label: "Em atraso", severity: "danger", icon: appIcon("alert-triangle") },
+  RESOLVIDO: { label: "Resolvido", severity: "success", icon: appIcon("circle-check") },
+  FECHADO: { label: "Fechado", severity: "secondary", icon: appIcon("lock") },
+  CANCELADO: { label: "Cancelado", severity: "secondary", icon: appIcon("circle-x") },
 };
 
 const EMPTY_TICKET = { name: "", observation: "", reason_id: null, responsible_id: null };
@@ -74,7 +75,7 @@ function TicketAvatar({ user, className = "" }) {
 
 function TicketMessageAvatar({ user }) {
   if (user?.avatar_type === "timo") {
-    return <span className="ticket-message__timo-avatar" title="Timo Bot" aria-label="Timo Bot"><i className="pi pi-sparkles" /></span>;
+    return <span className="ticket-message__timo-avatar" title="Timo Bot" aria-label="Timo Bot"><AppIcon name="sparkles"  /></span>;
   }
   return <TicketAvatar user={user} />;
 }
@@ -118,7 +119,7 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
       <label><span>Motivo</span><Dropdown value={form.reason_id} options={reasons.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => update("reason_id", event.value)} placeholder="Selecione se necessário" showClear /></label>
       <label className="ticket-form__wide"><span>Descrição</span><InputTextarea value={form.observation} onChange={(event) => update("observation", event.target.value)} placeholder="Explique o que aconteceu e o que precisa ser tratado." rows={5} autoResize /></label>
     </div>
-    <div className="ticket-dialog__footer"><Button label="Cancelar" text severity="secondary" onClick={onHide} disabled={saving} /><Button label="Abrir chamado" icon="pi pi-send" onClick={save} loading={saving} /></div>
+    <div className="ticket-dialog__footer"><Button label="Cancelar" text severity="secondary" onClick={onHide} disabled={saving} /><Button label="Abrir chamado" icon={<AppIcon name="send" />} onClick={save} loading={saving} /></div>
   </Dialog>;
 }
 
@@ -183,36 +184,36 @@ export function TicketsDashboard() {
       title="Central de Chamados"
       description="Acompanhe solicitações, tratativas e prazos em tempo real."
       actions={<div className="tickets-header-actions">
-        {canCreate && <Button icon="pi pi-plus" label="Novo chamado" onClick={openNewTicket} />}
+        {canCreate && <Button icon={<AppIcon name="plus" />} label="Novo chamado" onClick={openNewTicket} />}
       </div>}
     />
 
     <section className="tickets-overview">
-      <article className="tickets-highlight"><div className="tickets-highlight__icon"><i className="pi pi-headphones" /></div>
+      <article className="tickets-highlight"><div className="tickets-highlight__icon"><AppIcon name="headphones"  /></div>
         <div>
           <span>Fila de atendimento</span>
           <strong>{metrics.open}</strong>
           <small>chamados em aberto ou em andamento</small>
         </div>
-        <button type="button" onClick={() => { setStatus(null); setOnlyOpen(false); }}>Ver todos <i className="pi pi-arrow-up-right" /></button>
+        <button type="button" onClick={() => { setStatus(null); setOnlyOpen(false); }}>Ver todos <AppIcon name="arrow-up-right"  /></button>
       </article>
 
       <article className="tickets-metric is-total">
-        <i className="pi pi-ticket" />
+        <AppIcon name="ticket"  />
         <span>Total</span>
         <strong>{metrics.total}</strong>
         <small>no seu escopo</small>
       </article>
 
       <article className="tickets-metric is-danger">
-        <i className="pi pi-clock" />
+        <AppIcon name="clock"  />
         <span>Em atraso</span>
         <strong>{metrics.overdue}</strong>
         <small>prazo de 24h excedido</small>
       </article>
 
       <article className="tickets-metric is-success">
-        <i className="pi pi-check-circle" />
+        <AppIcon name="circle-check"  />
         <span>Resolvidos</span>
         <strong>{metrics.resolved}</strong>
         <small>tratativas concluídas</small>
@@ -227,7 +228,7 @@ export function TicketsDashboard() {
         </div>
         <div className="tickets-toolbar">
           <span className="tickets-search">
-            <i className="pi pi-search" />
+            <AppIcon name="search"  />
             <InputText value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar chamado" aria-label="Buscar chamado" />
           </span>
           <Dropdown value={status} options={STATUS} onChange={(event) => { setStatus(event.value); setOnlyOpen(false); }} placeholder="Todos os status" showClear />
@@ -245,14 +246,14 @@ export function TicketsDashboard() {
             <p>{ticket.observation}</p>
             <div className="ticket-list-card__bottom">
               <span className={ticket.status === "ATRASADO" ? "is-overdue" : ""}>
-                <i className="pi pi-clock" />{dueLabel(ticket, now)}
+                <AppIcon name="clock"  />{dueLabel(ticket, now)}
               </span>
               <div>
                 {ticket.responsible && <TicketAvatar user={ticket.responsible} />}
                 <span>{ticket.responsible?.nome || "Sem responsável"}</span>
               </div>
             </div>
-          </button>)}{!filteredTickets.length && <div className="tickets-empty"><i className="pi pi-ticket" />
+          </button>)}{!filteredTickets.length && <div className="tickets-empty"><AppIcon name="ticket"  />
 
             <strong>Nenhum chamado encontrado</strong>
             <span>Altere os filtros ou abra um novo chamado.</span>
@@ -322,14 +323,14 @@ export function TicketDetail() {
     finally { setSending(false); }
   };
 
-  if (!ticket) return <section className="ticket-detail ticket-detail--loading"><i className="pi pi-spin pi-spinner" /> Carregando chamado…</section>;
+  if (!ticket) return <section className="ticket-detail ticket-detail--loading"><AppIcon name="loader-2"  /> Carregando chamado…</section>;
   const isFinal = ["RESOLVIDO", "FECHADO", "CANCELADO"].includes(ticket.status);
   return <section className="ticket-detail">
-    <PageHeader section="Atendimento / Chamados" title={`Chamado #${ticket.id}`} description={`Aberto em ${asDate(ticket.created_at)}`} actions={<Button icon="pi pi-arrow-left" label="Voltar aos chamados" outlined onClick={() => navigate("/tickets")} />} />
-    <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><i className="pi pi-clock" /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
+    <PageHeader section="Atendimento / Chamados" title={`Chamado #${ticket.id}`} description={`Aberto em ${asDate(ticket.created_at)}`} actions={<Button icon={<AppIcon name="arrow-left" />} label="Voltar aos chamados" outlined onClick={() => navigate("/tickets")} />} />
+    <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><AppIcon name="clock"  /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
     <section className="ticket-conversation">
       <aside className="ticket-info-panel"><div className="ticket-info-panel__heading"><span>Informações</span><h2>{ticket.name}</h2></div><p>{ticket.observation}</p><dl><div><dt>Motivo</dt><dd>{ticket.reason?.nome || "Não informado"}</dd></div><div><dt>Solicitante</dt><dd><TicketAvatar user={ticket.created_by} />{ticket.created_by?.nome || "—"}</dd></div><div><dt>Responsável</dt><dd><TicketAvatar user={ticket.responsible} />{ticket.responsible?.nome || "Aguardando atribuição"}</dd></div></dl>{canEdit && <div className="ticket-info-panel__edit"><label><span>Status</span><Dropdown value={statusValue} options={STATUS} onChange={(event) => { setStatusValue(event.value); update({ status: event.value }, "O status foi alterado."); }} /></label>{isAdmin && <label><span>Responsável</span><Dropdown value={responsibleValue} options={assignees.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => { setResponsibleValue(event.value); update({ responsible_id: event.value }, "O responsável foi atualizado."); }} placeholder="Selecione" filter showClear /></label>}</div>}</aside>
-      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><i className="pi pi-comments" /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><i className="pi pi-paperclip" /> Abrir anexo</a>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><i className="pi pi-comments" />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={2} autoResize placeholder="Escreva uma atualização para o chamado…" /><Button icon="pi pi-send" label="Enviar" onClick={sendComment} loading={sending} disabled={!comment.trim()} /></footer>}</main>
+      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><AppIcon name="paperclip"  /> Abrir anexo</a>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={2} autoResize placeholder="Escreva uma atualização para o chamado…" /><Button icon={<AppIcon name="send" />} label="Enviar" onClick={sendComment} loading={sending} disabled={!comment.trim()} /></footer>}</main>
     </section>
   </section>;
 }

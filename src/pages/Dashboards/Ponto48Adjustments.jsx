@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
@@ -34,7 +35,7 @@ function formatDuration(value) {
 function AdjustmentCard({ active, icon, label, value, detail, tone, onClick }) {
   return (
     <button type="button" className={`ponto48-card tm-dashboard-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
-      <span className="ponto48-card__icon"><i className={icon} /></span>
+      <span className="ponto48-card__icon">{typeof icon === "string" ? <AppIcon name={icon} /> : icon}</span>
       <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
     </button>
   );
@@ -164,21 +165,21 @@ export function Ponto48Adjustments({ filters = EMPTY_FILTERS, dateRange = null, 
     { header: "Origem", body: (row) => <Tag value={row.solicitacao ? "Solicitação" : "Direto"} severity={row.solicitacao ? "info" : "secondary"} /> },
     { header: "Batidas", body: (row) => <Tag value={row.quantidade_batidas} severity={row.batida_impar ? "danger" : "success"} rounded /> },
     { header: "Tempo", body: (row) => formatDuration(row.tempo_ajuste_minutos) },
-    { header: "Detalhes", body: (row) => <Button label="Visualizar" icon="pi pi-eye" size="small" outlined onClick={() => setDetail(row)} /> },
+    { header: "Detalhes", body: (row) => <Button label="Visualizar" icon={<AppIcon name="eye" />} size="small" outlined onClick={() => setDetail(row)} /> },
   ], []);
 
   return (
     <div className="ponto48-adjustments">
       {!data.importacao && !loading ? (
-        <div className="ponto48-empty"><i className="pi pi-file-edit" /><h2>Nenhum ajuste importado</h2><p>Use a importação conjunta no topo para carregar os três relatórios.</p></div>
+        <div className="ponto48-empty"><AppIcon name="file-pencil"  /><h2>Nenhum ajuste importado</h2><p>Use a importação conjunta no topo para carregar os três relatórios.</p></div>
       ) : (
         <>
           <div className="ponto48-summary ponto48-adjustments-summary">
-            <AdjustmentCard active={view === "all"} icon="pi pi-pencil" label="Ajustes" value={summary.adjustments} detail={`${summary.employees} colaboradores`} tone="neutral" onClick={() => setView("all")} />
-            <AdjustmentCard active={view === "requests"} icon="pi pi-send" label="Solicitações" value={summary.requests} detail="enviadas pelo colaborador" tone="success" onClick={() => setView("requests")} />
-            <AdjustmentCard active={view === "direct"} icon="pi pi-user-edit" label="Ajustes diretos" value={summary.direct} detail="sem solicitação" tone="violet" onClick={() => setView("direct")} />
-            <AdjustmentCard active={view === "odd"} icon="pi pi-exclamation-triangle" label="Batidas ímpares" value={summary.odd} detail="exigem conferência" tone="danger" onClick={() => setView("odd")} />
-            <AdjustmentCard active={view === "empty"} icon="pi pi-minus-circle" label="Sem batidas" value={summary.empty} detail="folgas e compensações" tone="warning" onClick={() => setView("empty")} />
+            <AdjustmentCard active={view === "all"} icon={<AppIcon name="pencil" />} label="Ajustes" value={summary.adjustments} detail={`${summary.employees} colaboradores`} tone="neutral" onClick={() => setView("all")} />
+            <AdjustmentCard active={view === "requests"} icon={<AppIcon name="send" />} label="Solicitações" value={summary.requests} detail="enviadas pelo colaborador" tone="success" onClick={() => setView("requests")} />
+            <AdjustmentCard active={view === "direct"} icon={<AppIcon name="user-edit" />} label="Ajustes diretos" value={summary.direct} detail="sem solicitação" tone="violet" onClick={() => setView("direct")} />
+            <AdjustmentCard active={view === "odd"} icon={<AppIcon name="alert-triangle" />} label="Batidas ímpares" value={summary.odd} detail="exigem conferência" tone="danger" onClick={() => setView("odd")} />
+            <AdjustmentCard active={view === "empty"} icon={<AppIcon name="circle-minus" />} label="Sem batidas" value={summary.empty} detail="folgas e compensações" tone="warning" onClick={() => setView("empty")} />
           </div>
 
           <div className="ponto48-analysis">

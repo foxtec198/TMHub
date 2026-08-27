@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Controle de Faltas - FaltsControl.jsx
 // Utils
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -391,7 +392,7 @@ function AbsenceControlPage() {
   const timerBody = (record) => {
     if (!hasDocumentDeadline(record.motivo) || record.status === "tratada") return <span className="absence-no-timer">Sem prazo</span>;
     const timer = remaining(record.prazo_atestado, now);
-    return <span className={`absence-timer ${timer?.expired ? "is-expired" : ""}`}><i className={`pi ${timer?.expired ? "pi-exclamation-triangle" : "pi-clock"}`} />{timer?.text || "—"}</span>;
+    return <span className={`absence-timer ${timer?.expired ? "is-expired" : ""}`}><AppIcon name={timer?.expired ? "alert-triangle" : "clock"} />{timer?.text || "—"}</span>;
   };
 
   const classificationBody = (record) => {
@@ -428,28 +429,28 @@ function AbsenceControlPage() {
       title="Controle de Faltas"
       description="Registros gerados automaticamente pelas requisições de reposição."
       actions={<>
-        <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+        <Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
         <Button
-          icon="pi pi-file-excel"
+          icon={<AppIcon name="file-spreadsheet" />}
           label="Exportar XLSX"
           outlined
           loading={exporting}
           disabled={exporting || !filtered.length}
           onClick={exportAbsences}
         />
-        {canEdit && <Button icon="pi pi-plus" label="Lançar falta" onClick={openManual} />}
+        {canEdit && <Button icon={<AppIcon name="plus" />} label="Lançar falta" onClick={openManual} />}
       </>}
     />
     <div className="absence-summary">
-      <article><i className="pi pi-list" /><div><small>Total</small><strong>{summary.total}</strong></div></article>
-      <article><i className="pi pi-inbox" /><div><small>Pendentes</small><strong>{summary.pending}</strong></div></article>
-      <article className="is-danger"><i className="pi pi-stopwatch" /><div><small>Documentos vencidos</small><strong>{summary.expired}</strong></div></article>
-      <article><i className="pi pi-check-circle" /><div><small>Tratadas</small><strong>{summary.treated}</strong></div></article>
+      <article><AppIcon name="list"  /><div><small>Total</small><strong>{summary.total}</strong></div></article>
+      <article><AppIcon name="inbox"  /><div><small>Pendentes</small><strong>{summary.pending}</strong></div></article>
+      <article className="is-danger"><AppIcon name="stopwatch"  /><div><small>Documentos vencidos</small><strong>{summary.expired}</strong></div></article>
+      <article><AppIcon name="circle-check"  /><div><small>Tratadas</small><strong>{summary.treated}</strong></div></article>
     </div>
     <div className="absence-panel">
       <div className="absence-filters">
         <span className="p-input-icon-left">
-          <i className="pi pi-search px-3" />
+          <AppIcon name="search" className="px-3"  />
           <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador, matrícula ou contrato" />
         </span>
       </div>
@@ -471,13 +472,13 @@ function AbsenceControlPage() {
           { header: "Prazo do documento", body: timerBody },
           { field: "classificacao", header: "Classificação", sortable: true, body: classificationBody },
           { field: "status", header: "Tratativa", sortable: true, body: (record) => <Tag value={record.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={record.status === "tratada" ? "success" : "info"} /> },
-          ...(canEdit ? [{ header: "Ações", body: (record) => <Button icon="pi pi-pencil" rounded text aria-label={`Tratar falta de ${record.colaborador}`} onClick={() => open(record)} /> }] : []),
+          ...(canEdit ? [{ header: "Ações", body: (record) => <Button icon={<AppIcon name="pencil" />} rounded text aria-label={`Tratar falta de ${record.colaborador}`} onClick={() => open(record)} /> }] : []),
         ]}
       />
     </div>
 
     <OverlayPanel ref={filterPanel} className="absence-filter-panel">
-      <div className="absence-filter-title"><div><strong>Filtrar faltas</strong><span>O período começa no mês atual.</span></div><Button icon="pi pi-filter-slash" text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
+      <div className="absence-filter-title"><div><strong>Filtrar faltas</strong><span>O período começa no mês atual.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
       <div className="absence-filter-grid">
         <label className="is-wide"><span>Período</span><Calendar value={dateRange} onChange={(event) => setDateRange(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" showIcon /></label>
         <CombinedMultiSelect name="status" label="Situação" options={filterOptions.status} placeholder="Todas as situações" />
@@ -502,15 +503,15 @@ function AbsenceControlPage() {
           <Button label="Cancelar" text onClick={() => setEditing(null)} />
           <Button label="Salvar alterações" outlined onClick={() => save(false)} />
           {editing.status === "tratada"
-            ? <Button label="Voltar para pendente" severity="warning" icon="pi pi-undo" onClick={reopen} />
-            : <Button label="Marcar como tratada" icon="pi pi-check" onClick={() => save(true)} />}
+            ? <Button label="Voltar para pendente" severity="warning" icon={<AppIcon name="arrow-back-up" />} onClick={reopen} />
+            : <Button label="Marcar como tratada" icon={<AppIcon name="check" />} onClick={() => save(true)} />}
         </div>
       </div>}
     </Dialog>
     <Dialog header="Lançar falta manualmente" visible={Boolean(manualForm)} modal className="absence-manual-dialog" onHide={() => setManualForm(null)}>
       {manualForm && <div className="absence-manual-form">
         <div className="absence-manual-intro">
-          <i className="pi pi-info-circle" />
+          <AppIcon name="info-circle"  />
           <span>Este lançamento criará automaticamente uma requisição aberta como <strong>SEM COBERTURA</strong> e registrará seu usuário na timeline.</span>
         </div>
 
@@ -538,8 +539,8 @@ function AbsenceControlPage() {
         </label>
 
         {manualForm.colaborador_id && <div className="absence-manual-employee is-wide">
-          <div><i className="pi pi-user" /><strong>{manualForm.colaborador_nome}</strong><span>Matrícula {manualForm.colaborador_matricula || "não informada"}</span></div>
-          <div><i className="pi pi-building" /><strong>{manualForm.contrato || "Local não informado"}</strong><span>{manualForm.departamento ? `DPTO. ${manualForm.departamento}` : "Sem departamento"}</span></div>
+          <div><AppIcon name="user"  /><strong>{manualForm.colaborador_nome}</strong><span>Matrícula {manualForm.colaborador_matricula || "não informada"}</span></div>
+          <div><AppIcon name="building"  /><strong>{manualForm.contrato || "Local não informado"}</strong><span>{manualForm.departamento ? `DPTO. ${manualForm.departamento}` : "Sem departamento"}</span></div>
         </div>}
 
         <label><span>Data e hora da falta</span><Calendar value={manualForm.data_falta} onChange={(event) => setManualForm({ ...manualForm, data_falta: event.value })} dateFormat="dd/mm/yy" showTime hourFormat="24" showIcon /></label>
@@ -588,7 +589,7 @@ function AbsenceControlPage() {
         <label className="is-wide"><span>Observação</span><InputTextarea value={manualForm.observacao} onChange={(event) => setManualForm({ ...manualForm, observacao: event.target.value })} rows={4} autoResize placeholder="Descreva informações importantes sobre esta falta" /></label>
         <div className="dialog-actions is-wide">
           <Button label="Cancelar" text onClick={() => setManualForm(null)} />
-          <Button label="Lançar e criar requisição" icon="pi pi-check" onClick={saveManual} />
+          <Button label="Lançar e criar requisição" icon={<AppIcon name="check" />} onClick={saveManual} />
         </div>
       </div>}
     </Dialog>

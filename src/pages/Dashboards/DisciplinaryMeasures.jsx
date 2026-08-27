@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
@@ -66,14 +67,14 @@ function errorMessage(error) {
 }
 
 function EmptyChart({ text }) {
-  return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
+  return <Placeholder variant="chart" icon={<AppIcon name="chart-bar" />} title={text} />;
 }
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
   return (
     <article className={`disciplinary-dashboard-card tm-dashboard-card is-${tone}`}>
       <span className="disciplinary-dashboard-card__icon">
-        <i className={icon} />
+        {typeof icon === "string" ? <AppIcon name={icon} /> : icon}
       </span>
       <span>
         <small>{label}</small>
@@ -111,14 +112,14 @@ function LoadingState() {
 function ErrorState({ message, onRetry }) {
   return (
     <div className="disciplinary-dashboard-error" role="alert">
-      <i className="pi pi-exclamation-triangle" />
+      <AppIcon name="alert-triangle"  />
       <div>
         <strong>Não foi possível abrir o dashboard</strong>
         <span>{message}</span>
       </div>
       <Button
         type="button"
-        icon="pi pi-refresh"
+        icon={<AppIcon name="refresh" />}
         label="Tentar novamente"
         outlined
         onClick={onRetry}
@@ -451,11 +452,11 @@ export function DisciplinaryMeasuresDashboard() {
       Number(second.total || 0) - Number(first.total || 0)
     ))[0], [monthly]);
   const summary = [
-    { icon: "pi pi-file-edit", label: "Total de medidas", value: indicators.total, detail: "no período selecionado", tone: "primary" },
-    { icon: "pi pi-info-circle", label: "Advertências", value: indicators.advertencias, detail: "medidas registradas", tone: "info" },
-    { icon: "pi pi-pause-circle", label: "Suspensões", value: indicators.suspensoes, detail: `${suspensionPercentage}% do total`, tone: "warning" },
-    { icon: "pi pi-users", label: "Colaboradores", value: indicators.colaboradores, detail: "pessoas distintas", tone: "success" },
-    { icon: "pi pi-calendar-clock", label: "Dias de suspensão", value: indicators.dias_suspensao, detail: "soma dos dias informados", tone: "danger" },
+    { icon: appIcon("file-pencil"), label: "Total de medidas", value: indicators.total, detail: "no período selecionado", tone: "primary" },
+    { icon: appIcon("info-circle"), label: "Advertências", value: indicators.advertencias, detail: "medidas registradas", tone: "info" },
+    { icon: appIcon("pause"), label: "Suspensões", value: indicators.suspensoes, detail: `${suspensionPercentage}% do total`, tone: "warning" },
+    { icon: appIcon("users"), label: "Colaboradores", value: indicators.colaboradores, detail: "pessoas distintas", tone: "success" },
+    { icon: appIcon("calendar-time"), label: "Dias de suspensão", value: indicators.dias_suspensao, detail: "soma dos dias informados", tone: "danger" },
   ];
 
   return (
@@ -467,18 +468,18 @@ export function DisciplinaryMeasuresDashboard() {
         actions={(
           <>
             <div className="disciplinary-dashboard-period">
-              <i className="pi pi-calendar" />
+              <AppIcon name="calendar"  />
               <span>{formatPeriod(filters.period)}</span>
             </div>
             <Button
               type="button"
-              icon="pi pi-filter-fill"
+              icon={<AppIcon name="filter-filled" />}
               label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
               onClick={(event) => filterPanel.current?.toggle(event)}
             />
             <Button
               type="button"
-              icon="pi pi-refresh"
+              icon={<AppIcon name="refresh" />}
               label="Atualizar"
               outlined
               loading={loading && Boolean(data)}
@@ -490,7 +491,7 @@ export function DisciplinaryMeasuresDashboard() {
 
       {!periodComplete && (
         <div className="disciplinary-dashboard-notice">
-          <i className="pi pi-calendar-times" />
+          <AppIcon name="calendar-x"  />
           <span>Selecione a data inicial e a data final.</span>
         </div>
       )}
@@ -506,11 +507,11 @@ export function DisciplinaryMeasuresDashboard() {
         <>
           {error && (
             <div className="disciplinary-dashboard-inline-error" role="alert">
-              <i className="pi pi-exclamation-circle" />
+              <AppIcon name="alert-circle"  />
               <span>{error}</span>
               <Button
                 type="button"
-                icon="pi pi-refresh"
+                icon={<AppIcon name="refresh" />}
                 label="Tentar novamente"
                 text
                 onClick={() => setRefresh((value) => value + 1)}
@@ -737,7 +738,7 @@ export function DisciplinaryMeasuresDashboard() {
           </div>
           <Button
             type="button"
-            icon="pi pi-filter-slash"
+            icon={<AppIcon name="filter-off" />}
             label="Limpar filtros"
             text
             severity="secondary"

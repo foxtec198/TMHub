@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from 'primereact/button';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
@@ -147,7 +148,7 @@ export function ProjetosPage() {
     confirmDialog({
       header: `Excluir ${projeto.nome}`,
       message: 'Todas as colunas e cards deste projeto serão excluídos. Deseja continuar?',
-      icon: 'pi pi-exclamation-triangle',
+      icon: appIcon("alert-triangle"),
       acceptLabel: 'Excluir',
       rejectLabel: 'Cancelar',
       acceptClassName: 'p-button-danger',
@@ -248,7 +249,7 @@ export function ProjetosPage() {
   const criarCardItems = useMemo(
     () => (projetoAtivo?.columns || []).map((column) => ({
       label: `Criar em ${column.titulo}`,
-      icon: 'pi pi-plus',
+      icon: appIcon("plus"),
       command: () => abrirNovoCard(column.id),
     })),
     [projetoAtivo]
@@ -323,7 +324,7 @@ export function ProjetosPage() {
         <div className="projetos-board-wrapper__topo">
           <div className="flex align-items-center gap-3">
             <Button
-              icon={sidebarOpen ? 'pi pi-angle-left' : 'pi pi-bars'}
+              icon={<AppIcon name={sidebarOpen ? "chevron-left" : "menu"} />}
               text
               rounded
               aria-label={sidebarOpen ? 'Recolher projetos' : 'Mostrar projetos'}
@@ -347,7 +348,7 @@ export function ProjetosPage() {
             {projetoAtivo && (
               <SplitButton
                 label="Criar card"
-                icon="pi pi-plus"
+                icon={<AppIcon name="plus" />}
                 onClick={() => abrirNovoCard()}
                 model={criarCardItems}
                 disabled={!projetoAtivo.columns?.length}
@@ -355,7 +356,7 @@ export function ProjetosPage() {
             )}
             {projetoAtivo && projetoAtivo.donoId === currentUserId && (
               <Button
-                icon="pi pi-users"
+                icon={<AppIcon name="users" />}
                 label="Membros"
                 text
                 onClick={() => abrirMembros(projetoAtivo.id)}
@@ -363,7 +364,7 @@ export function ProjetosPage() {
             )}
             {projetoAtivo && projetoAtivo.donoId === currentUserId && (
               <Button
-                icon="pi pi-trash"
+                icon={<AppIcon name="trash" />}
                 label="Excluir"
                 severity="danger"
                 text
@@ -382,11 +383,11 @@ export function ProjetosPage() {
           />
         ) : (
           <div className="flex flex-column align-items-center justify-content-center flex-1 gap-3 p-5">
-            <i className="pi pi-inbox text-4xl text-color-secondary" />
+            <AppIcon name="inbox" className="text-4xl text-color-secondary"  />
             <p className="text-color-secondary m-0">
               Voce ainda nao tem projetos. Crie o primeiro ao lado.
             </p>
-            <Button label="Novo projeto" icon="pi pi-plus" onClick={abrirNovoProjeto} />
+            <Button label="Novo projeto" icon={<AppIcon name="plus" />} onClick={abrirNovoProjeto} />
           </div>
         )}
       </div>
@@ -429,7 +430,7 @@ export function ProjetosPage() {
         footer={(
           <div className="flex justify-content-end gap-2">
             <Button label="Cancelar" text disabled={creatingCard} onClick={() => setNovoCard({ visible: false, titulo: '', colunaId: null })} />
-            <Button label="Criar card" icon="pi pi-plus" loading={creatingCard} onClick={criarCardNoProjeto} />
+            <Button label="Criar card" icon={<AppIcon name="plus" />} loading={creatingCard} onClick={criarCardNoProjeto} />
           </div>
         )}
       >

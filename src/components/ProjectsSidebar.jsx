@@ -1,3 +1,4 @@
+import { AppIcon } from "./icons/AppIcon";
 // components/ProjectsSidebar.jsx
 import { useState } from 'react';
 import { InputText } from 'primereact/inputtext';
@@ -44,7 +45,7 @@ function ProjectRow({ projeto, ativo, currentUserId, onSelect, onRename, onOpenM
         )}
         {canManage && (
           <Button
-            icon="pi pi-pencil"
+            icon={<AppIcon name="pencil" />}
             text
             rounded
             size="small"
@@ -67,7 +68,7 @@ function ProjectRow({ projeto, ativo, currentUserId, onSelect, onRename, onOpenM
         </AvatarGroup>
         {canManage && (
           <Button
-            icon="pi pi-users"
+            icon={<AppIcon name="users" />}
             text
             rounded
             size="small"
@@ -96,9 +97,9 @@ export default function ProjectsSidebar({
       <div className="projetos-sidebar__header">
         <span>{title}</span>
         <div className="flex align-items-center gap-1">
-          <Button icon="pi pi-plus" rounded text size="small" onClick={onNovoProjeto} title="Novo projeto" />
+          <Button icon={<AppIcon name="plus" />} rounded text size="small" onClick={onNovoProjeto} title="Novo projeto" />
           <Button
-            icon="pi pi-times"
+            icon={<AppIcon name="x" />}
             rounded
             text
             size="small"

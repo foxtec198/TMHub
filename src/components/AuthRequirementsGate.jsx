@@ -1,3 +1,4 @@
+import { AppIcon } from "./icons/AppIcon";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -164,7 +165,7 @@ export function AuthRequirementsGate() {
       {profileStep && (
         <div className="auth-requirements-content">
           <div className="auth-requirements-intro">
-            <i className="pi pi-user-edit" />
+            <AppIcon name="user-edit"  />
             <div>
               <strong>Precisamos confirmar seus dados</strong>
               <span>O CPF é obrigatório. A foto de perfil é opcional.</span>
@@ -175,18 +176,18 @@ export function AuthRequirementsGate() {
           </label>
           <div className="required-photo">
             <div className="required-photo-preview">
-              {photo ? <img src={photo} alt="Prévia da foto de perfil" /> : <i className="pi pi-user" />}
+              {photo ? <img src={photo} alt="Prévia da foto de perfil" /> : <AppIcon name="user"  />}
             </div>
             <div>
               <strong>Foto de perfil <small>(opcional)</small></strong>
               <span>PNG, JPG ou WEBP de até 1,5 MB.</span>
-              <Button label={photo ? "Trocar foto" : "Selecionar foto"} icon="pi pi-camera" outlined onClick={() => fileRef.current?.click()} />
+              <Button label={photo ? "Trocar foto" : "Selecionar foto"} icon={<AppIcon name="camera" />} outlined onClick={() => fileRef.current?.click()} />
               <input ref={fileRef} hidden type="file" accept="image/png,image/jpeg,image/webp" onChange={selectPhoto} />
             </div>
           </div>
           <div className="auth-requirements-actions">
-            <Button label="Sair" icon="pi pi-sign-out" text severity="secondary" onClick={logout} />
-            <Button label="Salvar e continuar" icon="pi pi-arrow-right" iconPos="right" onClick={saveProfile} />
+            <Button label="Sair" icon={<AppIcon name="logout" />} text severity="secondary" onClick={logout} />
+            <Button label="Salvar e continuar" icon={<AppIcon name="arrow-right" />} iconPos="right" onClick={saveProfile} />
           </div>
         </div>
       )}
@@ -194,7 +195,7 @@ export function AuthRequirementsGate() {
       {passwordStep && (
         <div className="auth-requirements-content">
           <div className={`auth-requirements-intro ${requirements.senha_padrao ? "is-warning" : ""}`}>
-            <i className={requirements.senha_padrao ? "pi pi-info-circle" : "pi pi-shield"} />
+            <AppIcon name={requirements.senha_padrao ? "info-circle" : "shield"} />
             <div>
               <strong>{requirements.senha_padrao ? "Você ainda utiliza a senha padrão" : "Sua senha atual não atende aos requisitos"}</strong>
               <span>{requirements.senha_padrao ? "Recomendamos alterá-la agora. Você também pode continuar temporariamente." : "A alteração é obrigatória antes de acessar o sistema."}</span>
@@ -206,11 +207,11 @@ export function AuthRequirementsGate() {
           <label>Confirmar nova senha
             <Password value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} feedback={false} toggleMask />
           </label>
-          <small className="auth-password-rule"><i className="pi pi-info-circle" /> Use 8 ou mais caracteres, com maiúscula, minúscula, número e símbolo.</small>
+          <small className="auth-password-rule"><AppIcon name="info-circle"  /> Use 8 ou mais caracteres, com maiúscula, minúscula, número e símbolo.</small>
           <div className="auth-requirements-actions">
-            <Button label="Sair" icon="pi pi-sign-out" text severity="secondary" onClick={logout} />
+            <Button label="Sair" icon={<AppIcon name="logout" />} text severity="secondary" onClick={logout} />
             {requirements.senha_padrao && <Button label="Continuar por agora" text onClick={ignoreDefaultPassword} />}
-            <Button label="Alterar senha" icon="pi pi-shield" onClick={changePassword} />
+            <Button label="Alterar senha" icon={<AppIcon name="shield" />} onClick={changePassword} />
           </div>
         </div>
       )}

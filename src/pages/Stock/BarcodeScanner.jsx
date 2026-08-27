@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
@@ -160,7 +161,7 @@ export function BarcodeScanner({ visible, products, onHide, onProduct }) {
                         aria-label="Código de barras"
                         autoFocus
                     />
-                    <Button type="button" icon="pi pi-arrow-right" label="Usar" onClick={() => resolveProduct(manualCode)} />
+                    <Button type="button" icon={<AppIcon name="arrow-right" />} label="Usar" onClick={() => resolveProduct(manualCode)} />
                 </div>
             </div>
         </Dialog>

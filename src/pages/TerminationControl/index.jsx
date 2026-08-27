@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -397,29 +398,29 @@ function TerminationControlContent() {
         actions={<>
           <Button
             label={`Filtros${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
-            icon="pi pi-filter"
+            icon={<AppIcon name="filter" />}
             outlined
             onClick={(event) => filterPanel.current?.toggle(event)}
           />
-          <Button label="Calcular rescisão" icon="pi pi-calculator" outlined onClick={openCalculation} />
-          {canImport && <Button label="Importar planilha" icon="pi pi-file-import" onClick={() => setImportOpen(true)} />}
-          {isAdmin && <Button label="Excluir tudo" icon="pi pi-trash" severity="danger" outlined disabled={!records.length} onClick={() => setDeleteAllOpen(true)} />}
+          <Button label="Calcular rescisão" icon={<AppIcon name="calculator" />} outlined onClick={openCalculation} />
+          {canImport && <Button label="Importar planilha" icon={<AppIcon name="file-import" />} onClick={() => setImportOpen(true)} />}
+          {isAdmin && <Button label="Excluir tudo" icon={<AppIcon name="trash" />} severity="danger" outlined disabled={!records.length} onClick={() => setDeleteAllOpen(true)} />}
         </>}
       />
 
       <div className="termination-summary">
-        <article><i className="pi pi-users" /><div><small>Rescisões</small><strong>{cardNumber(summary.total)}</strong><span>no período filtrado</span></div></article>
-        <article><i className="pi pi-arrow-up-right" /><div><small>Proventos</small><strong>{cardMoney(summary.proventos)}</strong><span>valor bruto</span></div></article>
-        <article className="is-danger"><i className="pi pi-arrow-down-right" /><div><small>Descontos</small><strong>{cardMoney(summary.descontos)}</strong><span>retenções informadas</span></div></article>
-        <article className="is-success"><i className="pi pi-wallet" /><div><small>Líquido</small><strong>{cardMoney(summary.liquido)}</strong><span>pago aos colaboradores</span></div></article>
-        <article className="is-warning"><i className="pi pi-building-columns" /><div><small>FGTS rescisório</small><strong>{cardMoney(summary.fgts_rescisorio)}</strong><span>guia rescisória</span></div></article>
-        <article><i className="pi pi-chart-line" /><div><small>Custo bruto</small><strong>{cardMoney(summary.custo_bruto)}</strong><span>proventos + FGTS</span></div></article>
+        <article><AppIcon name="users"  /><div><small>Rescisões</small><strong>{cardNumber(summary.total)}</strong><span>no período filtrado</span></div></article>
+        <article><AppIcon name="arrow-up-right"  /><div><small>Proventos</small><strong>{cardMoney(summary.proventos)}</strong><span>valor bruto</span></div></article>
+        <article className="is-danger"><AppIcon name="arrow-down-right"  /><div><small>Descontos</small><strong>{cardMoney(summary.descontos)}</strong><span>retenções informadas</span></div></article>
+        <article className="is-success"><AppIcon name="wallet"  /><div><small>Líquido</small><strong>{cardMoney(summary.liquido)}</strong><span>pago aos colaboradores</span></div></article>
+        <article className="is-warning"><AppIcon name="building-bank"  /><div><small>FGTS rescisório</small><strong>{cardMoney(summary.fgts_rescisorio)}</strong><span>guia rescisória</span></div></article>
+        <article><AppIcon name="chart-line"  /><div><small>Custo bruto</small><strong>{cardMoney(summary.custo_bruto)}</strong><span>proventos + FGTS</span></div></article>
       </div>
 
       <article className="termination-panel">
         <div className="termination-toolbar">
           <span className="p-input-icon-left">
-            <i className="pi pi-search" />
+            <AppIcon name="search"  />
             <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar nome, matrícula, motivo, contrato ou supervisor" />
           </span>
           <span>{records.length} registro(s)</span>
@@ -442,7 +443,7 @@ function TerminationControlContent() {
             { field: "descontos", header: "Descontos", sortable: true, body: (row) => money(row.descontos), style: { minWidth: "9rem" } },
             { field: "liquido", header: "Líquido", sortable: true, body: (row) => <strong>{money(row.liquido)}</strong>, style: { minWidth: "9rem" } },
             { field: "fgts_rescisorio", header: "FGTS rescisório", sortable: true, body: (row) => money(row.fgts_rescisorio), style: { minWidth: "10rem" } },
-            ...(canEdit ? [{ header: "Ações", body: (row) => <Button icon="pi pi-trash" severity="danger" rounded text aria-label="Excluir rescisão" onClick={() => removeRecord(row)} />, style: { width: "5rem" } }] : []),
+            ...(canEdit ? [{ header: "Ações", body: (row) => <Button icon={<AppIcon name="trash" />} severity="danger" rounded text aria-label="Excluir rescisão" onClick={() => removeRecord(row)} />, style: { width: "5rem" } }] : []),
           ]}
         />
       </article>
@@ -450,7 +451,7 @@ function TerminationControlContent() {
       <OverlayPanel ref={filterPanel} className="termination-filter-panel">
         <div className="termination-filter-heading">
           <div><strong>Filtrar rescisões</strong><span>Os indicadores acompanham este recorte.</span></div>
-          <Button icon="pi pi-filter-slash" rounded text aria-label="Limpar filtros" onClick={clearFilters} />
+          <Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} />
         </div>
         <div className="termination-filter-grid">
           <label className="is-wide"><span>Período de demissão</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" showIcon readOnlyInput hideOnRangeSelection /></label>
@@ -472,33 +473,33 @@ function TerminationControlContent() {
       >
         <div className="termination-delete-content">
           <span className="termination-delete-icon" aria-hidden="true">
-            <i className="pi pi-exclamation-triangle" />
+            <AppIcon name="alert-triangle"  />
           </span>
           <div>
             <strong>Confirma a exclusão de todos os dados?</strong>
             <p>Todas as rescisões importadas serão removidas permanentemente.</p>
             <div className="termination-delete-warning">
-              <i className="pi pi-info-circle" />
+              <AppIcon name="info-circle"  />
               <span>A situação 8 dos colaboradores não será alterada. Esta ação não pode ser desfeita.</span>
             </div>
           </div>
         </div>
         <div className="termination-dialog-actions termination-delete-actions">
           <Button label="Cancelar" outlined onClick={() => setDeleteAllOpen(false)} />
-          <Button label="Excluir todos" icon="pi pi-trash" severity="danger" onClick={removeAllRecords} autoFocus />
+          <Button label="Excluir todos" icon={<AppIcon name="trash" />} severity="danger" onClick={removeAllRecords} autoFocus />
         </div>
       </Dialog>
 
       <Dialog header="Importar rescisões" visible={importOpen} modal className="termination-import-dialog" onHide={() => { setImportOpen(false); setImportFile(null); }}>
         <div className="termination-import-content">
-          <div className="termination-import-note"><i className="pi pi-info-circle" /><span>Use a planilha “Relação de Rescisões Calculadas”. A matrícula vincula cada linha ao colaborador e define automaticamente filial, departamento, contrato e supervisor.</span></div>
+          <div className="termination-import-note"><AppIcon name="info-circle"  /><span>Use a planilha “Relação de Rescisões Calculadas”. A matrícula vincula cada linha ao colaborador e define automaticamente filial, departamento, contrato e supervisor.</span></div>
           <button type="button" className={`termination-dropzone ${importFile ? "has-file" : ""}`} onClick={() => fileInput.current?.click()}>
             <input ref={fileInput} type="file" accept=".xlsx" onChange={(event) => setImportFile(event.target.files?.[0] || null)} />
-            <i className={`pi ${importFile ? "pi-file-check" : "pi-cloud-upload"}`} />
+            <AppIcon name={importFile ? "file-check" : "cloud-upload"} />
             <strong>{importFile?.name || "Selecionar planilha .xlsx"}</strong>
             <span>{importFile ? `${(importFile.size / 1024).toFixed(1)} KB` : "A reimportação da mesma matrícula e data atualiza o registro existente."}</span>
           </button>
-          <div className="termination-dialog-actions"><Button label="Cancelar" text onClick={() => setImportOpen(false)} /><Button label="Importar" icon="pi pi-check" onClick={importSpreadsheet} disabled={!importFile} /></div>
+          <div className="termination-dialog-actions"><Button label="Cancelar" text onClick={() => setImportOpen(false)} /><Button label="Importar" icon={<AppIcon name="check" />} onClick={importSpreadsheet} disabled={!importFile} /></div>
         </div>
       </Dialog>
 
@@ -544,7 +545,7 @@ function TerminationControlContent() {
             </label>
             {inExperiencePeriod && (
               <div className="termination-calculation-info is-wide is-experience">
-                <i className="pi pi-clock" />
+                <AppIcon name="clock"  />
                 <div>
                   <strong>Colaborador em período de experiência</strong>
                   <span>Até {dateLabel(experienceEndDate)}. O motivo fica limitado a término de experiência, sem aviso prévio.</span>
@@ -553,7 +554,7 @@ function TerminationControlContent() {
             )}
             {workedNoticeEndDate && (
               <div className="termination-calculation-info is-wide is-notice">
-                <i className="pi pi-calendar" />
+                <AppIcon name="calendar"  />
                 <div>
                   <strong>Término previsto do aviso: {dateLabel(workedNoticeEndDate)}</strong>
                   <span>{noticeDaysPreview} dias de aviso − 7 dias de redução = {Math.max(0, noticeDaysPreview - 7)} dias trabalhados.</span>
@@ -562,7 +563,7 @@ function TerminationControlContent() {
             )}
             {fgtsBalanceDisabled && (
               <div className="termination-calculation-info is-wide is-restricted">
-                <i className="pi pi-lock" />
+                <AppIcon name="lock"  />
                 <div>
                   <strong>Saldo do FGTS não aplicável</strong>
                   <span>Para justa causa, o saldo não participa do cálculo da multa.</span>
@@ -573,11 +574,11 @@ function TerminationControlContent() {
             <label><span>Férias vencidas em dobro</span><InputNumber value={calculationForm.ferias_em_dobro} onValueChange={(event) => changeCalculation("ferias_em_dobro", event.value || 0)} min={0} max={10} showButtons /></label>
             <label><span>Outras verbas estimadas</span><InputNumber value={calculationForm.outras_verbas} onValueChange={(event) => changeCalculation("outras_verbas", event.value || 0)} mode="currency" currency="BRL" locale="pt-BR" min={0} /></label>
             <label><span>Descontos informados</span><InputNumber value={calculationForm.descontos} onValueChange={(event) => changeCalculation("descontos", event.value || 0)} mode="currency" currency="BRL" locale="pt-BR" min={0} /></label>
-            <div className="termination-calculate-action is-wide"><Button label="Gerar provisão" icon="pi pi-calculator" onClick={calculateTermination} /></div>
+            <div className="termination-calculate-action is-wide"><Button label="Gerar provisão" icon={<AppIcon name="calculator" />} onClick={calculateTermination} /></div>
           </div>
 
           <div className={`termination-calculation-result ${calculation ? "has-result" : ""}`}>
-            {!calculation ? <div className="termination-result-empty"><i className="pi pi-calculator" /><strong>Memória de cálculo</strong><span>Preencha os dados para visualizar a provisão detalhada.</span></div> : <>
+            {!calculation ? <div className="termination-result-empty"><AppIcon name="calculator"  /><strong>Memória de cálculo</strong><span>Preencha os dados para visualizar a provisão detalhada.</span></div> : <>
               <div className="termination-result-employee">
                 <div>
                   <small>Colaborador</small>

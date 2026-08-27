@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
@@ -23,12 +24,12 @@ import "./pcd.css";
 const TIPOS_PCD = ["Motora", "Visual", "Auditiva", "Intelectual", "Outras", "Reabilitado"];
 
 const TYPE_ICONS = {
-  "Motora": "pi pi-arrows-alt",
-  "Visual": "pi pi-eye",
-  "Auditiva": "pi pi-volume-up",
-  "Intelectual": "pi pi-book",
-  "Outras": "pi pi-question-circle",
-  "Reabilitado": "pi pi-refresh",
+  "Motora": "arrows-maximize",
+  "Visual": "eye",
+  "Auditiva": "volume",
+  "Intelectual": "book",
+  "Outras": "question",
+  "Reabilitado": "refresh",
 };
 
 const EMPTY_FILTERS = {
@@ -242,7 +243,7 @@ export function Pcd() {
     confirmDialog({
       header: "Excluir todos os dados de PCD",
       message: "Isso remove a marcação de PCD, o tipo e a observação de todos os colaboradores. Use apenas em caso de erro na importação. Deseja continuar?",
-      icon: "pi pi-exclamation-triangle",
+      icon: appIcon("alert-triangle"),
       acceptLabel: "Excluir tudo",
       rejectLabel: "Cancelar",
       acceptClassName: "p-button-danger",
@@ -282,12 +283,12 @@ export function Pcd() {
 
   const speedDialItems = [
     ...(canEdit ? [
-      { label: "Importar planilha", icon: "pi pi-upload", command: () => setImportOpen(true) },
-      { label: "Marcar colaborador como PCD", icon: "pi pi-plus", command: openNew },
+      { label: "Importar planilha", icon: appIcon("upload"), command: () => setImportOpen(true) },
+      { label: "Marcar colaborador como PCD", icon: appIcon("plus"), command: openNew },
     ] : []),
-    { label: "Exportar (em breve)", icon: "pi pi-download", disabled: true, command: () => {} },
+    { label: "Exportar (em breve)", icon: appIcon("download"), disabled: true, command: () => {} },
     ...(isAdmin ? [
-      { label: "Excluir todos os dados", icon: "pi pi-trash", command: confirmDeleteAll },
+      { label: "Excluir todos os dados", icon: appIcon("trash"), command: confirmDeleteAll },
     ] : []),
   ];
 
@@ -297,10 +298,10 @@ export function Pcd() {
       title="Controle de PCD"
       description="Colaboradores com deficiência, organizados por departamento e centro de custo."
       actions={<>
-        <Button icon="pi pi-refresh" label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
+        <Button icon={<AppIcon name="refresh" />} label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
         <Button
           type="button"
-          icon="pi pi-filter-fill"
+          icon={<AppIcon name="filter-filled" />}
           label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
           outlined
           onClick={(event) => filterPanel.current?.toggle(event)}
@@ -310,7 +311,7 @@ export function Pcd() {
 
     {(canEdit || isAdmin) && <div className="pcd-speed-dial">
       <Tooltip target=".pcd-speed-dial .p-speeddial-action" position="left" showDelay={150} />
-      <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações de PCD" />
+      <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon={<AppIcon name="plus" />} hideIcon={<AppIcon name="x" />} aria-label="Ações de PCD" />
     </div>}
 
     <OverlayPanel ref={filterPanel} className="pcd-filter-panel">
@@ -319,7 +320,7 @@ export function Pcd() {
           <strong>Filtrar colaboradores</strong>
           <span>Combine um ou mais filtros.</span>
         </div>
-        <Button type="button" icon="pi pi-filter-slash" text rounded aria-label="Limpar filtros" onClick={() => setFilters(EMPTY_FILTERS)} />
+        <Button type="button" icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={() => setFilters(EMPTY_FILTERS)} />
       </div>
       <Divider />
 
@@ -350,15 +351,15 @@ export function Pcd() {
     </OverlayPanel>
 
     <div className="pcd-summary">
-      <article className="pcd-summary-card"><i className="pi pi-users" /><div><small>Total PCD</small><strong>{filteredColaboradores.length}</strong></div></article>
+      <article className="pcd-summary-card"><AppIcon name="users"  /><div><small>Total PCD</small><strong>{filteredColaboradores.length}</strong></div></article>
       {Object.entries(summaryByType).map(([tipo, count]) => (
-        <article className="pcd-summary-card" key={tipo}><i className={TYPE_ICONS[tipo] || "pi pi-tag"} /><div><small>{tipo}</small><strong>{count}</strong></div></article>
+        <article className="pcd-summary-card" key={tipo}><AppIcon name={TYPE_ICONS[tipo] || "tag"} /><div><small>{tipo}</small><strong>{count}</strong></div></article>
       ))}
     </div>
 
     <div className="pcd-panel">
       <div className="pcd-filters">
-        <span className="p-input-icon-left"><i className="pi pi-search" /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nome, matrícula, cargo ou tipo" /></span>
+        <span className="p-input-icon-left"><AppIcon name="search"  /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nome, matrícula, cargo ou tipo" /></span>
       </div>
 
       {departments.length === 0 && <p className="pcd-empty">Nenhum colaborador PCD encontrado.</p>}
@@ -387,9 +388,9 @@ export function Pcd() {
                   return (
                     <article className="pcd-center" key={centerId}>
                       <header className="pcd-center-header">
-                        <i className="pi pi-building" />
+                        <AppIcon name="building"  />
                         <strong>{center.centro_custo || "Centro de custo não informado"}</strong>
-                        <span><i className="pi pi-user" /> {center.supervisor}</span>
+                        <span><AppIcon name="user"  /> {center.supervisor}</span>
                       </header>
 
                       <ul className="pcd-employee-list">
@@ -441,7 +442,7 @@ export function Pcd() {
                             {canEdit && (
                               <div className="pcd-employee-actions">
                                 <Button
-                                  icon="pi pi-pencil"
+                                  icon={<AppIcon name="pencil" />}
                                   rounded
                                   text
                                   aria-label={`Editar ${colaborador.nome}`}
@@ -449,7 +450,7 @@ export function Pcd() {
                                 />
 
                                 <Button
-                                  icon="pi pi-times"
+                                  icon={<AppIcon name="x" />}
                                   rounded
                                   text
                                   severity="danger"
@@ -507,7 +508,7 @@ export function Pcd() {
 
         <div className="pcd-dialog-actions">
           <Button label="Cancelar" text disabled={saving} onClick={() => setManageForm(null)} />
-          <Button label="Salvar" icon="pi pi-check" loading={saving} onClick={saveManage} />
+          <Button label="Salvar" icon={<AppIcon name="check" />} loading={saving} onClick={saveManage} />
         </div>
       </div>}
     </Dialog>
@@ -519,7 +520,7 @@ export function Pcd() {
         {spreadsheet && <small>Arquivo selecionado: {spreadsheet.name}</small>}
         <div className="pcd-dialog-actions">
           <Button type="button" label="Cancelar" text disabled={importing} onClick={closeImport} />
-          <Button type="submit" label={importing ? "Importando..." : "Importar"} icon="pi pi-upload" loading={importing} disabled={!spreadsheet || importing} />
+          <Button type="submit" label={importing ? "Importando..." : "Importar"} icon={<AppIcon name="upload" />} loading={importing} disabled={!spreadsheet || importing} />
         </div>
       </form>
     </Dialog>

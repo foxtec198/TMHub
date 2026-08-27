@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import './products.css';
 
 import { InputText } from 'primereact/inputtext';
@@ -152,7 +153,7 @@ export function Products() {
         confirmDialog({
             message: `Deseja realmente excluir "${product.nome}"?`,
             header: 'Confirmar exclusão',
-            icon: 'pi pi-exclamation-triangle',
+            icon: appIcon("alert-triangle"),
             acceptClassName: 'p-button-danger',
             acceptLabel: 'Excluir',
             rejectLabel: 'Cancelar',
@@ -213,8 +214,8 @@ export function Products() {
             header: 'Ações',
             body: (row) => (
                 <div className="flex gap-2">
-                    <Button icon="pi pi-pencil" rounded text onClick={() => openEdit(row)} tooltip="Editar" />
-                    <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDelete(row)} tooltip="Excluir" />
+                    <Button icon={<AppIcon name="pencil" />} rounded text onClick={() => openEdit(row)} tooltip="Editar" />
+                    <Button icon={<AppIcon name="trash" />} rounded text severity="danger" onClick={() => confirmDelete(row)} tooltip="Excluir" />
                 </div>
             ),
         },
@@ -246,7 +247,7 @@ export function Products() {
                 />
             </div>
                 <div className="products-category-actions flex justify-content-end">
-                    <Button icon="pi pi-tags" label="Categorias" outlined onClick={() => setCatDialogVisible(true)} />
+                    <Button icon={<AppIcon name="tags" />} label="Categorias" outlined onClick={() => setCatDialogVisible(true)} />
                 </div>
 
             <div className="products-table-section flex flex-column overflow-auto">
@@ -261,7 +262,7 @@ export function Products() {
             </div>
 
             <Button
-                icon="pi pi-plus"
+                icon={<AppIcon name="plus" />}
                 size="large"
                 className="p-4"
                 rounded
@@ -323,7 +324,7 @@ export function Products() {
                         <label htmlFor="local">Local do estoque</label>
                     </FloatLabel>
 
-                    <Button type="submit" label={isEditing ? 'Salvar alterações' : 'Cadastrar produto'} icon="pi pi-check" />
+                    <Button type="submit" label={isEditing ? 'Salvar alterações' : 'Cadastrar produto'} icon={<AppIcon name="check" />} />
                 </form>
             </Dialog>
 
@@ -331,14 +332,14 @@ export function Products() {
                 <div className="flex flex-column gap-3">
                     <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); handleAddCategory(); }}>
                         <InputText className="w-full" placeholder="Nome da categoria" value={newCategory.nome} onChange={(e) => setNewCategory({ ...newCategory, nome: e.target.value })} />
-                        <Button type="submit" icon="pi pi-plus" />
+                        <Button type="submit" icon={<AppIcon name="plus" />} />
                     </form>
 
                     <ul className="category-list">
                         {categories.map((category) => (
                             <li key={category.id} className="category-item">
                                 <span>{category.nome}</span>
-                                <Button icon="pi pi-trash" text rounded severity="danger" onClick={() => handleDeleteCategory(category)} />
+                                <Button icon={<AppIcon name="trash" />} text rounded severity="danger" onClick={() => handleDeleteCategory(category)} />
                             </li>
                         ))}
                     </ul>

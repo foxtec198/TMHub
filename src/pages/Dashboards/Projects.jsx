@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -49,7 +50,7 @@ function MemberAvatar({ member, photosByUserId, small = false }) {
 }
 
 function EmptyChart({ text }) {
-  return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
+  return <Placeholder variant="chart" icon={<AppIcon name="chart-bar" />} title={text} />;
 }
 
 const projectDoughnutCenterPlugin = {
@@ -183,8 +184,8 @@ export function ProjectDashboard() {
         title="Dashboard de Projetos"
         description="Prazos, execução e distribuição dos cards pelos membros."
         actions={<>
-          <div className="project-dashboard-period"><i className="pi pi-calendar" />{filters.periodo?.[0]?.toLocaleDateString("pt-BR")} — {filters.periodo?.[1]?.toLocaleDateString("pt-BR")}</div>
-          <Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
+          <div className="project-dashboard-period"><AppIcon name="calendar"  />{filters.periodo?.[0]?.toLocaleDateString("pt-BR")} — {filters.periodo?.[1]?.toLocaleDateString("pt-BR")}</div>
+          <Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
         </>}
       />
 
@@ -203,8 +204,8 @@ export function ProjectDashboard() {
           ))}
         </div>
         <div className="project-progress-totals">
-          <span><i className="pi pi-users" /><strong>{summary.participantes || 0}</strong><small>Participantes</small></span>
-          <span><i className="pi pi-folder-open" /><strong>{summary.projetos || 0}</strong><small>Projetos</small></span>
+          <span><AppIcon name="users"  /><strong>{summary.participantes || 0}</strong><small>Participantes</small></span>
+          <span><AppIcon name="folder-open"  /><strong>{summary.projetos || 0}</strong><small>Projetos</small></span>
         </div>
       </section>
 
@@ -289,7 +290,7 @@ export function ProjectDashboard() {
       <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
         <div className="dashboard-filter-title">
           <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
-          <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+          <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
         </div>
         <div className="dashboard-filter-grid">
           <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>

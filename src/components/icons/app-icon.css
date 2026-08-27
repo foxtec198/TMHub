@@ -1,0 +1,22 @@
+.tm-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  line-height: 1;
+  vertical-align: -0.125em;
+}
+
+.tm-icon--spin {
+  animation: tm-icon-spin 0.9s linear infinite;
+}
+
+@keyframes tm-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-icon--spin {
+    animation-duration: 1.8s;
+  }
+}

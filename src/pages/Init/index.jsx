@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useEffect, useState } from "react";
 import connect from "../../utils/request";
 import "./init.css";
@@ -9,14 +10,14 @@ const documentation = [
   {
     title: "Documentação do Frontend",
     description: "Interface React, componentes, permissões, temas e fluxo de desenvolvimento.",
-    icon: "pi pi-desktop",
+    icon: appIcon("desktop"),
     tech: "React + Vite",
     href: "https://github.com/foxtec198/tmhub#readme",
   },
   {
     title: "Documentação da API",
     description: "Rotas, serviços, banco de dados, WebSocket e execução do backend.",
-    icon: "pi pi-server",
+    icon: appIcon("server"),
     tech: "Flask + PostgreSQL",
     href: "https://github.com/foxtec198/api_tmhub#readme",
   },
@@ -49,14 +50,16 @@ export function Init() {
               quais informações enviar para agilizar seu atendimento.
             </p>
             <div className="init-support-hero-tags">
-              <span><i className="pi pi-book" /> Documentação atualizada</span>
-              <span><i className="pi pi-comments" /> Suporte interno</span>
-              <span><i className="pi pi-shield" /> Acesso controlado</span>
+              <span><AppIcon name="book"  /> Documentação atualizada</span>
+              <span><AppIcon name="messages"  /> Suporte interno</span>
+              <span><AppIcon name="shield"  /> Acesso controlado</span>
             </div>
           </div>
           <div className="init-support-hero-mark" aria-hidden="true">
             <ThemeLogo variant="inverse" alt="" />
-            <i className="pi pi-headphones" />
+            <span className="init-support-hero-icon">
+              <AppIcon name="headphones" size="2rem" />
+            </span>
           </div>
         </section>
 
@@ -70,18 +73,18 @@ export function Init() {
             <h2>Documentação do projeto</h2>
             <p>Acesse diretamente o README oficial de cada aplicação no GitHub.</p>
           </div>
-          <i className="pi pi-github" aria-hidden="true" />
+          <AppIcon name="brand-github" aria-hidden="true"  />
         </header>
 
         <div className="init-docs-grid">
           {documentation.map((item) => (
             <article className="init-doc-card" key={item.title}>
-              <div className="init-doc-icon"><i className={item.icon} /></div>
+              <div className="init-doc-icon">{typeof item.icon === "string" ? <AppIcon icon={item.icon} /> : item.icon}</div>
               <span className="init-doc-tech">{item.tech}</span>
               <h3>{item.title}</h3>
               <p>{item.description}</p>
               <a href={item.href} target="_blank" rel="noreferrer">
-                <i className="pi pi-external-link" />
+                <AppIcon name="external-link"  />
                 Abrir documentação
               </a>
             </article>
@@ -92,7 +95,7 @@ export function Init() {
       <section className="init-support-grid">
         <article className="init-help-card">
           <div className="init-help-card-title">
-            <i className="pi pi-send" />
+            <AppIcon name="send"  />
             <div>
               <span>Atendimento eficiente</span>
               <h2>Antes de solicitar suporte</h2>
@@ -125,7 +128,7 @@ export function Init() {
               </div>
             )) : (
               <div className="init-team-empty">
-                <span><i className="pi pi-users" /></span>
+                <span><AppIcon name="users"  /></span>
                 <div>
                   <strong>Equipe de administradores</strong>
                   <small>Consulte um administrador interno.</small>
@@ -139,7 +142,7 @@ export function Init() {
             target="_blank"
             rel="noreferrer"
           >
-            <i className="pi pi-github" />
+            <AppIcon name="brand-github"  />
             Registrar problema técnico
           </a>
         </article>

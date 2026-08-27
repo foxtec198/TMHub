@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -26,7 +27,7 @@ function MetricList({ rows = [], label }) {
 }
 
 function Summary({ icon, label, value, detail, tone = "neutral" }) {
-  return <article className={`project-dashboard-summary-card tm-dashboard-card is-${tone}`}><span className="project-dashboard-summary-card__icon"><i className={icon} /></span><span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span></article>;
+  return <article className={`project-dashboard-summary-card tm-dashboard-card is-${tone}`}><span className="project-dashboard-summary-card__icon">{typeof icon === "string" ? <AppIcon name={icon} /> : icon}</span><span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span></article>;
 }
 
 export function GlosaDashboard() {
@@ -54,20 +55,20 @@ export function GlosaDashboard() {
   const chart = useMemo(() => ({ labels: (data?.evolucao_mensal || []).map((row) => row.competencia), datasets: [{ label: "Valor", data: (data?.evolucao_mensal || []).map((row) => row.valor), backgroundColor: chartTheme.danger, borderRadius: 8 }] }), [data, chartTheme]);
 
   return <main className="project-dashboard">
-    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /></>} />
+    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /></>} />
     <section className="project-dashboard-summary">
-      <Summary icon="pi pi-file" label="Glosas" value={summary.total_registros || 0} detail="registros no período" />
-      <Summary icon="pi pi-money-bill" label="Valor total" value={money(summary.valor_total)} detail="valor apontado" tone="violet" />
-      <Summary icon="pi pi-check-circle" label="Valor coberto" value={money(summary.valor_coberto)} detail="com cobertura comprovada" tone="success" />
-      <Summary icon="pi pi-times-circle" label="Valor descoberto" value={money(summary.valor_descoberto)} detail="impacto sem cobertura" tone="danger" />
-      <Summary icon="pi pi-clock" label="Em análise" value={money(summary.valor_em_analise)} detail="aguardando tratativa" tone="warning" />
+      <Summary icon={<AppIcon name="file" />} label="Glosas" value={summary.total_registros || 0} detail="registros no período" />
+      <Summary icon={<AppIcon name="cash" />} label="Valor total" value={money(summary.valor_total)} detail="valor apontado" tone="violet" />
+      <Summary icon={<AppIcon name="circle-check" />} label="Valor coberto" value={money(summary.valor_coberto)} detail="com cobertura comprovada" tone="success" />
+      <Summary icon={<AppIcon name="circle-x" />} label="Valor descoberto" value={money(summary.valor_descoberto)} detail="impacto sem cobertura" tone="danger" />
+      <Summary icon={<AppIcon name="clock" />} label="Em análise" value={money(summary.valor_em_analise)} detail="aguardando tratativa" tone="warning" />
     </section>
     <section className="project-dashboard-analysis"><article className="project-dashboard-panel tm-dashboard-panel project-dashboard-performance"><header><div><span>Financeiro</span><h2>Evolução mensal</h2></div></header><div className="project-dashboard-chart">{data?.evolucao_mensal?.length ? <Chart type="bar" data={chart} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: chartTheme.text } }, y: { beginAtZero: true, grid: { color: chartTheme.grid }, ticks: { color: chartTheme.text } } } }} /> : <div className="project-dashboard-empty">Sem movimentação no período.</div>}</div></article><article className="project-dashboard-panel tm-dashboard-panel project-dashboard-insight"><span>Resumo do recorte</span><h2>{summary.valor_descoberto ? "Há valores sem cobertura para tratar" : "Não há valores descobertos"}</h2><p>Os indicadores consideram somente as glosas dentro do período e dos filtros escolhidos.</p><div><span><small>Dias apontados</small><strong>{summary.dias || 0}</strong></span><em>{summary.total_registros || 0} glosas</em></div></article></section>
     <section className="project-dashboard-detail-grid"><article className="project-dashboard-panel tm-dashboard-panel"><header><div><span>Contratos</span><h2>Maior impacto financeiro</h2></div></header><MetricList rows={data?.por_contrato} label="contrato" /></article><article className="project-dashboard-panel tm-dashboard-panel"><header><div><span>Motivos</span><h2>Ocorrências e colaboradores</h2></div></header><MetricList rows={data?.por_motivo} label="motivo" /></article></section>
     <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
       <div className="dashboard-filter-title">
         <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
-        <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
+        <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
       <div className="dashboard-filter-grid">
         <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>

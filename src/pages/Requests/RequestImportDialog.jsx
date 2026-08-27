@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -62,12 +63,12 @@ export function RequestImportDialog({ visible, onHide, onImported }) {
   return <Dialog header="Importar requisições" visible={visible} modal className="request-import-dialog" closable={!importing} closeOnEscape={!importing} onHide={close}>
     <form className="request-import-form" onSubmit={importRequests}>
       <p>A operação é transacional: se uma linha estiver inválida, nenhuma requisição será criada.</p>
-      <Button type="button" label="Baixar planilha modelo" icon="pi pi-download" outlined disabled={importing} onClick={downloadTemplate} />
+      <Button type="button" label="Baixar planilha modelo" icon={<AppIcon name="download" />} outlined disabled={importing} onClick={downloadTemplate} />
       <input ref={fileInput} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={importing} onChange={(event) => setSpreadsheet(event.target.files?.[0] || null)} />
       {spreadsheet && <small>Arquivo selecionado: {spreadsheet.name}</small>}
       <div className="flex justify-content-end gap-2">
         <Button type="button" label="Cancelar" text disabled={importing} onClick={close} />
-        <Button type="submit" label={importing ? "Importando..." : "Importar requisições"} icon="pi pi-upload" loading={importing} disabled={!spreadsheet || importing} />
+        <Button type="submit" label={importing ? "Importando..." : "Importar requisições"} icon={<AppIcon name="upload" />} loading={importing} disabled={!spreadsheet || importing} />
       </div>
     </form>
   </Dialog>;

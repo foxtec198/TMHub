@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -111,7 +112,7 @@ export function TMOpsTasks() {
       header: "Respostas",
       body: (row) => (
         <Button
-          icon="pi pi-eye"
+          icon={<AppIcon name="eye" />}
           text
           rounded
           tooltip="Ver checklist respondido"
@@ -127,26 +128,31 @@ export function TMOpsTasks() {
         section="TM Ops"
         title="Tarefas"
         description="Acompanhe as tarefas geradas pelas rotinas e suas execuções."
-        actions={<Button icon="pi pi-refresh" outlined onClick={load} />}
+        actions={<Button icon={<AppIcon name="refresh" />} outlined onClick={load} />}
       />
       <section className="tm-ops-task-cards">
         <div>
+          <AppIcon name="list-check" />
           <b>{stats.total || 0}</b>
           <span>Total</span>
         </div>
         <div>
+          <AppIcon name="folder-open" />
           <b>{stats.abertas || 0}</b>
           <span>Abertas</span>
         </div>
         <div>
+          <AppIcon name="alert-triangle" />
           <b>{stats.atrasadas || 0}</b>
           <span>Atrasadas</span>
         </div>
         <div>
+          <AppIcon name="pause" />
           <b>{stats.pausadas || 0}</b>
           <span>Pausadas</span>
         </div>
         <div>
+          <AppIcon name="circle-check" />
           <b>{stats.concluidas || 0}</b>
           <span>Finalizadas</span>
         </div>
@@ -207,13 +213,13 @@ export function TMOpsTasks() {
       >
         {detailLoading && (
           <div className="tm-ops-task-detail-state">
-            <i className="pi pi-spin pi-spinner" />
+            <AppIcon name="loader-2"  />
             <span>Carregando checklist, percurso e indicadores...</span>
           </div>
         )}
         {!detailLoading && detailError && (
           <div className="tm-ops-task-detail-state is-error">
-            <i className="pi pi-exclamation-triangle" />
+            <AppIcon name="alert-triangle"  />
             <span>{detailError}</span>
             <Button label="Tentar novamente" onClick={() => openTaskDetail(selectedTask)} />
           </div>
@@ -254,15 +260,15 @@ export function TMOpsTasks() {
                       <div className="tm-ops-response-evidences">
                         {response.evidencias.map((evidence) => (
                           <span key={evidence.id}>
-                            <i
-                              className={
+                            <AppIcon
+                              name={
                                 evidence.tipo === "qrcode"
-                                  ? "pi pi-qrcode"
+                                  ? "qrcode"
                                   : evidence.tipo === "barcode"
-                                    ? "pi pi-barcode"
+                                    ? "barcode"
                                     : evidence.tipo === "signature"
-                                      ? "pi pi-pencil"
-                                      : "pi pi-image"
+                                      ? "pencil"
+                                      : "photo"
                               }
                             />
                             {evidence.url ? (

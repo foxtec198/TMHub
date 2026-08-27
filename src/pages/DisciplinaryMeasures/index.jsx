@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
@@ -206,7 +207,7 @@ export function DisciplinaryMeasures() {
   const confirmDeleteAll = () => confirmDialog({
     header: "Excluir todas as medidas disciplinares",
     message: "Esta ação excluirá permanentemente todos os registros de medidas disciplinares. Deseja continuar?",
-    icon: "pi pi-exclamation-triangle",
+    icon: appIcon("alert-triangle"),
     acceptLabel: "Excluir tudo",
     rejectLabel: "Voltar",
     acceptClassName: "p-button-danger",
@@ -261,7 +262,7 @@ export function DisciplinaryMeasures() {
           <div className="disciplinary-header-actions">
             <Button
               type="button"
-              icon="pi pi-filter-fill"
+              icon={<AppIcon name="filter-filled" />}
               label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
               outlined
               onClick={(event) => {
@@ -269,8 +270,8 @@ export function DisciplinaryMeasures() {
                 filterPanel.current?.toggle(event);
               }}
             />
-            {canCreate && <Button type="button" icon="pi pi-file-excel" label="Importar" onClick={openImport} />}
-            {isAdmin && <Button type="button" icon="pi pi-trash" label="Excluir tudo" severity="danger" outlined onClick={confirmDeleteAll} />}
+            {canCreate && <Button type="button" icon={<AppIcon name="file-spreadsheet" />} label="Importar" onClick={openImport} />}
+            {isAdmin && <Button type="button" icon={<AppIcon name="trash" />} label="Excluir tudo" severity="danger" outlined onClick={confirmDeleteAll} />}
           </div>
         )}
       />
@@ -283,7 +284,7 @@ export function DisciplinaryMeasures() {
           </div>
           <Button
             type="button"
-            icon="pi pi-filter-slash"
+            icon={<AppIcon name="filter-off" />}
             label="Limpar filtros"
             text
             severity="secondary"
@@ -298,7 +299,7 @@ export function DisciplinaryMeasures() {
           <label className="is-wide">
             <span>Busca</span>
             <span className="p-input-icon-left disciplinary-search">
-              <i className="pi pi-search" />
+              <AppIcon name="search"  />
               <InputText value={filters.busca} onChange={(event) => updateFilter("busca", event.target.value)} placeholder="Nome, matrícula, supervisor ou observação" />
             </span>
           </label>
@@ -376,7 +377,7 @@ export function DisciplinaryMeasures() {
         <div className="disciplinary-import">
           <p>Selecione o relatório “Relação de Advertências e Suspensões”. A API padroniza as alíneas, vincula cada matrícula e grava o supervisor responsável no momento da importação.</p>
           <input ref={fileInput} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => { setImportFile(event.target.files?.[0] || null); setImportReport(null); }} />
-          <Button label="Processar planilha" icon="pi pi-upload" disabled={!importFile} onClick={importSpreadsheet} />
+          <Button label="Processar planilha" icon={<AppIcon name="upload" />} disabled={!importFile} onClick={importSpreadsheet} />
           {importReport && (
             <div className="disciplinary-import-report">
               <div className="disciplinary-counts">
