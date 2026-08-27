@@ -98,7 +98,7 @@ export function DreControl() {
   const [branches, setBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
   const [canDelete, setCanDelete] = useState(false);
-  const [expandedRows, setExpandedRows] = useState({});
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
@@ -140,6 +140,17 @@ export function DreControl() {
     .sort()
     .map((value) => ({ label: competenceLabel(value), value })), [filterOptions.competencias]);
 
+  const selectedDepartment = useMemo(
+    () => records.find((record) => record.id === selectedDepartmentId) || records[0] || null,
+    [records, selectedDepartmentId],
+  );
+
+  const plannedRevenue = Number(summary.previsto || 0);
+  const realizedRevenue = Number(summary.rob || 0);
+  const resultValue = Number(summary.margem || 0);
+  const plannedCompletion = plannedRevenue > 0 ? (realizedRevenue / plannedRevenue) * 100 : 0;
+  const plannedCompletionMeter = Math.max(0, Math.min(plannedCompletion, 100));
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -171,15 +182,6 @@ export function DreControl() {
   const refreshData = useCallback(async () => {
     await loadData();
   }, [loadData]);
-
-  const toggleDepartment = (record) => {
-    setExpandedRows((current) => {
-      if (!current[record.id]) return { ...current, [record.id]: true };
-      const remaining = { ...current };
-      delete remaining[record.id];
-      return remaining;
-    });
-  };
 
   const openImport = () => {
     setImportFile(null);
@@ -294,9 +296,17 @@ export function DreControl() {
     }
   };
 
-  const detailTemplate = (record) => <div className="dre-detail">
+  const detailPanel = (record) => {
+    if (!record) return <aside className="dre-department-detail dre-department-detail--empty">
+      <i className="pi pi-chart-bar" />
+      <strong>Selecione um departamento</strong>
+      <span>Os valores detalhados da competência aparecerão aqui.</span>
+    </aside>;
+
+    return <aside className="dre-department-detail">
+      <div className="dre-detail">
     <div className="dre-detail__heading">
-      <div><span>DETALHAMENTO DO DEPARTAMENTO</span><strong>Departamento {record.departamento}</strong></div>
+      <div><span>DETALHE DO DEPARTAMENTO</span><strong>Departamento {record.departamento}</strong></div>
       <small>Competência {competenceLabel(record.competencia)}</small>
     </div>
     <section className="dre-detail__section is-planned">
@@ -345,12 +355,14 @@ export function DreControl() {
         <div className="dre-detail__section-heading"><span>RESULTADO</span><strong>Margem final do departamento</strong></div>
         <div className="dre-detail__grid">
           {detailMetric("Resultado do departamento", record.margem, Number(record.margem) < 0 ? "is-negative" : "is-income", Number(record.margem) < 0 ? "−" : "+")}
-        </div>
-      </section>
-  </div>;
+      </div>
+    </section>
+      </div>
+    </aside>;
+  };
 
   const columns = [
-    { field: "departamento", header: "Departamento", mobileHeader: "Departamento", sortable: true, body: (row) => <div className="dre-contract"><strong>Departamento {row.departamento}</strong><small>Clique para detalhar</small></div>, style: { minWidth: "16rem" } },
+    { field: "departamento", header: "Departamento", mobileHeader: "Departamento", sortable: true, body: (row) => <div className={`dre-contract ${selectedDepartment?.id === row.id ? "is-selected" : ""}`}><strong>Departamento {row.departamento}</strong><small>Clique para visualizar no painel</small></div>, style: { minWidth: "16rem" } },
     { field: "rob", header: "Faturamento", mobileHeader: "Faturamento", body: (row) => <span className="dre-income">+ {currency(Math.abs(Number(row.rob || 0)))}</span>, style: { minWidth: "11rem" } },
     { field: "total_custos", header: "Custos", mobileHeader: "Custos", body: (row) => <span className="dre-expense">− {currency(Math.abs(Number(row.total_custos || 0)))}</span>, style: { minWidth: "11rem" } },
     { field: "margem", header: "Resultado", mobileHeader: "Resultado", body: (row) => <div className={Number(row.margem) < 0 ? "dre-result is-negative" : "dre-result is-positive"}><strong>{Number(row.margem) < 0 ? "−" : "+"} {currency(Math.abs(Number(row.margem || 0)))}</strong><small>{Number(row.percentual_margem || 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% de margem</small></div>, style: { minWidth: "12rem" } },
@@ -369,37 +381,46 @@ export function DreControl() {
       description="Acompanhe faturamento, custos e resultado por departamento e competência."
     />
 
-    <div className="dre-summary" aria-label="Resumo financeiro do recorte">
-      {metric("Faturamento previsto", summary.previsto, "referência contratual", "is-planned", "+")}
-      {metric("Faturamento realizado", summary.rob, "receita bruta", "is-income", "+")}
-      {metric("Receita operacional", summary.rol, "após impostos", "is-income", "+")}
-      {metric("Custos totais", summary.custos, "pessoal e operação", "is-warning", "−")}
-      {metric("Glosas", summary.glosas, "valores descontados", "is-danger", "−")}
-      {metric("Resultado", summary.margem, "margem do recorte", Number(summary.margem) < 0 ? "is-danger" : "is-success", Number(summary.margem) < 0 ? "−" : "+")}
-    </div>
-
     <div className="dre-selection-bar">
       {(isAdmin || branches.length > 1) && <label className="dre-competence-selector"><span>Filial</span><Dropdown value={selectedBranchId} options={branches} optionLabel="nome" optionValue="id" onChange={(event) => { setSelectedBranchId(event.value); setSelectedCompetence(null); }} placeholder="Selecione a filial" /></label>}
       <label className="dre-competence-selector"><span>Competência</span><Dropdown value={selectedCompetence} options={competenceOptions} optionLabel="label" optionValue="value" onChange={(event) => setSelectedCompetence(event.value || null)} placeholder="Todas as competências" showClear /></label>
       {canDelete && <Button label="Excluir competência" icon="pi pi-trash" severity="danger" outlined disabled={!selectedCompetence} onClick={() => setDeleteOpen(true)} />}
     </div>
 
-    {recordsByCompetence.length ? recordsByCompetence.map(({ competence, rows }) => <article className="dre-panel dre-month-panel" key={competence}>
-      <div className="dre-panel__heading"><div><span>DEMONSTRATIVO OPERACIONAL</span><h2>{competenceLabel(competence)}</h2></div><small>{rows.length} departamento(s) · ordem crescente · clique para expandir</small></div>
-      <Table
-        data={rows}
-        columns={columns}
-        dataKey="id"
-        expandedRows={expandedRows}
-        onRowToggle={(event) => setExpandedRows(event.data)}
-        onRowClick={(event) => toggleDepartment(event.data)}
-        rowExpansionTemplate={detailTemplate}
-        rows={10}
-        rowsPerPageOptions={[10, 25, 50, 100]}
-        tableClassName="dre-table"
-        emptyMessage="Nenhum lançamento foi encontrado para esta competência."
-      />
-    </article>) : <article className="dre-panel"><div className="dre-panel__heading"><div><span>DEMONSTRATIVO OPERACIONAL</span><h2>Resultado por departamento</h2></div></div><Table data={[]} columns={columns} tableClassName="dre-table" emptyMessage="Nenhum lançamento foi encontrado para o recorte aplicado." /></article>}
+    <section className="dre-executive-summary" aria-label="Leitura executiva da competência">
+      <article className="dre-executive-summary__card is-planned">
+        <div><span>ADERÊNCIA AO PLANEJADO</span><small>Faturamento realizado em relação ao contrato</small></div>
+        <strong>{compactCurrency(realizedRevenue)}</strong>
+        <div className="dre-executive-summary__comparison"><span>Previsto: {compactCurrency(plannedRevenue)}</span><b>{plannedRevenue > 0 ? `${plannedCompletion.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : "—"}</b></div>
+        <div className="dre-executive-summary__meter"><span style={{ width: `${plannedCompletionMeter}%` }} /></div>
+      </article>
+      <article className={`dre-executive-summary__card ${resultValue < 0 ? "is-negative" : "is-positive"}`}>
+        <div><span>RESULTADO OPERACIONAL</span><small>Resultado líquido após custos, impostos e glosas</small></div>
+        <strong>{resultValue < 0 ? "−" : "+"} {compactCurrency(Math.abs(resultValue))}</strong>
+        <div className="dre-executive-summary__comparison"><span>Custos: {compactCurrency(summary.custos)}</span><b>{Number(summary.percentual_margem || 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% de margem</b></div>
+        <small>Glosas do recorte: {compactCurrency(summary.glosas)}</small>
+      </article>
+    </section>
+
+    <section className="dre-workspace">
+      <article className="dre-panel dre-workspace__list">
+        <div className="dre-panel__heading"><div><span>DEPARTAMENTOS</span><h2>Resultado por departamento</h2></div><small>Ordem crescente · selecione uma linha para analisar</small></div>
+        {recordsByCompetence.length ? recordsByCompetence.map(({ competence, rows }) => <div className="dre-workspace__month" key={competence}>
+          <div className="dre-workspace__month-heading"><strong>{competenceLabel(competence)}</strong><span>{rows.length} departamento(s)</span></div>
+          <Table
+            data={rows}
+            columns={columns}
+            dataKey="id"
+            onRowClick={(event) => setSelectedDepartmentId(event.data.id)}
+            rows={10}
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            tableClassName="dre-table"
+            emptyMessage="Nenhum lançamento foi encontrado para esta competência."
+          />
+        </div>) : <Table data={[]} columns={columns} tableClassName="dre-table" emptyMessage="Nenhum lançamento foi encontrado para o recorte aplicado." />}
+      </article>
+      {detailPanel(selectedDepartment)}
+    </section>
 
     <Dialog header="Importar fonte da DRE" visible={importOpen} modal className="dre-import-dialog" onHide={() => setImportOpen(false)}>
       <div className="dre-dialog-content">
