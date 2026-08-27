@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
-import { Column } from "primereact/column";
-import { DataTable } from "../../components/tables/DataTable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
@@ -13,6 +11,7 @@ import { Tag } from "primereact/tag";
 
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import { PageHeader } from "../../components/PageHeader";
+import { Table } from "../../components/tables/Table";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
@@ -425,30 +424,27 @@ function TerminationControlContent() {
           </span>
           <span>{records.length} registro(s)</span>
         </div>
-        <DataTable
-          value={records}
-          paginator
+        <Table
+          data={records}
+          dataKey="id"
           rows={10}
           rowsPerPageOptions={[10, 25, 50, 100]}
-          stripedRows
-          size="small"
-          dataKey="id"
-          scrollable
-          emptyMessage="Nenhuma rescisão encontrada para os filtros aplicados."
+          emptyTitle="Nenhuma rescisão encontrada para os filtros aplicados."
           tableStyle={{ minWidth: "94rem" }}
-        >
-          <Column field="data_demissao" header="Demissão" sortable body={(row) => dateLabel(row.data_demissao)} style={{ minWidth: "8rem" }} />
-          <Column field="nome" header="Colaborador" sortable body={employeeBody} style={{ minWidth: "17rem" }} />
-          <Column field="centro_custo" header="Filial / contrato" body={contractBody} style={{ minWidth: "20rem" }} />
-          <Column field="motivo_rescisao" header="Motivo" body={reasonBody} style={{ minWidth: "16rem", maxWidth: "20rem" }} />
-          <Column field="data_admissao" header="Admissão" body={(row) => dateLabel(row.data_admissao)} style={{ minWidth: "8rem" }} />
-          <Column field="aviso" header="Aviso" body={(row) => row.aviso || "—"} style={{ minWidth: "7rem" }} />
-          <Column field="proventos" header="Proventos" sortable body={(row) => money(row.proventos)} style={{ minWidth: "9rem" }} />
-          <Column field="descontos" header="Descontos" sortable body={(row) => money(row.descontos)} style={{ minWidth: "9rem" }} />
-          <Column field="liquido" header="Líquido" sortable body={(row) => <strong>{money(row.liquido)}</strong>} style={{ minWidth: "9rem" }} />
-          <Column field="fgts_rescisorio" header="FGTS rescisório" sortable body={(row) => money(row.fgts_rescisorio)} style={{ minWidth: "10rem" }} />
-          {canEdit && <Column header="Ações" frozen alignFrozen="right" body={(row) => <Button icon="pi pi-trash" severity="danger" rounded text aria-label="Excluir rescisão" onClick={() => removeRecord(row)} />} style={{ width: "5rem" }} />}
-        </DataTable>
+          columns={[
+            { field: "data_demissao", header: "Demissão", sortable: true, body: (row) => dateLabel(row.data_demissao), style: { minWidth: "8rem" } },
+            { field: "nome", header: "Colaborador", sortable: true, body: employeeBody, style: { minWidth: "17rem" } },
+            { field: "centro_custo", header: "Filial / contrato", body: contractBody, style: { minWidth: "20rem" } },
+            { field: "motivo_rescisao", header: "Motivo", body: reasonBody, style: { minWidth: "16rem", maxWidth: "20rem" } },
+            { field: "data_admissao", header: "Admissão", body: (row) => dateLabel(row.data_admissao), style: { minWidth: "8rem" } },
+            { field: "aviso", header: "Aviso", body: (row) => row.aviso || "—", style: { minWidth: "7rem" } },
+            { field: "proventos", header: "Proventos", sortable: true, body: (row) => money(row.proventos), style: { minWidth: "9rem" } },
+            { field: "descontos", header: "Descontos", sortable: true, body: (row) => money(row.descontos), style: { minWidth: "9rem" } },
+            { field: "liquido", header: "Líquido", sortable: true, body: (row) => <strong>{money(row.liquido)}</strong>, style: { minWidth: "9rem" } },
+            { field: "fgts_rescisorio", header: "FGTS rescisório", sortable: true, body: (row) => money(row.fgts_rescisorio), style: { minWidth: "10rem" } },
+            ...(canEdit ? [{ header: "Ações", body: (row) => <Button icon="pi pi-trash" severity="danger" rounded text aria-label="Excluir rescisão" onClick={() => removeRecord(row)} />, style: { width: "5rem" } }] : []),
+          ]}
+        />
       </article>
 
       <OverlayPanel ref={filterPanel} className="termination-filter-panel">

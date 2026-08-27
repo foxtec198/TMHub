@@ -15,13 +15,12 @@ import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
 import { ThemeLogo } from "../components/ThemeLogo";
 import { UserAvatar } from "../components/UserAvatar";
-import { BrowserNotificationCenter } from "../components/BrowserNotificationCenter";
 import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
 import { UsageTelemetryTracker } from "../components/UsageTelemetryTracker";
 
 // Styles
 import './main.css'
-import { EdinhoCard } from "../components/Edinhos";
+import { EdinhoCard } from "../components/Edinho";
 import { Divider } from "primereact/divider";
 
 const REALTIME_CHANNELS_BY_ROUTE = {
@@ -34,6 +33,7 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/admissao/aditivos": ["admissao"],
   "/rescisoes": ["rescisoes", "colaboradores"],
   "/reposicoes/requisicoes": ["reposicoes.requisicoes"],
+  "/reposicoes/requisicao": ["reposicoes.requisicoes", "reposicoes.reservas"],
   "/reposicoes/reservas": ["reposicoes.reservas"],
   "/reposicoes/historico": ["reposicoes.historico"],
   "/colaboradores": ["colaboradores"],
@@ -264,6 +264,12 @@ export function MainLayout() {
           command: () => { navigateTo("/avaliacoes-experiencia"); },
         },
         {
+          label: "Minhas avaliações",
+          icon: "pi pi-id-card",
+          visible: can("avaliacao_experiencia_supervisor"),
+          command: () => { navigateTo("/avaliacoes-experiencia/supervisor"); },
+        },
+        {
           label: 'Glosas',
           icon: 'pi pi-money-bill',
           visible: can("controle_glosas"),
@@ -285,6 +291,12 @@ export function MainLayout() {
           label: 'Reposições',
           icon: 'pi pi-sync',
           items: [
+            {
+              label: 'Nova requisição',
+              icon: 'pi pi-plus-circle',
+              visible: can("reposicoes", "create"),
+              command: () => { navigateTo("/reposicoes/requisicao") }
+            },
             {
               label: 'Requisições',
               icon: 'pi pi-question',

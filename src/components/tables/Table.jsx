@@ -33,21 +33,15 @@ export function Table({
     onRowToggle,
     rowExpansionTemplate,
     onRowClick,
-    lazy = false,
-    totalRecords,
-    first,
-    onPageChange,
+    remotePagination,
 }) {
     const [globalFilterDash, setGlobalFilterDash] = useState("");
     const searchInputId = useId();
     const dateInputId = useId();
     const resolvedSearchValue = searchValue ?? globalFilterDash;
-    const resolvedRows = Number(rows) > 0 ? Number(rows) : 5;
-    const useLazyPagination = lazy && mode === "paginate";
-    const resolvedFirst = Number.isFinite(Number(first)) ? Math.max(0, Number(first)) : 0;
-    const resolvedTotalRecords = Number.isFinite(Number(totalRecords))
-        ? Math.max(0, Number(totalRecords))
-        : data.length;
+    const isRemotePagination = Boolean(remotePagination);
+    const remoteTotalRecords = Math.max(0, Number(remotePagination?.totalRecords) || 0);
+    const remoteFirst = Math.max(0, Number(remotePagination?.first) || 0);
 
     const updateSearch = (value) => {
         setGlobalFilterDash(value);
@@ -106,7 +100,9 @@ export function Table({
         <DataTable
             value={data}
             loading={loading}
-            globalFilter={resolvedSearchValue}
+            // A busca remota já é aplicada pela API. Reaplicar o globalFilter aqui
+            // filtrava somente a página atual e deixava o total/paginador incoerente.
+            globalFilter={isRemotePagination ? undefined : resolvedSearchValue}
             header={header}
             emptyTitle={emptyTitle || emptyMessage}
             emptyDescription={emptyDescription}
@@ -118,14 +114,12 @@ export function Table({
             rowExpansionTemplate={rowExpansionTemplate}
             onRowClick={onRowClick}
             paginator={mode === "paginate"}
-            rows={resolvedRows}
+            rows={rows}
             rowsPerPageOptions={rowsPerPageOptions}
-            {...(useLazyPagination ? {
-                lazy: true,
-                totalRecords: resolvedTotalRecords,
-                first: resolvedFirst,
-                onPage: onPageChange,
-            } : { lazy: false })}
+            lazy={isRemotePagination}
+            totalRecords={isRemotePagination ? remoteTotalRecords : undefined}
+            first={isRemotePagination ? remoteFirst : undefined}
+            onPage={isRemotePagination ? remotePagination?.onPageChange : undefined}
 
             scrollable
             scrollHeight={mode === "scroll" ? "400px" : undefined}

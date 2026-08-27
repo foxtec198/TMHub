@@ -1,4 +1,4 @@
-// Tela pública das avaliações de experiência para supervisores.
+// Tela autenticada das avaliações de experiência para supervisores.
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
@@ -63,8 +63,8 @@ function formFromEvaluation(evaluation) {
   };
 }
 
-export function ExperiencePublic() {
-  // O supervisor se identifica pelo nome, no mesmo fluxo público de reposições.
+export function ExperienceSupervisor() {
+  // A lista é limitada pela sessão e pela filial global selecionada.
   const [supervisors, setSupervisors] = useState([]);
   const [supervisor, setSupervisor] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -76,10 +76,10 @@ export function ExperiencePublic() {
   const { showToast } = useToast();
 
   useEffect(() => {
-    // A lista é carregada uma única vez para compor o primeiro passo do formulário.
+    // A lista é carregada uma única vez dentro do escopo autenticado.
     async function loadSupervisors() {
       try {
-        const { data } = await connect.get("/avaliacoes-experiencia/publico/supervisores");
+        const { data } = await connect.get("/avaliacoes-experiencia/supervisores");
         setSupervisors((Array.isArray(data) ? data : []).map((item) => ({ label: item.nome, value: item.id })));
       } catch (error) {
         showToast("error", "Período de experiência", errorMessage(error, "Não foi possível carregar os supervisores."));
@@ -89,15 +89,15 @@ export function ExperiencePublic() {
   }, [showToast]);
 
   const loadTasks = async () => {
-    // A API só retorna pendências vinculadas ao supervisor informado no corpo.
+    // A API limita as pendências ao supervisor e à filial da sessão.
     if (!supervisor) {
       showToast("warn", "Identificação", "Selecione seu nome para continuar.");
       return false;
     }
     setLoadingTasks(true);
     try {
-      const { data } = await connect.post("/avaliacoes-experiencia/publico/tarefas", {
-        supervisor_id: supervisor,
+      const { data } = await connect.get("/avaliacoes-experiencia/tarefas-supervisor", {
+        params: { supervisor_id: supervisor },
       });
       setTasks(Array.isArray(data) ? data : []);
       return true;
@@ -110,13 +110,9 @@ export function ExperiencePublic() {
   };
 
   const openEvaluation = async (evaluationId) => {
-    // O identificador segue no corpo para não ficar exposto na URL pública.
     setLoading(true);
     try {
-      const { data } = await connect.post("/avaliacoes-experiencia/publico/detalhe", {
-        supervisor_id: supervisor,
-        avaliacao_id: evaluationId,
-      });
+      const { data } = await connect.get(`/avaliacoes-experiencia/${evaluationId}`);
       setEvaluation(data);
       setForm(formFromEvaluation(data));
     } catch (error) {
@@ -131,13 +127,11 @@ export function ExperiencePublic() {
     if (!evaluation) return;
     setLoading(true);
     try {
-      const { data } = await connect.post(
+      const { data } = await connect[complete ? "post" : "patch"](
         complete
-          ? "/avaliacoes-experiencia/publico/concluir"
-          : "/avaliacoes-experiencia/publico/salvar",
+          ? `/avaliacoes-experiencia/${evaluation.id}/supervisor/concluir`
+          : `/avaliacoes-experiencia/${evaluation.id}/supervisor`,
         {
-          supervisor_id: supervisor,
-          avaliacao_id: evaluation.id,
           ...form,
         },
       );
@@ -177,19 +171,15 @@ export function ExperiencePublic() {
     try {
       // Persiste as respostas antes da assinatura, evitando que ela seja
       // invalidada ao enviar a avaliação ao RH.
-      const { data: savedEvaluation } = await connect.post(
-        "/avaliacoes-experiencia/publico/salvar",
-        {
-          supervisor_id: supervisor,
-          avaliacao_id: evaluation.id,
-          ...form,
-        },
+      const { data: savedEvaluation } = await connect.patch(
+        `/avaliacoes-experiencia/${evaluation.id}/supervisor`, form,
       );
       const payload = new FormData();
-      payload.append("supervisor_id", supervisor);
-      payload.append("avaliacao_id", savedEvaluation.id);
       payload.append("arquivo", file);
-      const { data } = await connect.post("/avaliacoes-experiencia/publico/assinatura", payload);
+      const { data } = await connect.post(
+        `/avaliacoes-experiencia/${savedEvaluation.id}/supervisor/assinatura`,
+        payload,
+      );
       setEvaluation(data);
       setForm(formFromEvaluation(data));
       showToast("success", "Assinatura", "Assinatura registrada com sucesso.");

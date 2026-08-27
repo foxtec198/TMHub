@@ -2,14 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
-import { Column } from "primereact/column";
-import { DataTable } from "../../components/tables/DataTable";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
 import { Placeholder } from "../../components/Placeholder";
+import { Table } from "../../components/tables/Table";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
@@ -109,7 +108,7 @@ export function AbsenceDashboard() {
 
       <section className="absence-detail-grid">
         <article className="absence-dashboard-panel tm-dashboard-panel absence-contract-ranking"><header><div><span>Concentração</span><h2>Contratos com mais faltas</h2></div></header><div className="absence-ranking-list">{contractData.map((item, index) => <div key={item.label}><em>{String(index + 1).padStart(2, "0")}</em><span><strong>{item.label}</strong><i><b style={{ width: `${item.total * 100 / maxContract}%` }} /></i></span><small>{item.total}</small></div>)}{!contractData.length && <EmptyChart text="Nenhum contrato para exibir." />}</div></article>
-        <article className="absence-dashboard-panel tm-dashboard-panel absence-recent-panel"><header><div><span>Ocorrências recentes</span><h2>Últimas faltas do recorte</h2></div></header><DataTable value={data?.recentes || []} paginator rows={7} stripedRows size="small" emptyMessage="Nenhuma falta no período."><Column field="data_falta" header="Data" sortable body={(row) => new Date(`${String(row.data_falta).slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR")} /><Column field="colaborador" header="Colaborador" sortable /><Column field="contrato" header="Contrato" sortable /><Column field="motivo" header="Motivo" sortable /><Column field="status" header="Tratativa" body={(row) => <Tag value={row.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={row.status === "tratada" ? "success" : "info"} />} /></DataTable></article>
+        <article className="absence-dashboard-panel tm-dashboard-panel absence-recent-panel"><header><div><span>Ocorrências recentes</span><h2>Últimas faltas do recorte</h2></div></header><Table data={data?.recentes || []} rows={7} emptyTitle="Nenhuma falta no período." tableStyle={{ minWidth: "700px" }} columns={[{ field: "data_falta", header: "Data", sortable: true, body: (row) => new Date(`${String(row.data_falta).slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR") }, { field: "colaborador", header: "Colaborador", sortable: true }, { field: "contrato", header: "Contrato", sortable: true }, { field: "motivo", header: "Motivo", sortable: true }, { field: "status", header: "Tratativa", body: (row) => <Tag value={row.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={row.status === "tratada" ? "success" : "info"} /> }]} /></article>
       </section>
 
       <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">

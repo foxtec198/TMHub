@@ -1,0 +1,93 @@
+.edinho-balance {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+  color: var(--text-primary);
+  perspective: 520px;
+}
+
+.edinho-balance__coin {
+  position: relative;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  filter: drop-shadow(0 .22rem .36rem color-mix(in srgb, var(--text-primary) 24%, transparent));
+  animation: edinho-coin-spin 7s linear infinite;
+}
+
+.edinho-balance__coin::before {
+  content: "";
+  position: absolute;
+  top: .1rem;
+  left: 50%;
+  width: .82rem;
+  height: 2.01rem;
+  border-radius: .41rem;
+  background: linear-gradient(90deg, #5e2b04 0%, #a85c07 20%, #f7c34a 50%, #a85c07 80%, #5e2b04 100%);
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+}
+
+.edinho-balance__side,
+.edinho-balance__side img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+}
+
+.edinho-balance__side {
+  inset: 0;
+  backface-visibility: hidden;
+  transform: translateZ(.41rem);
+}
+
+.edinho-balance__side--tails {
+  transform: rotateY(180deg) translateZ(.41rem);
+}
+
+.edinho-balance__side img {
+  display: block;
+  object-fit: contain;
+}
+
+.edinho-balance__side--tails img {
+  transform: scaleX(-1);
+}
+
+.edinho-balance__content {
+  display: grid;
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.edinho-balance__content strong {
+  color: var(--text-primary);
+  font-size: 1.02rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.edinho-balance__content small {
+  color: var(--text-secondary);
+  font-size: .69rem;
+}
+
+@keyframes edinho-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-.16rem) rotate(2deg); }
+}
+
+@keyframes edinho-coin-spin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edinho-balance__coin { animation: none; }
+}

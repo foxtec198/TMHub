@@ -13,7 +13,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import connect from "../../utils/request";
 import { InputText } from "primereact/inputtext";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
-import { ThemeLogo } from "../../components/ThemeLogo";
+import { PageHeader } from "../../components/PageHeader";
 import "./new.css";
 
 function SelectedCollaborator({ title, collaborator, icon, disciplinaryContext, disciplinaryLoading }) {
@@ -69,6 +69,9 @@ function SelectedCollaborator({ title, collaborator, icon, disciplinaryContext, 
 export function Request() {
     // Campos do formulário e seleções relacionadas ao colaborador ausente.
     const [user, selectedUser] = useState(null)
+    const [canChooseSupervisor, setCanChooseSupervisor] = useState(false)
+    const [requesterLoading, setRequesterLoading] = useState(true)
+    const [requesterError, setRequesterError] = useState(null)
     const [replace, selectedReplace] = useState(null)
     const [absent, selectedAbsent] = useState(null)
     const [absentDetails, setAbsentDetails] = useState(null)
@@ -117,12 +120,11 @@ export function Request() {
     function handleStepChange(event) {
         const { index } = event;
         const canGoBack = index < activeStep;
-        const canOpenReservation = index === 1 && Boolean(user);
-        const canOpenAdditional = index === 2 && additionalStepReleased;
+        const canOpenAdditional = index === 1 && additionalStepReleased;
 
         // O supervisor pode voltar às etapas anteriores, mas só avança quando
         // a etapa necessária já foi concluída e liberada pela regra de negócio.
-        if (index === activeStep || canGoBack || canOpenReservation || canOpenAdditional) {
+        if (index === activeStep || canGoBack || canOpenAdditional) {
             setActiveStep(index);
             return;
         }
@@ -219,7 +221,7 @@ export function Request() {
         }
 
         setAdditionalStepReleased(true);
-        changeStep(2);
+        changeStep(1);
     }
 
     // Valida os campos obrigatórios e envia a nova requisição ao backend.
@@ -244,9 +246,6 @@ export function Request() {
                     advertencia: warning,
                     data: selectedRequestDate(),
                     obs: obs,
-                    // Identifica o fluxo público no backend para que o
-                    // supervisor não limite os colaboradores atendidos.
-                    publico: true,
                 }
                 await connect.post("/repo/request", data)
                 showToast("success", "Sucesso na requisição", "Sua requisição foi criada com sucesso, aguarde novidades por email!")
@@ -259,16 +258,35 @@ export function Request() {
 
     }
 
-    // Pré-carrega os supervisores usados no primeiro passo do formulário.
+    // O supervisor é resolvido a partir do usuário autenticado. Somente
+    // administradores podem trocar o responsável dentro do escopo selecionado.
     useEffect(() => {
-        async function getSups() {
-            const res = await connect.get("/supervisores");
-            const sups = []
-            res.data.map(item => sups.push({ name: item.nome, id: item.id }))
-            setSupsOptions(sups)
+        let active = true;
+        async function loadRequester() {
+            setRequesterLoading(true);
+            setRequesterError(null);
+            try {
+                const { data } = await connect.get("/repo/request/solicitante");
+                if (!active) return;
+                setCanChooseSupervisor(Boolean(data.pode_selecionar_supervisor));
+                setSupsOptions((data.supervisores || []).map((item) => ({
+                    id: item.id,
+                    name: item.nome,
+                })));
+                selectedUser(data.supervisor ? {
+                    id: data.supervisor.id,
+                    name: data.supervisor.nome,
+                } : null);
+            } catch (error) {
+                if (!active) return;
+                selectedUser(null);
+                setRequesterError(error.response?.data || "Não foi possível identificar seu acesso de supervisor.");
+            } finally {
+                if (active) setRequesterLoading(false);
+            }
         }
-
-        getSups();
+        loadRequester();
+        return () => { active = false; };
     }, [])
 
     // A disponibilidade considera somente a data escolhida para a requisição.
@@ -281,7 +299,6 @@ export function Request() {
                 const { data } = await connect.get("/repo/reservas-uso", {
                     params: {
                         data: selectedRequestDateKey(),
-                        publico: 1,
                     },
                 });
                 if (!active) return;
@@ -323,71 +340,47 @@ export function Request() {
         setAdditionalStepReleased(false);
     }, [absent, checked, replace?.id, reason, warning])
 
-    // Formulário público e responsivo de abertura de reposição.
+    // Formulário autenticado e responsivo de abertura de reposição.
     return (
         <>
-            <div className="request-create-page flex min-h-screen px-4 py-6 flex-column justify-content-start align-items-center">
-                {/* HEADER */}
-                <header className="request-create-header fadeinleft animation-duration-1000">
-                    <ThemeLogo
-                        alt="TM Hub"
-                        className="request-create-logo"
-                    />
-                    <div>
-                        <span>Gestão de reposições</span>
-                        <h1>Solicitação de cobertura</h1>
-                        <p>Informe uma ausência e a cobertura necessária para o posto.</p>
-                    </div>
-                </header>
+            <div className="request-create-page request-create-page--authenticated flex px-4 py-4 flex-column justify-content-start align-items-center">
+                <PageHeader
+                    section="Operacional"
+                    title="Nova requisição"
+                    description="Informe uma ausência e a cobertura necessária para o posto."
+                />
 
                 {/* MAIN */}
                 <div className={`request-stepper-shell ${additionalStepReleased ? "is-additional-released" : "is-additional-locked"}`}>
+                    <div className="request-authenticated-supervisor">
+                        {requesterLoading ? <><i className="pi pi-spin pi-spinner" /> Identificando supervisor responsável...</> : null}
+                        {!requesterLoading && requesterError ? <span className="request-authenticated-supervisor__error">{requesterError}</span> : null}
+                        {!requesterLoading && !requesterError && canChooseSupervisor ? <Dropdown
+                            className="w-full"
+                            value={user}
+                            options={supsOtions}
+                            optionLabel="name"
+                            placeholder="Selecione o supervisor responsável"
+                            filter
+                            onChange={(event) => {
+                                selectedUser(event.value);
+                                selectedAbsent(null);
+                                setAbsentDetails(null);
+                                selectedReplace(null);
+                                setReplaces([]);
+                                setAdditionalStepReleased(false);
+                            }}
+                        /> : null}
+                        {!requesterLoading && !requesterError && !canChooseSupervisor && user ? <><i className="pi pi-user" /> Requisição em nome de <strong>{user.name}</strong></> : null}
+                    </div>
                     <Stepper ref={stepperRef} activeStep={activeStep} onChangeStep={handleStepChange}>
-                        <StepperPanel header="Login">
-                            <div className="flex flex-column text-medium text-center">
-                                <span className="font-xl mb-4">Selecione seu nome na lista, caso não encontre, entre em contato com o suporte!</span>
-                                <Dropdown
-                                    className="w-full mb-6"
-                                    value={user}
-                                    onChange={(e) => {
-                                        selectedUser(e.value);
-                                        selectedAbsent(null);
-                                        setAbsentDetails(null);
-                                        setDisciplinaryContext(null);
-                                        setAdditionalContext(null);
-                                        setManualCoverage(null);
-                                        setAdditionalStepReleased(false);
-                                        disciplinaryRequestRef.current += 1;
-                                        additionalRequestRef.current += 1;
-                                        selectedReplace(null);
-                                        setReplaces([]);
-                                    }}
-                                    options={supsOtions}
-                                    placeholder="Selecione seu nome na lista"
-                                    optionLabel="name"
-                                    filter
-                                />
-                                <Button
-                                    label="Realizar Login"
-                                    icon="pi pi-sign-in"
-                                    iconPos="right"
-                                    onClick={() => {
-                                        user
-                                            ? changeStep(1)
-                                            : showToast("error", "Erro no Login", "Selecione um usuário primeiro!")
-                                    }}
-                                />
-                            </div>
-                        </StepperPanel>
-
-                        <StepperPanel header="Reserva">
+                        <StepperPanel header="Requisição">
                             <div className="request-reservation-step request-form-step flex flex-column">
                                 <CollaboratorDropdown
                                     appendTo="self"
                                     panelStyle={{ width: '100%' }}
                                     className="w-full mb-3 collaborator-dropdown--wrap"
                                     value={absent}
-                                    queryParams={{ publico: 1 }}
                                     virtualScrollerOptions={null}
                                     onChange={(id, collaborator) => {
                                         selectedAbsent(id);

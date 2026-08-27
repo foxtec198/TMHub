@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Calendar } from "primereact/calendar";
-import { Column } from "primereact/column";
-import { DataTable } from "../../components/tables/DataTable";
 import { Dialog } from "primereact/dialog";
 import { Timeline } from "primereact/timeline";
 
@@ -9,6 +7,7 @@ import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 import { useToast } from "../../contexts/ToastContext";
 import { UserAvatar } from "../../components/UserAvatar";
+import { Table } from "../../components/tables/Table";
 
 function toApiDate(value) {
   if (!value) return "";
@@ -95,16 +94,7 @@ export function UsageControlSettings() {
         ))}
       </div>
 
-      <DataTable value={data.registros || []} loading={loading} paginator rows={10} stripedRows emptyMessage="Nenhuma atividade registrada neste dia." className="tm-responsive-table usage-control__table">
-        <Column header="Usuário" body={userBody} sortable field="usuario.nome" />
-        <Column header="Primeira atividade" body={(record) => record.primeira_atividade_em ? new Date(record.primeira_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—"} />
-        <Column header="Última atividade" body={(record) => record.ultima_atividade_em ? new Date(record.ultima_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—"} />
-        <Column header="Tempo ativo" body={(record) => duration(record.segundos_ativos)} sortable field="segundos_ativos" />
-        <Column header="Páginas" field="paginas_visitadas" sortable />
-        <Column header="Ações" field="acoes_concluidas" sortable />
-        <Column header="Edinhos" body={(record) => <span className="usage-edinho"><i className="pi pi-star-fill" /> {record.edinhos_gerados}</span>} sortable field="edinhos_gerados" />
-        <Column header="Timeline" body={(record) => <button type="button" className="usage-timeline-button" onClick={() => setSelectedRecord(record)}><i className="pi pi-list" /> Ver</button>} />
-      </DataTable>
+      <Table data={data.registros || []} loading={loading} rows={10} emptyTitle="Nenhuma atividade registrada neste dia." tableClassName="usage-control__table" columns={[{ header: "Usuário", body: userBody, sortable: true, field: "usuario.nome" }, { header: "Primeira atividade", body: (record) => record.primeira_atividade_em ? new Date(record.primeira_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—" }, { header: "Última atividade", body: (record) => record.ultima_atividade_em ? new Date(record.ultima_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—" }, { header: "Tempo ativo", body: (record) => duration(record.segundos_ativos), sortable: true, field: "segundos_ativos" }, { header: "Páginas", field: "paginas_visitadas", sortable: true }, { header: "Ações", field: "acoes_concluidas", sortable: true }, { header: "Edinhos", body: (record) => <span className="usage-edinho"><i className="pi pi-star-fill" /> {record.edinhos_gerados}</span>, sortable: true, field: "edinhos_gerados" }, { header: "Timeline", body: (record) => <button type="button" className="usage-timeline-button" onClick={() => setSelectedRecord(record)}><i className="pi pi-list" /> Ver</button> }]} />
 
       <Dialog header={`Timeline de uso · ${selectedRecord?.usuario?.nome || ""}`} visible={Boolean(selectedRecord)} onHide={() => setSelectedRecord(null)} modal className="usage-timeline-dialog">
         {selectedRecord?.timeline?.length ? (

@@ -13,6 +13,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
+import { Table } from "../../components/tables/Table";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
@@ -84,15 +85,6 @@ function formatDate(value) {
 function errorMessage(error, fallback) {
   const data = error.response?.data;
   return typeof data === "string" ? data : data?.message || fallback;
-}
-
-function responsiveCell(label, content) {
-  return (
-    <div className="tm-table-cell">
-      <span className="tm-table-card-label">{label}</span>
-      <div className="tm-table-card-value">{content ?? "—"}</div>
-    </div>
-  );
 }
 
 export function DisciplinaryMeasures() {
@@ -343,33 +335,22 @@ export function DisciplinaryMeasures() {
         <article><span>Suspensões</span><strong>{summary.suspensoes}</strong></article>
       </div>
 
-      <DataTable
-        value={records}
+      <Table
+        data={records}
         loading={tableLoading}
-        lazy
-        paginator
-        first={pagination.first}
         rows={pagination.rows}
-        totalRecords={totalRecords}
-        onPage={(event) => setPagination({ first: event.first, rows: event.rows })}
         rowsPerPageOptions={[10, 25, 50]}
-        paginatorTemplate="RowsPerPageDropdown CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
-        currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} resultados"
-        emptyMessage="Nenhuma medida disciplinar encontrada."
-        stripedRows
-        scrollable
+        remotePagination={{
+          totalRecords,
+          first: pagination.first,
+          onPageChange: (event) => setPagination({ first: event.first, rows: event.rows }),
+        }}
+        emptyTitle="Nenhuma medida disciplinar encontrada."
+        tableClassName="disciplinary-table"
         tableStyle={{ minWidth: "76rem" }}
-        className="tm-responsive-table disciplinary-table"
-      >
-        <Column
-          field="data_medida"
-          header="Data"
-          body={(row) => responsiveCell("Data", formatDate(row.data_medida))}
-        />
-        <Column
-          field="colaborador"
-          header="Colaborador"
-          body={(row) => responsiveCell("Colaborador", (
+        columns={[
+          { field: "data_medida", header: "Data", body: (row) => formatDate(row.data_medida) },
+          { field: "colaborador", header: "Colaborador", body: (row) => (
             <div className="disciplinary-employee">
               <strong>{row.colaborador || "Colaborador não identificado"}</strong>
               <small>
@@ -377,39 +358,19 @@ export function DisciplinaryMeasures() {
                 <span>{row.centro_custo || "Sem contrato"}</span>
               </small>
             </div>
-          ))}
-        />
-        <Column
-          field="supervisor"
-          header="Supervisor da época"
-          body={(row) => responsiveCell("Supervisor", row.supervisor || "Sem supervisor")}
-        />
-        <Column
-          field="tipo_label"
-          header="Medida"
-          body={(row) => responsiveCell("Medida", (
+          ) },
+          { field: "supervisor", header: "Supervisor da época", body: (row) => row.supervisor || "Sem supervisor" },
+          { field: "tipo_label", header: "Medida", body: (row) => (
             <Tag
               value={row.tipo_label}
               severity={row.tipo === "suspensao" ? "warning" : "info"}
             />
-          ))}
-        />
-        <Column
-          field="motivo_label"
-          header="Alínea / motivo"
-          body={(row) => responsiveCell("Alínea / motivo", row.motivo_label)}
-        />
-        <Column
-          field="quantidade_dias"
-          header="Dias"
-          body={(row) => responsiveCell("Dias", row.quantidade_dias || "—")}
-        />
-        <Column
-          field="origem"
-          header="Origem"
-          body={(row) => responsiveCell("Origem", row.origem === "importacao" ? "Planilha" : "Manual")}
-        />
-      </DataTable>
+          ) },
+          { field: "motivo_label", header: "Alínea / motivo" },
+          { field: "quantidade_dias", header: "Dias", body: (row) => row.quantidade_dias || "—" },
+          { field: "origem", header: "Origem", body: (row) => row.origem === "importacao" ? "Planilha" : "Manual" },
+        ]}
+      />
 
       <Dialog visible={importVisible} onHide={() => setImportVisible(false)} header="Importar medidas disciplinares" modal className="disciplinary-import-dialog">
         <div className="disciplinary-import">

@@ -85,7 +85,6 @@ export function TMOpsAccessSettings() {
           <CollaboratorDropdown
             value={employeeId}
             selectedOption={selectedEmployee}
-            queryParams={{ publico: 1 }}
             placeholder="Selecione um colaborador"
             emptyMessage="Nenhum colaborador encontrado"
             className="w-full"

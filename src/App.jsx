@@ -63,7 +63,7 @@ import { TicketManagement } from "./pages/Tickets/TicketManagement";
 import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasures.jsx";
 import { ExperienceDashboard } from "./pages/Dashboards/Experience.jsx";
 import { ExperienceControl } from "./pages/ExperienceControl";
-import { ExperiencePublic } from "./pages/ExperienceControl/supervisor";
+import { ExperienceSupervisor } from "./pages/ExperienceControl/supervisor";
 import { PeriodicExams } from "./pages/PeriodicExams";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
@@ -194,8 +194,6 @@ export function AppRoutes() {
         <Route path="" element={<Auth />} />
         <Route path="/" element={<Auth />} />
         <Route path="/login" element={<Auth />} />
-        <Route path="/reposicoes/requisicao" element={<Request />} />
-        <Route path="/reports/reposicoes/ods" element={<RequestsODS />} />
         <Route path="/tm-ops/login" element={<TMOps />} />
         <Route path="/tm-ops" element={<TMOps />} />
         <Route path="/tm-ops/tarefa/:taskId" element={<TMOps />} />
@@ -205,7 +203,6 @@ export function AppRoutes() {
         />
         <Route path="/schedular/*" element={<LegacyTMOpsRedirect />} />
         <Route path="/schedular" element={<LegacyTMOpsRedirect />} />
-        <Route path="/avaliacoes-experiencia/avaliar" element={<ExperiencePublic />} />
 
           <Route element={<MainLayout />}>
           {/* Init Page */}
@@ -380,6 +377,30 @@ export function AppRoutes() {
             }
           />
           {/* Reposicoes */}
+          <Route
+            path="/reposicoes/requisicao"
+            element={
+              <PermissionGate screen="reposicoes" action="create">
+                <Request />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/avaliacoes-experiencia/supervisor"
+            element={
+              <PermissionGate screen="avaliacao_experiencia_supervisor">
+                <ExperienceSupervisor />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/reports/reposicoes/ods"
+            element={
+              <PermissionGate screen="dashboard_reposicoes_ods">
+                <RequestsODS />
+              </PermissionGate>
+            }
+          />
           <Route
             path="/reposicoes/requisicoes"
             element={

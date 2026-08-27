@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { DataTable } from "../../components/tables/DataTable";
-import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { PageHeader } from "../../components/PageHeader";
+import { Table } from "../../components/tables/Table";
 import { TaskExecutionMetrics } from "../../components/TMOps/TaskExecutionMetrics";
 import { TaskGeolocationMap } from "../../components/TMOps/TaskGeolocationMap";
 import connect from "../../utils/request";
@@ -91,6 +90,37 @@ export function TMOpsTasks() {
       return Object.keys(value).length ? JSON.stringify(value) : "Sem texto";
     return String(value);
   };
+  const columns = [
+    { field: "tarefa", header: "Tarefa" },
+    { field: "local", header: "Estrutura" },
+    { field: "colaborador", header: "Colaborador" },
+    { header: "Agendada para", body: (row) => new Date(row.agendada_para).toLocaleString("pt-BR") },
+    { header: "Prazo previsto", body: (row) => row.prazo_em ? new Date(row.prazo_em).toLocaleString("pt-BR") : "—" },
+    {
+      header: "Status",
+      body: (row) => (
+        <Tag
+          value={row.atrasada ? "ATRASADA" : row.status.replace("_", " ").toUpperCase()}
+          severity={row.atrasada ? "danger" : "info"}
+        />
+      ),
+    },
+    { header: "Iniciada em", body: (row) => row.iniciada_em ? new Date(row.iniciada_em).toLocaleString("pt-BR") : "—" },
+    { header: "Conclusão", body: (row) => row.concluida_em ? new Date(row.concluida_em).toLocaleString("pt-BR") : "—" },
+    {
+      header: "Respostas",
+      body: (row) => (
+        <Button
+          icon="pi pi-eye"
+          text
+          rounded
+          tooltip="Ver checklist respondido"
+          disabled={row.status !== "concluida"}
+          onClick={() => openTaskDetail(row)}
+        />
+      ),
+    },
+  ];
   return (
     <main className="tm-ops-management">
       <PageHeader
@@ -148,80 +178,23 @@ export function TMOpsTasks() {
             }}
           />
         </div>
-        <DataTable
-          value={tasks}
-          lazy
+        <Table
+          data={tasks}
+          columns={columns}
           loading={loading}
-          paginator
-          first={first}
           rows={rows}
-          totalRecords={totalRecords}
           rowsPerPageOptions={[10, 20, 50]}
-          onPage={(event) => {
-            setFirst(event.first);
-            setRows(event.rows);
+          remotePagination={{
+            totalRecords,
+            first,
+            onPageChange: (event) => {
+              setFirst(event.first);
+              setRows(event.rows);
+            },
           }}
-          responsiveLayout="scroll"
-          emptyMessage={loadError || "Nenhuma tarefa encontrada."}
-        >
-          <Column field="tarefa" header="Tarefa" />
-          <Column field="local" header="Estrutura" />
-          <Column field="colaborador" header="Colaborador" />
-          <Column
-            header="Início"
-            body={(row) => new Date(row.agendada_para).toLocaleString("pt-BR")}
-          />
-          <Column
-            header="Prazo previsto"
-            body={(row) =>
-              row.prazo_em
-                ? new Date(row.prazo_em).toLocaleString("pt-BR")
-                : "—"
-            }
-          />
-          <Column
-            header="Status"
-            body={(row) => (
-              <Tag
-                value={
-                  row.atrasada
-                    ? "ATRASADA"
-                    : row.status.replace("_", " ").toUpperCase()
-                }
-                severity={row.atrasada ? "danger" : "info"}
-              />
-            )}
-          />
-          <Column
-            header="Início"
-            body={(row) =>
-              row.iniciada_em
-                ? new Date(row.iniciada_em).toLocaleString("pt-BR")
-                : "—"
-            }
-          />
-          <Column
-            header="Conclusão"
-            body={(row) =>
-              row.concluida_em
-                ? new Date(row.concluida_em).toLocaleString("pt-BR")
-                : "—"
-            }
-          />
-          <Column
-            header="Respostas"
-            body={(row) => (
-              <Button
-                icon="pi pi-eye"
-                text
-                rounded
-                tooltip="Ver checklist respondido"
-                disabled={row.status !== "concluida"}
-                onClick={() => openTaskDetail(row)}
-              />
-            )}
-          />
-        </DataTable>
+          emptyTitle={loadError || "Nenhuma tarefa encontrada."}
+          tableStyle={{ minWidth: "1040px" }}
+        />
       </section>
       <Dialog
         header={

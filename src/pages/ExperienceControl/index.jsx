@@ -2,8 +2,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "../../components/tables/DataTable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -13,6 +11,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
+import { Table } from "../../components/tables/Table";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
@@ -438,14 +437,22 @@ export function ExperienceControl() {
         <div className="experience-list-meta">
           <span>{filteredRhRecords.length} de {rhRecords.length} avaliação(ões) · {employeesInExperience.length} colaborador(es) em experiência</span>
         </div>
-            <DataTable value={filteredRhRecords} paginator rows={10} rowsPerPageOptions={[10, 25, 50, 100]} stripedRows size="small" dataKey="id" emptyMessage="Nenhuma avaliação encontrada." tableStyle={{ minWidth: "68rem" }}>
-              <Column header="Colaborador" body={personBody} style={{ minWidth: "18rem" }} />
-              <Column header="Supervisor" field="supervisor.nome" body={(row) => row.supervisor?.nome || "—"} style={{ minWidth: "14rem" }} />
-              <Column header="Contrato" body={(row) => <div className="experience-person"><strong>{row.colaborador?.centro_custo || "—"}</strong><small>DPTO. {row.colaborador?.departamento || "—"}</small></div>} style={{ minWidth: "16rem" }} />
-              <Column header="Fim da experiência" body={(row) => dateLabel(row.colaborador?.data_fim_experiencia)} style={{ minWidth: "10rem" }} />
-              <Column header="Situação" body={(row) => statusTag(row.status)} style={{ minWidth: "11rem" }} />
-              <Column header="Ações" body={(row) => <div className="experience-row-actions"><Button label={isAdmin && row.status === "concluida" ? "Editar" : "Abrir"} icon={isAdmin && row.status === "concluida" ? "pi pi-pencil" : "pi pi-eye"} text onClick={() => openEvaluation(row.id)} />{isAdmin && row.status === "concluida" && <Button icon="pi pi-trash" severity="danger" rounded text aria-label={`Excluir avaliação de ${row.colaborador?.nome || "colaborador"}`} onClick={() => deleteEvaluation(row)} />}</div>} style={{ width: "10rem" }} />
-            </DataTable>
+            <Table
+              data={filteredRhRecords}
+              dataKey="id"
+              rows={10}
+              rowsPerPageOptions={[10, 25, 50, 100]}
+              emptyTitle="Nenhuma avaliação encontrada."
+              tableStyle={{ minWidth: "68rem" }}
+              columns={[
+                { header: "Colaborador", body: personBody, style: { minWidth: "18rem" } },
+                { header: "Supervisor", field: "supervisor.nome", body: (row) => row.supervisor?.nome || "—", style: { minWidth: "14rem" } },
+                { header: "Contrato", body: (row) => <div className="experience-person"><strong>{row.colaborador?.centro_custo || "—"}</strong><small>DPTO. {row.colaborador?.departamento || "—"}</small></div>, style: { minWidth: "16rem" } },
+                { header: "Fim da experiência", body: (row) => dateLabel(row.colaborador?.data_fim_experiencia), style: { minWidth: "10rem" } },
+                { header: "Situação", body: (row) => statusTag(row.status), style: { minWidth: "11rem" } },
+                { header: "Ações", body: (row) => <div className="experience-row-actions"><Button label={isAdmin && row.status === "concluida" ? "Editar" : "Abrir"} icon={isAdmin && row.status === "concluida" ? "pi pi-pencil" : "pi pi-eye"} text onClick={() => openEvaluation(row.id)} />{isAdmin && row.status === "concluida" && <Button icon="pi pi-trash" severity="danger" rounded text aria-label={`Excluir avaliação de ${row.colaborador?.nome || "colaborador"}`} onClick={() => deleteEvaluation(row)} />}</div>, style: { width: "10rem" } },
+              ]}
+            />
       </article>
 
       <OverlayPanel ref={filterPanel} className="experience-filter-panel">

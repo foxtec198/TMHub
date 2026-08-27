@@ -16,8 +16,6 @@ import {
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
-import { Column } from "primereact/column";
-import { DataTable } from "../../components/tables/DataTable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
@@ -29,6 +27,7 @@ import { Tag } from "primereact/tag";
 // Components
 import { PageHeader } from "../../components/PageHeader";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+import { Table } from "../../components/tables/Table";
 import "../../components/tables/index.css";
 
 // Styles
@@ -126,15 +125,6 @@ const FILTER_DEFINITIONS = {
       : record.colaborador,
   },
 };
-
-function responsiveCell(label, content) {
-  return (
-    <div className="tm-table-cell">
-      <span className="tm-table-card-label">{label}</span>
-      <div className="tm-table-card-value">{content ?? "—"}</div>
-    </div>
-  );
-}
 
 function AbsenceControlPage() {
   const [records, setRecords] = useState([]);
@@ -463,18 +453,27 @@ function AbsenceControlPage() {
           <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador, matrícula ou contrato" />
         </span>
       </div>
-      <DataTable value={filtered} paginator rows={10} rowsPerPageOptions={[10, 25, 50, 100]} stripedRows emptyMessage="Nenhuma falta encontrada." dataKey="id" size="small" className="tm-responsive-table absence-table" tableStyle={{ minWidth: "90rem" }}>
-        <Column field="data_falta" header="Data" sortable body={(record) => responsiveCell("Data", new Date(record.data_falta).toLocaleDateString("pt-BR"))} />
-        <Column field="colaborador" header="Colaborador" sortable body={(record) => responsiveCell("Colaborador", <div className="absence-person"><strong>{record.colaborador}</strong><small>Matrícula {record.matricula}</small></div>)} />
-        <Column field="contrato" header="Contrato" sortable body={(record) => responsiveCell("Contrato", <div className="absence-person"><strong>{record.contrato}</strong><small>DPTO. {record.departamento ?? "—"}</small></div>)} />
-        <Column field="motivo" header="Motivo" sortable body={(record) => responsiveCell("Motivo", <div className="absence-person"><strong>{record.motivo}</strong><small>{record.tipo_ausencia === "parcial" ? `Parcial · ${record.quantidade_horas || 0}h` : "Integral"}</small></div>)} />
-        <Column header="Adicional" body={(record) => responsiveCell("Adicional", additionalBody(record))} />
-        <Column header="Nominal" body={(record) => responsiveCell("Nominal", additionalRecipientBody(record))} />
-        <Column header="Prazo do documento" body={(record) => responsiveCell("Prazo do documento", timerBody(record))} />
-        <Column header="Classificação" field="classificacao" sortable body={(record) => responsiveCell("Classificação", classificationBody(record))} />
-        <Column field="status" header="Tratativa" sortable body={(record) => responsiveCell("Tratativa", <Tag value={record.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={record.status === "tratada" ? "success" : "info"} />)} />
-        {canEdit && <Column header="Ações" body={(record) => responsiveCell("Ações", <Button icon="pi pi-pencil" rounded text aria-label={`Tratar falta de ${record.colaborador}`} onClick={() => open(record)} />)} />}
-      </DataTable>
+      <Table
+        data={filtered}
+        dataKey="id"
+        rows={10}
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        emptyTitle="Nenhuma falta encontrada."
+        tableClassName="absence-table"
+        tableStyle={{ minWidth: "90rem" }}
+        columns={[
+          { field: "data_falta", header: "Data", sortable: true, body: (record) => new Date(record.data_falta).toLocaleDateString("pt-BR") },
+          { field: "colaborador", header: "Colaborador", sortable: true, body: (record) => <div className="absence-person"><strong>{record.colaborador}</strong><small>Matrícula {record.matricula}</small></div> },
+          { field: "contrato", header: "Contrato", sortable: true, body: (record) => <div className="absence-person"><strong>{record.contrato}</strong><small>DPTO. {record.departamento ?? "—"}</small></div> },
+          { field: "motivo", header: "Motivo", sortable: true, body: (record) => <div className="absence-person"><strong>{record.motivo}</strong><small>{record.tipo_ausencia === "parcial" ? `Parcial · ${record.quantidade_horas || 0}h` : "Integral"}</small></div> },
+          { header: "Adicional", body: additionalBody },
+          { header: "Nominal", body: additionalRecipientBody },
+          { header: "Prazo do documento", body: timerBody },
+          { field: "classificacao", header: "Classificação", sortable: true, body: classificationBody },
+          { field: "status", header: "Tratativa", sortable: true, body: (record) => <Tag value={record.status === "tratada" ? "TRATADA" : "PENDENTE"} severity={record.status === "tratada" ? "success" : "info"} /> },
+          ...(canEdit ? [{ header: "Ações", body: (record) => <Button icon="pi pi-pencil" rounded text aria-label={`Tratar falta de ${record.colaborador}`} onClick={() => open(record)} /> }] : []),
+        ]}
+      />
     </div>
 
     <OverlayPanel ref={filterPanel} className="absence-filter-panel">
