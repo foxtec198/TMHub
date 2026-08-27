@@ -65,6 +65,7 @@ import { ExperienceDashboard } from "./pages/Dashboards/Experience.jsx";
 import { ExperienceControl } from "./pages/ExperienceControl";
 import { ExperiencePublic } from "./pages/ExperienceControl/supervisor";
 import { PeriodicExams } from "./pages/PeriodicExams";
+import { DreControl } from "./pages/DreControl";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -458,6 +459,16 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="controle_ferias">
                 <VacationControl />
+              </PermissionGate>
+            }
+          />
+
+          {/* DRE */}
+          <Route
+            path="/dre"
+            element={
+              <PermissionGate screen="controle_dre">
+                <DreControl />
               </PermissionGate>
             }
           />

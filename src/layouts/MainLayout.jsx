@@ -343,6 +343,12 @@ export function MainLayout() {
             },
           ],
         },
+        {
+          label: "DRE",
+          icon: "pi pi-chart-line",
+          visible: can("controle_dre"),
+          command: () => { navigateTo("/dre"); },
+        },
       ]
     },
     {
