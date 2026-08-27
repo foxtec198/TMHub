@@ -331,7 +331,49 @@ export function RequestReport() {
 
         <section className="request-dashboard__analysis">
           <DashboardPanel className="request-dashboard-panel request-dashboard-panel--wide"><header><div><span>Volume</span><h2>Requisições por dia</h2></div><small>{metrics.total} registro(s) no recorte</small></header><div className="request-dashboard-chart">{daily.length ? <Chart type="line" data={dailyChart} options={chartOptions} /> : <Placeholder variant="chart" title="Sem requisições no período" description="Ajuste o período ou aguarde novos registros." />}</div></DashboardPanel>
-          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--status"><header><div><span>Cobertura</span><h2>Situação das requisições</h2></div></header><div className="request-dashboard-status-body"><div className="request-dashboard-doughnut">{metrics.total ? <><Chart type="doughnut" data={statusChart} options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }} /><div><strong>{metrics.coverageRate}%</strong><span>cobertas</span></div></> : <Placeholder variant="chart" title="Sem dados de cobertura" />}</div><div className="request-dashboard-status-legend"><span className="is-success"><i />Cobertas <strong>{metrics.covered}</strong></span><span className="is-danger"><i />Sem cobertura <strong>{metrics.uncovered}</strong></span><span className="is-warning"><i />Em aberto <strong>{metrics.open}</strong></span></div></div><footer className="request-dashboard-top-contract"><i className="pi pi-map-marker" /><span>Maior concentração</span><strong title={metrics.topContract}>{metrics.topContract}</strong><small>{metrics.topContractCount} no período</small></footer></DashboardPanel>
+          <DashboardPanel className="request-dashboard-panel request-dashboard-panel--status">
+            <header>
+              <div>
+                <span>Cobertura</span>
+                <h2>Situação das requisições</h2>
+              </div>
+            </header>
+            <div className="request-dashboard-status-body">
+              <div className="request-dashboard-doughnut">{metrics.total ? <><Chart type="doughnut" data={statusChart} options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }} />
+                <div>
+                  <strong>{metrics.coverageRate}%</strong>
+                  <span>cobertas</span>
+                </div>
+              </> :
+                <Placeholder variant="chart" title="Sem dados de cobertura" />}
+              </div>
+              <div className="request-dashboard-status-legend">
+                <span className="is-success">
+                  <i />Cobertas
+                  <strong>{metrics.covered}</strong>
+                </span><span className="is-danger">
+                  <i />Sem cobertura <strong>{metrics.uncovered}
+                  </strong>
+                </span>
+                <span className="is-warning">
+                  <i />Em aberto
+                  <strong>{metrics.open}</strong>
+                </span>
+              </div>
+            </div>
+            <footer className="request-dashboard-top-contract flex flex-column">
+              <div className="flex gap-1">
+                <i className="pi pi-map-marker" />
+                <span>Maior concentração:</span>
+              </div>
+
+              <div className="flex flex-column">
+                <strong title={metrics.topContract}>{metrics.topContract}</strong>
+                <small>{metrics.topContractCount} no período</small>
+              </div>
+            </footer>
+          </DashboardPanel>
+
         </section>
         <DashboardPanel className="request-dashboard-table-panel"><header><div><span>Detalhamento</span><h2>Requisições do período</h2></div><small>Inclui decisões finalizadas e solicitações ainda abertas.</small></header><Table data={filteredRecords} columns={columns} loading={loading} rows={10} rowsPerPageOptions={[10, 25, 50, 100]} search emptyTitle={activeFilterCount ? "Nenhuma requisição corresponde aos filtros" : "Nenhuma requisição no período"} emptyDescription="Altere o período ou os filtros para encontrar registros." tableClassName="request-dashboard-table" /></DashboardPanel>
       </>}

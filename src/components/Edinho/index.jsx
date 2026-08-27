@@ -21,6 +21,22 @@ function localDayParam() {
 
 export function EdinhoCard() {
   const [total, setTotal] = useState(0);
+  const [modelReady, setModelReady] = useState(false);
+  const [modelFailed, setModelFailed] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    import("@google/model-viewer")
+      .then(() => {
+        if (mounted) setModelReady(true);
+      })
+      .catch(() => {
+        if (mounted) setModelFailed(true);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const refreshBalance = useCallback(async () => {
     try {
       const { data } = await connect.get("/uso/meu-dia", { params: { dia: localDayParam() } });
@@ -42,8 +58,23 @@ export function EdinhoCard() {
   const title = `${total.toLocaleString("pt-BR")} Edinhos`;
   return <div className="edinho-balance" title={title} aria-label={title}>
     <span className="edinho-balance__coin" aria-hidden="true">
-      <span className="edinho-balance__side edinho-balance__side--heads"><img src="/edinho.svg" alt="" /></span>
-      <span className="edinho-balance__side edinho-balance__side--tails"><img src="/edinho.svg" alt="" /></span>
+      {modelFailed || !modelReady ? (
+        <img className="edinho-balance__fallback" src="/edinho.svg" alt="" />
+      ) : (
+        <model-viewer
+          className="edinho-balance__model"
+          src="/edinho.glb"
+          alt=""
+          auto-rotate
+          rotation-per-second="18deg"
+          interaction-prompt="none"
+          disable-zoom
+          disable-pan
+          shadow-intensity="0.3"
+          exposure="1.1"
+          onError={() => setModelFailed(true)}
+        />
+      )}
     </span>
     <span className="edinho-balance__content"><strong>{formatEdinhos(total)}</strong><small>Edinhos</small></span>
   </div>;
