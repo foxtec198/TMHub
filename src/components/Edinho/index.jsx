@@ -27,7 +27,8 @@ export function EdinhoCard() {
   useEffect(() => {
     let mounted = true;
     import("@google/model-viewer")
-      .then(() => {
+      .then(({ ModelViewerElement }) => {
+        ModelViewerElement.minimumRenderScale = 1;
         if (mounted) setModelReady(true);
       })
       .catch(() => {
