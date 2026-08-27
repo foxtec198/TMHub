@@ -8,14 +8,14 @@ import { FloatLabel } from "primereact/floatlabel";
 import { SpeedDial } from "primereact/speeddial";
 import { Tag } from "primereact/tag";
 import { MultiSelect } from "primereact/multiselect";
-import { InputSwitch } from "primereact/inputswitch";
 import { Checkbox } from "primereact/checkbox";
 import { Table } from "../../components/tables/Table";
+import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import connect from "../../utils/request";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 
-const EMPTY_FORM = { nome: "", cpf: "", email: "", role: "USER", password: "", filial_ids: [], gerencia_faltas: false, permissions: [] };
+const EMPTY_FORM = { nome: "", cpf: "", email: "", role: "USER", password: "", filial_ids: [], gerencia_faltas: false, permissions: [], colaborador_id: null };
 const ROLE_OPTIONS = [
   { label: "Supervisor", value: "SUPERVISOR" },
   { label: "Gerente", value: "GERENTE" },
@@ -27,6 +27,12 @@ function formatDate(value) {
   if (!value) return "—";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("pt-BR");
+}
+
+function shortCollaboratorName(value) {
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 2) return parts.join(" ");
+  return `${parts[0]} ${parts[parts.length - 1]}`;
 }
 
 export function UsersSettings() {
@@ -41,6 +47,7 @@ export function UsersSettings() {
   const [signatureDialog, setSignatureDialog] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [selectedCollaborator, setSelectedCollaborator] = useState(null);
   const [spreadsheet, setSpreadsheet] = useState(null);
   const [signatureUserId, setSignatureUserId] = useState(null);
   const [signatureFile, setSignatureFile] = useState(null);
@@ -80,13 +87,29 @@ export function UsersSettings() {
   const openCreate = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setSelectedCollaborator(null);
     setUserDialog(true);
   };
 
   const openEdit = (user) => {
     setEditingId(user.id);
-    setForm({ nome: user.nome || "", cpf: user.cpf || "", email: user.email || "", role: user.role || "USER", password: "", filial_ids: user.filial_ids || [], gerencia_faltas: Boolean(user.gerencia_faltas), permissions: user.permissions || [] });
+    setForm({ nome: user.nome || "", cpf: user.cpf || "", email: user.email || "", role: user.role || "USER", password: "", filial_ids: user.filial_ids || [], gerencia_faltas: Boolean(user.gerencia_faltas), permissions: user.permissions || [], colaborador_id: null });
+    setSelectedCollaborator(null);
     setUserDialog(true);
+  };
+
+  const selectCollaborator = (collaboratorId, collaborator) => {
+    setSelectedCollaborator(collaborator || null);
+    if (!collaborator) {
+      setForm((current) => ({ ...current, colaborador_id: null }));
+      return;
+    }
+    setForm((current) => ({
+      ...current,
+      colaborador_id: collaboratorId,
+      nome: shortCollaboratorName(collaborator.nome),
+      cpf: collaborator.cpf || "",
+    }));
   };
 
   const openSignatureRegistration = () => {
@@ -142,6 +165,7 @@ export function UsersSettings() {
   const saveUser = async (event) => {
     event.preventDefault();
     const payload = { ...form };
+    if (editingId || !payload.colaborador_id) delete payload.colaborador_id;
     if (editingId && !payload.password) delete payload.password;
 
     setLoading(true);
@@ -276,6 +300,20 @@ export function UsersSettings() {
 
     <Dialog header={editingId ? "Editar usuário" : "Criar usuário"} visible={userDialog} modal className="user-dialog" onHide={() => setUserDialog(false)}>
       <form className="user-form flex flex-column gap-4 mt-4" onSubmit={saveUser}>
+        {!editingId && <div className="user-collaborator-link">
+          <label htmlFor="user-collaborator">Vincular colaborador (opcional)</label>
+          <CollaboratorDropdown
+            value={form.colaborador_id}
+            selectedOption={selectedCollaborator}
+            queryParams={{ include_cpf: 1 }}
+            minSearch={2}
+            inputId="user-collaborator"
+            placeholder="Busque por nome ou matrícula"
+            onChange={selectCollaborator}
+            onError={() => showToast("error", "Colaborador", "Não foi possível buscar os colaboradores.")}
+          />
+          <small>Ao selecionar, o primeiro e o último nome e o CPF serão preenchidos automaticamente.</small>
+        </div>}
         <FloatLabel><InputText id="user-name" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required /><label htmlFor="user-name">Nome</label></FloatLabel>
 
         <div className="flex flex-wrap gap-3 mt-3">

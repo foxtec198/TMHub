@@ -41,6 +41,7 @@ export function CollaboratorDropdown({
     limit = DEFAULT_LIMIT,
     debounce = DEFAULT_DEBOUNCE,
     minSearch = 0,
+    inputId,
     className = "",
     placeholder = "Selecione um colaborador",
     emptyMessage = "Nenhum colaborador encontrado",
@@ -130,6 +131,7 @@ export function CollaboratorDropdown({
 
     return (
         <Dropdown
+            inputId={inputId}
             value={value}
             options={options}
             optionLabel="label"

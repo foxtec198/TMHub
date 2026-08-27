@@ -424,6 +424,26 @@
   width: 100%;
 }
 
+.user-collaborator-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-ground);
+}
+
+.user-collaborator-link > label {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.user-collaborator-link > small {
+  color: var(--text-color-secondary);
+  font-size: 0.78rem;
+}
+
 .user-form .p-inputtext,
 .user-form .p-password,
 .user-form .p-dropdown,
