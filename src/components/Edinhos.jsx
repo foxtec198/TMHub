@@ -14,12 +14,16 @@ function formatEdinhos(value) {
   return `${compact.toLocaleString("pt-BR", { maximumFractionDigits: compact >= 100 ? 0 : 1 })}${suffix}`;
 }
 
+function localDayParam() {
+  const today = new Date();
+  return [today.getFullYear(), String(today.getMonth() + 1).padStart(2, "0"), String(today.getDate()).padStart(2, "0")].join("-");
+}
+
 export function EdinhoCard() {
   const [total, setTotal] = useState(0);
   const refreshBalance = useCallback(async () => {
     try {
-      const day = new Date().toLocaleDateString("en-CA");
-      const { data } = await connect.get("/uso/meu-dia", { params: { dia: day } });
+      const { data } = await connect.get("/uso/meu-dia", { params: { dia: localDayParam() } });
       setTotal(Number(data?.saldo_edinhos) || 0);
     } catch {
       // O saldo é complementar ao header; não interrompe a navegação se indisponível.

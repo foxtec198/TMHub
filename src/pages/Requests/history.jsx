@@ -436,11 +436,6 @@ function HistoryPage() {
             body: (row) => <span className="text-truncate">{row.motivo || "—"}</span>,
         },
         {
-            header: "Dias",
-            field: "dias",
-            body: (row) => <span>{row.dias || 1}</span>,
-        },
-        {
             header: "Observações",
             field: "obs",
             body: (row) => {

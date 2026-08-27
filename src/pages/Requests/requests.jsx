@@ -365,11 +365,6 @@ export function Requests() {
             }
         },
         {
-            header: "Dias",
-            field: "dias",
-            body: (row) => <span>{row.dias || 1}</span>,
-        },
-        {
             header: "Ações",
             body: (row) => {
                 if (!canEdit) return null;
