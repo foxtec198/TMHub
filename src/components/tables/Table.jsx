@@ -33,12 +33,21 @@ export function Table({
     onRowToggle,
     rowExpansionTemplate,
     onRowClick,
+    lazy = false,
+    totalRecords,
+    first,
     onPageChange,
 }) {
     const [globalFilterDash, setGlobalFilterDash] = useState("");
     const searchInputId = useId();
     const dateInputId = useId();
     const resolvedSearchValue = searchValue ?? globalFilterDash;
+    const resolvedRows = Number(rows) > 0 ? Number(rows) : 5;
+    const useLazyPagination = lazy && mode === "paginate";
+    const resolvedFirst = Number.isFinite(Number(first)) ? Math.max(0, Number(first)) : 0;
+    const resolvedTotalRecords = Number.isFinite(Number(totalRecords))
+        ? Math.max(0, Number(totalRecords))
+        : data.length;
 
     const updateSearch = (value) => {
         setGlobalFilterDash(value);
@@ -109,10 +118,14 @@ export function Table({
             rowExpansionTemplate={rowExpansionTemplate}
             onRowClick={onRowClick}
             paginator={mode === "paginate"}
-            rows={rows}
+            rows={resolvedRows}
             rowsPerPageOptions={rowsPerPageOptions}
-            lazy={true}
-            onPage={onPageChange}
+            {...(useLazyPagination ? {
+                lazy: true,
+                totalRecords: resolvedTotalRecords,
+                first: resolvedFirst,
+                onPage: onPageChange,
+            } : { lazy: false })}
 
             scrollable
             scrollHeight={mode === "scroll" ? "400px" : undefined}
