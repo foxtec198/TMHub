@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Widgets ----------------------------------------------
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
@@ -284,7 +285,7 @@ export function MobileMovement() {
                     <Button
                         type="submit"
                         label="Entrar"
-                        icon="pi pi-sign-in"
+                        icon={<AppIcon name="login" />}
                         iconPos="right"
                         className="w-full h-3rem mt-5"
                         disabled={!!(bloqueadoAte && tempoRestante > 0)}
@@ -317,7 +318,7 @@ export function MobileMovement() {
                         {displayName && (
                             <div className="flex justify-content-between align-items-center">
                                 <span>Olá, <b>{displayName}</b></span>
-                                <Button type="button" label="Sair" icon="pi pi-sign-out" iconPos="right" text size="small" onClick={logout} />
+                                <Button type="button" label="Sair" icon={<AppIcon name="logout" />} iconPos="right" text size="small" onClick={logout} />
                             </div>
                         )}
 
@@ -333,7 +334,7 @@ export function MobileMovement() {
                         <Button
                             type="button"
                             label="Ler código de barras"
-                            icon="pi pi-camera"
+                            icon={<AppIcon name="camera" />}
                             outlined
                             className="w-full"
                             onClick={() => setScannerVisible(true)}
@@ -393,7 +394,7 @@ export function MobileMovement() {
                         <Button
                             type="submit"
                             label="Registrar Movimentação"
-                            icon="pi pi-send"
+                            icon={<AppIcon name="send" />}
                             iconPos="right"
                             className="w-full h-3rem"
                         />

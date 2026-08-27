@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Componentes visuais ----------------------------------
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
@@ -32,7 +33,7 @@ function SelectedCollaborator({ title, collaborator, icon, disciplinaryContext, 
     return (
         <section className="request-collaborator-summary" aria-label={`${title} selecionado`}>
             <div className="request-collaborator-summary__heading">
-                <i className={icon} aria-hidden="true" />
+                {typeof icon === "string" ? <AppIcon name={icon} /> : icon}
                 <span>{title}</span>
             </div>
             <dl>
@@ -53,9 +54,9 @@ function SelectedCollaborator({ title, collaborator, icon, disciplinaryContext, 
                     <dd>{place}</dd>
                 </div>
             </dl>
-            {disciplinaryLoading && <div className="request-disciplinary-loading"><i className="pi pi-spin pi-spinner" /> Verificando histórico disciplinar...</div>}
+            {disciplinaryLoading && <div className="request-disciplinary-loading"><AppIcon name="loader-2"  /> Verificando histórico disciplinar...</div>}
             {disciplinaryContext?.avisos?.length > 0 && <aside className="request-disciplinary-alert" role="alert">
-                <i className="pi pi-exclamation-triangle" aria-hidden="true" />
+                <AppIcon name="alert-triangle" aria-hidden="true"  />
                 <div>
                     <strong>Orientação do RH</strong>
                     <ul>{disciplinaryContext.avisos.map((message) => <li key={message}>{message}</li>)}</ul>
@@ -353,7 +354,7 @@ export function Request() {
                 {/* MAIN */}
                 <div className={`request-stepper-shell ${additionalStepReleased ? "is-additional-released" : "is-additional-locked"}`}>
                     <div className="request-authenticated-supervisor">
-                        {requesterLoading ? <><i className="pi pi-spin pi-spinner" /> Identificando supervisor responsável...</> : null}
+                        {requesterLoading ? <><AppIcon name="loader-2"  /> Identificando supervisor responsável...</> : null}
                         {!requesterLoading && requesterError ? <span className="request-authenticated-supervisor__error">{requesterError}</span> : null}
                         {!requesterLoading && !requesterError && canChooseSupervisor ? <Dropdown
                             className="w-full"
@@ -371,7 +372,7 @@ export function Request() {
                                 setAdditionalStepReleased(false);
                             }}
                         /> : null}
-                        {!requesterLoading && !requesterError && !canChooseSupervisor && user ? <><i className="pi pi-user" /> Requisição em nome de <strong>{user.name}</strong></> : null}
+                        {!requesterLoading && !requesterError && !canChooseSupervisor && user ? <><AppIcon name="user"  /> Requisição em nome de <strong>{user.name}</strong></> : null}
                     </div>
                     <Stepper ref={stepperRef} activeStep={activeStep} onChangeStep={handleStepChange}>
                         <StepperPanel header="Requisição">
@@ -397,7 +398,7 @@ export function Request() {
                                 <SelectedCollaborator
                                     title="Ausente"
                                     collaborator={absentDetails}
-                                    icon="pi pi-user-minus"
+                                    icon={<AppIcon name="user-minus" />}
                                     disciplinaryContext={disciplinaryContext}
                                     disciplinaryLoading={disciplinaryLoading}
                                 />
@@ -500,7 +501,7 @@ export function Request() {
 
                                 <Button
                                     label={additionalContext?.modo === "selecionar_cobertura" ? "Continuar" : "Enviar Requisição"}
-                                    icon={additionalContext?.modo === "selecionar_cobertura" ? "pi pi-arrow-right" : "pi pi-send"}
+                                    icon={<AppIcon name={additionalContext?.modo === "selecionar_cobertura" ? "arrow-right" : "send"} />}
                                     iconPos="right"
                                     className="w-full mt-4"
                                     onClick={advanceToAdditional}
@@ -519,7 +520,7 @@ export function Request() {
                                         </div>
                                     </div>
 
-                                    {additionalLoading && <p className="request-additional-coverage__message"><i className="pi pi-spin pi-spinner" /> Verificando o cargo selecionado...</p>}
+                                    {additionalLoading && <p className="request-additional-coverage__message"><AppIcon name="loader-2"  /> Verificando o cargo selecionado...</p>}
 
                                     {!additionalLoading && additionalContext?.modo === "selecionar_cobertura" && (
                                         <>
@@ -567,7 +568,7 @@ export function Request() {
 
                                 <Button
                                     label="Enviar Requisição"
-                                    icon="pi pi-send"
+                                    icon={<AppIcon name="send" />}
                                     iconPos="right"
                                     className="w-full mt-3"
                                     onClick={() => { createRequest() }}

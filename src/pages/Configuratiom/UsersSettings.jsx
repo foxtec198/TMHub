@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -249,9 +250,9 @@ export function UsersSettings() {
   };
 
   const speedDialItems = [
-    { label: "Criar uma conta", icon: "pi pi-user-plus", command: openCreate },
-    { label: "Vincular assinatura", icon: "pi pi-pencil", command: openSignatureRegistration },
-    { label: "Importar arquivo XLSX", icon: "pi pi-file-excel", command: () => setBulkDialog(true) },
+    { label: "Criar uma conta", icon: appIcon("user-plus"), command: openCreate },
+    { label: "Vincular assinatura", icon: appIcon("pencil"), command: openSignatureRegistration },
+    { label: "Importar arquivo XLSX", icon: appIcon("file-spreadsheet"), command: () => setBulkDialog(true) },
   ];
 
   const permissionValue = (screen, action) => Boolean(form.permissions.find((item) => item.screen === screen)?.[action]);
@@ -281,21 +282,21 @@ export function UsersSettings() {
     { header: "Telas", body: (user) => user.permissions?.filter((permission) => permission.view).length || 0 },
     ...(canManage ? [{
       header: "Ações",
-      body: (user) => <Button icon="pi pi-pencil" rounded text aria-label={`Editar ${user.nome}`} onClick={() => openEdit(user)} />,
+      body: (user) => <Button icon={<AppIcon name="pencil" />} rounded text aria-label={`Editar ${user.nome}`} onClick={() => openEdit(user)} />,
     }] : []),
   ];
 
   return <div>
     <article className="settings-card users-table-card">
-      <div className="settings-card-title"><i className="pi pi-users" /><div><h2>Usuários cadastrados</h2><p>Contas com acesso ao TM Hub</p></div></div>
-      {usersStatus === "loading" && <div className="settings-feedback"><i className="pi pi-spin pi-spinner" /> Carregando usuários...</div>}
-      {usersStatus === "error" && <div className="settings-feedback is-error"><i className="pi pi-exclamation-triangle" /><span>{usersError}</span><Button label="Tentar novamente" text onClick={() => setRefresh((value) => value + 1)} /></div>}
+      <div className="settings-card-title"><AppIcon name="users"  /><div><h2>Usuários cadastrados</h2><p>Contas com acesso ao TM Hub</p></div></div>
+      {usersStatus === "loading" && <div className="settings-feedback"><AppIcon name="loader-2"  /> Carregando usuários...</div>}
+      {usersStatus === "error" && <div className="settings-feedback is-error"><AppIcon name="alert-triangle"  /><span>{usersError}</span><Button label="Tentar novamente" text onClick={() => setRefresh((value) => value + 1)} /></div>}
       {usersStatus === "ready" && users.length > 0 && <Table data={users} columns={columns} search rows={5} rowsPerPageOptions={[3, 5, 10, 50, 100]} />}
       {usersStatus === "ready" && users.length === 0 && <div className="settings-feedback">Nenhum usuário cadastrado.</div>}
     </article>
 
     <div className="users-speed-dial">
-      <SpeedDial model={speedDialItems} direction="up" showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações de usuários" />
+      <SpeedDial model={speedDialItems} direction="up" showIcon={<AppIcon name="plus" />} hideIcon={<AppIcon name="x" />} aria-label="Ações de usuários" />
     </div>
 
     <Dialog header={editingId ? "Editar usuário" : "Criar usuário"} visible={userDialog} modal className="user-dialog" onHide={() => setUserDialog(false)}>
@@ -341,23 +342,23 @@ export function UsersSettings() {
                   checked={form.role === "ADMIN" || permissionValue(item.key, action)}
                   disabled={form.role === "ADMIN"}
                   onChange={(event) => setPermission(item.key, action, event.checked)}
-                /> : <i className="pi pi-minus permission-unavailable" />}
+                /> : <AppIcon name="minus" className="permission-unavailable"  />}
               </span>)}
             </div>)}
           </div>
-          {form.role === "ADMIN" && <small className="permission-admin-note"><i className="pi pi-shield" /> Administradores possuem acesso total.</small>}
+          {form.role === "ADMIN" && <small className="permission-admin-note"><AppIcon name="shield"  /> Administradores possuem acesso total.</small>}
         </section>
-        <div className="dialog-actions"><Button type="button" label="Cancelar" text onClick={() => setUserDialog(false)} /><Button type="submit" label={editingId ? "Salvar alterações" : "Criar usuário"} icon="pi pi-check" /></div>
+        <div className="dialog-actions"><Button type="button" label="Cancelar" text onClick={() => setUserDialog(false)} /><Button type="submit" label={editingId ? "Salvar alterações" : "Criar usuário"} icon={<AppIcon name="check" />} /></div>
       </form>
     </Dialog>
 
     <Dialog header="Importar usuários" visible={bulkDialog} modal className="user-dialog" closable={!importing} closeOnEscape={!importing} onHide={() => !importing && setBulkDialog(false)}>
       <form className="bulk-user-form" onSubmit={importUsers}>
         <p>A importação é transacional: se alguma linha estiver inválida, nenhum usuário será criado.</p>
-        <Button type="button" label="Baixar planilha modelo" icon="pi pi-download" outlined onClick={downloadTemplate} disabled={importing} />
+        <Button type="button" label="Baixar planilha modelo" icon={<AppIcon name="download" />} outlined onClick={downloadTemplate} disabled={importing} />
         <input ref={fileInput} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={importing} onChange={(event) => setSpreadsheet(event.target.files?.[0] || null)} />
         {spreadsheet ? <small>Arquivo selecionado: {spreadsheet.name}</small> : null}
-        <div className="dialog-actions"><Button type="button" label="Cancelar" text disabled={importing} onClick={() => setBulkDialog(false)} /><Button type="submit" label={importing ? "Importando..." : "Importar usuários"} icon="pi pi-upload" loading={importing} disabled={!spreadsheet || importing} /></div>
+        <div className="dialog-actions"><Button type="button" label="Cancelar" text disabled={importing} onClick={() => setBulkDialog(false)} /><Button type="submit" label={importing ? "Importando..." : "Importar usuários"} icon={<AppIcon name="upload" />} loading={importing} disabled={!spreadsheet || importing} /></div>
       </form>
     </Dialog>
 
@@ -401,7 +402,7 @@ export function UsersSettings() {
             {signatureCrop && <span className="registered-signature-crop__selection" style={{ left: `${signatureCrop.x * 100}%`, top: `${signatureCrop.y * 100}%`, width: `${signatureCrop.width * 100}%`, height: `${signatureCrop.height * 100}%` }} />}
           </div>
         </div>}
-        <div className="dialog-actions"><Button type="button" label="Cancelar" text disabled={registeringSignature} onClick={() => setSignatureDialog(false)} /><Button type="submit" label="Cadastrar assinatura" icon="pi pi-check" loading={registeringSignature} disabled={!signatureUserId || !signatureFile || registeringSignature} /></div>
+        <div className="dialog-actions"><Button type="button" label="Cancelar" text disabled={registeringSignature} onClick={() => setSignatureDialog(false)} /><Button type="submit" label="Cadastrar assinatura" icon={<AppIcon name="check" />} loading={registeringSignature} disabled={!signatureUserId || !signatureFile || registeringSignature} /></div>
       </form>
     </Dialog>
   </div>;

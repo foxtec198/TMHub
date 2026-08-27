@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import './admission.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -60,7 +61,7 @@ function formatHours(value) {
 function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
     return (
         <article className={`admission-summary-card tm-dashboard-card is-${tone}`}>
-            <span className="admission-summary-card__icon"><i className={icon} /></span>
+            <span className="admission-summary-card__icon">{typeof icon === "string" ? <AppIcon name={icon} /> : icon}</span>
             <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
         </article>
     );
@@ -145,12 +146,12 @@ export function AdmissionDashboard() {
 
     // Os tons dos cards refletem a comparação de cada indicador com sua meta vigente.
     const summary = [
-        { icon: 'pi pi-briefcase', label: 'Vagas no período', value: indicators.total_vagas ?? 0, detail: `${indicators.vagas_concluidas ?? 0} concluídas`, tone: 'neutral' },
-        { icon: 'pi pi-calendar-plus', label: 'Com data prevista', value: indicators.vagas_data_prevista ?? 0, detail: 'não contabilizadas no SLA', tone: 'warning' },
-        { icon: 'pi pi-bolt', label: 'Primeira ação', value: formatHours(indicators.sla_acao_medio_horas), detail: `meta de até ${actionTarget}h úteis`, tone: indicators.sla_acao_medio_horas <= actionTarget ? 'success' : 'warning' },
-        { icon: 'pi pi-check-circle', label: 'Conclusão', value: indicators.sla_conclusao_medio_dias != null ? `${indicators.sla_conclusao_medio_dias} dias` : '-', detail: `meta de até ${closeTargetDays} dias úteis`, tone: indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'success' : 'danger' },
-        { icon: 'pi pi-chart-line', label: 'Dentro do SLA', value: indicators.percentual_no_prazo != null ? `${indicators.percentual_no_prazo}%` : '-', detail: 'ação e conclusão', tone: indicators.percentual_no_prazo >= 80 ? 'success' : 'warning' },
-        { icon: 'pi pi-hourglass', label: 'Em andamento', value: indicators.vagas_em_andamento ?? 0, detail: `${indicators.sla_estourado ?? 0} fora do prazo`, tone: indicators.sla_estourado ? 'danger' : 'violet' },
+        { icon: appIcon("briefcase"), label: 'Vagas no período', value: indicators.total_vagas ?? 0, detail: `${indicators.vagas_concluidas ?? 0} concluídas`, tone: 'neutral' },
+        { icon: appIcon("calendar-plus"), label: 'Com data prevista', value: indicators.vagas_data_prevista ?? 0, detail: 'não contabilizadas no SLA', tone: 'warning' },
+        { icon: appIcon("bolt"), label: 'Primeira ação', value: formatHours(indicators.sla_acao_medio_horas), detail: `meta de até ${actionTarget}h úteis`, tone: indicators.sla_acao_medio_horas <= actionTarget ? 'success' : 'warning' },
+        { icon: appIcon("circle-check"), label: 'Conclusão', value: indicators.sla_conclusao_medio_dias != null ? `${indicators.sla_conclusao_medio_dias} dias` : '-', detail: `meta de até ${closeTargetDays} dias úteis`, tone: indicators.sla_conclusao_medio_dias <= closeTargetDays ? 'success' : 'danger' },
+        { icon: appIcon("chart-line"), label: 'Dentro do SLA', value: indicators.percentual_no_prazo != null ? `${indicators.percentual_no_prazo}%` : '-', detail: 'ação e conclusão', tone: indicators.percentual_no_prazo >= 80 ? 'success' : 'warning' },
+        { icon: appIcon("hourglass"), label: 'Em andamento', value: indicators.vagas_em_andamento ?? 0, detail: `${indicators.sla_estourado ?? 0} fora do prazo`, tone: indicators.sla_estourado ? 'danger' : 'violet' },
     ];
 
     return (
@@ -161,7 +162,7 @@ export function AdmissionDashboard() {
                 title="SLA de Admissões"
                 description="Acompanhe a velocidade de resposta e conclusão. Vagas com saída prevista permanecem fora do SLA."
                 actions={<>
-                    <Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : 'Filtros'} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
+                    <Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : 'Filtros'} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
                 </>}
             />
 
@@ -195,9 +196,9 @@ export function AdmissionDashboard() {
 
             <article className="admission-table-panel tm-dashboard-panel">
                 <nav className="admission-table-tabs" aria-label="Visualizações do dashboard">
-                    <button className={activeTable === 'departments' ? 'is-active' : ''} type="button" onClick={() => setActiveTable('departments')}><i className="pi pi-building" /><span>SLA por departamento</span></button>
-                    <button className={activeTable === 'recent' ? 'is-active' : ''} type="button" onClick={() => setActiveTable('recent')}><i className="pi pi-history" /><span>Vagas recentes</span></button>
-                    <button className={activeTable === 'attention' ? 'is-active is-attention' : ''} type="button" onClick={() => setActiveTable('attention')}><i className="pi pi-exclamation-triangle" /><span>Atenção</span><em>{data?.atencao?.length || 0}</em></button>
+                    <button className={activeTable === 'departments' ? 'is-active' : ''} type="button" onClick={() => setActiveTable('departments')}><AppIcon name="building"  /><span>SLA por departamento</span></button>
+                    <button className={activeTable === 'recent' ? 'is-active' : ''} type="button" onClick={() => setActiveTable('recent')}><AppIcon name="history"  /><span>Vagas recentes</span></button>
+                    <button className={activeTable === 'attention' ? 'is-active is-attention' : ''} type="button" onClick={() => setActiveTable('attention')}><AppIcon name="alert-triangle"  /><span>Atenção</span><em>{data?.atencao?.length || 0}</em></button>
                 </nav>
 
                 <div className="admission-table-content">
@@ -216,7 +217,7 @@ export function AdmissionDashboard() {
                         <Column
                             header="Saída prevista"
                             body={(row) => row.data_saida_prevista
-                                ? <Tag value={formatDateOnly(row.data_saida)} severity="warning" icon="pi pi-calendar" rounded />
+                                ? <Tag value={formatDateOnly(row.data_saida)} severity="warning" icon={<AppIcon name="calendar" />} rounded />
                                 : '-'}
                             sortable
                             sortField="data_saida"
@@ -245,7 +246,7 @@ export function AdmissionDashboard() {
             <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
                 <div className="dashboard-filter-title">
                     <div><strong>Filtrar admissões</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
-                    <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+                    <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
                 </div>
                 <div className="dashboard-filter-grid">
                     <label className="is-wide"><span>Período</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>

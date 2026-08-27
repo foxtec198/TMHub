@@ -1,4 +1,5 @@
 import { Skeleton } from "primereact/skeleton";
+import { AppIcon } from "../icons/AppIcon";
 
 import "./placeholder.css";
 
@@ -64,7 +65,7 @@ function ChartSkeleton() {
 export function Placeholder({
   loading = false,
   variant = "content",
-  icon = "pi-inbox",
+  icon = "inbox",
   title,
   description,
   action = null,
@@ -81,7 +82,9 @@ export function Placeholder({
 
   return (
     <div className={`tm-placeholder tm-placeholder--${variant} ${className}`.trim()} role="status">
-      <span className="tm-placeholder__icon" aria-hidden="true"><i className={`pi ${icon}`} /></span>
+      <span className="tm-placeholder__icon" aria-hidden="true">
+        {typeof icon === "string" ? <AppIcon name={icon} /> : icon}
+      </span>
       <div className="tm-placeholder__copy">
         <strong>{title || "Nada para mostrar por aqui"}</strong>
         {description ? <span>{description}</span> : null}
@@ -94,4 +97,3 @@ export function Placeholder({
 export function EmptyState(props) {
   return <Placeholder {...props} />;
 }
-

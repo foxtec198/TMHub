@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -308,9 +309,9 @@ function VacationControlContent() {
   }
 
   const speedDialItems = [
-    ...(canCreate ? [{ label: "Importar planilha", icon: "pi pi-file-import", command: () => setImportOpen(true) }] : []),
-    { label: "Exportar controle", icon: "pi pi-file-export", command: exportSpreadsheet },
-    ...(isAdmin ? [{ label: "Excluir todos os registros", icon: "pi pi-trash", command: () => setDeleteAllOpen(true) }] : []),
+    ...(canCreate ? [{ label: "Importar planilha", icon: appIcon("file-import"), command: () => setImportOpen(true) }] : []),
+    { label: "Exportar controle", icon: appIcon("file-export"), command: exportSpreadsheet },
+    ...(isAdmin ? [{ label: "Excluir todos os registros", icon: appIcon("trash"), command: () => setDeleteAllOpen(true) }] : []),
   ];
 
   function toggleEmployeePeriods(employeeId) {
@@ -329,7 +330,7 @@ function VacationControlContent() {
   }
 
   const employeeBody = (row) => <div className="vacation-main-cell"><strong title={row.nome}>{row.nome}</strong><small>Matrícula {row.matricula || "—"}</small></div>;
-  const historyEmployeeBody = (row) => <div className="vacation-history-employee"><Button icon={expandedEmployees[row.id] ? "pi pi-minus" : "pi pi-plus"} text rounded aria-label={expandedEmployees[row.id] ? "Ocultar períodos" : "Mostrar períodos"} className="vacation-history-expand-button" onClick={(event) => { event.stopPropagation(); toggleEmployeePeriods(row.id); }} /><div className="vacation-main-cell"><strong title={row.nome}>{row.nome}</strong><small>Matrícula {row.matricula || "—"} · {row.periodos.length} período(s)</small></div></div>;
+  const historyEmployeeBody = (row) => <div className="vacation-history-employee"><Button icon={<AppIcon name={expandedEmployees[row.id] ? "minus" : "plus"} />} text rounded aria-label={expandedEmployees[row.id] ? "Ocultar períodos" : "Mostrar períodos"} className="vacation-history-expand-button" onClick={(event) => { event.stopPropagation(); toggleEmployeePeriods(row.id); }} /><div className="vacation-main-cell"><strong title={row.nome}>{row.nome}</strong><small>Matrícula {row.matricula || "—"} · {row.periodos.length} período(s)</small></div></div>;
   const contractBody = (row) => <div className="vacation-main-cell"><strong title={row.centro_custo}>{row.centro_custo || "—"}</strong><small>DPTO. {row.departamento ?? "—"} · {row.supervisor || "Sem supervisor"}</small></div>;
   const periodBody = (row) => <div className="vacation-main-cell"><strong>{dateLabel(row.periodo_aquisitivo_inicio)} a {dateLabel(row.periodo_aquisitivo_fim)}</strong><small>Limite: {dateLabel(row.limite_concessivo)}</small></div>;
   const daysBody = (row) => <div className="vacation-days"><strong>{row.dias_gozados || 0} de {row.dias_direito || 30}</strong><small>{row.dias_a_gozar || 0} dia(s) a gozar</small></div>;
@@ -340,7 +341,7 @@ function VacationControlContent() {
     { header: "Períodos", mobileHeader: "Períodos", body: (row) => <div className="vacation-days"><strong>{row.periodos.length} registrado(s)</strong><small>{row.periodos.reduce((total, period) => total + Number(period.dias_gozados || 0), 0)} dia(s) gozados</small></div>, style: { minWidth: "12rem" } },
     { header: "Último período", mobileHeader: "Último período", body: (row) => periodBody(row.periodos[0]), style: { minWidth: "16rem" } },
   ];
-  const historyExpansionTemplate = (employee) => <div className="vacation-history-periods"><div className="vacation-history-periods__heading"><strong>Períodos de férias registrados</strong><span>{employee.periodos.length} período(s) desde a admissão</span></div>{employee.periodos.map((period) => <div className="vacation-history-period" key={period.id}><div><span>Período aquisitivo</span><strong>{dateLabel(period.periodo_aquisitivo_inicio)} a {dateLabel(period.periodo_aquisitivo_fim)}</strong></div><div><span>Gozos</span><strong>{period.dias_gozados || 0} de {period.dias_direito || 30} dias</strong><small>{(period.gozos || []).map((leave) => `${dateLabel(leave.data_inicio)} a ${dateLabel(leave.data_fim)}`).join(" · ") || "Sem gozo informado"}</small></div><div><span>Situação</span>{statusBody(period)}</div>{canEdit && <Button label="Editar período" icon="pi pi-pencil" outlined className="vacation-history-period__edit" onClick={() => openDetail(period)} />}</div>)}</div>;
+  const historyExpansionTemplate = (employee) => <div className="vacation-history-periods"><div className="vacation-history-periods__heading"><strong>Períodos de férias registrados</strong><span>{employee.periodos.length} período(s) desde a admissão</span></div>{employee.periodos.map((period) => <div className="vacation-history-period" key={period.id}><div><span>Período aquisitivo</span><strong>{dateLabel(period.periodo_aquisitivo_inicio)} a {dateLabel(period.periodo_aquisitivo_fim)}</strong></div><div><span>Gozos</span><strong>{period.dias_gozados || 0} de {period.dias_direito || 30} dias</strong><small>{(period.gozos || []).map((leave) => `${dateLabel(leave.data_inicio)} a ${dateLabel(leave.data_fim)}`).join(" · ") || "Sem gozo informado"}</small></div><div><span>Situação</span>{statusBody(period)}</div>{canEdit && <Button label="Editar período" icon={<AppIcon name="pencil" />} outlined className="vacation-history-period__edit" onClick={() => openDetail(period)} />}</div>)}</div>;
   const provisioningColumns = [
     { field: "nome", header: "Colaborador", mobileHeader: "Colaborador", sortable: true, body: employeeBody, style: { minWidth: "19rem" } },
     { header: "Período aquisitivo", mobileHeader: "Período aquisitivo", body: periodBody, style: { minWidth: "16rem" } },
@@ -355,22 +356,22 @@ function VacationControlContent() {
       title="Controle de Férias"
       description="Acompanhe o histórico, os dias a gozar e os períodos que precisam de programação."
       actions={<>
-        <Button label={`Filtros${activeFilterCount ? ` (${activeFilterCount})` : ""}`} icon="pi pi-filter" outlined onClick={(event) => filterPanel.current?.toggle(event)} />
+        <Button label={`Filtros${activeFilterCount ? ` (${activeFilterCount})` : ""}`} icon={<AppIcon name="filter" />} outlined onClick={(event) => filterPanel.current?.toggle(event)} />
       </>}
     />
 
     <div className="vacation-summary">
-      <article><i className="pi pi-history" /><div><small>Histórico importado</small><strong>{summary.historico || 0}</strong><span>períodos registrados</span></div></article>
-      <article><i className="pi pi-calendar-plus" /><div><small>A programar</small><strong>{summary.provisionamento || 0}</strong><span>com saldo de férias</span></div></article>
-      <article className="is-warning"><i className="pi pi-clock" /><div><small>A vencer</small><strong>{summary.a_vencer || 0}</strong><span>até 90 dias</span></div></article>
-      <article className="is-danger"><i className="pi pi-exclamation-triangle" /><div><small>Exigem atenção</small><strong>{summary.criticas || 0}</strong><span>críticas ou em dobro</span></div></article>
-      <article className="is-success"><i className="pi pi-wallet" /><div><small>Férias líquidas</small><strong>{money(summary.custo_pago)}</strong><span>histórico filtrado</span></div></article>
+      <article><AppIcon name="history"  /><div><small>Histórico importado</small><strong>{summary.historico || 0}</strong><span>períodos registrados</span></div></article>
+      <article><AppIcon name="calendar-plus"  /><div><small>A programar</small><strong>{summary.provisionamento || 0}</strong><span>com saldo de férias</span></div></article>
+      <article className="is-warning"><AppIcon name="clock"  /><div><small>A vencer</small><strong>{summary.a_vencer || 0}</strong><span>até 90 dias</span></div></article>
+      <article className="is-danger"><AppIcon name="alert-triangle"  /><div><small>Exigem atenção</small><strong>{summary.criticas || 0}</strong><span>críticas ou em dobro</span></div></article>
+      <article className="is-success"><AppIcon name="wallet"  /><div><small>Férias líquidas</small><strong>{money(summary.custo_pago)}</strong><span>histórico filtrado</span></div></article>
     </div>
 
     <article className="vacation-panel">
       <div className="vacation-view-switcher" role="tablist" aria-label="Visualização do controle de férias">
-        <Button label="Histórico mensal" icon="pi pi-history" outlined={activeView !== "historico"} className={activeView === "historico" ? "is-active" : ""} onClick={() => setActiveView("historico")} aria-selected={activeView === "historico"} />
-        <Button label="Provisionamento" icon="pi pi-calendar-plus" outlined={activeView !== "provisionamento"} className={activeView === "provisionamento" ? "is-active" : ""} onClick={() => setActiveView("provisionamento")} aria-selected={activeView === "provisionamento"} />
+        <Button label="Histórico mensal" icon={<AppIcon name="history" />} outlined={activeView !== "historico"} className={activeView === "historico" ? "is-active" : ""} onClick={() => setActiveView("historico")} aria-selected={activeView === "historico"} />
+        <Button label="Provisionamento" icon={<AppIcon name="calendar-plus" />} outlined={activeView !== "provisionamento"} className={activeView === "provisionamento" ? "is-active" : ""} onClick={() => setActiveView("provisionamento")} aria-selected={activeView === "provisionamento"} />
       </div>
 
       {activeView === "historico" ? <>
@@ -383,9 +384,9 @@ function VacationControlContent() {
     </article>
 
     <OverlayPanel ref={filterPanel} className="vacation-filter-panel">
-      <div className="vacation-filter-heading"><div><strong>Filtrar férias</strong><span>O histórico e o provisionamento acompanham este recorte.</span></div><Button icon="pi pi-filter-slash" rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
+      <div className="vacation-filter-heading"><div><strong>Filtrar férias</strong><span>O histórico e o provisionamento acompanham este recorte.</span></div><Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
       <div className="vacation-filter-grid">
-        <label className="is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left vacation-filter-search"><i className="pi pi-search" /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula, contrato ou supervisor" /></span></label>
+        <label className="is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left vacation-filter-search"><AppIcon name="search"  /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula, contrato ou supervisor" /></span></label>
         <label><span>Departamento</span><MultiSelect value={filters.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, departamento: event.value || [] }))} placeholder="Todos os departamentos" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
         <label><span>Contrato</span><MultiSelect value={filters.centro_custo_id} options={filterOptions.centros || []} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, centro_custo_id: event.value || [] }))} placeholder="Todos os contratos" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
         <label><span>Supervisor</span><MultiSelect value={filters.supervisor_id} options={filterOptions.supervisores || []} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, supervisor_id: event.value || [] }))} placeholder="Todos os supervisores" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
@@ -395,32 +396,32 @@ function VacationControlContent() {
 
     <Dialog header="Importar férias calculadas" visible={importOpen} modal className="vacation-import-dialog" onHide={() => { setImportOpen(false); setImportFile(null); setImportPreview(null); }}>
       <div className="vacation-import-content">
-        <div className="vacation-import-note"><i className="pi pi-info-circle" /><span>Use a planilha “Relação de Férias Calculadas”. A prévia valida períodos, matrículas e escopo antes de qualquer gravação.</span></div>
+        <div className="vacation-import-note"><AppIcon name="info-circle"  /><span>Use a planilha “Relação de Férias Calculadas”. A prévia valida períodos, matrículas e escopo antes de qualquer gravação.</span></div>
         <button type="button" className={`vacation-dropzone ${importFile ? "has-file" : ""}`} onClick={() => fileInput.current?.click()}>
           <input ref={fileInput} type="file" accept=".xlsx" onChange={selectImportFile} />
-          <i className={`pi ${importFile ? "pi-file-check" : "pi-cloud-upload"}`} />
+          <AppIcon name={importFile ? "file-check" : "cloud-upload"} />
           <strong>{importFile?.name || "Selecionar planilha .xlsx"}</strong>
           <span>{importFile ? `${(importFile.size / 1024).toFixed(1)} KB` : "Nenhum dado será gravado antes da confirmação."}</span>
         </button>
 
-        {previewLoading && <div className="vacation-import-preview is-loading"><i className="pi pi-spin pi-spinner" /><span>Lendo e validando a planilha…</span></div>}
-        {importPreview?.error && <div className="vacation-import-preview is-error"><i className="pi pi-exclamation-triangle" /><div><strong>Importação bloqueada</strong><span>{importPreview.error}</span></div></div>}
+        {previewLoading && <div className="vacation-import-preview is-loading"><AppIcon name="loader-2"  /><span>Lendo e validando a planilha…</span></div>}
+        {importPreview?.error && <div className="vacation-import-preview is-error"><AppIcon name="alert-triangle"  /><div><strong>Importação bloqueada</strong><span>{importPreview.error}</span></div></div>}
         {importPreview && !importPreview.error && <div className="vacation-import-preview">
           <div className="vacation-import-preview__heading"><div><span>PRÉVIA DA IMPORTAÇÃO</span><strong>{importPreview.total_periodos} período(s) encontrado(s)</strong></div><small>{importPreview.total_lancamentos} lançamento(s) na planilha</small></div>
           <div className="vacation-import-summary" aria-label="Resumo da importação">
-            <div><i className="pi pi-users" /><span>Colaboradores</span><strong>{importPreview.resumo?.colaboradores || 0}</strong></div>
-            <div><i className="pi pi-calendar-plus" /><span>Novos períodos</span><strong>{importPreview.resumo?.novos_periodos || 0}</strong></div>
-            <div><i className="pi pi-sync" /><span>Já cadastrados</span><strong>{importPreview.resumo?.periodos_atualizados || 0}</strong></div>
-            <div><i className="pi pi-clone" /><span>Com mais de um gozo</span><strong>{importPreview.resumo?.gozos_fracionados || 0}</strong></div>
+            <div><AppIcon name="users"  /><span>Colaboradores</span><strong>{importPreview.resumo?.colaboradores || 0}</strong></div>
+            <div><AppIcon name="calendar-plus"  /><span>Novos períodos</span><strong>{importPreview.resumo?.novos_periodos || 0}</strong></div>
+            <div><AppIcon name="refresh"  /><span>Já cadastrados</span><strong>{importPreview.resumo?.periodos_atualizados || 0}</strong></div>
+            <div><AppIcon name="copy"  /><span>Com mais de um gozo</span><strong>{importPreview.resumo?.gozos_fracionados || 0}</strong></div>
           </div>
-          <div className="vacation-import-preview__range"><i className="pi pi-calendar" /><span>Períodos de gozo no arquivo</span><strong>{dateLabel(importPreview.resumo?.primeiro_gozo)} a {dateLabel(importPreview.resumo?.ultimo_gozo)}</strong></div>
+          <div className="vacation-import-preview__range"><AppIcon name="calendar"  /><span>Períodos de gozo no arquivo</span><strong>{dateLabel(importPreview.resumo?.primeiro_gozo)} a {dateLabel(importPreview.resumo?.ultimo_gozo)}</strong></div>
         </div>}
 
-        <div className="vacation-dialog-actions"><Button label="Cancelar" text onClick={() => setImportOpen(false)} /><Button label="Importar" icon="pi pi-check" onClick={importSpreadsheet} disabled={!importFile || previewLoading || !importPreview || Boolean(importPreview.error)} /></div>
+        <div className="vacation-dialog-actions"><Button label="Cancelar" text onClick={() => setImportOpen(false)} /><Button label="Importar" icon={<AppIcon name="check" />} onClick={importSpreadsheet} disabled={!importFile || previewLoading || !importPreview || Boolean(importPreview.error)} /></div>
       </div>
     </Dialog>
 
-    <Dialog header="Excluir todas as férias" visible={deleteAllOpen} modal dismissableMask draggable={false} className="vacation-delete-dialog" onHide={() => setDeleteAllOpen(false)}><div className="vacation-delete-content"><i className="pi pi-exclamation-triangle" /><div><strong>Excluir todos os períodos importados?</strong><p>Esta ação remove o histórico e os dias de gozo registrados. Os dados dos colaboradores e das faltas não serão alterados.</p></div></div><div className="vacation-dialog-actions"><Button label="Cancelar" outlined onClick={() => setDeleteAllOpen(false)} /><Button label="Excluir todos" icon="pi pi-trash" severity="danger" onClick={deleteAll} /></div></Dialog>
+    <Dialog header="Excluir todas as férias" visible={deleteAllOpen} modal dismissableMask draggable={false} className="vacation-delete-dialog" onHide={() => setDeleteAllOpen(false)}><div className="vacation-delete-content"><AppIcon name="alert-triangle"  /><div><strong>Excluir todos os períodos importados?</strong><p>Esta ação remove o histórico e os dias de gozo registrados. Os dados dos colaboradores e das faltas não serão alterados.</p></div></div><div className="vacation-dialog-actions"><Button label="Cancelar" outlined onClick={() => setDeleteAllOpen(false)} /><Button label="Excluir todos" icon={<AppIcon name="trash" />} severity="danger" onClick={deleteAll} /></div></Dialog>
 
     <Dialog header={`Férias · ${selectedPeriod?.nome || ""}`} visible={detailOpen} modal maximizable className="vacation-detail-dialog" onHide={() => setDetailOpen(false)}>
       {selectedPeriod && <div className="vacation-detail">
@@ -431,7 +432,7 @@ function VacationControlContent() {
           <div><span>Dias a gozar</span><strong>{localDaysAGozar} dias</strong></div>
         </div>
 
-        <div className="vacation-payment-note"><i className="pi pi-info-circle" /><span>Pagamento de férias: {selectedPeriod.pagamento_ferias_integral ? "realizado integralmente" : "a confirmar"}. VA das férias: {selectedPeriod.va_ferias_integral_pago ? "já considerado no período" : "a confirmar"}. Alterar os dias efetivamente gozados não cria novo pagamento nem novo VA.</span></div>
+        <div className="vacation-payment-note"><AppIcon name="info-circle"  /><span>Pagamento de férias: {selectedPeriod.pagamento_ferias_integral ? "realizado integralmente" : "a confirmar"}. VA das férias: {selectedPeriod.va_ferias_integral_pago ? "já considerado no período" : "a confirmar"}. Alterar os dias efetivamente gozados não cria novo pagamento nem novo VA.</span></div>
 
         <div className="vacation-leaves">
           <div className="vacation-leaves__heading"><div><span>GOZOS REGISTRADOS</span><h3>Dias efetivamente tirados</h3></div></div>
@@ -443,7 +444,7 @@ function VacationControlContent() {
         </div>
 
         {canEdit && localDaysAGozar > 0 && <div className="vacation-next-leave">
-          <div className="vacation-next-leave__heading"><i className="pi pi-calendar-plus" /><div><span>NOVO GOZO</span><strong>{localDaysAGozar} dia(s) ainda disponíveis</strong><small>Cadastre o próximo período em que o colaborador efetivamente ficará de férias.</small></div></div>
+          <div className="vacation-next-leave__heading"><AppIcon name="calendar-plus"  /><div><span>NOVO GOZO</span><strong>{localDaysAGozar} dia(s) ainda disponíveis</strong><small>Cadastre o próximo período em que o colaborador efetivamente ficará de férias.</small></div></div>
           <div className="vacation-next-leave__fields">
             <label><span>Início do próximo gozo</span><Calendar value={newLeave.data_inicio} onChange={(event) => setNewLeave((current) => ({ ...current, data_inicio: event.value }))} dateFormat="dd/mm/yy" showIcon /></label>
             <label><span>Dias a gozar neste período</span><InputNumber value={newLeave.dias_gozados} onValueChange={(event) => setNewLeave((current) => ({ ...current, dias_gozados: event.value }))} min={1} max={localDaysAGozar} placeholder={`Até ${localDaysAGozar}`} /></label>
@@ -452,11 +453,11 @@ function VacationControlContent() {
         </div>}
 
         <label className="vacation-observation"><span>Observação do RH</span><InputText value={selectedPeriod.observacao_manual || ""} onChange={(event) => setSelectedPeriod((current) => ({ ...current, observacao_manual: event.target.value }))} disabled={!canEdit} placeholder="Registre uma observação sobre o ajuste manual." /></label>
-        {canEdit && <div className="vacation-dialog-actions"><Button label="Salvar alterações" icon="pi pi-save" onClick={saveAllChanges} /></div>}
+        {canEdit && <div className="vacation-dialog-actions"><Button label="Salvar alterações" icon={<AppIcon name="device-floppy" />} onClick={saveAllChanges} /></div>}
       </div>}
     </Dialog>
 
-    {speedDialItems.length > 0 && <div className="vacation-speed-dial"><Tooltip className="vacation-speed-dial-tooltip" target=".vacation-speed-dial .p-speeddial-action" position="left" showDelay={150} /><SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={110} showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações de férias" /></div>}
+    {speedDialItems.length > 0 && <div className="vacation-speed-dial"><Tooltip className="vacation-speed-dial-tooltip" target=".vacation-speed-dial .p-speeddial-action" position="left" showDelay={150} /><SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={110} showIcon={<AppIcon name="plus" />} hideIcon={<AppIcon name="x" />} aria-label="Ações de férias" /></div>}
   </section>;
 }
 

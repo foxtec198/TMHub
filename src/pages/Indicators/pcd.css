@@ -251,7 +251,7 @@
     background: var(--bg-page);
 }
 
-.pcd-center-header i.pi-building {
+.pcd-center-header > .tm-icon {
     display: grid;
     place-items: center;
     width: 2rem;

@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
@@ -114,7 +115,7 @@ export function TicketManagement() {
     { header: "Status", body: (ticket) => statusTag(ticket.status), sortable: true },
     { header: "Responsável", body: (ticket) => ticket.responsible?.nome || "Sem responsável" },
     { header: "Atualizado", body: (ticket) => asDate(ticket.updated_at) },
-    { header: "Ações", body: (ticket) => <Button icon="pi pi-eye" text rounded aria-label="Abrir chamado" onClick={() => navigate(`/tickets/${ticket.id}`)} /> },
+    { header: "Ações", body: (ticket) => <Button icon={<AppIcon name="eye" />} text rounded aria-label="Abrir chamado" onClick={() => navigate(`/tickets/${ticket.id}`)} /> },
   ];
 
   const reasonColumns = [
@@ -130,14 +131,14 @@ export function TicketManagement() {
       description="Acompanhe os chamados da filial selecionada, direcione responsáveis e mantenha os motivos de atendimento."
       actions={
         <div className="tickets-header-actions">
-          <Button label="Novo motivo" icon="pi pi-plus" onClick={() => setReasonDialog(true)} />
+          <Button label="Novo motivo" icon={<AppIcon name="plus" />} onClick={() => setReasonDialog(true)} />
         </div>}
     />
 
     <section className="ticket-management__metrics">
-      <article><i className="pi pi-ticket" /><span>Total no filtro global</span><strong>{metrics.total}</strong></article>
-      <article><i className="pi pi-inbox" /><span>Em tratativa</span><strong>{metrics.open}</strong></article>
-      <article><i className="pi pi-user-minus" /><span>Sem responsável</span><strong>{metrics.unassigned}</strong></article>
+      <article><AppIcon name="ticket"  /><span>Total no filtro global</span><strong>{metrics.total}</strong></article>
+      <article><AppIcon name="inbox"  /><span>Em tratativa</span><strong>{metrics.open}</strong></article>
+      <article><AppIcon name="user-minus"  /><span>Sem responsável</span><strong>{metrics.unassigned}</strong></article>
     </section>
 
     <section className="ticket-management__grid">
@@ -153,7 +154,7 @@ export function TicketManagement() {
 
     <Dialog visible={reasonDialog} onHide={() => !saving && setReasonDialog(false)} modal draggable={false} header="Novo motivo de chamado" className="ticket-reason-dialog">
       <label className="ticket-reason-dialog__field"><span>Nome do motivo</span><InputText value={reasonName} onChange={(event) => setReasonName(event.target.value)} autoFocus placeholder="Ex.: Ajuste de acesso" maxLength={120} /></label>
-      <footer><Button label="Cancelar" severity="secondary" text disabled={saving} onClick={() => setReasonDialog(false)} /><Button label="Salvar motivo" icon="pi pi-save" loading={saving} onClick={createReason} /></footer>
+      <footer><Button label="Cancelar" severity="secondary" text disabled={saving} onClick={() => setReasonDialog(false)} /><Button label="Salvar motivo" icon={<AppIcon name="device-floppy" />} loading={saving} onClick={createReason} /></footer>
     </Dialog>
   </section>;
 }

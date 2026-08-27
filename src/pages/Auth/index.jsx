@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 // Widgets
 import { Button } from "primereact/button";
 import { FloatLabel } from "primereact/floatlabel";
@@ -163,11 +164,11 @@ export function Auth() {
         <article className="auth-informative-slide auth-commits-slide">
             <div className="auth-commits-header">
                 <div>
-                    <span><i className="pi pi-github" /> Novidades do TM Hub</span>
+                    <span><AppIcon name="brand-github"  /> Novidades do TM Hub</span>
                     <h2>Últimas atualizações</h2>
                     <p>Alterações publicadas recentemente no frontend e na API.</p>
                 </div>
-                <span className="auth-live-badge"><i className="pi pi-circle-fill" /> GitHub</span>
+                <span className="auth-live-badge"><AppIcon name="circle-filled"  /> GitHub</span>
             </div>
             <div className="auth-commits-list">
                 {item.commits.map((commit) => (
@@ -193,14 +194,14 @@ export function Auth() {
             ) : (
                 <div className="auth-informative-visual" aria-hidden="true">
                     <ThemeLogo variant="inverse" alt="" />
-                    <span><i className={item.icon} /></span>
+                    <span>{typeof item.icon === "string" ? <AppIcon icon={item.icon} /> : item.icon}</span>
                 </div>
             )}
             <div className="auth-informative-copy">
                 <span>{item.eyebrow}</span>
                 <h2>{item.title}</h2>
                 <p>{item.description}</p>
-                {item.link && <a className="auth-news-link" href={item.link} target="_blank" rel="noreferrer">Saiba mais <i className="pi pi-arrow-up-right" /></a>}
+                {item.link && <a className="auth-news-link" href={item.link} target="_blank" rel="noreferrer">Saiba mais <AppIcon name="arrow-up-right"  /></a>}
             </div>
         </article>
     );
@@ -222,7 +223,7 @@ export function Auth() {
                     autoplayInterval={6500}
                     className="auth-carousel"
                 />
-                <span className="auth-showcase-note"><i className="pi pi-megaphone" /> Espaço de comunicados e informativos</span>
+                <span className="auth-showcase-note"><AppIcon name="speakerphone"  /> Espaço de comunicados e informativos</span>
             </section>
 
             <section className="auth-login-panel">
@@ -264,7 +265,7 @@ export function Auth() {
 
                 <Button
                     label="Realizar Login"
-                    icon='pi pi-angle-double-up'
+                    icon={<AppIcon name="chevrons-up" />}
                     className="w-full h-3rem"
                 />
 

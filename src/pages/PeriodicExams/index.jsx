@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 // Controle de exames periódicos.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
@@ -208,8 +209,8 @@ export function PeriodicExams() {
   };
 
   const speedDialItems = [
-    { label: "Importar planilha SST", icon: "pi pi-upload", command: () => setImportOpen(true) },
-    { label: exporting ? "Exportando..." : "Exportar XLSX", icon: "pi pi-file-excel", disabled: exporting || !records.length, command: exportSpreadsheet },
+    { label: "Importar planilha SST", icon: appIcon("upload"), command: () => setImportOpen(true) },
+    { label: exporting ? "Exportando..." : "Exportar XLSX", icon: appIcon("file-spreadsheet"), disabled: exporting || !records.length, command: exportSpreadsheet },
   ];
 
   return <section className="periodic-exams-page">
@@ -218,9 +219,9 @@ export function PeriodicExams() {
       title="Exames periódicos"
       description="Acompanhe vencimentos, pendências e conclusões dos exames ocupacionais."
       actions={<>
-        <Button icon="pi pi-filter" label={filterCount ? `Filtros (${filterCount})` : "Filtros"} outlined onClick={(event) => filterPanel.current?.toggle(event)} />
-        {selected.length > 0 && <Button icon="pi pi-check-square" label={`Atualizar (${selected.length})`} onClick={() => { setBulkByFilter(false); setBulkOpen(true); }} />}
-        {isAdmin && <Button icon="pi pi-trash" label="Excluir tudo" severity="danger" outlined disabled={!records.length} onClick={() => setDeleteAllOpen(true)} />}
+        <Button icon={<AppIcon name="filter" />} label={filterCount ? `Filtros (${filterCount})` : "Filtros"} outlined onClick={(event) => filterPanel.current?.toggle(event)} />
+        {selected.length > 0 && <Button icon={<AppIcon name="square-check" />} label={`Atualizar (${selected.length})`} onClick={() => { setBulkByFilter(false); setBulkOpen(true); }} />}
+        {isAdmin && <Button icon={<AppIcon name="trash" />} label="Excluir tudo" severity="danger" outlined disabled={!records.length} onClick={() => setDeleteAllOpen(true)} />}
       </>}
     />
 
@@ -231,7 +232,7 @@ export function PeriodicExams() {
       </div>
       <div className="periodic-exams-search">
         <span className="p-input-icon-left">
-          <i className="pi pi-search" />
+          <AppIcon name="search"  />
           <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador, matrícula ou contrato" />
         </span>
       </div>
@@ -243,12 +244,12 @@ export function PeriodicExams() {
         <Column header="Exame" body={(row) => responsiveCell("Exame", <div className="periodic-exam-type"><strong>{row.tipo_exame}</strong><small>{row.resultado || "Sem resultado informado"}</small></div>)} />
         <Column header="Vencimento" body={(row) => responsiveCell("Vencimento", <div className={row.vencido ? "periodic-exam-due is-overdue" : "periodic-exam-due"}><strong>{dateLabel(row.data_vencimento)}</strong><small>{row.vencido ? `${Math.abs(row.dias_para_vencimento)} dia(s) em atraso` : `${row.dias_para_vencimento} dia(s)`}</small></div>)} sortable />
         <Column header="Situação" body={(row) => responsiveCell("Situação", statusTag(row.status))} />
-        <Column header="Ações" body={(row) => responsiveCell("Ações", <Button icon="pi pi-pencil" rounded text aria-label={`Editar exame de ${row.colaborador}`} onClick={() => openEdit(row)} />)} />
+        <Column header="Ações" body={(row) => responsiveCell("Ações", <Button icon={<AppIcon name="pencil" />} rounded text aria-label={`Editar exame de ${row.colaborador}`} onClick={() => openEdit(row)} />)} />
       </DataTable>
     </article>
 
     <OverlayPanel ref={filterPanel} className="periodic-exams-filter-panel">
-      <div className="periodic-exams-filter-title"><div><strong>Filtrar exames</strong><span>A lista e os indicadores acompanham este recorte.</span></div><Button icon="pi pi-filter-slash" text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
+      <div className="periodic-exams-filter-title"><div><strong>Filtrar exames</strong><span>A lista e os indicadores acompanham este recorte.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
       <div className="periodic-exams-filters">
         <label><span>Situação</span><MultiSelect value={filters.status} options={STATUS_OPTIONS} optionLabel="label" optionValue="value" onChange={(event) => updateFilter("status", event.value)} placeholder="Todas as situações" display="chip" /></label>
         <label><span>Departamento</span><MultiSelect value={filters.departamento} options={options.departamento || []} onChange={(event) => updateFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter /></label>
@@ -260,10 +261,10 @@ export function PeriodicExams() {
 
     <div className="periodic-exams-speed-dial">
       <Tooltip target=".periodic-exams-speed-dial .p-speeddial-action" position="left" showDelay={150} />
-      <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações de exames periódicos" />
+      <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon={<AppIcon name="plus" />} hideIcon={<AppIcon name="x" />} aria-label="Ações de exames periódicos" />
     </div>
 
-    <Dialog header={`Editar exame · ${editing?.colaborador || ""}`} visible={Boolean(editing)} modal className="periodic-exam-dialog" onHide={() => setEditing(null)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text onClick={() => setEditing(null)} /><Button label="Salvar alterações" icon="pi pi-save" onClick={saveEdit} /></div>}>
+    <Dialog header={`Editar exame · ${editing?.colaborador || ""}`} visible={Boolean(editing)} modal className="periodic-exam-dialog" onHide={() => setEditing(null)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text onClick={() => setEditing(null)} /><Button label="Salvar alterações" icon={<AppIcon name="device-floppy" />} onClick={saveEdit} /></div>}>
       {editing && <div className="periodic-exam-form">
         <div className="periodic-exam-context"><strong>{editing.tipo_exame}</strong><span>{editing.centro_custo} · vence em {dateLabel(editing.data_vencimento)}</span></div>
         <label><span>Situação</span><Dropdown value={editForm.status} options={EDITABLE_STATUS_OPTIONS} optionLabel="label" optionValue="value" onChange={(event) => setEditForm((current) => ({ ...current, status: event.value }))} /></label>
@@ -271,15 +272,15 @@ export function PeriodicExams() {
       </div>}
     </Dialog>
 
-    <Dialog header="Importar relatório SST" visible={importOpen} modal className="periodic-exam-import-dialog" closable={!importing} onHide={() => !importing && setImportOpen(false)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text disabled={importing} onClick={() => setImportOpen(false)} /><Button label={importing ? "Importando..." : "Importar"} icon="pi pi-upload" loading={importing} disabled={importing} onClick={importSpreadsheet} /></div>}>
+    <Dialog header="Importar relatório SST" visible={importOpen} modal className="periodic-exam-import-dialog" closable={!importing} onHide={() => !importing && setImportOpen(false)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text disabled={importing} onClick={() => setImportOpen(false)} /><Button label={importing ? "Importando..." : "Importar"} icon={<AppIcon name="upload" />} loading={importing} disabled={importing} onClick={importSpreadsheet} /></div>}>
       <div className="periodic-exam-import-content"><p>Use o relatório SST. A importação identifica o colaborador por empresa e matrícula, ignora afastados/demitidos e não duplica exames já cadastrados.</p><input ref={fileInput} type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" disabled={importing} /></div>
     </Dialog>
 
-    <Dialog header={bulkByFilter ? "Atualizar exames do recorte" : "Atualizar exames selecionados"} visible={bulkOpen} modal className="periodic-exam-bulk-dialog" onHide={() => setBulkOpen(false)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text onClick={() => setBulkOpen(false)} /><Button label="Confirmar" icon="pi pi-check" onClick={updateBulk} /></div>}>
+    <Dialog header={bulkByFilter ? "Atualizar exames do recorte" : "Atualizar exames selecionados"} visible={bulkOpen} modal className="periodic-exam-bulk-dialog" onHide={() => setBulkOpen(false)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text onClick={() => setBulkOpen(false)} /><Button label="Confirmar" icon={<AppIcon name="check" />} onClick={updateBulk} /></div>}>
       <div className="periodic-exam-form"><p>{bulkByFilter ? `Todos os exames do departamento ${filters.departamento[0]} com vencimento em ${filters.competencia[0].split("-").reverse().join("/")}.` : `${selected.length} exame(s) selecionado(s).`}</p><label><span>Nova situação</span><Dropdown value={bulkStatus} options={EDITABLE_STATUS_OPTIONS} optionLabel="label" optionValue="value" onChange={(event) => setBulkStatus(event.value)} /></label></div>
     </Dialog>
 
-    <Dialog header="Excluir todos os exames" visible={deleteAllOpen} modal className="periodic-exam-delete-dialog" onHide={() => setDeleteAllOpen(false)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text onClick={() => setDeleteAllOpen(false)} /><Button label="Excluir tudo" icon="pi pi-trash" severity="danger" onClick={deleteAll} /></div>}>
+    <Dialog header="Excluir todos os exames" visible={deleteAllOpen} modal className="periodic-exam-delete-dialog" onHide={() => setDeleteAllOpen(false)} footer={<div className="periodic-exam-dialog-actions"><Button label="Cancelar" text onClick={() => setDeleteAllOpen(false)} /><Button label="Excluir tudo" icon={<AppIcon name="trash" />} severity="danger" onClick={deleteAll} /></div>}>
       <p>Esta ação remove todos os exames importados do controle. Ela não pode ser desfeita.</p>
     </Dialog>
   </section>;

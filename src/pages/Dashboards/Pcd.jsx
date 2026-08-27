@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import "./pcd.css";
 
 import { useEffect, useMemo, useState } from "react";
@@ -16,7 +17,7 @@ function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
     return (
         <article className={`pcd-dashboard-summary-card tm-dashboard-card is-${tone}`}>
             <span className="pcd-dashboard-summary-card__icon">
-                <i className={icon} />
+                {typeof icon === "string" ? <AppIcon name={icon} /> : icon}
             </span>
             <span>
                 <small>{label}</small>
@@ -28,7 +29,7 @@ function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
 }
 
 function EmptyChart({ text }) {
-    return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
+    return <Placeholder variant="chart" icon={<AppIcon name="chart-bar" />} title={text} />;
 }
 
 export function PcdDashboard() {
@@ -187,34 +188,34 @@ export function PcdDashboard() {
 
     const cards = [
         {
-            icon: "pi pi-users",
+            icon: appIcon("users"),
             label: "Colaboradores ativos",
             value: summary.total_colaboradores ?? 0,
             detail: "afastados excluídos",
         },
         {
-            icon: "pi pi-heart",
+            icon: appIcon("heart"),
             label: "Total PCD",
             value: summary.total_pcd ?? 0,
             detail: "ativos e afastados",
             tone: "violet",
         },
         {
-            icon: "pi pi-user",
+            icon: appIcon("user"),
             label: "PCD ativos",
             value: summary.pcd_ativos ?? 0,
             detail: "Ativos",
             tone: "success",
         },
         {
-            icon: "pi pi-clock",
+            icon: appIcon("clock"),
             label: "PCD afastados",
             value: summary.pcd_afastados ?? 0,
             detail: "Afastados",
             tone: "warning",
         },
         {
-            icon: "pi pi-percentage",
+            icon: appIcon("percentage"),
             label: "Percentual PCD",
             value: `${currentPercentage.toLocaleString(
                 "pt-BR",

@@ -1,3 +1,4 @@
+import { AppIcon } from "../icons/AppIcon";
 import { useMemo, useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
@@ -59,7 +60,7 @@ export function FloatPicker({
                             </div>
 
                             <Button
-                                icon="pi pi-plus"
+                                icon={<AppIcon name="plus" />}
                                 rounded
                                 text
                             />
@@ -102,7 +103,7 @@ export function FloatPicker({
                             </div>
 
                             <Button
-                                icon="pi pi-trash"
+                                icon={<AppIcon name="trash" />}
                                 severity="danger"
                                 rounded
                                 text

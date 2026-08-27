@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -444,13 +445,13 @@ function DisallowanceControlContent() {
       header: "Evidência",
       field: "evidencia_nome",
       body: (record) => record.evidencia_url
-        ? <Button icon="pi pi-paperclip" label="Abrir" text size="small" onClick={() => window.open(record.evidencia_url, "_blank", "noopener,noreferrer")} />
+        ? <Button icon={<AppIcon name="paperclip" />} label="Abrir" text size="small" onClick={() => window.open(record.evidencia_url, "_blank", "noopener,noreferrer")} />
         : <span className="glosa-no-evidence">Sem evidência</span>,
     },
     {
       header: "Ações",
       body: (record) => canEdit
-        ? <div className="glosa-actions"><Button icon="pi pi-pencil" rounded text aria-label="Editar glosa" onClick={() => openEdit(record)} /><Button icon="pi pi-trash" rounded text severity="danger" aria-label="Excluir glosa" onClick={() => remove(record)} /></div>
+        ? <div className="glosa-actions"><Button icon={<AppIcon name="pencil" />} rounded text aria-label="Editar glosa" onClick={() => openEdit(record)} /><Button icon={<AppIcon name="trash" />} rounded text severity="danger" aria-label="Excluir glosa" onClick={() => remove(record)} /></div>
         : "—",
       style: { width: "8rem" },
     },
@@ -462,15 +463,15 @@ function DisallowanceControlContent() {
       title="Controle de Glosas"
       description="Acompanhe coberturas, valores em análise e perdas por competência."
       actions={<>
-        <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon="pi pi-filter-fill" onClick={(event) => filterPanel.current?.toggle(event)} />
-        <Button label="Exportar XLSX" icon="pi pi-file-excel" outlined onClick={exportSpreadsheet} />
-        {canCreate && <Button label="Nova glosa" icon="pi pi-plus" onClick={openCreate} />}
+        <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon={<AppIcon name="filter-filled" />} onClick={(event) => filterPanel.current?.toggle(event)} />
+        <Button label="Exportar XLSX" icon={<AppIcon name="file-spreadsheet" />} outlined onClick={exportSpreadsheet} />
+        {canCreate && <Button label="Nova glosa" icon={<AppIcon name="plus" />} onClick={openCreate} />}
       </>}
     />
     <OverlayPanel ref={filterPanel} className="glosa-filter-panel">
       <div className="glosa-filter-title">
         <div><strong>Filtrar glosas</strong><span>A exportação usa exatamente estes filtros.</span></div>
-        <Button icon="pi pi-filter-slash" rounded text aria-label="Limpar filtros" onClick={clearFilters} />
+        <Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} />
       </div>
       <div className="glosa-filter-grid">
         <label className="is-wide"><span>Competência</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" showIcon readOnlyInput hideOnRangeSelection /></label>
@@ -513,11 +514,11 @@ function DisallowanceControlContent() {
         </label>
 
         {(form.colaborador_id || form.colaborador_nome) && <div className="glosa-colab-card is-wide">
-          <div className="glosa-colab-card-header"><i className="pi pi-user" /><strong>{form.colaborador_nome}</strong></div>
+          <div className="glosa-colab-card-header"><AppIcon name="user"  /><strong>{form.colaborador_nome}</strong></div>
           <div className="glosa-colab-card-details">
-            <span><i className="pi pi-id-card" /> <strong>Matrícula:</strong> {form.colaborador_matricula || "Sem matrícula"}</span>
-            <span><i className="pi pi-building" /> <strong>Contrato:</strong> {form.contrato_nome || "Não informado"} {form.departamento ? `(DPTO. ${form.departamento})` : ""}</span>
-            <span><i className="pi pi-dollar" /> <strong>Diária padrão:</strong> {money(form.valor_diaria)}</span>
+            <span><AppIcon name="id-badge"  /> <strong>Matrícula:</strong> {form.colaborador_matricula || "Sem matrícula"}</span>
+            <span><AppIcon name="building"  /> <strong>Contrato:</strong> {form.contrato_nome || "Não informado"} {form.departamento ? `(DPTO. ${form.departamento})` : ""}</span>
+            <span><AppIcon name="currency-dollar"  /> <strong>Diária padrão:</strong> {money(form.valor_diaria)}</span>
           </div>
         </div>}
 
@@ -538,7 +539,7 @@ function DisallowanceControlContent() {
         </div>
 
         {["coberta", "parcial"].includes(form.cobertura) && <div className="glosa-evidence is-wide">
-          <div className="glosa-evidence-heading"><div><strong>Evidência da cobertura</strong><span>PDF ou imagem de até 15 MB</span></div>{form.evidencia_url && <div><Button type="button" label="Abrir atual" icon="pi pi-external-link" text size="small" onClick={() => window.open(form.evidencia_url, "_blank", "noopener,noreferrer")} /><Button type="button" label="Remover" icon="pi pi-trash" severity="danger" text size="small" onClick={removeEvidence} /></div>}</div>
+          <div className="glosa-evidence-heading"><div><strong>Evidência da cobertura</strong><span>PDF ou imagem de até 15 MB</span></div>{form.evidencia_url && <div><Button type="button" label="Abrir atual" icon={<AppIcon name="external-link" />} text size="small" onClick={() => window.open(form.evidencia_url, "_blank", "noopener,noreferrer")} /><Button type="button" label="Remover" icon={<AppIcon name="trash" />} severity="danger" text size="small" onClick={removeEvidence} /></div>}</div>
           <div
             className={`glosa-dropzone ${evidenceFile ? "has-file" : ""}`}
             role="button"
@@ -549,7 +550,7 @@ function DisallowanceControlContent() {
             onDrop={(event) => { event.preventDefault(); selectEvidence(event.dataTransfer.files?.[0]); }}
           >
             <input ref={fileInput} type="file" accept=".pdf,image/png,image/jpeg,image/webp" onChange={(event) => selectEvidence(event.target.files?.[0])} />
-            <i className={`pi ${evidenceFile ? "pi-check-circle" : "pi-cloud-upload"}`} />
+            <AppIcon name={evidenceFile ? "circle-check" : "cloud-upload"} />
             <strong>{evidenceFile?.name || form.evidencia_nome || "Arraste, clique ou cole uma imagem com Ctrl + V"}</strong>
             <span>{evidenceFile ? `${(evidenceFile.size / 1024 / 1024).toFixed(2)} MB selecionado` : "Você também pode substituir a evidência já salva."}</span>
           </div>
@@ -557,15 +558,15 @@ function DisallowanceControlContent() {
 
         <label className="is-wide"><span>Justificativa</span><InputTextarea value={form.justificativa} onChange={(event) => setForm({ ...form, justificativa: event.target.value })} rows={3} autoResize /></label>
         <label className="is-wide"><span>Observação</span><InputTextarea value={form.observacao} onChange={(event) => setForm({ ...form, observacao: event.target.value })} rows={3} autoResize /></label>
-        <div className="dialog-actions is-wide"><Button type="button" label="Cancelar" text onClick={close} /><Button type="submit" label={editing ? "Salvar alterações" : "Registrar glosa"} icon="pi pi-check" /></div>
+        <div className="dialog-actions is-wide"><Button type="button" label="Cancelar" text onClick={close} /><Button type="submit" label={editing ? "Salvar alterações" : "Registrar glosa"} icon={<AppIcon name="check" />} /></div>
       </form>
     </Dialog>
     <section className="glosa-summary">
-      <article><i className="pi pi-list" /><div><small>Registros</small><strong>{summary.total_registros}</strong><span>no período selecionado</span></div></article>
-      <article><i className="pi pi-calendar" /><div><small>Dias apontados</small><strong>{summary.dias}</strong><span>dias de glosa</span></div></article>
-      <article><i className="pi pi-wallet" /><div><small>Valor total</small><strong>{money(summary.valor_total)}</strong><span>valor apontado</span></div></article>
-      <article className="is-success"><i className="pi pi-check-circle" /><div><small>Valor coberto</small><strong>{money(summary.valor_coberto)}</strong><span>tratativas cobertas</span></div></article>
-      <article className="is-danger"><i className="pi pi-exclamation-triangle" /><div><small>Saldo descoberto</small><strong>{money(summary.valor_descoberto)}</strong><span>exige acompanhamento</span></div></article>
+      <article><AppIcon name="list"  /><div><small>Registros</small><strong>{summary.total_registros}</strong><span>no período selecionado</span></div></article>
+      <article><AppIcon name="calendar"  /><div><small>Dias apontados</small><strong>{summary.dias}</strong><span>dias de glosa</span></div></article>
+      <article><AppIcon name="wallet"  /><div><small>Valor total</small><strong>{money(summary.valor_total)}</strong><span>valor apontado</span></div></article>
+      <article className="is-success"><AppIcon name="circle-check"  /><div><small>Valor coberto</small><strong>{money(summary.valor_coberto)}</strong><span>tratativas cobertas</span></div></article>
+      <article className="is-danger"><AppIcon name="alert-triangle"  /><div><small>Saldo descoberto</small><strong>{money(summary.valor_descoberto)}</strong><span>exige acompanhamento</span></div></article>
     </section>
 
     <section className="glosa-panel">

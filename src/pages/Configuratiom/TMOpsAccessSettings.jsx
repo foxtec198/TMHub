@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Password } from "primereact/password";
@@ -75,7 +76,7 @@ export function TMOpsAccessSettings() {
     <div className="settings-grid">
       <article className="settings-card">
         <div className="settings-card-title">
-          <i className="pi pi-key" />
+          <AppIcon name="key"  />
           <div>
             <h2>Acessos do TM Ops</h2>
             <p>Credencial exclusiva, vinculada diretamente ao colaborador.</p>
@@ -108,19 +109,19 @@ export function TMOpsAccessSettings() {
             className="tm-ops-password"
           />
         </div>
-        <Button label="Criar ou redefinir acesso" icon="pi pi-save" className="mt-5" onClick={save} />
+        <Button label="Criar ou redefinir acesso" icon={<AppIcon name="device-floppy" />} className="mt-5" onClick={save} />
       </article>
 
       <article className="settings-card">
         <div className="settings-card-title">
-          <i className="pi pi-list" />
+          <AppIcon name="list"  />
           <div>
             <h2>Acessos cadastrados</h2>
             <p>{status === "ready" ? `${accessTotal} colaborador(es) com acesso.` : "Consulta paginada"}</p>
           </div>
         </div>
-        {status === "loading" && <div className="settings-feedback"><i className="pi pi-spin pi-spinner" /> Carregando acessos...</div>}
-        {status === "error" && <div className="settings-feedback is-error"><i className="pi pi-exclamation-triangle" /><span>{errorMessage}</span><Button label="Tentar novamente" text onClick={load} /></div>}
+        {status === "loading" && <div className="settings-feedback"><AppIcon name="loader-2"  /> Carregando acessos...</div>}
+        {status === "error" && <div className="settings-feedback is-error"><AppIcon name="alert-triangle"  /><span>{errorMessage}</span><Button label="Tentar novamente" text onClick={load} /></div>}
         {status === "ready" && (
           <div className="tm-ops-access-list">
             {accesses.map((access) => (
@@ -134,9 +135,9 @@ export function TMOpsAccessSettings() {
             ))}
             {!accesses.length && <div className="settings-feedback">Nenhum acesso do TM Ops foi cadastrado.</div>}
             {accessPages > 1 && <div className="settings-pagination">
-              <Button label="Anterior" icon="pi pi-chevron-left" text disabled={accessPage <= 1} onClick={() => load(accessPage - 1)} />
+              <Button label="Anterior" icon={<AppIcon name="chevron-left" />} text disabled={accessPage <= 1} onClick={() => load(accessPage - 1)} />
               <span>Página {accessPage} de {accessPages}</span>
-              <Button label="Próxima" icon="pi pi-chevron-right" iconPos="right" text disabled={accessPage >= accessPages} onClick={() => load(accessPage + 1)} />
+              <Button label="Próxima" icon={<AppIcon name="chevron-right" />} iconPos="right" text disabled={accessPage >= accessPages} onClick={() => load(accessPage + 1)} />
             </div>}
           </div>
         )}

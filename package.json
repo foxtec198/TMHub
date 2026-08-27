@@ -16,6 +16,7 @@
   "dependencies": {
     "@ericblade/quagga2": "^1.12.1",
     "@google/model-viewer": "^4.3.1",
+    "@tabler/icons-react": "^3.46.0",
     "axios": "^1.18.1",
     "bwip-js": "^4.11.2",
     "chart.js": "^4.5.1",
@@ -26,7 +27,6 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^1.29.0",
     "primeflex": "^4.0.0",
-    "primeicons": "^7.0.0",
     "primereact": "^10.9.8",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

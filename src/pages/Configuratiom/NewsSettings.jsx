@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -14,7 +15,7 @@ const emptyNews = {
   eyebrow: "Novidades",
   title: "",
   description: "",
-  icon: "pi pi-megaphone",
+  icon: "speakerphone",
   accent: "#64ea8a",
   image: null,
   link: "",
@@ -97,13 +98,13 @@ export function NewsSettings() {
           <h2>Notícias do login</h2>
           <p>Gerencie os slides e comunicados exibidos antes do acesso ao TM Hub.</p>
         </div>
-        <Button label="Nova notícia" icon="pi pi-plus" onClick={() => setEditing({ ...emptyNews, order: items.length + 1 })} />
+        <Button label="Nova notícia" icon={<AppIcon name="plus" />} onClick={() => setEditing({ ...emptyNews, order: items.length + 1 })} />
       </header>
 
       <div className="news-settings-list">
         {items.length === 0 && (
           <div className="news-empty">
-            <i className="pi pi-megaphone" />
+            <AppIcon name="speakerphone"  />
             <strong>Nenhuma notícia personalizada</strong>
             <span>Enquanto isso, o login continuará mostrando os informativos padrão.</span>
           </div>
@@ -111,7 +112,7 @@ export function NewsSettings() {
         {items.map((item) => (
           <article className={`news-item ${!item.active ? "is-inactive" : ""}`} key={item.id}>
             <div className="news-item-preview" style={{ "--news-accent": item.accent }}>
-              {item.image ? <img src={item.image} alt="" /> : <i className={item.icon || "pi pi-megaphone"} />}
+              {item.image ? <img src={item.image} alt="" /> : <AppIcon icon={item.icon || "speakerphone"} />}
             </div>
             <div className="news-item-copy">
               <span>{item.eyebrow} · ordem {item.order}</span>
@@ -120,8 +121,8 @@ export function NewsSettings() {
             </div>
             <span className={`news-state ${item.active ? "is-active" : ""}`}>{item.active ? "Ativa" : "Oculta"}</span>
             <div className="news-item-actions">
-              <Button icon="pi pi-pencil" rounded text aria-label="Editar" onClick={() => setEditing({ ...item })} />
-              <Button icon="pi pi-trash" rounded text severity="danger" aria-label="Excluir" onClick={() => remove(item)} />
+              <Button icon={<AppIcon name="pencil" />} rounded text aria-label="Editar" onClick={() => setEditing({ ...item })} />
+              <Button icon={<AppIcon name="trash" />} rounded text severity="danger" aria-label="Excluir" onClick={() => remove(item)} />
             </div>
           </article>
         ))}
@@ -135,7 +136,7 @@ export function NewsSettings() {
         footer={(
           <div className="dialog-actions">
             <Button label="Cancelar" text onClick={() => setEditing(null)} />
-            <Button label="Salvar notícia" icon="pi pi-check" onClick={save} />
+            <Button label="Salvar notícia" icon={<AppIcon name="check" />} onClick={save} />
           </div>
         )}
       >
@@ -144,7 +145,7 @@ export function NewsSettings() {
             <label>Chamada<InputText value={editing.eyebrow} maxLength={120} onChange={(e) => setEditing({ ...editing, eyebrow: e.target.value })} /></label>
             <label>Título<InputText value={editing.title} maxLength={180} onChange={(e) => setEditing({ ...editing, title: e.target.value })} /></label>
             <label className="full">Descrição<InputTextarea rows={3} autoResize value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></label>
-            <label>Ícone PrimeIcons<InputText value={editing.icon} placeholder="pi pi-megaphone" onChange={(e) => setEditing({ ...editing, icon: e.target.value })} /></label>
+            <label>Ícone Tabler<InputText value={editing.icon} placeholder="speakerphone" onChange={(e) => setEditing({ ...editing, icon: e.target.value })} /></label>
             <label>Cor de destaque<div className="news-color-field"><input type="color" value={editing.accent} onChange={(e) => setEditing({ ...editing, accent: e.target.value })} /><InputText value={editing.accent} onChange={(e) => setEditing({ ...editing, accent: e.target.value })} /></div></label>
             <label>Ordem<InputNumber value={editing.order} min={0} onValueChange={(e) => setEditing({ ...editing, order: e.value ?? 0 })} /></label>
             <label className="news-active">Exibir no login<InputSwitch checked={editing.active} onChange={(e) => setEditing({ ...editing, active: e.value })} /></label>
@@ -156,8 +157,8 @@ export function NewsSettings() {
               </div>
               {editing.image && <img src={editing.image} alt="Prévia da arte" />}
               <div>
-                <Button label={editing.image ? "Trocar imagem" : "Selecionar imagem"} icon="pi pi-image" outlined onClick={() => fileRef.current?.click()} />
-                {editing.image && <Button label="Remover" icon="pi pi-times" text severity="danger" onClick={() => setEditing({ ...editing, image: null })} />}
+                <Button label={editing.image ? "Trocar imagem" : "Selecionar imagem"} icon={<AppIcon name="photo" />} outlined onClick={() => fileRef.current?.click()} />
+                {editing.image && <Button label="Remover" icon={<AppIcon name="x" />} text severity="danger" onClick={() => setEditing({ ...editing, image: null })} />}
               </div>
               <input ref={fileRef} type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={selectImage} />
             </div>

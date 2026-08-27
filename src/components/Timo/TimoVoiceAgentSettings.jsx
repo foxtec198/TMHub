@@ -1,3 +1,4 @@
+import { AppIcon } from "../icons/AppIcon";
 import { useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -102,13 +103,13 @@ export function TimoVoiceAgentSettings() {
           <p>O computador reconhece a voz localmente com Whisper e envia somente o texto do comando ao TMHub.</p>
         </div>
         <div className="timo-agent-settings__actions">
-          <Button label="Baixar agente" icon="pi pi-download" outlined onClick={() => window.open(RELEASE_URL, "_blank", "noopener,noreferrer")} />
-          <Button label="Gerar pareamento" icon="pi pi-link" loading={creatingPairing} onClick={generatePairing} />
+          <Button label="Baixar agente" icon={<AppIcon name="download" />} outlined onClick={() => window.open(RELEASE_URL, "_blank", "noopener,noreferrer")} />
+          <Button label="Gerar pareamento" icon={<AppIcon name="link" />} loading={creatingPairing} onClick={generatePairing} />
         </div>
       </div>
 
       <div className="timo-agent-settings__note">
-        <i className="pi pi-shield" aria-hidden="true" />
+        <AppIcon name="shield" aria-hidden="true"  />
         <span>O código é temporário, de uso único e não expõe a senha, sessão ou token principal do usuário.</span>
       </div>
 
@@ -124,7 +125,7 @@ export function TimoVoiceAgentSettings() {
                 <strong>{item.nome}</strong>
                 <small>{item.dispositivo_id}</small>
                 <span className={`timo-agent-card__status ${item.online ? "is-online" : ""}`}>
-                  <i className="pi pi-circle-fill" aria-hidden="true" />
+                  <AppIcon name="circle-filled" aria-hidden="true"  />
                   {item.online
                     ? (AGENT_STATE_LABELS[item.estado] || item.estado || "Online")
                     : "Offline"}
@@ -132,8 +133,8 @@ export function TimoVoiceAgentSettings() {
               </div>
               <div className="timo-agent-card__actions">
                 {!preferred ? <Button label="Usar" text onClick={() => choose(item)} loading={busyAgentId === item.id} /> : null}
-                <Button label={active ? "Parar" : "Iniciar"} icon={active ? "pi pi-pause" : "pi pi-play"} outlined onClick={() => toggle(item)} loading={busyAgentId === item.id} />
-                <Button icon="pi pi-trash" severity="danger" text rounded aria-label="Revogar agente" onClick={() => remove(item)} disabled={busyAgentId === item.id} />
+                <Button label={active ? "Parar" : "Iniciar"} icon={<AppIcon name={active ? "pause" : "play"} />} outlined onClick={() => toggle(item)} loading={busyAgentId === item.id} />
+                <Button icon={<AppIcon name="trash" />} severity="danger" text rounded aria-label="Revogar agente" onClick={() => remove(item)} disabled={busyAgentId === item.id} />
               </div>
             </article>
           );
@@ -144,7 +145,7 @@ export function TimoVoiceAgentSettings() {
         <p>Abra o Timo Voice Agent neste computador e cole este código. Ele expira em 10 minutos e só pode ser utilizado uma vez.</p>
         <code className="timo-agent-pairing-code">{pairing?.codigo}</code>
         <div className="dialog-actions">
-          <Button label="Copiar código" icon="pi pi-copy" onClick={copyPairing} />
+          <Button label="Copiar código" icon={<AppIcon name="copy" />} onClick={copyPairing} />
           <Button label="Fechar" text onClick={() => setPairing(null)} />
         </div>
       </Dialog>

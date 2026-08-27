@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -27,7 +28,7 @@ const formatPeriod = (period) => period?.[0] && period?.[1] ? `${period[0].toLoc
 const formatDuration = (value) => value == null ? "—" : value >= 48 ? `${(value / 24).toFixed(1)} dias` : `${Number(value).toFixed(1)}h`;
 
 function EmptyChart({ text }) {
-  return <Placeholder variant="chart" icon="pi-chart-bar" title={text} />;
+  return <Placeholder variant="chart" icon={<AppIcon name="chart-bar" />} title={text} />;
 }
 
 export function AbsenceDashboard() {
@@ -84,20 +85,20 @@ export function AbsenceDashboard() {
         description="Indicadores de ocorrência, justificativa e velocidade de tratativa."
         actions={<>
           <div className="absence-period-label">
-            <i className="pi pi-calendar" />
+            <AppIcon name="calendar"  />
             <span>{formatPeriod(filters.period)}</span>
           </div>
-          <Button type="button" icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
+          <Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
         </>}
       />
 
       <section className="absence-overview">
-        <article className="absence-primary-kpi"><div className="absence-primary-icon"><i className="pi pi-calendar-times" /></div><div><span>Total no período</span><strong>{indicators.total || 0}</strong><small>{treatedPercentage}% das ocorrências já foram tratadas</small></div><div className="absence-progress"><span style={{ width: `${treatedPercentage}%` }} /></div></article>
+        <article className="absence-primary-kpi"><div className="absence-primary-icon"><AppIcon name="calendar-x"  /></div><div><span>Total no período</span><strong>{indicators.total || 0}</strong><small>{treatedPercentage}% das ocorrências já foram tratadas</small></div><div className="absence-progress"><span style={{ width: `${treatedPercentage}%` }} /></div></article>
         <div className="absence-kpi-grid">
-          <article className="tm-dashboard-card is-warning"><span><i className="pi pi-clock" /> Pendentes</span><strong>{indicators.pendentes || 0}</strong><small>aguardando análise</small></article>
-          <article className="tm-dashboard-card is-success"><span><i className="pi pi-check-circle" /> Tratadas</span><strong>{indicators.tratadas || 0}</strong><small>processo concluído</small></article>
-          <article className="tm-dashboard-card is-danger"><span><i className="pi pi-exclamation-circle" /> Injustificadas</span><strong>{indicators.injustificadas || 0}</strong><small>classificação final</small></article>
-          <article className="tm-dashboard-card is-neutral"><span><i className="pi pi-stopwatch" /> Tempo médio</span><strong>{formatDuration(indicators.tempo_medio_tratativa_horas)}</strong><small>até a tratativa</small></article>
+          <article className="tm-dashboard-card is-warning"><span><AppIcon name="clock"  /> Pendentes</span><strong>{indicators.pendentes || 0}</strong><small>aguardando análise</small></article>
+          <article className="tm-dashboard-card is-success"><span><AppIcon name="circle-check"  /> Tratadas</span><strong>{indicators.tratadas || 0}</strong><small>processo concluído</small></article>
+          <article className="tm-dashboard-card is-danger"><span><AppIcon name="alert-circle"  /> Injustificadas</span><strong>{indicators.injustificadas || 0}</strong><small>classificação final</small></article>
+          <article className="tm-dashboard-card is-neutral"><span><AppIcon name="stopwatch"  /> Tempo médio</span><strong>{formatDuration(indicators.tempo_medio_tratativa_horas)}</strong><small>até a tratativa</small></article>
         </div>
       </section>
 
@@ -114,7 +115,7 @@ export function AbsenceDashboard() {
       <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
         <div className="dashboard-filter-title">
           <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
-          <Button type="button" icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+          <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
         </div>
         <div className="dashboard-filter-grid">
           <label className="is-wide"><span>Período</span><Calendar value={filters.period} onChange={(event) => setFilter("period", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>

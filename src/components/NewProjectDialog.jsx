@@ -1,3 +1,4 @@
+import { AppIcon } from "./icons/AppIcon";
 // components/NewProjectDialog.jsx
 import React, { useState } from 'react';
 import { Dialog } from 'primereact/dialog';
@@ -46,7 +47,7 @@ export default function NewProjectDialog({ visible, todosUsuarios, currentUserId
       footer={
         <div>
           <Button label="Cancelar" text onClick={() => { resetar(); onHide(); }} />
-          <Button label="Criar projeto" icon="pi pi-check" onClick={criar} disabled={!nome.trim()} />
+          <Button label="Criar projeto" icon={<AppIcon name="check" />} onClick={criar} disabled={!nome.trim()} />
         </div>
       }
     >

@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { ButtonGroup } from "primereact/buttongroup";
@@ -348,7 +349,7 @@ function HistoryPage() {
         confirmDialog({
             header: `Excluir histórico #${row.id}`,
             message: "Essa ação também pode excluir a requisição e a timeline vinculadas. Deseja continuar?",
-            icon: "pi pi-exclamation-triangle",
+            icon: appIcon("alert-triangle"),
             acceptLabel: "Excluir",
             rejectLabel: "Cancelar",
             acceptClassName: "p-button-danger",
@@ -460,7 +461,7 @@ function HistoryPage() {
                 <ButtonGroup className="flex justify-content-end align-items-end">
                     <Button
                         type="button"
-                        icon="pi pi-pencil"
+                        icon={<AppIcon name="pencil" />}
                         severity="warning"
                         aria-label={`Editar requisição ${row.id}`}
                         title="Editar requisição"
@@ -468,7 +469,7 @@ function HistoryPage() {
                     />
                     <Button
                         type="button"
-                        icon="pi pi-history"
+                        icon={<AppIcon name="history" />}
                         severity="info"
                         aria-label={`Abrir timeline da requisição ${row.requisicao_id || "não vinculada"}`}
                         title="Abrir timeline"
@@ -476,7 +477,7 @@ function HistoryPage() {
                     />
                     <Button
                         type="button"
-                        icon="pi pi-trash"
+                        icon={<AppIcon name="trash" />}
                         severity="danger"
                         loading={deletingId === row.id}
                         disabled={deletingId !== null}
@@ -501,12 +502,12 @@ function HistoryPage() {
                     actions={<>
                         <Button
                             className="dashboard-filter-trigger"
-                            icon="pi pi-filter-fill"
+                            icon={<AppIcon name="filter-filled" />}
                             label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
                             onClick={(event) => filterPanel.current?.toggle(event)}
                         />
                         <Button
-                            icon="pi pi-file-excel"
+                            icon={<AppIcon name="file-spreadsheet" />}
                             label="Exportar XLSX"
                             outlined
                             disabled={!filteredHistory.length}
@@ -523,7 +524,7 @@ function HistoryPage() {
                         <span>Período e opções são combinados para evitar resultados vazios.</span>
                     </div>
                     <Button
-                        icon="pi pi-filter-slash"
+                        icon={<AppIcon name="filter-off" />}
                         label="Limpar filtros"
                         text
                         onClick={clearFilters}
@@ -623,7 +624,7 @@ function HistoryPage() {
                         <Button
                             type="submit"
                             label="Salvar alterações"
-                            icon="pi pi-check"
+                            icon={<AppIcon name="check" />}
                             loading={saving}
                         />
                     </div>
@@ -640,7 +641,7 @@ function HistoryPage() {
                 onHide={() => setTimelineDialogVisible(false)}
             >
                 {timelineLoading
-                    ? <div className="flex justify-content-center p-5"><i className="pi pi-spin pi-spinner text-3xl" /></div>
+                    ? <div className="flex justify-content-center p-5"><AppIcon name="loader-2" className="text-3xl"  /></div>
                     : timelineEvents.length
                         ? <Timeline
                             value={timelineEvents}

@@ -112,7 +112,7 @@
   opacity: .95;
 }
 
-.init-support-hero-mark>i {
+.init-support-hero-icon {
   display: grid;
   width: 4.5rem;
   height: 4.5rem;
@@ -124,6 +124,10 @@
   box-shadow: 0 14px 30px rgba(0, 0, 0, .2);
   font-size: 2rem;
   transform: rotate(-5deg);
+}
+
+.init-support-hero-icon .tm-icon {
+  transform: rotate(5deg);
 }
 
 .init-support-section,
@@ -158,7 +162,7 @@
   font-size: .84rem;
 }
 
-.init-support-section-header>i {
+.init-support-section-header>.tm-icon {
   color: var(--primary-color);
   font-size: 2rem;
 }
@@ -249,10 +253,11 @@
   gap: .8rem;
 }
 
-.init-help-card-title>i {
+.init-help-card-title>.tm-icon {
   display: grid;
   width: 2.8rem;
   height: 2.8rem;
+  padding: .75rem;
   place-items: center;
   color: var(--primary-color);
   background: color-mix(in srgb, var(--primary-color) 12%, transparent);
@@ -402,10 +407,10 @@
   color: var(--text-primary);
 }
 
-:root[data-mode="dark"] .init-support-section-header>i,
+:root[data-mode="dark"] .init-support-section-header>.tm-icon,
 :root[data-mode="dark"] .init-doc-tech,
 :root[data-mode="dark"] .init-doc-icon,
-:root[data-mode="dark"] .init-help-card-title>i {
+:root[data-mode="dark"] .init-help-card-title>.tm-icon {
   color: var(--accent-hover);
 }
 
@@ -487,7 +492,7 @@
     align-items: flex-start;
   }
 
-  .init-support-section-header>i {
+  .init-support-section-header>.tm-icon {
     flex: 0 0 auto;
     font-size: 1.65rem;
   }

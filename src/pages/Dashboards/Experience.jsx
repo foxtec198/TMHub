@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
@@ -319,20 +320,20 @@ export function ExperienceDashboard() {
         title="Resumo de período de experiência"
         description="Acompanhe tarefas, prazos e decisões das avaliações de 90 dias."
         actions={<>
-          <Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+          <Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
         </>}
       />
 
       {loading && !data ? <Placeholder loading variant="dashboard" /> : error && !data ? (
-        <div className="experience-dashboard-error" role="alert"><i className="pi pi-exclamation-triangle" /><div><strong>Não foi possível abrir o dashboard</strong><span>{error}</span></div><Button label="Tentar novamente" icon="pi pi-refresh" outlined onClick={reload} /></div>
+        <div className="experience-dashboard-error" role="alert"><AppIcon name="alert-triangle"  /><div><strong>Não foi possível abrir o dashboard</strong><span>{error}</span></div><Button label="Tentar novamente" icon={<AppIcon name="refresh" />} outlined onClick={reload} /></div>
       ) : <>
         <div className="experience-dashboard-summary">
-          <DashboardMetricCard title="Em experiência" value={indicators.em_experiencia || 0} detail="colaboradores ativos no período" icon="pi pi-users" tone="primary" />
-          <DashboardMetricCard title="Avaliações" value={indicators.avaliacoes || 0} detail="no recorte selecionado" icon="pi pi-file-edit" tone="info" />
-          <DashboardMetricCard title="Em andamento" value={indicators.abertas || 0} detail="com o supervisor" icon="pi pi-pencil" tone="warning" />
-          <DashboardMetricCard title="Aguardando RH" value={indicators.aguardando_rh || 0} detail="prontas para tratativa" icon="pi pi-briefcase" tone="info" />
-          <DashboardMetricCard title="Atrasadas" value={indicators.atrasadas || 0} detail="requerem acompanhamento" icon="pi pi-clock" tone="danger" />
-          <DashboardMetricCard title="Concluídas" value={indicators.concluidas || 0} detail="avaliações finalizadas" icon="pi pi-check-circle" tone="success" />
+          <DashboardMetricCard title="Em experiência" value={indicators.em_experiencia || 0} detail="colaboradores ativos no período" icon={<AppIcon name="users" />} tone="primary" />
+          <DashboardMetricCard title="Avaliações" value={indicators.avaliacoes || 0} detail="no recorte selecionado" icon={<AppIcon name="file-pencil" />} tone="info" />
+          <DashboardMetricCard title="Em andamento" value={indicators.abertas || 0} detail="com o supervisor" icon={<AppIcon name="pencil" />} tone="warning" />
+          <DashboardMetricCard title="Aguardando RH" value={indicators.aguardando_rh || 0} detail="prontas para tratativa" icon={<AppIcon name="briefcase" />} tone="info" />
+          <DashboardMetricCard title="Atrasadas" value={indicators.atrasadas || 0} detail="requerem acompanhamento" icon={<AppIcon name="clock" />} tone="danger" />
+          <DashboardMetricCard title="Concluídas" value={indicators.concluidas || 0} detail="avaliações finalizadas" icon={<AppIcon name="circle-check" />} tone="success" />
         </div>
 
         <div className="experience-dashboard-analysis">
@@ -364,9 +365,9 @@ export function ExperienceDashboard() {
 
         <DashboardPanel className="experience-dashboard-details">
           <nav className="experience-dashboard-detail-tabs" aria-label="Informações de acompanhamento">
-            <button className={activeDetail === "priorities" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("priorities")}><i className="pi pi-exclamation-circle" /><span>Tarefas que exigem acompanhamento</span><em>{data?.prioridades?.length || 0}</em></button>
-            <button className={activeDetail === "supervisors" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("supervisors")}><i className="pi pi-users" /><span>Pendências por supervisor</span><em>{data?.supervisores?.length || 0}</em></button>
-            <button className={activeDetail === "employees" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("employees")}><i className="pi pi-id-card" /><span>Colaboradores em experiência</span><em>{indicators.em_experiencia || 0}</em></button>
+            <button className={activeDetail === "priorities" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("priorities")}><AppIcon name="alert-circle"  /><span>Tarefas que exigem acompanhamento</span><em>{data?.prioridades?.length || 0}</em></button>
+            <button className={activeDetail === "supervisors" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("supervisors")}><AppIcon name="users"  /><span>Pendências por supervisor</span><em>{data?.supervisores?.length || 0}</em></button>
+            <button className={activeDetail === "employees" ? "is-active" : ""} type="button" onClick={() => setActiveDetail("employees")}><AppIcon name="id-badge"  /><span>Colaboradores em experiência</span><em>{indicators.em_experiencia || 0}</em></button>
           </nav>
           <div className="experience-dashboard-detail-content">
             {activeDetail === "priorities" ? <Table data={data?.prioridades || []} columns={columns} rows={10} rowsPerPageOptions={[10, 25, 50]} emptyMessage="Nenhuma tarefa pendente no recorte." /> : activeDetail === "employees" ? (
@@ -377,14 +378,14 @@ export function ExperienceDashboard() {
                   <div><strong>{item.supervisor}</strong><small>{item.total} avaliação(ões) no recorte</small></div>
                   <div><span className="is-warning">{item.pendentes} pendente(s)</span><span className="is-danger">{item.atrasadas} atrasada(s)</span></div>
                 </article>)}
-              </div> : <Placeholder variant="chart" icon="pi-user-minus" title="Não há supervisores no recorte" />
+              </div> : <Placeholder variant="chart" icon={<AppIcon name="user-minus" />} title="Não há supervisores no recorte" />
             )}
           </div>
         </DashboardPanel>
       </>}
 
       <OverlayPanel ref={filterPanel} className="experience-dashboard-filter-panel">
-        <div className="experience-dashboard-filter-header"><div><strong>Filtrar dashboard</strong><span>Indicadores, gráficos e lista usam o mesmo recorte.</span></div><Button icon="pi pi-filter-slash" rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
+        <div className="experience-dashboard-filter-header"><div><strong>Filtrar dashboard</strong><span>Indicadores, gráficos e lista usam o mesmo recorte.</span></div><Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
         <div className="experience-dashboard-filters">
           <label><span>Fim da experiência</span><Calendar value={filters.period} onChange={(event) => setFilters((current) => ({ ...current, period: event.value }))} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput showIcon /></label>
           <label><span>Departamento</span><MultiSelect value={filters.department} options={options.departamentos || []} onChange={(event) => setFilter("department", event.value)} placeholder="Todos os departamentos" filter showClear /></label>

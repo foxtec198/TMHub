@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -210,7 +211,7 @@ export function TMOpsManagement({ mode = "routines" }) {
         description={description}
         actions={
           <Button
-            icon="pi pi-refresh"
+            icon={<AppIcon name="refresh" />}
             outlined
             aria-label="Atualizar"
             tooltip="Atualizar"
@@ -234,7 +235,7 @@ export function TMOpsManagement({ mode = "routines" }) {
           </div>
           <Button
             label={isChecklistScreen ? "Novo checklist" : "Nova rotina"}
-            icon="pi pi-plus"
+            icon={<AppIcon name="plus" />}
             onClick={() => {
               if (isChecklistScreen) {
                 setEditingChecklistId(null);
@@ -291,14 +292,14 @@ export function TMOpsManagement({ mode = "routines" }) {
               body={(row) => (
                 <div className="tm-ops-row-actions">
                   <Button
-                    icon="pi pi-link"
+                    icon={<AppIcon name="link" />}
                     text
                     rounded
                     tooltip="Vincular a outros locais"
                     onClick={() => setLinkingRoutine(row)}
                   />
                   <Button
-                    icon="pi pi-pencil"
+                    icon={<AppIcon name="pencil" />}
                     text
                     rounded
                     tooltip="Editar"
@@ -308,14 +309,14 @@ export function TMOpsManagement({ mode = "routines" }) {
                     }}
                   />
                   <Button
-                    icon={row.ativa ? "pi pi-pause" : "pi pi-play"}
+                    icon={<AppIcon name={row.ativa ? "pause" : "play"} />}
                     text
                     rounded
                     tooltip={row.ativa ? "Desativar" : "Ativar"}
                     onClick={() => toggleRoutine(row)}
                   />
                   <Button
-                    icon="pi pi-trash"
+                    icon={<AppIcon name="trash" />}
                     severity="danger"
                     text
                     rounded
@@ -343,14 +344,14 @@ export function TMOpsManagement({ mode = "routines" }) {
               body={(row) => (
                 <div className="tm-ops-row-actions">
                   <Button
-                    icon="pi pi-pencil"
+                    icon={<AppIcon name="pencil" />}
                     text
                     rounded
                     tooltip="Editar"
                     onClick={() => editChecklist(row)}
                   />
                   <Button
-                    icon="pi pi-trash"
+                    icon={<AppIcon name="trash" />}
                     severity="danger"
                     text
                     rounded
@@ -409,7 +410,7 @@ export function TMOpsManagement({ mode = "routines" }) {
             <strong>Itens do checklist</strong>
             <Button
               label="Adicionar item"
-              icon="pi pi-plus"
+              icon={<AppIcon name="plus" />}
               outlined
               onClick={addItem}
             />
@@ -435,7 +436,7 @@ export function TMOpsManagement({ mode = "routines" }) {
                 }
               />
               <Button
-                icon="pi pi-trash"
+                icon={<AppIcon name="trash" />}
                 severity="danger"
                 text
                 onClick={() =>
@@ -491,7 +492,7 @@ export function TMOpsManagement({ mode = "routines" }) {
               label={
                 editingChecklistId ? "Salvar alterações" : "Criar checklist"
               }
-              icon="pi pi-check"
+              icon={<AppIcon name="check" />}
               onClick={saveChecklist}
             />
           </div>

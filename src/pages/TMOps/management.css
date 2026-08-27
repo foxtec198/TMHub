@@ -24,7 +24,7 @@
   background: var(--surface-card);
   overflow: hidden;
 }
-.tm-ops-task-cards > div:before {
+.tm-ops-task-cards > div > .tm-icon {
   position: absolute;
   top: 1rem;
   left: 1rem;
@@ -33,31 +33,27 @@
   height: 1.7rem;
   place-items: center;
   border-radius: 9px;
-  font-family: "primeicons";
   font-size: 0.85rem;
+  padding: 0.4rem;
+  box-sizing: border-box;
 }
-.tm-ops-task-cards > div:nth-child(1):before {
-  content: "\e93e";
+.tm-ops-task-cards > div:nth-child(1) > .tm-icon {
   color: #1d6f45;
   background: #dff6e8;
 }
-.tm-ops-task-cards > div:nth-child(2):before {
-  content: "\e925";
+.tm-ops-task-cards > div:nth-child(2) > .tm-icon {
   color: #1877b9;
   background: #e0f2ff;
 }
-.tm-ops-task-cards > div:nth-child(3):before {
-  content: "\e923";
+.tm-ops-task-cards > div:nth-child(3) > .tm-icon {
   color: #c43e3e;
   background: #ffe4e4;
 }
-.tm-ops-task-cards > div:nth-child(4):before {
-  content: "\e91d";
+.tm-ops-task-cards > div:nth-child(4) > .tm-icon {
   color: #a27012;
   background: #fff0cc;
 }
-.tm-ops-task-cards > div:nth-child(5):before {
-  content: "\e909";
+.tm-ops-task-cards > div:nth-child(5) > .tm-icon {
   color: #167343;
   background: #dff6e8;
 }

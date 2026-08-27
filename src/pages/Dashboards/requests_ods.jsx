@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
@@ -8,10 +9,10 @@ const PAGE_SIZE = 9;
 const ACTIVE_STATUSES = new Set(["pending", "updated"]);
 
 const STATUS = {
-  pending: { label: "PENDENTE", icon: "pi-hourglass", tone: "pending" },
-  updated: { label: "ALTERADA", icon: "pi-pencil", tone: "updated" },
-  approved: { label: "APROVADA", icon: "pi-check-circle", tone: "approved" },
-  reproved: { label: "REPROVADA", icon: "pi-times-circle", tone: "reproved" },
+  pending: { label: "PENDENTE", icon: appIcon("hourglass"), tone: "pending" },
+  updated: { label: "ALTERADA", icon: appIcon("pencil"), tone: "updated" },
+  approved: { label: "APROVADA", icon: appIcon("circle-check"), tone: "approved" },
+  reproved: { label: "REPROVADA", icon: appIcon("circle-x"), tone: "reproved" },
 };
 
 function parseDate(value) {
@@ -191,7 +192,7 @@ export function RequestsODS() {
           </div>
           <time>{new Date(now).toLocaleTimeString("pt-BR")}</time>
           <button type="button" onClick={toggleFullscreen} aria-label={fullscreen ? "Sair da tela cheia" : "Entrar em tela cheia"}>
-            <i className={`pi ${fullscreen ? "pi-window-minimize" : "pi-window-maximize"}`} />
+            <AppIcon name={fullscreen ? "window-minimize" : "window-maximize"} />
           </button>
         </div>
       </header>
@@ -211,13 +212,13 @@ export function RequestsODS() {
 
         <div className="requests-kds__rows">
           {visibleRequests.map((request) => {
-            const status = STATUS[request.status] || { label: String(request.status || "—").toUpperCase(), icon: "pi-circle", tone: "pending" };
+            const status = STATUS[request.status] || { label: String(request.status || "—").toUpperCase(), icon: appIcon("circle"), tone: "pending" };
             const requestSituation = situation(request, now);
             const requestDay = dayCategory(request, now);
             return (
               <article key={request.id} className={`requests-kds__row requests-kds__grid is-${requestSituation.tone}`}>
                 <div className="requests-kds__elapsed">
-                  <i className={`pi ${requestDay === "future" ? "pi-calendar" : "pi-clock"}`} />
+                  <AppIcon name={requestDay === "future" ? "calendar" : "clock"} />
                   <strong>{requestDay === "future" ? "PROGRAMADA" : formatElapsed(elapsedMilliseconds(request, now))}</strong>
                   <small>{scheduledLabel(request, now)} • REQ #{request.id}</small>
                 </div>
@@ -226,14 +227,14 @@ export function RequestsODS() {
                 <div><strong>{shortName(request.reserva, "SEM COBERTURA")}</strong><small>{request.reserva_matricula || "Aguardando definição"}</small></div>
                 <div><strong>{shortName(request.supervisor)}</strong></div>
                 <div><strong>{request.motivo || "Não informado"}</strong>{request.warning ? <small className="is-alert">ADVERTÊNCIA APLICADA</small> : request.obs ? <small title={request.obs}>{request.obs}</small> : null}</div>
-                <div><span className={`requests-kds__badge is-${status.tone}`}><i className={`pi ${status.icon}`} />{status.label}</span></div>
+                <div><span className={`requests-kds__badge is-${status.tone}`}>{status.icon}{status.label}</span></div>
                 <div><span className={`requests-kds__badge is-${requestSituation.tone}`}>{requestSituation.label}</span></div>
               </article>
             );
           })}
 
           {!visibleRequests.length && (
-            <div className="requests-kds__empty"><i className="pi pi-check-circle" /><strong>Nenhuma requisição na fila</strong><span>O painel atualizará automaticamente quando houver movimentação.</span></div>
+            <div className="requests-kds__empty"><AppIcon name="circle-check"  /><strong>Nenhuma requisição na fila</strong><span>O painel atualizará automaticamente quando houver movimentação.</span></div>
           )}
         </div>
       </section>

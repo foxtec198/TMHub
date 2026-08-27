@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 // Widgets
 import { Table } from "../../components/tables/Table";
 import { Button } from "primereact/button";
@@ -123,11 +124,11 @@ export function Requests() {
     // Quarter-circle actions keep the mobile trigger accessible without covering the table.
     const speedDialItems = [
         ...(canCreate ? [
-        { label: "Abrir em um nova página", icon: "pi pi-external-link", command: () => navigate("/reposicoes/requisicao") },
-        { label: "Lançamento rápido", icon: "pi pi-plus-circle", command: () => setQuickDialog(true) },
-        { label: "Importar planilha", icon: "pi pi-upload", command: () => setImportDialog(true) },
+        { label: "Abrir em um nova página", icon: appIcon("external-link"), command: () => navigate("/reposicoes/requisicao") },
+        { label: "Lançamento rápido", icon: appIcon("circle-plus"), command: () => setQuickDialog(true) },
+        { label: "Importar planilha", icon: appIcon("upload"), command: () => setImportDialog(true) },
         ] : []),
-        { label: "Uso diário das reservas", icon: "pi pi-calendar", command: () => { setUsageDialog(true); loadReservationUsage() } },
+        { label: "Uso diário das reservas", icon: appIcon("calendar"), command: () => { setUsageDialog(true); loadReservationUsage() } },
     ]
 
     const reasonColors = {
@@ -167,7 +168,7 @@ export function Requests() {
         confirmDialog({
             message: `Deseja confirmar a alteração?`,
             header: `Troca de ${campo}`,
-            icon: 'pi pi-exclamation-triangle',
+            icon: appIcon("alert-triangle"),
             defaultFocus: 'accept',
             acceptLabel: "Sim",
             rejectLabel: "Não",
@@ -215,7 +216,7 @@ export function Requests() {
         confirmDialog({
             header: `Excluir requisição #${row.id}`,
             message: "Essa ação também pode excluir o histórico e a timeline vinculados. Deseja continuar?",
-            icon: "pi pi-exclamation-triangle",
+            icon: appIcon("alert-triangle"),
             acceptLabel: "Excluir",
             rejectLabel: "Cancelar",
             acceptClassName: "p-button-danger",
@@ -308,7 +309,7 @@ export function Requests() {
                             </InplaceContent>
                         </Inplace>
                         {row.reserva_floater_id ? <Button
-                            icon="pi pi-ban"
+                            icon={<AppIcon name="ban" />}
                             text
                             rounded
                             severity="warning"
@@ -370,21 +371,21 @@ export function Requests() {
                 if (!canEdit) return null;
                 return <ButtonGroup className="request-actions-group flex">
                     <Button
-                        icon="pi pi-times"
+                        icon={<AppIcon name="x" />}
                         severity="help"
                         onClick={() => { setStatus(row.id, "reproved") }}
                         data-pr-tooltip="Reprovar Solicitação"
                     />
                     <Button
                         data-pr-tooltip="Aprovar Solicitação"
-                        icon="pi pi-check-circle"
+                        icon={<AppIcon name="circle-check" />}
                         severity="success"
                         disabled={!hasValidReplacement(row)}
                         title={hasValidReplacement(row) ? "Aprovar solicitação" : "Selecione uma reserva antes de aprovar"}
                         onClick={() => { setStatus(row.id, "approved") }}
                     />
                     <Button
-                        icon="pi pi-trash"
+                        icon={<AppIcon name="trash" />}
                         severity="danger"
                         loading={deletingId === row.id}
                         disabled={deletingId !== null}
@@ -439,7 +440,7 @@ export function Requests() {
 
             <div className="requests-speed-dial">
                 <Tooltip target=".requests-speed-dial .p-speeddial-action" position="left" showDelay={150} />
-                <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações de requisições" />
+                <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon={<AppIcon name="plus" />} hideIcon={<AppIcon name="x" />} aria-label="Ações de requisições" />
             </div>
 
             <div className="flex gap-2 align-items-center">
@@ -500,7 +501,7 @@ export function Requests() {
                                 <div className="reserve-usage-item" key={item.id}>
                                     <div className="reserve-usage-person">
                                         <strong>{item.nome}</strong>
-                                        {item.ultimo_contrato && <small><i className="pi pi-building" /> Último contrato: {item.ultimo_contrato}</small>}
+                                        {item.ultimo_contrato && <small><AppIcon name="building"  /> Último contrato: {item.ultimo_contrato}</small>}
                                     </div>
                                     <div className="reserve-usage-meta">
                                         <Tag value={item.situacao || "Sem situação"} severity={["ATIVO", "TRABALHANDO"].includes(item.situacao?.toUpperCase()) ? "success" : "warning"} rounded />
@@ -549,8 +550,8 @@ export function Requests() {
             >
                 <p>Por que <strong>{availabilityDialog?.reserva}</strong> não pode atender à reposição?</p>
                 <div className="reserve-availability-options">
-                    <Button label="Falta" icon="pi pi-user-minus" severity="danger" onClick={() => updateReservationAvailability("FALTA")} />
-                    <Button label="Apoio" icon="pi pi-users" severity="warning" onClick={() => updateReservationAvailability("APOIO")} />
+                    <Button label="Falta" icon={<AppIcon name="user-minus" />} severity="danger" onClick={() => updateReservationAvailability("FALTA")} />
+                    <Button label="Apoio" icon={<AppIcon name="users" />} severity="warning" onClick={() => updateReservationAvailability("APOIO")} />
                 </div>
             </Dialog>
         </main>

@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import './movements.css';
 
 import { Table } from '../../components/tables/Table';
@@ -109,7 +110,7 @@ export function Movements() {
         confirmDialog({
             message: `Deseja realmente excluir esta movimentação?`,
             header: 'Confirmar exclusão',
-            icon: 'pi pi-exclamation-triangle',
+            icon: appIcon("alert-triangle"),
             acceptClassName: 'p-button-danger',
             acceptLabel: 'Excluir',
             rejectLabel: 'Cancelar',
@@ -291,7 +292,7 @@ export function Movements() {
         {
             header: 'Destinatários',
             body: (row) => row.destinatarios?.length
-                ? <Button label={`${row.destinatarios.length} colaborador(es)`} icon="pi pi-users" text onClick={() => setMovementDetail(row)} />
+                ? <Button label={`${row.destinatarios.length} colaborador(es)`} icon={<AppIcon name="users" />} text onClick={() => setMovementDetail(row)} />
                 : <span className="text-color-secondary">—</span>,
         },
         { field: 'observacao', header: 'Observação', class: 'text-truncate' },
@@ -300,8 +301,8 @@ export function Movements() {
             header: 'Ações',
             body: (row) => (
                 <div className="flex gap-1">
-                    {canEdit && <Button icon="pi pi-pencil" rounded text onClick={() => openEdit(row)} tooltip="Editar" />}
-                    {isAdmin && <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDeleteMovement(row)} tooltip="Excluir" />}
+                    {canEdit && <Button icon={<AppIcon name="pencil" />} rounded text onClick={() => openEdit(row)} tooltip="Editar" />}
+                    {isAdmin && <Button icon={<AppIcon name="trash" />} rounded text severity="danger" onClick={() => confirmDeleteMovement(row)} tooltip="Excluir" />}
                 </div>
             ),
         }] : []),
@@ -512,17 +513,17 @@ export function Movements() {
     const speedDialItems = [
         {
             label: 'Movimentar ativo',
-            icon: 'pi pi-building',
+            icon: appIcon("building"),
             command: openAssetMovement,
         },
         {
             label: 'Ler código',
-            icon: 'pi pi-barcode',
+            icon: appIcon("barcode"),
             command: openQuickScanner,
         },
         {
             label: 'Movimentar estoque',
-            icon: 'pi pi-box',
+            icon: appIcon("box"),
             command: openCreate,
         },
     ];
@@ -559,8 +560,8 @@ export function Movements() {
                         type="quarter-circle"
                         direction="up-left"
                         radius={132}
-                        showIcon="pi pi-plus"
-                        hideIcon="pi pi-times"
+                        showIcon={<AppIcon name="plus" />}
+                        hideIcon={<AppIcon name="x" />}
                         aria-label="Ações de movimentação"
                     />
                 </div>
@@ -582,7 +583,7 @@ export function Movements() {
                     <Button
                         type="button"
                         label="Ler código de barras"
-                        icon="pi pi-camera"
+                        icon={<AppIcon name="camera" />}
                         outlined
                         onClick={() => setScannerVisible(true)}
                     />
@@ -640,7 +641,7 @@ export function Movements() {
                                         <article key={recipient.colaborador_id}>
                                             <div>
                                                 <strong>{employee?.label || `#${recipient.colaborador_id}`}</strong>
-                                                <span><i className="pi pi-map-marker" /> {employee?.centro_local || employee?.local || 'Local vinculado no cadastro'}</span>
+                                                <span><AppIcon name="map-pin"  /> {employee?.centro_local || employee?.local || 'Local vinculado no cadastro'}</span>
                                             </div>
                                             <InputNumber
                                                 value={recipient.quantidade}
@@ -648,8 +649,8 @@ export function Movements() {
                                                 min={1}
                                                 showButtons
                                                 buttonLayout="horizontal"
-                                                decrementButtonIcon="pi pi-minus"
-                                                incrementButtonIcon="pi pi-plus"
+                                                decrementButtonIcon={<AppIcon name="minus" />}
+                                                incrementButtonIcon={<AppIcon name="plus" />}
                                             />
                                         </article>
                                     );
@@ -663,7 +664,7 @@ export function Movements() {
                         <label htmlFor="observacao">Observação (opcional)</label>
                     </FloatLabel>
 
-                    <Button type="submit" label={form.id ? 'Salvar alterações' : 'Registrar movimentação'} icon="pi pi-check" />
+                    <Button type="submit" label={form.id ? 'Salvar alterações' : 'Registrar movimentação'} icon={<AppIcon name="check" />} />
                 </form>
             </Dialog>
 
@@ -761,7 +762,7 @@ export function Movements() {
                     <Button
                         type="submit"
                         label="Confirmar movimentação"
-                        icon="pi pi-arrow-right-arrow-left"
+                        icon={<AppIcon name="arrows-exchange" />}
                     />
                 </form>
             </Dialog>

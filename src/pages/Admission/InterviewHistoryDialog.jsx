@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { DataTable } from "../../components/tables/DataTable";
@@ -64,7 +65,7 @@ export function InterviewHistoryDialog({ visible, onHide }) {
         <Dialog header="Histórico de entrevistas" visible={visible} modal maximizable className="interview-history-dialog" onHide={onHide}>
             <div className="interview-history-toolbar">
                 <span className="p-input-icon-left interview-history-search">
-                    <i className="pi pi-search" />
+                    <AppIcon name="search"  />
                     <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador que saiu, candidato ou contrato" />
                 </span>
                 <Dropdown value={status} options={statusOptions} onChange={(event) => setStatus(event.value)} placeholder="Todos os status" showClear />

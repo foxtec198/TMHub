@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import "./ql.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -25,7 +26,7 @@ const initialFilters = () => ({ departamentos: [], mes: currentMonth() });
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
   return <article className={`ql-summary-card tm-dashboard-card is-${tone}`}>
-    <span className="ql-summary-card__icon"><i className={icon} /></span>
+    <span className="ql-summary-card__icon">{typeof icon === "string" ? <AppIcon name={icon} /> : icon}</span>
     <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
   </article>;
 }
@@ -174,7 +175,7 @@ export function QLDashboard() {
       description="Acompanhe o quadro de lotação por departamento e a evolução diária do efetivo."
       actions={<>
         <Button
-          icon="pi pi-filter-fill"
+          icon={<AppIcon name="filter-filled" />}
           label={filterCount ? `Filtros (${filterCount})` : "Filtros"}
           onClick={(event) => filterPanel.current?.toggle(event)}
         />
@@ -182,10 +183,10 @@ export function QLDashboard() {
     />
 
     <section className="ql-summary-grid">
-      <SummaryCard icon="pi pi-users" label="Trabalhando" value={summary.colaboradores_ativos || 0} detail="quadro atual no recorte" tone="success" />
-      <SummaryCard icon="pi pi-bullseye" label="Meta de QL" value={summary.capacidade_esperada || 0} detail={`${summary.departamentos_sem_meta || 0} departamento(s) sem meta`} tone="info" />
-      <SummaryCard icon="pi pi-exclamation-circle" label="Déficit" value={summary.deficit || 0} detail="pessoas abaixo da meta" tone="danger" />
-      <SummaryCard icon="pi pi-arrow-up-right" label="Excedente" value={summary.excedente || 0} detail={`${summary.departamentos || 0} departamento(s) no recorte`} tone="warning" />
+      <SummaryCard icon={<AppIcon name="users" />} label="Trabalhando" value={summary.colaboradores_ativos || 0} detail="quadro atual no recorte" tone="success" />
+      <SummaryCard icon={<AppIcon name="target" />} label="Meta de QL" value={summary.capacidade_esperada || 0} detail={`${summary.departamentos_sem_meta || 0} departamento(s) sem meta`} tone="info" />
+      <SummaryCard icon={<AppIcon name="alert-circle" />} label="Déficit" value={summary.deficit || 0} detail="pessoas abaixo da meta" tone="danger" />
+      <SummaryCard icon={<AppIcon name="arrow-up-right" />} label="Excedente" value={summary.excedente || 0} detail={`${summary.departamentos || 0} departamento(s) no recorte`} tone="warning" />
     </section>
 
     <section className="ql-dashboard-grid">
@@ -200,7 +201,7 @@ export function QLDashboard() {
               x: { grid: { color: chartTheme.grid }, ticks: { color: chartTheme.text } },
               y: { beginAtZero: true, grid: { color: chartTheme.grid }, ticks: { color: chartTheme.text, precision: 0 } },
             },
-          }} /> : <div className="ql-empty"><i className="pi pi-chart-line" />O histórico diário começa a ser salvo a partir de hoje.</div>}
+          }} /> : <div className="ql-empty"><AppIcon name="chart-line"  />O histórico diário começa a ser salvo a partir de hoje.</div>}
         </div>
       </article>
       <article className="ql-panel tm-dashboard-panel ql-insight-panel">
@@ -227,7 +228,7 @@ export function QLDashboard() {
     <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
       <div className="dashboard-filter-title">
         <div><strong>Filtrar dashboard</strong><span>As métricas, evolução e tabela respeitam o recorte selecionado.</span></div>
-        <Button icon="pi pi-filter-slash" label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
+        <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
       <div className="dashboard-filter-grid">
         <label><span>Mês de referência</span><Calendar value={filters.mes} onChange={(event) => setFilters((current) => ({ ...current, mes: event.value || currentMonth() }))} view="month" dateFormat="mm/yy" readOnlyInput showIcon className="w-full" /></label>

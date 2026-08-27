@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { Dialog } from "primereact/dialog";
@@ -61,11 +62,11 @@ export function UsageControlSettings() {
 
   const summary = data.resumo || {};
   const cards = useMemo(() => [
-    ["pi pi-users", "Usuários ativos", summary.usuarios_ativos || 0],
-    ["pi pi-clock", "Tempo ativo", duration(summary.segundos_ativos)],
-    ["pi pi-compass", "Páginas visitadas", summary.paginas_visitadas || 0],
-    ["pi pi-check-square", "Ações concluídas", summary.acoes_concluidas || 0],
-    ["pi pi-star-fill", "Edinhos liberados", summary.edinhos_gerados || 0],
+    ["users", "Usuários ativos", summary.usuarios_ativos || 0],
+    ["clock", "Tempo ativo", duration(summary.segundos_ativos)],
+    ["compass", "Páginas visitadas", summary.paginas_visitadas || 0],
+    ["square-check", "Ações concluídas", summary.acoes_concluidas || 0],
+    ["star-filled", "Edinhos liberados", summary.edinhos_gerados || 0],
   ], [summary]);
 
   const userBody = (record) => (
@@ -88,13 +89,13 @@ export function UsageControlSettings() {
       <div className="usage-control__summary">
         {cards.map(([icon, label, value]) => (
           <article key={label}>
-            <i className={icon} />
+            <AppIcon name={icon} />
             <div><small>{label}</small><strong>{value}</strong></div>
           </article>
         ))}
       </div>
 
-      <Table data={data.registros || []} loading={loading} rows={10} emptyTitle="Nenhuma atividade registrada neste dia." tableClassName="usage-control__table" columns={[{ header: "Usuário", body: userBody, sortable: true, field: "usuario.nome" }, { header: "Primeira atividade", body: (record) => record.primeira_atividade_em ? new Date(record.primeira_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—" }, { header: "Última atividade", body: (record) => record.ultima_atividade_em ? new Date(record.ultima_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—" }, { header: "Tempo ativo", body: (record) => duration(record.segundos_ativos), sortable: true, field: "segundos_ativos" }, { header: "Páginas", field: "paginas_visitadas", sortable: true }, { header: "Ações", field: "acoes_concluidas", sortable: true }, { header: "Edinhos", body: (record) => <span className="usage-edinho"><i className="pi pi-star-fill" /> {record.edinhos_gerados}</span>, sortable: true, field: "edinhos_gerados" }, { header: "Timeline", body: (record) => <button type="button" className="usage-timeline-button" onClick={() => setSelectedRecord(record)}><i className="pi pi-list" /> Ver</button> }]} />
+      <Table data={data.registros || []} loading={loading} rows={10} emptyTitle="Nenhuma atividade registrada neste dia." tableClassName="usage-control__table" columns={[{ header: "Usuário", body: userBody, sortable: true, field: "usuario.nome" }, { header: "Primeira atividade", body: (record) => record.primeira_atividade_em ? new Date(record.primeira_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—" }, { header: "Última atividade", body: (record) => record.ultima_atividade_em ? new Date(record.ultima_atividade_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—" }, { header: "Tempo ativo", body: (record) => duration(record.segundos_ativos), sortable: true, field: "segundos_ativos" }, { header: "Páginas", field: "paginas_visitadas", sortable: true }, { header: "Ações", field: "acoes_concluidas", sortable: true }, { header: "Edinhos", body: (record) => <span className="usage-edinho"><AppIcon name="star-filled"  /> {record.edinhos_gerados}</span>, sortable: true, field: "edinhos_gerados" }, { header: "Timeline", body: (record) => <button type="button" className="usage-timeline-button" onClick={() => setSelectedRecord(record)}><AppIcon name="list"  /> Ver</button> }]} />
 
       <Dialog header={`Timeline de uso · ${selectedRecord?.usuario?.nome || ""}`} visible={Boolean(selectedRecord)} onHide={() => setSelectedRecord(null)} modal className="usage-timeline-dialog">
         {selectedRecord?.timeline?.length ? (

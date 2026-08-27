@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useState } from 'react';
 import { MultiSelect } from 'primereact/multiselect';
 import { Dropdown } from 'primereact/dropdown';
@@ -292,11 +293,11 @@ export function BarcodeGenerator() {
                     </div>
 
                     <div className="barcode-selection-summary">
-                        <i className="pi pi-info-circle" />
+                        <AppIcon name="info-circle"  />
                         <span>{labels.length ? `${labels.length} etiqueta(s) em ${Math.ceil(labels.length / 20)} página(s)` : 'Cada código inclui nome, ID e localização do produto.'}</span>
                     </div>
 
-                    <Button label="Gerar Código de Barras" icon="pi pi-download" onClick={generate} className="barcode-generate-button" />
+                    <Button label="Gerar Código de Barras" icon={<AppIcon name="download" />} onClick={generate} className="barcode-generate-button" />
                 </div>
             </section>
         </main>

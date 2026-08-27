@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import './vacancies.css';
 
 // Widgets
@@ -150,7 +151,7 @@ function VagaHeader({ vaga }) {
                     <Tag
                         value={`${isFutureDate(vaga.data_saida) ? 'SAÍDA PREVISTA' : 'SAÍDA'} · ${formatDateOnly(vaga.data_saida)}`}
                         severity={isFutureDate(vaga.data_saida) ? 'warning' : 'secondary'}
-                        icon="pi pi-calendar"
+                        icon={<AppIcon name="calendar" />}
                         rounded
                     />
                 )}
@@ -329,7 +330,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
             {vaga.status !== 'concluido' && (
                 <form className="candidate-text-editor" onSubmit={(event) => { event.preventDefault(); saveCandidateText(); }}>
                     <div className="candidate-text-editor__heading mb-3">
-                        <span><i className="pi pi-user-edit" /> Pessoa que será contratada</span>
+                        <span><AppIcon name="user-edit"  /> Pessoa que será contratada</span>
                         <Tag className="candidate-text-editor__tag" value="Somente texto até a conclusão" severity="secondary" rounded />
                     </div>
                     <div className="candidate-text-editor__fields">
@@ -352,8 +353,8 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                             />
                             <label htmlFor={`candidate-phone-${vaga.id}`}>Telefone (opcional)</label>
                         </FloatLabel>
-                        <Button type="submit" label="Salvar candidato" icon="pi pi-save" outlined />
-                        <Button type="button" label="Registrar resultado" icon="pi pi-flag" severity="warning" outlined onClick={() => setCandidateResultVisible(true)} />
+                        <Button type="submit" label="Salvar candidato" icon={<AppIcon name="device-floppy" />} outlined />
+                        <Button type="button" label="Registrar resultado" icon={<AppIcon name="flag" />} severity="warning" outlined onClick={() => setCandidateResultVisible(true)} />
                     </div>
                 </form>
             )}
@@ -362,7 +363,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                 className="align-self-start"
                 type="button"
                 label={`Histórico de candidatos (${vaga.historico_candidatos?.length || 0})`}
-                icon="pi pi-history"
+                icon={<AppIcon name="history" />}
                 text
                 onClick={() => setCandidateHistoryVisible(true)}
             />
@@ -396,7 +397,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                 </FloatLabel>
 
                 <Button
-                    icon="pi pi-save"
+                    icon={<AppIcon name="device-floppy" />}
                     outlined
                     aria-label="Salvar supervisor"
                     tooltip="Salvar supervisor"
@@ -404,7 +405,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                     onClick={saveSupervisor}
                 />
 
-                <Button icon="pi pi-trash" text rounded severity="danger" tooltip="Excluir vaga" onClick={() => onDelete(vaga)} />
+                <Button icon={<AppIcon name="trash" />} text rounded severity="danger" tooltip="Excluir vaga" onClick={() => onDelete(vaga)} />
             </div>
 
             {showInterviewForm && (
@@ -413,7 +414,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                     onSubmit={(e) => { e.preventDefault(); confirmInterview(); }}
                 >
                     <div className="flex align-items-center gap-2">
-                        <i className="pi pi-calendar-plus" style={{ color: 'var(--primary-color-dark)' }}></i>
+                        <AppIcon name="calendar-plus" style={{ color: 'var(--primary-color-dark)' }} />
                         <span className="font-bold">Agendar entrevista</span>
                     </div>
 
@@ -452,7 +453,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                                 timeOnly
                                 hourFormat="24"
                                 stepMinute={5}
-                                icon="pi pi-clock"
+                                icon={<AppIcon name="clock" />}
                                 showIcon
                                 readOnlyInput
                             />
@@ -460,7 +461,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                         </FloatLabel>
                     </div>
 
-                    <Button type="submit" label="Confirmar e mudar status" icon="pi pi-check" />
+                    <Button type="submit" label="Confirmar e mudar status" icon={<AppIcon name="check" />} />
                 </form>
             )}
 
@@ -473,7 +474,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
             >
                 <form className="flex flex-column gap-4 pt-3" onSubmit={(event) => { event.preventDefault(); confirmCompletion(); }}>
                     <div className="completion-recruiter">
-                        <i className="pi pi-user" />
+                        <AppIcon name="user"  />
                         <span>Recrutador: <strong>{localStorage.getItem('display_name') || 'Usuário do TMHub'}</strong></span>
                     </div>
 
@@ -490,7 +491,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                     </FloatLabel>
 
                     <small className="completion-schedule-hint">
-                        <i className="pi pi-info-circle" /> A vaga pode ser concluída mesmo que essa matrícula ainda não esteja na base de colaboradores.
+                        <AppIcon name="info-circle"  /> A vaga pode ser concluída mesmo que essa matrícula ainda não esteja na base de colaboradores.
                     </small>
 
                     {/* O nome continua livre para preservar o candidato enquanto a importação não ocorre. */}
@@ -520,7 +521,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                     </FloatLabel>
 
                     <small className="completion-schedule-hint">
-                        <i className="pi pi-clock" /> Horário inicial automático: <strong>{firstScheduleTime(vaga.horario_trabalho) || 'horário inválido'}</strong>
+                        <AppIcon name="clock"  /> Horário inicial automático: <strong>{firstScheduleTime(vaga.horario_trabalho) || 'horário inválido'}</strong>
                         <span> ({vaga.horario_trabalho})</span>
                     </small>
 
@@ -538,7 +539,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
 
                     <div className="flex justify-content-end gap-2">
                         <Button type="button" label="Cancelar" severity="secondary" text onClick={() => setShowCompletionForm(false)} />
-                        <Button type="submit" label="Concluir vaga" icon="pi pi-check" />
+                        <Button type="submit" label="Concluir vaga" icon={<AppIcon name="check" />} />
                     </div>
                 </form>
             </Dialog>
@@ -552,7 +553,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
             >
                 <form className="flex flex-column gap-4 pt-3" onSubmit={(event) => { event.preventDefault(); registerCandidateResult(); }}>
                     <div className="candidate-result-person">
-                        <i className="pi pi-user" />
+                        <AppIcon name="user"  />
                         <span><strong>{candidateName || 'Candidato não informado'}</strong>{candidatePhone && <small>{candidatePhone}</small>}</span>
                     </div>
                     <FloatLabel>
@@ -566,7 +567,7 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                     <small>Ao confirmar, o candidato será preservado no histórico e os campos ficarão livres para a próxima pessoa.</small>
                     <div className="flex justify-content-end gap-2">
                         <Button type="button" label="Cancelar" severity="secondary" text onClick={() => setCandidateResultVisible(false)} />
-                        <Button type="submit" label="Registrar e liberar vaga" icon="pi pi-check" severity="warning" />
+                        <Button type="submit" label="Registrar e liberar vaga" icon={<AppIcon name="check" />} severity="warning" />
                     </div>
                 </form>
             </Dialog>
@@ -587,8 +588,8 @@ function VagaItem({ vaga, supervisors, onUpdate, onCandidateResult, onDelete }) 
                             </div>
                             {item.observacao && <p>{item.observacao}</p>}
                             <footer>
-                                <span><i className="pi pi-user-edit" /> {item.registrado_por || 'Usuário não identificado'}</span>
-                                <span><i className="pi pi-clock" /> {item.ocorrido_em ? new Date(item.ocorrido_em).toLocaleString('pt-br') : '-'}</span>
+                                <span><AppIcon name="user-edit"  /> {item.registrado_por || 'Usuário não identificado'}</span>
+                                <span><AppIcon name="clock"  /> {item.ocorrido_em ? new Date(item.ocorrido_em).toLocaleString('pt-br') : '-'}</span>
                             </footer>
                         </article>
                     )) : <span className="empty-status">Nenhum candidato finalizado nesta vaga.</span>}
@@ -803,7 +804,7 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
         confirmDialog({
             message: `Deseja realmente excluir a vaga de "${vaga.tipo === 'aditivo' ? vaga.centro_custo : vaga.colaborador}"?`,
             header: 'Confirmar exclusão',
-            icon: 'pi pi-exclamation-triangle',
+            icon: appIcon("alert-triangle"),
             acceptClassName: 'p-button-danger',
             acceptLabel: 'Excluir',
             rejectLabel: 'Cancelar',
@@ -849,7 +850,7 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
 
                     {departFilter && (
                         <Button
-                            icon="pi pi-filter-slash"
+                            icon={<AppIcon name="filter-off" />}
                             text
                             rounded
                             severity="secondary"
@@ -860,7 +861,7 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
                 </div>
 
                 <div className="flex align-items-center gap-2">
-                    {!isAdditive && <Button label="Histórico de entrevistas" icon="pi pi-history" outlined onClick={() => setHistoryVisible(true)} />}
+                    {!isAdditive && <Button label="Histórico de entrevistas" icon={<AppIcon name="history" />} outlined onClick={() => setHistoryVisible(true)} />}
                     <SelectButton value={order} onChange={(e) => e.value && setOrder(e.value)} options={orderOptions} />
                 </div>
             </div>
@@ -896,7 +897,7 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
             </div>
 
             <Button
-                icon="pi pi-plus"
+                icon={<AppIcon name="plus" />}
                 size="large"
                 className="p-4"
                 rounded
@@ -1036,13 +1037,13 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
                             </FloatLabel>
 
                             <small className="departure-date-hint">
-                                <i className="pi pi-info-circle" />
+                                <AppIcon name="info-circle"  />
                                 Essa data não bloqueia a vaga. O processo seletivo pode começar e ser concluído antes da saída.
                             </small>
                         </>
                     )}
 
-                    <Button type="submit" className='mt-3' label="Cadastrar vaga" icon="pi pi-check" />
+                    <Button type="submit" className='mt-3' label="Cadastrar vaga" icon={<AppIcon name="check" />} />
                 </form>
             </Dialog>
             {!isAdditive && <InterviewHistoryDialog visible={historyVisible} onHide={() => setHistoryVisible(false)} />}

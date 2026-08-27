@@ -1,3 +1,4 @@
+import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -6,11 +7,11 @@ import tmOpsRequest from "../../utils/tmOpsRequest";
 import { useToast } from "../../contexts/ToastContext";
 
 const EVIDENCE_META = {
-  camera: { label: "Câmera", icon: "pi pi-camera" },
-  image: { label: "Galeria", icon: "pi pi-images" },
-  barcode: { label: "Código de barras", icon: "pi pi-barcode" },
-  qrcode: { label: "QR Code", icon: "pi pi-qrcode" },
-  signature: { label: "Assinatura", icon: "pi pi-pencil" },
+  camera: { label: "Câmera", icon: appIcon("camera") },
+  image: { label: "Galeria", icon: appIcon("library-photo") },
+  barcode: { label: "Código de barras", icon: appIcon("barcode") },
+  qrcode: { label: "QR Code", icon: appIcon("qrcode") },
+  signature: { label: "Assinatura", icon: appIcon("pencil") },
 };
 
 function captureFormats(type) {
@@ -325,7 +326,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
                   title="Evidência obrigatória"
                   aria-label="Evidência obrigatória"
                 >
-                  <i className="pi pi-exclamation" />
+                  <AppIcon name="exclamation-mark"  />
                 </span>
               )}
               {evidence?.url && (
@@ -337,7 +338,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
                   aria-label={`Abrir ${meta.label} registrada`}
                   title={`Abrir ${meta.label} registrada`}
                 >
-                  <i className="pi pi-external-link" />
+                  <AppIcon name="external-link"  />
                 </a>
               )}
             </div>
@@ -407,7 +408,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
           <p>{cameraStatus}</p>
           <Button
             label="Capturar foto"
-            icon="pi pi-camera"
+            icon={<AppIcon name="camera" />}
             loading={sending}
             onClick={takePhoto}
           />
@@ -439,7 +440,7 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
             <Button label="Limpar" outlined onClick={prepareSignature} />
             <Button
               label="Salvar assinatura"
-              icon="pi pi-check"
+              icon={<AppIcon name="check" />}
               loading={sending}
               onClick={saveSignature}
             />

@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
@@ -285,7 +286,7 @@ export function RequestReport() {
       field: "reserva",
       body: (row) => {
         const uncovered = row.status === "reproved" || row.reserva === "SEM COBERTURA" || !row.reserva;
-        return <span className={`request-dashboard-coverage ${uncovered ? "is-uncovered" : "is-covered"}`}><i className={`pi ${uncovered ? "pi-times-circle" : "pi-check-circle"}`} />{uncovered ? "Sem cobertura" : firstAndLastName(row.reserva)}</span>;
+        return <span className={`request-dashboard-coverage ${uncovered ? "is-uncovered" : "is-covered"}`}><AppIcon name={uncovered ? "circle-x" : "circle-check"} />{uncovered ? "Sem cobertura" : firstAndLastName(row.reserva)}</span>;
       },
       sortable: true,
     },
@@ -304,11 +305,11 @@ export function RequestReport() {
         section="Dashboards"
         title="Dashboard de Reposições"
         description="Acompanhe coberturas, pendências e indisponibilidades de reservas no recorte selecionado."
-        actions={<Button icon="pi pi-filter-fill" label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />}
+        actions={<Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />}
       />
 
       <OverlayPanel ref={filterPanel} className="request-dashboard-filter-panel">
-        <div className="request-dashboard-filter-panel__heading"><div><strong>Filtros do dashboard</strong><span>As opções se ajustam ao recorte atual.</span></div><Button icon="pi pi-filter-slash" label="Limpar" text onClick={clearFilters} /></div>
+        <div className="request-dashboard-filter-panel__heading"><div><strong>Filtros do dashboard</strong><span>As opções se ajustam ao recorte atual.</span></div><Button icon={<AppIcon name="filter-off" />} label="Limpar" text onClick={clearFilters} /></div>
         <div className="request-dashboard-filter-grid">
           <label className="is-wide"><span>Período</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput hideOnRangeSelection showIcon showButtonBar placeholder="Selecione o período" /></label>
           {[["contrato", "Contrato"], ["departamento", "Departamento"], ["supervisor", "Supervisor"], ["motivo", "Motivo"], ["status", "Status"], ["colaborador", "Colaborador"]].map(([field, label]) => <label key={field}><span>{label}</span><MultiSelect value={filters[field]} options={filterOptions[field]} optionLabel="label" optionValue="value" onChange={(event) => setFilter(field, event.value)} placeholder={`Todos os ${label.toLowerCase()}s`} display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>)}
@@ -316,15 +317,15 @@ export function RequestReport() {
       </OverlayPanel>
 
       {loading && !data ? <Placeholder loading variant="dashboard" /> : error && !data ? (
-        <Placeholder icon="pi-exclamation-triangle" title="Não foi possível abrir o dashboard" description={error} action={<Button label="Tentar novamente" icon="pi-refresh" outlined onClick={reload} />} />
+        <Placeholder icon={<AppIcon name="alert-triangle" />} title="Não foi possível abrir o dashboard" description={error} action={<Button label="Tentar novamente" icon={<AppIcon name="refresh" />} outlined onClick={reload} />} />
       ) : <>
         <section className="request-dashboard__metrics" aria-label="Indicadores de reposições">
-          <DashCard icon="pi pi-list-check" title="Requisições" detail="no recorte selecionado" value={metrics.total} cont="100%" contSeverity="info" contClassName="request-metric-tag request-metric-tag-total" />
-          <DashCard icon="pi pi-clock" title="Em aberto" detail="aguardando decisão" value={metrics.open} tone="warning" cont={`${metrics.total ? Math.round((metrics.open / metrics.total) * 100) : 0}%`} contSeverity="warning" contClassName="request-metric-tag request-metric-tag-open" />
-          <DashCard icon="pi pi-check-circle" title="Cobertas" detail="decisões aprovadas" value={metrics.covered} tone="success" cont={`${metrics.coverageRate}%`} contSeverity="success" contClassName="request-metric-tag request-metric-tag-covered" />
-          <DashCard icon="pi pi-times-circle" title="Sem cobertura" detail="decisões reprovadas" value={metrics.uncovered} tone="danger" cont={`${metrics.total ? Math.round((metrics.uncovered / metrics.total) * 100) : 0}%`} contSeverity="danger" contClassName="request-metric-tag request-metric-tag-uncovered" />
-          <DashCard icon="pi pi-user-minus" title="Faltas de reservas" detail="no período selecionado" value={metrics.reserveAbsences} tone="danger" />
-          <DashCard icon="pi pi-calendar-times" title="Faltas de reservas" detail="registradas hoje" value={metrics.reserveAbsencesToday} tone="warning" />
+          <DashCard icon={<AppIcon name="list-check" />} title="Requisições" detail="no recorte selecionado" value={metrics.total} cont="100%" contSeverity="info" contClassName="request-metric-tag request-metric-tag-total" />
+          <DashCard icon={<AppIcon name="clock" />} title="Em aberto" detail="aguardando decisão" value={metrics.open} tone="warning" cont={`${metrics.total ? Math.round((metrics.open / metrics.total) * 100) : 0}%`} contSeverity="warning" contClassName="request-metric-tag request-metric-tag-open" />
+          <DashCard icon={<AppIcon name="circle-check" />} title="Cobertas" detail="decisões aprovadas" value={metrics.covered} tone="success" cont={`${metrics.coverageRate}%`} contSeverity="success" contClassName="request-metric-tag request-metric-tag-covered" />
+          <DashCard icon={<AppIcon name="circle-x" />} title="Sem cobertura" detail="decisões reprovadas" value={metrics.uncovered} tone="danger" cont={`${metrics.total ? Math.round((metrics.uncovered / metrics.total) * 100) : 0}%`} contSeverity="danger" contClassName="request-metric-tag request-metric-tag-uncovered" />
+          <DashCard icon={<AppIcon name="user-minus" />} title="Faltas de reservas" detail="no período selecionado" value={metrics.reserveAbsences} tone="danger" />
+          <DashCard icon={<AppIcon name="calendar-x" />} title="Faltas de reservas" detail="registradas hoje" value={metrics.reserveAbsencesToday} tone="warning" />
         </section>
 
         <DashboardPanel className="request-dashboard-departments"><header><div><span>Departamentos</span><h2>Resumo por área</h2></div><small>{departments.length} departamento(s) no recorte</small></header>{departments.length ? <div className="request-dashboard-department-grid">{departments.map(([department, values]) => <article key={department}><header><strong>DPTO. {department}</strong><span>{values.total} requisição(ões)</span></header><div><span className="is-success">{values.covered} cobertas</span><span className="is-danger">{values.uncovered} sem cobertura</span><span className="is-warning">{values.open} abertas</span></div></article>)}</div> : <Placeholder variant="content" title="Nenhum departamento no recorte" />}</DashboardPanel>
@@ -363,7 +364,7 @@ export function RequestReport() {
             </div>
             <footer className="request-dashboard-top-contract flex flex-column">
               <div className="flex gap-1">
-                <i className="pi pi-map-marker" />
+                <AppIcon name="map-pin"  />
                 <span>Maior concentração:</span>
               </div>
 

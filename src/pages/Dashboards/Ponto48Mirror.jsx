@@ -1,3 +1,4 @@
+import { AppIcon } from "../../components/icons/AppIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
@@ -28,7 +29,7 @@ function formatPeriod(batch) {
 function MirrorCard({ active, icon, label, value, detail, tone, onClick }) {
   return (
     <button type="button" className={`ponto48-card tm-dashboard-card is-${tone} ${active ? "is-active" : ""}`} onClick={onClick}>
-      <span className="ponto48-card__icon"><i className={icon} /></span>
+      <span className="ponto48-card__icon">{typeof icon === "string" ? <AppIcon name={icon} /> : icon}</span>
       <span><small>{label}</small><strong>{value}</strong><em>{detail}</em></span>
     </button>
   );
@@ -166,21 +167,21 @@ export function Ponto48Mirror({ filters = EMPTY_FILTERS, dateRange = null, refre
     { header: "HE", body: (row) => formatMinutes(row.horas_extras_minutos) },
     { header: "Saldo", body: (row) => <Tag value={formatMinutes(row.saldo_final_minutos, true)} severity={row.saldo_final_minutos < 0 ? "danger" : row.saldo_final_minutos > 0 ? "success" : "secondary"} rounded /> },
     { header: "Ímpares", body: (row) => <Tag value={row.dias_batida_impar} severity={row.dias_batida_impar ? "danger" : "success"} rounded /> },
-    { header: "Espelho", body: (row) => <Button label="Visualizar" icon="pi pi-eye" size="small" outlined onClick={() => setDetail(row)} /> },
+    { header: "Espelho", body: (row) => <Button label="Visualizar" icon={<AppIcon name="eye" />} size="small" outlined onClick={() => setDetail(row)} /> },
   ], []);
 
   return (
     <div className="ponto48-mirror">
       {!data.importacao && !loading ? (
-        <div className="ponto48-empty"><i className="pi pi-id-card" /><h2>Nenhum espelho importado</h2><p>Use a importação conjunta no topo para carregar os quatro relatórios.</p></div>
+        <div className="ponto48-empty"><AppIcon name="id-badge"  /><h2>Nenhum espelho importado</h2><p>Use a importação conjunta no topo para carregar os quatro relatórios.</p></div>
       ) : (
         <>
           <div className="ponto48-summary">
-            <MirrorCard active={view === "all"} icon="pi pi-users" label="Colaboradores" value={summary.employees} detail="com jornada no período" tone="neutral" onClick={() => setView("all")} />
-            <MirrorCard active={view === "negative"} icon="pi pi-arrow-down" label="Saldo negativo" value={summary.negative} detail="colaboradores em débito" tone="danger" onClick={() => setView("negative")} />
-            <MirrorCard active={view === "positive"} icon="pi pi-arrow-up" label="Saldo positivo" value={summary.positive} detail="colaboradores em crédito" tone="success" onClick={() => setView("positive")} />
-            <MirrorCard active={view === "odd"} icon="pi pi-exclamation-triangle" label="Batidas ímpares" value={summary.odd} detail="dias para conferir" tone="warning" onClick={() => setView("odd")} />
-            <MirrorCard active={view === "debit"} icon="pi pi-clock" label="Débitos" value={formatMinutes(summary.debit)} detail="horas debitadas" tone="violet" onClick={() => setView("debit")} />
+            <MirrorCard active={view === "all"} icon={<AppIcon name="users" />} label="Colaboradores" value={summary.employees} detail="com jornada no período" tone="neutral" onClick={() => setView("all")} />
+            <MirrorCard active={view === "negative"} icon={<AppIcon name="arrow-down" />} label="Saldo negativo" value={summary.negative} detail="colaboradores em débito" tone="danger" onClick={() => setView("negative")} />
+            <MirrorCard active={view === "positive"} icon={<AppIcon name="arrow-up" />} label="Saldo positivo" value={summary.positive} detail="colaboradores em crédito" tone="success" onClick={() => setView("positive")} />
+            <MirrorCard active={view === "odd"} icon={<AppIcon name="alert-triangle" />} label="Batidas ímpares" value={summary.odd} detail="dias para conferir" tone="warning" onClick={() => setView("odd")} />
+            <MirrorCard active={view === "debit"} icon={<AppIcon name="clock" />} label="Débitos" value={formatMinutes(summary.debit)} detail="horas debitadas" tone="violet" onClick={() => setView("debit")} />
           </div>
 
           <div className="ponto48-analysis">

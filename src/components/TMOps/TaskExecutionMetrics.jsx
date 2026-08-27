@@ -1,3 +1,4 @@
+import { AppIcon } from "../icons/AppIcon";
 const formatDuration = (seconds) => {
   const total = Math.max(0, Math.floor(Number(seconds) || 0));
   const hours = Math.floor(total / 3600);
@@ -37,17 +38,17 @@ export function TaskExecutionMetrics({ task, now }) {
   return (
     <div className="tm-ops-execution-metrics" aria-label="Indicadores da execução">
       <div>
-        <i className="pi pi-map-marker" />
+        <AppIcon name="map-pin"  />
         <span>Distância percorrida</span>
         <strong>{formatDistance(task.distancia_percorrida_metros)}</strong>
       </div>
       <div>
-        <i className="pi pi-stopwatch" />
+        <AppIcon name="stopwatch"  />
         <span>Tempo decorrido</span>
         <strong>{formatDuration(elapsedSeconds)}</strong>
       </div>
       <div>
-        <i className="pi pi-pause-circle" />
+        <AppIcon name="pause"  />
         <span>Tempo em pausa</span>
         <strong>{formatDuration(pausedSeconds)}</strong>
       </div>
