@@ -80,6 +80,32 @@ function money(value) {
   return Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function compactCardNumber(value) {
+  const number = Number(value || 0);
+  const absolute = Math.abs(Number.isFinite(number) ? number : 0);
+  const sign = number < 0 ? "-" : "";
+
+  if (absolute < 100_000) {
+    return `${sign}${Math.trunc(absolute).toLocaleString("pt-BR")}`;
+  }
+
+  const scale = absolute >= 1_000_000_000
+    ? { divisor: 1_000_000_000, suffix: "B" }
+    : absolute >= 1_000_000
+      ? { divisor: 1_000_000, suffix: "M" }
+      : { divisor: 1_000, suffix: "K" };
+  const scaled = scale.suffix === "K"
+    ? Math.trunc(absolute / scale.divisor)
+    : Math.trunc((absolute / scale.divisor) * 10) / 10;
+
+  return `${sign}${scaled.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} ${scale.suffix}`;
+}
+
+function compactCardCurrency(value) {
+  const number = Number(value || 0);
+  return `${number < 0 ? "-" : ""}R$ ${compactCardNumber(Math.abs(number))}`;
+}
+
 function errorMessage(error, fallback) {
   const data = error?.response?.data;
   if (typeof data === "string" && data.trim()) return data;
@@ -360,11 +386,11 @@ function VacationControlContent() {
     />
 
     <div className="vacation-summary">
-      <article><i className="pi pi-history" /><div><small>Histórico importado</small><strong>{summary.historico || 0}</strong><span>períodos registrados</span></div></article>
-      <article><i className="pi pi-calendar-plus" /><div><small>A programar</small><strong>{summary.provisionamento || 0}</strong><span>com saldo de férias</span></div></article>
-      <article className="is-warning"><i className="pi pi-clock" /><div><small>A vencer</small><strong>{summary.a_vencer || 0}</strong><span>até 90 dias</span></div></article>
-      <article className="is-danger"><i className="pi pi-exclamation-triangle" /><div><small>Exigem atenção</small><strong>{summary.criticas || 0}</strong><span>críticas ou em dobro</span></div></article>
-      <article className="is-success"><i className="pi pi-wallet" /><div><small>Férias líquidas</small><strong>{money(summary.custo_pago)}</strong><span>histórico filtrado</span></div></article>
+      <article><i className="pi pi-history" /><div><small>Histórico importado</small><strong>{compactCardNumber(summary.historico)}</strong><span>períodos registrados</span></div></article>
+      <article><i className="pi pi-calendar-plus" /><div><small>A programar</small><strong>{compactCardNumber(summary.provisionamento)}</strong><span>com saldo de férias</span></div></article>
+      <article className="is-warning"><i className="pi pi-clock" /><div><small>A vencer</small><strong>{compactCardNumber(summary.a_vencer)}</strong><span>até 90 dias</span></div></article>
+      <article className="is-danger"><i className="pi pi-exclamation-triangle" /><div><small>Exigem atenção</small><strong>{compactCardNumber(summary.criticas)}</strong><span>críticas ou em dobro</span></div></article>
+      <article className="is-success"><i className="pi pi-wallet" /><div><small>Férias líquidas</small><strong>{compactCardCurrency(summary.custo_pago)}</strong><span>histórico filtrado</span></div></article>
     </div>
 
     <article className="vacation-panel">
