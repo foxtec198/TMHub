@@ -204,6 +204,16 @@ export function AppRoutes() {
         <Route path="/schedular/*" element={<LegacyTMOpsRedirect />} />
         <Route path="/schedular" element={<LegacyTMOpsRedirect />} />
 
+        {/* KDS/ODS executa em tela cheia, sem o MenuBar e o Outlet do TMHub. */}
+        <Route
+          path="/reports/reposicoes/ods"
+          element={
+            <PermissionGate screen="dashboard_reposicoes_ods">
+              <RequestsODS />
+            </PermissionGate>
+          }
+        />
+
           <Route element={<MainLayout />}>
           {/* Init Page */}
           <Route path="/init" element={<Init />} />
@@ -390,14 +400,6 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="avaliacao_experiencia_supervisor">
                 <ExperienceSupervisor />
-              </PermissionGate>
-            }
-          />
-          <Route
-            path="/reports/reposicoes/ods"
-            element={
-              <PermissionGate screen="dashboard_reposicoes_ods">
-                <RequestsODS />
               </PermissionGate>
             }
           />
