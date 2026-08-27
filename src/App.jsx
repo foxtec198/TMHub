@@ -59,11 +59,12 @@ import { TMOpsTasks } from "./pages/TMOps/Tasks";
 import { DisciplinaryMeasures } from "./pages/DisciplinaryMeasures";
 import { TicketDetail, TicketsDashboard } from "./pages/Tickets";
 import { TicketManagement } from "./pages/Tickets/TicketManagement";
-import {DisciplinaryMeasuresDashboard,} from "./pages/Dashboards/DisciplinaryMeasures.jsx";
+import { DisciplinaryMeasuresDashboard } from "./pages/Dashboards/DisciplinaryMeasures.jsx";
 import { ExperienceDashboard } from "./pages/Dashboards/Experience.jsx";
 import { ExperienceControl } from "./pages/ExperienceControl";
 import { ExperienceSupervisor } from "./pages/ExperienceControl/supervisor";
 import { PeriodicExams } from "./pages/PeriodicExams";
+import { MarketPlace } from "./pages/Marketplace";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -119,10 +120,10 @@ function LegacyTMOpsRedirect() {
   return <Navigate to={`${target}${location.search}${location.hash}`} replace />;
 }
 
-function MaintenanceGate() {
-  const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
-  return isAdmin ? <Outlet /> : <Navigate to="/manutencao" replace />;
-}
+// function MaintenanceGate() {
+//   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
+//   return isAdmin ? <Outlet /> : <Navigate to="/manutencao" replace />;
+// }
 
 export function AppRoutes() {
   const token = function () {
@@ -289,6 +290,10 @@ export function AppRoutes() {
                 <Ponto48Dashboard />
               </PermissionGate>
             }
+          />
+          <Route 
+            path="/marketplace"
+            element={<MarketPlace />}
           />
           <Route
             path="/reports/admissoes"

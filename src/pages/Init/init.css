@@ -229,7 +229,7 @@
   align-items: center;
   gap: .45rem;
   padding: .65rem .85rem;
-  color: #fff;
+  color: var(--text-on-color) !important;
   background: var(--primary-color);
   border-radius: 10px;
   font-size: .78rem;
