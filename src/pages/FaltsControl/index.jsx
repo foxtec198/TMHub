@@ -174,7 +174,7 @@ function AbsenceControlPage() {
 
     let active = true;
     setLoadingSupervisors(true);
-    connect.get("/supervisores", { params: { centro_id: manualCenterId } })
+    connect.get("/estrutura/supervisores", { params: { centro_id: manualCenterId } })
       .then(({ data }) => {
         if (!active) return;
         setSupervisors((Array.isArray(data) ? data : [])
@@ -352,7 +352,7 @@ function AbsenceControlPage() {
       centro_custo_id: null,
       contrato: "",
       departamento: "",
-      supervisor_id: null,
+      supervisor_usuario_id: null,
       houve_cobertura: false,
       cobertura_colaborador_id: null,
       cobertura_nome: "",
@@ -366,7 +366,7 @@ function AbsenceControlPage() {
   };
 
   const saveManual = async () => {
-    if (!manualForm?.colaborador_id || !manualForm.supervisor_id || !manualForm.motivo || !manualForm.data_falta) {
+    if (!manualForm?.colaborador_id || !manualForm.supervisor_usuario_id || !manualForm.motivo || !manualForm.data_falta) {
       return showToast("warn", "Lançamento manual", "Selecione o colaborador, supervisor, motivo e data da falta.");
     }
     if (manualForm.tipo_ausencia === "parcial" && !manualForm.quantidade_horas) {
@@ -528,7 +528,7 @@ function AbsenceControlPage() {
               centro_custo_id: employee?.centro_id || null,
               contrato: employee?.centro_local || "",
               departamento: employee?.departamento || "",
-              supervisor_id: null,
+              supervisor_usuario_id: null,
               cobertura_colaborador_id: null,
               cobertura_nome: "",
               cobertura_matricula: "",
@@ -543,7 +543,7 @@ function AbsenceControlPage() {
         </div>}
 
         <label><span>Data e hora da falta</span><Calendar value={manualForm.data_falta} onChange={(event) => setManualForm({ ...manualForm, data_falta: event.value })} dateFormat="dd/mm/yy" showTime hourFormat="24" showIcon /></label>
-        <label><span>Supervisor responsável</span><Dropdown value={manualForm.supervisor_id} options={supervisors} onChange={(event) => setManualForm({ ...manualForm, supervisor_id: event.value })} placeholder="Selecione" filter loading={loadingSupervisors} disabled={!manualCenterId || loadingSupervisors} emptyMessage="Nenhum supervisor vinculado a este local" emptyFilterMessage="Nenhum supervisor encontrado" /></label>
+        <label><span>Supervisor responsável</span><Dropdown value={manualForm.supervisor_usuario_id} options={supervisors} onChange={(event) => setManualForm({ ...manualForm, supervisor_usuario_id: event.value })} placeholder="Selecione" filter loading={loadingSupervisors} disabled={!manualCenterId || loadingSupervisors} emptyMessage="Nenhum supervisor vinculado a este local" emptyFilterMessage="Nenhum supervisor encontrado" /></label>
         <label><span>Motivo</span><Dropdown value={manualForm.motivo} options={REASONS} onChange={(event) => setManualForm({ ...manualForm, motivo: event.value })} placeholder="Selecione o motivo" /></label>
         <label><span>Tipo da falta</span><Dropdown value={manualForm.tipo_ausencia} options={ABSENCE_TYPES} onChange={(event) => setManualForm({ ...manualForm, tipo_ausencia: event.value, quantidade_horas: null })} /></label>
         {manualForm.tipo_ausencia === "parcial" && <label className="is-wide"><span>Quantidade de horas da falta</span><InputNumber value={manualForm.quantidade_horas} onValueChange={(event) => setManualForm({ ...manualForm, quantidade_horas: event.value })} min={0.01} max={23.99} minFractionDigits={0} maxFractionDigits={2} suffix=" h" placeholder="Ex.: 2 horas" /></label>}

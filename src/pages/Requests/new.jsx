@@ -238,7 +238,7 @@ export function Request() {
                 && (!manualCoverageRequired || manualCoverage);
             if (requestReady) {
                 const data = {
-                    supervisor_id: user.id,
+                    supervisor_usuario_id: user.id,
                     ausente_id: absent,
                     reserva_id: checked ? 0 : replace?.id,
                     cobertura_colaborador_id: checked ? manualCoverage?.id : null,

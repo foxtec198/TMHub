@@ -31,6 +31,8 @@ const reservationTemplate = (reservation, selected = false) => {
 
 export function QuickRequestDialog({ visible, onHide, onCreated }) {
   const [options, setOptions] = useState({ supervisors: [], reservations: [], centers: [] });
+  const [canChooseSupervisor, setCanChooseSupervisor] = useState(false);
+  const [optionsLoaded, setOptionsLoaded] = useState(false);
   const [form, setForm] = useState(initialForm);
   const setLoading = useLoading();
   const { showToast } = useToast();
@@ -49,18 +51,30 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
     setForm((current) => ({ ...current, absent: value, center: centerId }));
   };
 
+  useEffect(() => {
+    if (!visible) setOptionsLoaded(false);
+  }, [visible]);
+
   // Carrega apenas os catálogos pequenos ao abrir o diálogo. Funcionários ficam fora
   // deste lote porque a quantidade de registros tornava a abertura da tela muito lenta.
   useEffect(() => {
-    if (!visible || options.supervisors.length) return;
-    Promise.all([connect.get("/supervisores"), connect.get("/reservas"), connect.get("/centro")])
-      .then(([supervisors, reservations, centers]) => setOptions({
-        supervisors: supervisors.data.map((item) => ({ label: item.nome, value: item.id })),
+    if (!visible || optionsLoaded) return;
+    Promise.all([connect.get("/repo/request/solicitante"), connect.get("/reservas"), connect.get("/centro")])
+      .then(([requester, reservations, centers]) => {
+        const requesterData = requester.data || {};
+        const supervisorOptions = (requesterData.supervisores || []).map((item) => ({ label: item.nome, value: item.id }));
+        const currentSupervisor = requesterData.supervisor?.id || null;
+        setCanChooseSupervisor(Boolean(requesterData.pode_selecionar_supervisor));
+        setOptions({
+        supervisors: supervisorOptions,
         reservations: reservations.data.map((item) => ({ ...item, label: item.nome, value: item.id })),
         centers: centers.data.map((item) => ({ label: centerLabel(item), value: item.id })),
-      }))
+        });
+        setForm((current) => ({ ...current, supervisor: currentSupervisor }));
+        setOptionsLoaded(true);
+      })
       .catch(() => showToast("error", "Lançamento rápido", "Não foi possível carregar as opções."));
-  }, [visible, options.supervisors.length, showToast]);
+  }, [visible, optionsLoaded, showToast]);
 
   // Mirror the full-page request payload so both entry points follow the same API contract.
   const save = async (event) => {
@@ -76,7 +90,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
     setLoading(true);
     try {
       await connect.post("/repo/request", {
-        supervisor_id: form.supervisor,
+        supervisor_usuario_id: form.supervisor,
         ausente_id: form.absent,
         reserva_id: form.noCoverage ? 0 : form.reservation,
         centro_id: form.center,
@@ -100,7 +114,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
 
   return <Dialog header="Lançamento rápido" visible={visible} modal className="quick-request-dialog" onHide={onHide}>
     <form className="quick-request-form" onSubmit={save}>
-      <Dropdown value={form.supervisor} options={options.supervisors} onChange={(e) => setForm({ ...form, supervisor: e.value })} placeholder="Supervisor" filter />
+      {canChooseSupervisor ? <Dropdown value={form.supervisor} options={options.supervisors} onChange={(e) => setForm({ ...form, supervisor: e.value })} placeholder="Supervisor" filter /> : <div className="quick-request-supervisor">Supervisor autenticado</div>}
       <CollaboratorDropdown
         value={form.absent}
         onChange={selectAbsent}

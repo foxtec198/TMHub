@@ -179,7 +179,7 @@ export function Structure() {
     const openSupervisorEdit = (event, contract) => {
         event.stopPropagation();
         setSupervisorDialog(contract);
-        setSelectedSupervisorId(contract.supervisor_id || null);
+        setSelectedSupervisorId(contract.supervisor_usuario_id || null);
     };
 
     const openCompanyEdit = (event, contract) => {
@@ -223,7 +223,7 @@ export function Structure() {
         try {
             const { data } = await connect.patch(
                 `/estrutura/contratos/${supervisorDialog.id}/supervisor`,
-                { supervisor_id: selectedSupervisorId },
+                { supervisor_usuario_id: selectedSupervisorId },
             );
             const updatedContract = data.contrato;
             setDepartments((current) => current.map((department) => ({
@@ -550,7 +550,7 @@ export function Structure() {
                             label="Confirmar alteração"
                             icon="pi pi-check"
                             onClick={updateSupervisor}
-                            disabled={!selectedSupervisorId || selectedSupervisorId === supervisorDialog?.supervisor_id}
+                            disabled={!selectedSupervisorId || selectedSupervisorId === supervisorDialog?.supervisor_usuario_id}
                         />
                     </div>
                 )}

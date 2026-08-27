@@ -40,8 +40,17 @@ export function Table({
     const dateInputId = useId();
     const resolvedSearchValue = searchValue ?? globalFilterDash;
     const isRemotePagination = Boolean(remotePagination);
+    const resolvedRows = Math.max(1, Number(rows) || 5);
     const remoteTotalRecords = Math.max(0, Number(remotePagination?.totalRecords) || 0);
     const remoteFirst = Math.max(0, Number(remotePagination?.first) || 0);
+    const paginationProps = isRemotePagination
+        ? {
+            lazy: true,
+            totalRecords: remoteTotalRecords,
+            first: remoteFirst,
+            onPage: remotePagination?.onPageChange,
+        }
+        : {};
 
     const updateSearch = (value) => {
         setGlobalFilterDash(value);
@@ -114,12 +123,9 @@ export function Table({
             rowExpansionTemplate={rowExpansionTemplate}
             onRowClick={onRowClick}
             paginator={mode === "paginate"}
-            rows={rows}
+            rows={resolvedRows}
             rowsPerPageOptions={rowsPerPageOptions}
-            lazy={isRemotePagination}
-            totalRecords={isRemotePagination ? remoteTotalRecords : undefined}
-            first={isRemotePagination ? remoteFirst : undefined}
-            onPage={isRemotePagination ? remotePagination?.onPageChange : undefined}
+            {...paginationProps}
 
             scrollable
             scrollHeight={mode === "scroll" ? "400px" : undefined}
