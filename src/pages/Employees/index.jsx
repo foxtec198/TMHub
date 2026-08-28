@@ -29,6 +29,44 @@ function dateTime(value) {
   return Number.isNaN(parsed.getTime()) ? "—" : parsed.toLocaleString("pt-BR");
 }
 
+function groupImportHistory(rows) {
+  const groups = new Map();
+  rows.forEach((item) => {
+    const identifier = String(item.arquivo || "");
+    const batch = identifier.match(/^(.*?)(?:\/execucao-([^/]+))?\/lote-(\d+)-de-(\d+)$/i);
+    const key = batch
+      ? `script:${batch[1]}:${batch[2] || "legacy"}`
+      : `job:${item.job_id}`;
+    const current = groups.get(key);
+    if (!current) {
+      groups.set(key, {
+        ...item,
+        lotes: batch ? 1 : null,
+        lotes_esperados: batch ? Number(batch[4]) : null,
+      });
+      return;
+    }
+    const statuses = [current.status, item.status];
+    groups.set(key, {
+      ...current,
+      status: statuses.includes("error") ? "error" : statuses.every((status) => status === "completed") ? "completed" : "processing",
+      iniciado_em: new Date(item.iniciado_em) < new Date(current.iniciado_em) ? item.iniciado_em : current.iniciado_em,
+      finalizado_em: new Date(item.finalizado_em || 0) > new Date(current.finalizado_em || 0) ? item.finalizado_em : current.finalizado_em,
+      total: Number(current.total || 0) + Number(item.total || 0),
+      processados: Number(current.processados || 0) + Number(item.processados || 0),
+      colaboradores_criados: Number(current.colaboradores_criados || 0) + Number(item.colaboradores_criados || 0),
+      colaboradores_atualizados: Number(current.colaboradores_atualizados || 0) + Number(item.colaboradores_atualizados || 0),
+      colaboradores_ignorados: Number(current.colaboradores_ignorados || 0) + Number(item.colaboradores_ignorados || 0),
+      cargos_criados: Number(current.cargos_criados || 0) + Number(item.cargos_criados || 0),
+      registros_invalidos: Number(current.registros_invalidos || 0) + Number(item.registros_invalidos || 0),
+      duplicidades: Number(current.duplicidades || 0) + Number(item.duplicidades || 0),
+      erro: current.erro || item.erro,
+      lotes: Number(current.lotes || 0) + 1,
+    });
+  });
+  return [...groups.values()].sort((left, right) => new Date(right.iniciado_em) - new Date(left.iniciado_em));
+}
+
 function ImportEmployees({ onCompleted }) {
   const { showToast } = useToast();
   const fileRef = useRef(null);
@@ -41,8 +79,8 @@ function ImportEmployees({ onCompleted }) {
   const [history, setHistory] = useState([]);
 
   const loadHistory = useCallback(() => {
-    connect.get("/importacao-colaboradores/historico", { params: { limit: 10 } })
-      .then(({ data }) => setHistory(Array.isArray(data) ? data : []))
+    connect.get("/importacao-colaboradores/historico", { params: { limit: 100 } })
+      .then(({ data }) => setHistory(groupImportHistory(Array.isArray(data) ? data : []).slice(0, 10)))
       .catch(() => setHistory([]));
   }, []);
 
@@ -114,7 +152,7 @@ function ImportEmployees({ onCompleted }) {
   </article><section className="employee-import-history">
     <div className="employee-import-history__heading"><div><strong>Histórico de importações</strong><small>Últimas cargas recebidas pelo TMHub</small></div><Button icon={<AppIcon name="refresh" />} text rounded aria-label="Atualizar histórico" onClick={loadHistory} /></div>
     {history.length ? <div className="employee-import-history__list">{history.map((item) => <article key={item.job_id}>
-      <div><strong>{item.empresa_nome}</strong><small>{item.origem === "script" ? "Script" : `Sistema · ${item.usuario_nome || "Usuário não identificado"}`} · {dateTime(item.iniciado_em)}</small></div>
+      <div><strong>{item.empresa_nome}</strong><small>{item.origem === "script" ? `Script${item.lotes ? ` · ${item.lotes} lote(s)` : ""}` : `Sistema · ${item.usuario_nome || "Usuário não identificado"}`} · {dateTime(item.iniciado_em)}</small></div>
       <div><Tag value={item.status === "completed" ? "CONCLUÍDA" : item.status === "error" ? "ERRO" : "EM ANDAMENTO"} severity={item.status === "completed" ? "success" : item.status === "error" ? "danger" : "info"} /><small>{item.total || 0} total · {item.colaboradores_criados || 0} criados · {item.colaboradores_atualizados || 0} atualizados</small></div>
     </article>)}</div> : <p className="employee-import-history__empty">Nenhuma importação registrada ainda.</p>}
   </section></div>;
