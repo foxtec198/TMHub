@@ -24,23 +24,23 @@ connect.interceptors.request.use((config) => {
   // Public forms must not inherit the authenticated layout's branch context.
   if (token && !config.skipStandardFilters) {
     const selectedFilialIds = localStorage.getItem("selected_filial_ids");
-    if (selectedFilialIds !== null) {
+    if (selectedFilialIds && selectedFilialIds !== "[]") {
       config.headers["X-Filial-Ids"] = selectedFilialIds;
     }
     const selectedCompanyIds = localStorage.getItem("selected_company_ids");
-    if (selectedCompanyIds !== null) {
+    if (selectedCompanyIds && selectedCompanyIds !== "[]") {
       config.headers["X-Empresa-Ids"] = selectedCompanyIds;
     }
     const selectedDepartmentIds = localStorage.getItem("selected_department_ids");
-    if (selectedDepartmentIds !== null) {
+    if (selectedDepartmentIds && selectedDepartmentIds !== "[]") {
       config.headers["X-Departamento-Ids"] = selectedDepartmentIds;
     }
     const selectedCostCenterIds = localStorage.getItem("selected_cost_center_ids");
-    if (selectedCostCenterIds !== null) {
+    if (selectedCostCenterIds && selectedCostCenterIds !== "[]") {
       config.headers["X-Centro-Custo-Ids"] = selectedCostCenterIds;
     }
     const selectedDate = localStorage.getItem("standard_filter_date");
-    if (selectedDate !== null) {
+    if (selectedDate && selectedDate !== "[]") {
       config.headers["X-Data-Range"] = selectedDate;
       if (String(config.method || "get").toLowerCase() === "get") {
         try {

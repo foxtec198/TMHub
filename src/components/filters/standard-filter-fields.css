@@ -28,6 +28,14 @@
 .standard-filter-fields .p-calendar,
 .standard-filter-fields .p-multiselect {
   width: 100%;
+  min-width: 0;
+}
+
+.standard-filter-fields .p-multiselect-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 640px) {
