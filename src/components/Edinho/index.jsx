@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { socketio } from "../../utils/socketio";
 import connect from "../../utils/request";
+import { useTheme } from "../../theme/useTheme";
 import "./edinhos.css";
 
 function formatEdinhos(value) {
@@ -23,6 +24,7 @@ export function EdinhoCard() {
   const [total, setTotal] = useState(0);
   const [modelReady, setModelReady] = useState(false);
   const [modelFailed, setModelFailed] = useState(false);
+  const { particlesEnabled } = useTheme();
 
   useEffect(() => {
     let mounted = true;
@@ -61,13 +63,25 @@ export function EdinhoCard() {
     <span className="edinho-balance__coin" aria-hidden="true">
       {modelFailed || !modelReady ? (
         <img className="edinho-balance__fallback" src="/edinho.svg" alt="" />
-      ) : (
+      ) : particlesEnabled ? (
         <model-viewer
           className="edinho-balance__model"
           src="/edinho.glb"
           alt=""
           auto-rotate
           rotation-per-second="18deg"
+          interaction-prompt="none"
+          disable-zoom
+          disable-pan
+          shadow-intensity="0.3"
+          exposure="1.1"
+          onError={() => setModelFailed(true)}
+        />
+      ) : (
+        <model-viewer
+          className="edinho-balance__model"
+          src="/edinho.glb"
+          alt=""
           interaction-prompt="none"
           disable-zoom
           disable-pan

@@ -66,8 +66,11 @@ function formFromEvaluation(evaluation) {
 
 export function ExperienceSupervisor() {
   // A lista é limitada pela sessão e pela filial global selecionada.
+  const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
+  const currentUserId = Number(localStorage.getItem("current_id")) || null;
+  const displayName = localStorage.getItem("display_name") || "Supervisor";
   const [supervisors, setSupervisors] = useState([]);
-  const [supervisor, setSupervisor] = useState(null);
+  const [supervisor, setSupervisor] = useState(isAdmin ? null : currentUserId);
   const [tasks, setTasks] = useState([]);
   const [evaluation, setEvaluation] = useState(null);
   const [form, setForm] = useState(formFromEvaluation(null));
@@ -79,6 +82,7 @@ export function ExperienceSupervisor() {
   useEffect(() => {
     // A lista é carregada uma única vez dentro do escopo autenticado.
     async function loadSupervisors() {
+      if (!isAdmin) return;
       try {
         const { data } = await connect.get("/avaliacoes-experiencia/supervisores");
         setSupervisors((Array.isArray(data) ? data : []).map((item) => ({ label: item.nome, value: item.id })));
@@ -87,18 +91,18 @@ export function ExperienceSupervisor() {
       }
     }
     loadSupervisors();
-  }, [showToast]);
+  }, [isAdmin, showToast]);
 
   const loadTasks = async () => {
     // A API limita as pendências ao supervisor e à filial da sessão.
-    if (!supervisor) {
+    if (isAdmin && !supervisor) {
       showToast("warn", "Identificação", "Selecione seu nome para continuar.");
       return false;
     }
     setLoadingTasks(true);
     try {
       const { data } = await connect.get("/avaliacoes-experiencia/tarefas-supervisor", {
-        params: { supervisor_id: supervisor },
+        ...(isAdmin ? { params: { supervisor_id: supervisor } } : {}),
       });
       setTasks(Array.isArray(data) ? data : []);
       return true;
@@ -245,11 +249,11 @@ export function ExperienceSupervisor() {
           <StepperPanel header="Identificação">
             <div className="experience-public-identification">
               <span className="experience-public-step">Passo 1 de 2</span>
-              <h2>Vamos começar</h2>
-              <p>Selecione seu nome para ver as avaliações pendentes da sua equipe.</p>
-              <Dropdown value={supervisor} options={supervisors} onChange={(event) => changeSupervisor(event.value)} optionLabel="label" optionValue="value" placeholder="Selecione seu nome" filter className="w-full" />
+              <h2>{isAdmin ? "Vamos começar" : `Olá, ${displayName}`}</h2>
+              <p>{isAdmin ? "Selecione um supervisor para ver as avaliações pendentes da equipe." : "Suas avaliações são filtradas automaticamente pelo usuário autenticado."}</p>
+              {isAdmin && <Dropdown value={supervisor} options={supervisors} onChange={(event) => changeSupervisor(event.value)} optionLabel="label" optionValue="value" placeholder="Selecione o supervisor" filter className="w-full" />}
               <Button
-                label="Ver pendências"
+                label={isAdmin ? "Ver pendências" : "Ver minhas avaliações"}
                 icon={<AppIcon name="arrow-right" />}
                 iconPos="right"
                 loading={loadingTasks}
@@ -262,8 +266,8 @@ export function ExperienceSupervisor() {
           <StepperPanel header="Pendências">
             <div className="experience-public-tasks">
               <div className="experience-public-tasks-header">
-                <div><strong>{supervisors.find((item) => item.value === supervisor)?.label || "Supervisor"}</strong><span>{tasks.length} avaliação(ões) pendente(s)</span></div>
-                <Button label="Trocar nome" icon={<AppIcon name="user-edit" />} text onClick={() => stepperRef.current?.prevCallback?.()} />
+                <div><strong>{isAdmin ? (supervisors.find((item) => item.value === supervisor)?.label || "Supervisor") : displayName}</strong><span>{tasks.length} avaliação(ões) pendente(s)</span></div>
+                {isAdmin && <Button label="Trocar supervisor" icon={<AppIcon name="user-edit" />} text onClick={() => stepperRef.current?.prevCallback?.()} />}
               </div>
               <Table data={tasks} columns={taskColumns} loading={loadingTasks} rows={8} rowsPerPageOptions={[8, 16, 32]} tableClassName="experience-public-tasks-table" tableStyle={{ minWidth: "50rem" }} />
             </div>
