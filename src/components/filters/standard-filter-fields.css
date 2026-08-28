@@ -7,6 +7,14 @@
   border-bottom: 1px solid var(--surface-border);
 }
 
+.standard-filter-fields__toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
 .standard-filter-fields label {
   display: flex;
   min-width: 0;
