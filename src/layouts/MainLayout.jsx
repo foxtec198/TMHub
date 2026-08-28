@@ -584,6 +584,9 @@ export function MainLayout() {
     window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
       detail: { filialIds: ids },
     }));
+    window.dispatchEvent(new CustomEvent("tmhub:standard-filters-changed", {
+      detail: { name: "branches", value: ids },
+    }));
   };
 
   const handleCompaniesChange = (event) => {
@@ -592,6 +595,9 @@ export function MainLayout() {
     localStorage.setItem("selected_company_ids", JSON.stringify(ids));
     window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
       detail: { filialIds: selectedFilialIds, companyIds: ids },
+    }));
+    window.dispatchEvent(new CustomEvent("tmhub:standard-filters-changed", {
+      detail: { name: "companies", value: ids },
     }));
   };
 
