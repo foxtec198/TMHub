@@ -12,7 +12,6 @@ import { Tag } from 'primereact/tag';
 
 import { PageHeader } from '../../components/PageHeader';
 import { Placeholder } from '../../components/Placeholder';
-import { useLoading } from '../../contexts/LoadingContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useChartTheme } from '../../theme/useTheme';
 import connect from '../../utils/request';
@@ -247,11 +246,11 @@ export function DashboardLogistic() {
                             <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
                         </div>
                         <div className="dashboard-filter-grid">
-                            <label className="is-wide"><span>Período</span><Calendar value={filters.period} onChange={(event) => setFilter('period', event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" showIcon /></label>
+                            <label className="is-wide"><span>Data</span><Calendar value={filters.period} onChange={(event) => setFilter('period', event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" showIcon /></label>
+                            <label className="is-wide"><span>DPTO / Centro de custo</span><MultiSelect value={filters.center} options={options.centros_custo || []} onChange={(event) => setFilter('center', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
                             <label><span>Produto</span><MultiSelect value={filters.product} options={options.produtos || []} onChange={(event) => setFilter('product', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
                             <label><span>Tipo</span><MultiSelect value={filters.type} options={[{ label: 'Entrada', value: 'entrada' }, { label: 'Saída', value: 'saida' }]} onChange={(event) => setFilter('type', event.value)} showClear display="chip" placeholder="Todos" /></label>
                             <label className="is-wide"><span>Colaborador</span><MultiSelect value={filters.employee} options={options.colaboradores || []} onChange={(event) => setFilter('employee', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
-                            <label className="is-wide"><span>Local, contrato ou centro de custo</span><MultiSelect value={filters.center} options={options.centros_custo || []} onChange={(event) => setFilter('center', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
                         </div>
                     </OverlayPanel>
                 </>}

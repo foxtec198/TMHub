@@ -34,7 +34,6 @@ export function GlosaDashboard() {
   const chartTheme = useChartTheme();
   const [data, setData] = useState(null);
   const [filters, setFilters] = useState(initialFilters);
-  const [refresh, setRefresh] = useState(0);
   const filterPanel = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
@@ -46,7 +45,7 @@ export function GlosaDashboard() {
       .then(({ data: response }) => setData(response))
       .catch((error) => showToast("error", "Dashboard de Glosas", error.response?.data || "Não foi possível carregar as glosas."))
       .finally(() => setLoading(false));
-  }, [filters, refresh, setLoading, showToast]);
+  }, [filters, setLoading, showToast]);
 
   const summary = data?.resumo || {};
   const options = data?.filtros || {};
@@ -71,10 +70,10 @@ export function GlosaDashboard() {
         <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
       <div className="dashboard-filter-grid">
-        <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
+        <label className="is-wide"><span>Data</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
+        <label><span>DPTO</span><MultiSelect value={filters.departamento} options={(options.departamentos || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        <label className="is-wide"><span>Centro de custo / Contrato</span><MultiSelect value={filters.contrato} options={options.contratos || []} onChange={(event) => setFilter("contrato", event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
         <label><span>Situação</span><MultiSelect value={filters.cobertura} options={[{ label: "Em análise", value: "em_analise" }, { label: "Coberta", value: "coberta" }, { label: "Parcial", value: "parcial" }, { label: "Descoberta", value: "descoberta" }]} onChange={(event) => setFilter("cobertura", event.value)} placeholder="Todas as situações" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-        <label><span>Departamento</span><MultiSelect value={filters.departamento} options={(options.departamentos || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-        <label className="is-wide"><span>Contrato</span><MultiSelect value={filters.contrato} options={options.contratos || []} onChange={(event) => setFilter("contrato", event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
         <label className="is-wide"><span>Colaborador</span><MultiSelect value={filters.colaborador} options={options.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
       </div>
     </OverlayPanel>

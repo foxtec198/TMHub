@@ -246,3 +246,12 @@
         height: 16rem;
     }
 }
+
+.ql-company-label {
+    display: block;
+    margin-top: .2rem;
+    color: var(--text-color-secondary);
+    font-size: .7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}

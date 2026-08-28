@@ -28,6 +28,8 @@ const STATUS_META = {
 };
 
 const FILTER_FIELDS = {
+  empresa: (item) => item.empresa || "Sem empresa",
+  filial: (item) => item.filial || "Sem filial",
   contrato: (item) => item.local,
   departamento: (item) => item.dpto,
   supervisor: (item) => item.supervisor || "Sem supervisor",
@@ -42,7 +44,7 @@ function defaultPeriod() {
 }
 
 function initialFilters() {
-  return { contrato: [], departamento: [], supervisor: [], motivo: [], status: [], colaborador: [] };
+  return { empresa: [], filial: [], contrato: [], departamento: [], supervisor: [], motivo: [], status: [], colaborador: [] };
 }
 
 function dateParam(value) {
@@ -178,6 +180,8 @@ export function RequestReport() {
   );
 
   const filterOptions = useMemo(() => ({
+    empresa: makeOptions(records, filters, "empresa"),
+    filial: makeOptions(records, filters, "filial"),
     contrato: makeOptions(records, filters, "contrato"),
     departamento: makeOptions(records, filters, "departamento"),
     supervisor: makeOptions(records, filters, "supervisor"),
@@ -292,7 +296,7 @@ export function RequestReport() {
       },
       sortable: true,
     },
-    { field: "local", header: "Contrato", mobileHeader: "Contrato", body: (row) => <div className="request-dashboard-contract"><strong>{row.local || "—"}</strong><small>DPTO. {row.dpto || "—"}</small></div>, sortable: true },
+    { field: "local", header: "Contrato", mobileHeader: "Contrato", body: (row) => <div className="request-dashboard-contract"><strong>{row.local || "—"}</strong><small>{row.empresa || "Sem empresa"} · {row.filial || "Sem filial"} · DPTO. {row.dpto || "—"}</small></div>, sortable: true },
     { field: "supervisor", header: "Supervisor", mobileHeader: "Supervisor", body: (row) => firstAndLastName(row.supervisor), sortable: true },
     { header: "Motivo", mobileHeader: "Motivo", field: "motivo", sortable: true },
     { header: "Status", mobileHeader: "Status", body: (row) => { const meta = statusMeta(row.status); return <Tag value={meta.label} severity={meta.severity} rounded />; }, sortable: true },
@@ -313,8 +317,8 @@ export function RequestReport() {
       <OverlayPanel ref={filterPanel} className="request-dashboard-filter-panel">
         <div className="request-dashboard-filter-panel__heading"><div><strong>Filtros do dashboard</strong><span>As opções se ajustam ao recorte atual.</span></div><Button icon={<AppIcon name="filter-off" />} label="Limpar" text onClick={clearFilters} /></div>
         <div className="request-dashboard-filter-grid">
-          <label className="is-wide"><span>Período</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput hideOnRangeSelection showIcon showButtonBar placeholder="Selecione o período" /></label>
-          {[["contrato", "Contrato"], ["departamento", "Departamento"], ["supervisor", "Supervisor"], ["motivo", "Motivo"], ["status", "Status"], ["colaborador", "Colaborador"]].map(([field, label]) => <label key={field}><span>{label}</span><MultiSelect value={filters[field]} options={filterOptions[field]} optionLabel="label" optionValue="value" onChange={(event) => setFilter(field, event.value)} placeholder={`Todos os ${label.toLowerCase()}s`} display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>)}
+          <label className="is-wide"><span>Data</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput hideOnRangeSelection showIcon showButtonBar placeholder="Selecione o período" /></label>
+          {[["departamento", "DPTO / Centro de custo"], ["empresa", "Empresa"], ["filial", "Filial"], ["contrato", "Contrato"], ["supervisor", "Supervisor"], ["motivo", "Motivo"], ["status", "Status"], ["colaborador", "Colaborador"]].map(([field, label]) => <label key={field}><span>{label}</span><MultiSelect value={filters[field]} options={filterOptions[field]} optionLabel="label" optionValue="value" onChange={(event) => setFilter(field, event.value)} placeholder={`Todos: ${label.toLowerCase()}`} display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>)}
         </div>
       </OverlayPanel>
 

@@ -14,6 +14,7 @@ import { SpeedDial } from "primereact/speeddial";
 import { Tooltip } from "primereact/tooltip";
 import { Dialog } from "primereact/dialog";
 import { Calendar } from "primereact/calendar";
+import { Dropdown } from "primereact/dropdown";
 import { QuickRequestDialog } from "./QuickRequestDialog";
 import { RequestImportDialog } from "./RequestImportDialog";
 import { PageHeader } from "../../components/PageHeader";
@@ -37,6 +38,8 @@ const REQUEST_STATUS = {
     pending: { label: "PENDENTE", color: "var(--yellow-600)" },
     updated: { label: "ALTERADA", color: "var(--blue-600)" },
 };
+
+const ABSENCE_REASONS = ["ATESTADO", "DECLARAÇÃO", "INJUSTIFICADA", "OUTROS"];
 
 // Centralized thresholds keep cards and table visibility on the same operational rule.
 const REQUEST_TIME_LIMITS_HOURS = {
@@ -98,12 +101,14 @@ export function Requests() {
     const [usageDate, setUsageDate] = useState(new Date())
     const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [], indisponiveis: [] })
     const [availabilityDialog, setAvailabilityDialog] = useState(null)
+    const [absenceReason, setAbsenceReason] = useState(null)
 
     const { showToast } = useToast();
     const setLoading = useLoading();
     const navigate = useNavigate();
     const canCreate = can("reposicoes", "create");
     const canEdit = can("reposicoes", "edit");
+    const canEditAbsences = can("controle_faltas", "edit");
 
     const requestSummary = useMemo(() => requests.reduce((summary, request) => {
         const situation = getRequestSituation(request.data, currentTime);
@@ -178,15 +183,21 @@ export function Requests() {
 
     async function updateReservationAvailability(motivo) {
         if (!availabilityDialog?.reserva_floater_id) return;
+        if (motivo === "FALTA" && !absenceReason) {
+            showToast("warn", "Falta da reserva", "Selecione o motivo da falta.");
+            return;
+        }
         try {
             setLoading(true);
             await connect.patch("/reservas", {
                 id: availabilityDialog.reserva_floater_id,
                 disponivel: false,
                 motivo,
+                motivo_falta: motivo === "FALTA" ? absenceReason : undefined,
             });
             showToast("success", "Reserva indisponível", `${availabilityDialog.reserva} foi marcada como indisponível por ${motivo.toLowerCase()}.`);
             setAvailabilityDialog(null);
+            setAbsenceReason(null);
             setRefresh((previous) => previous + 1);
         } catch (error) {
             showToast("error", "Reserva", error.response?.data || "Não foi possível atualizar a disponibilidade.");
@@ -316,7 +327,7 @@ export function Requests() {
                             disabled={!canEdit}
                             aria-label={`Marcar ${row.reserva} como indisponível`}
                             tooltip="Marcar como indisponível"
-                            onClick={() => setAvailabilityDialog(row)}
+                            onClick={() => { setAvailabilityDialog(row); setAbsenceReason(null); }}
                         /> : null}
                     </div>
                 )
@@ -546,11 +557,16 @@ export function Requests() {
                 visible={Boolean(availabilityDialog)}
                 modal
                 className="reserve-availability-dialog"
-                onHide={() => setAvailabilityDialog(null)}
+                onHide={() => { setAvailabilityDialog(null); setAbsenceReason(null); }}
             >
                 <p>Por que <strong>{availabilityDialog?.reserva}</strong> não pode atender à reposição?</p>
+                <label className="reserve-availability-reason">
+                    <span>Motivo da falta</span>
+                    <Dropdown value={absenceReason} options={ABSENCE_REASONS} onChange={(event) => setAbsenceReason(event.value)} placeholder="Selecione o motivo" disabled={!canEditAbsences} />
+                    {!canEditAbsences ? <small>É necessária a permissão “alterar” no Controle de Faltas.</small> : null}
+                </label>
                 <div className="reserve-availability-options">
-                    <Button label="Falta" icon={<AppIcon name="user-minus" />} severity="danger" onClick={() => updateReservationAvailability("FALTA")} />
+                    <Button label="Falta" icon={<AppIcon name="user-minus" />} severity="danger" disabled={!canEditAbsences || !absenceReason} onClick={() => updateReservationAvailability("FALTA")} />
                     <Button label="Apoio" icon={<AppIcon name="users" />} severity="warning" onClick={() => updateReservationAvailability("APOIO")} />
                 </div>
             </Dialog>

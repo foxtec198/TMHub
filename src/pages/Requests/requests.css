@@ -190,6 +190,22 @@
   line-height: 1.5;
 }
 
+.reserve-availability-reason {
+  display: grid;
+  gap: .45rem;
+  margin-top: 1rem;
+}
+
+.reserve-availability-reason > span {
+  color: var(--text-color);
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.reserve-availability-reason small {
+  color: var(--orange-500);
+}
+
 .reserve-availability-options {
   display: flex;
   justify-content: flex-end;

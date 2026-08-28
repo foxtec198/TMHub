@@ -63,6 +63,8 @@ const REALTIME_CHANNELS_BY_ROUTE = {
 export function MainLayout() {
   const [fls, setFls] = useState([]);
   const [selectedFilialIds, setSelectedFilialIds] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [selectedCompanyIds, setSelectedCompanyIds] = useState([]);
   const [canSelectFiliais, setCanSelectFiliais] = useState(false);
   const [displayName, setDisplayName] = useState(() => localStorage.getItem("display_name") || "");
   const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem("profile_photo"));
@@ -486,10 +488,19 @@ export function MainLayout() {
           setFls([]);
           setSelectedFilialIds([]);
           localStorage.removeItem("selected_filial_ids");
+          const { data: companyRows } = await connect.get("/centro/empresas");
+          const activeCompanies = (Array.isArray(companyRows) ? companyRows : []).filter((company) => company.ativa !== false);
+          const ids = activeCompanies.map((company) => Number(company.id));
+          setCompanies(activeCompanies);
+          setSelectedCompanyIds(ids);
+          localStorage.setItem("selected_company_ids", JSON.stringify(ids));
           return;
         }
 
-        const { data: branches } = await connect.get("/filiais");
+        const [{ data: branches }, { data: companyRows }] = await Promise.all([
+          connect.get("/filiais"),
+          connect.get("/centro/empresas"),
+        ]);
         if (!active) return;
 
         const activeBranches = (Array.isArray(branches) ? branches : [])
@@ -515,12 +526,31 @@ export function MainLayout() {
         setFls(activeBranches);
         setSelectedFilialIds(initialSelection);
         localStorage.setItem("selected_filial_ids", JSON.stringify(initialSelection));
+
+        const activeCompanies = (Array.isArray(companyRows) ? companyRows : [])
+          .filter((company) => company.ativa !== false)
+          .sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+        const availableCompanyIds = new Set(activeCompanies.map((company) => Number(company.id)));
+        let storedCompanyIds = [];
+        try {
+          const parsed = JSON.parse(localStorage.getItem("selected_company_ids") || "[]");
+          storedCompanyIds = Array.isArray(parsed) ? parsed.map(Number).filter((id) => availableCompanyIds.has(id)) : [];
+        } catch {
+          storedCompanyIds = [];
+        }
+        const initialCompanies = storedCompanyIds.length ? storedCompanyIds : [...availableCompanyIds];
+        setCompanies(activeCompanies);
+        setSelectedCompanyIds(initialCompanies);
+        localStorage.setItem("selected_company_ids", JSON.stringify(initialCompanies));
       } catch {
         if (!active) return;
         setFls([]);
         setSelectedFilialIds([]);
         setCanSelectFiliais(false);
         localStorage.removeItem("selected_filial_ids");
+        setCompanies([]);
+        setSelectedCompanyIds([]);
+        localStorage.removeItem("selected_company_ids");
         // Falha pontual de rede não deve invalidar nem redirecionar a sessão.
         setProfileStatus("ready");
       }
@@ -546,6 +576,15 @@ export function MainLayout() {
     localStorage.setItem("selected_filial_ids", JSON.stringify(ids));
     window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
       detail: { filialIds: ids },
+    }));
+  };
+
+  const handleCompaniesChange = (event) => {
+    const ids = (event.value || []).map(Number);
+    setSelectedCompanyIds(ids);
+    localStorage.setItem("selected_company_ids", JSON.stringify(ids));
+    window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
+      detail: { filialIds: selectedFilialIds, companyIds: ids },
     }));
   };
 
@@ -643,9 +682,15 @@ export function MainLayout() {
 
         {/* MENU BAR */}
         <aside id="main-sidebar" className="layout-sidebar bg-primary shadow-4" aria-hidden={!isMenuVisible}>
+          {companies.length > 0 ? (
+            <FloatLabel className="flex mx-3 mt-5">
+              <MultiSelect inputId="layout-empresas" className="w-full" value={selectedCompanyIds} options={companies} optionLabel="nome" optionValue="id" onChange={handleCompaniesChange} placeholder="Selecione as empresas" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} empresas selecionadas" />
+              <label htmlFor="layout-empresas">Empresas</label>
+            </FloatLabel>
+          ) : null}
           {(() => {
             return canSelectFiliais && fls.length > 0 ? (
-              <FloatLabel className="flex mx-3 mt-5">
+              <FloatLabel className="flex mx-3 mt-4">
                 <MultiSelect
                   inputId="layout-filiais"
                   className="w-full"
