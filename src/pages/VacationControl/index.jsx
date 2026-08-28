@@ -174,6 +174,9 @@ function VacationControlContent() {
   }, []);
 
   const activeFilterCount = Object.values(filters).filter((values) => values.length).length + Number(Boolean(search));
+  const availableStatusOptions = useMemo(() => (
+    (filterOptions.situacoes || []).map((value) => STATUS_OPTIONS.find((option) => option.value === value)).filter(Boolean)
+  ), [filterOptions.situacoes]);
   const localDaysGozados = useMemo(
     () => (selectedPeriod?.gozos || []).reduce((total, leave) => total + Number(leave.dias_gozados || 0), 0),
     [selectedPeriod],
@@ -391,7 +394,7 @@ function VacationControlContent() {
       <div className="vacation-filter-grid">
         <label className="is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left vacation-filter-search"><AppIcon name="search"  /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula, contrato ou supervisor" /></span></label>
         <label><span>Supervisor</span><MultiSelect value={filters.supervisor_id} options={filterOptions.supervisores || []} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, supervisor_id: event.value || [] }))} placeholder="Todos os supervisores" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-        <label><span>Situação</span><MultiSelect value={filters.situacao} options={STATUS_OPTIONS} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, situacao: event.value || [] }))} placeholder="Todas as situações" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+        <label><span>Situação</span><MultiSelect value={filters.situacao} options={availableStatusOptions} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, situacao: event.value || [] }))} placeholder="Todas as situações" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
       </div>
     </OverlayPanel>
 

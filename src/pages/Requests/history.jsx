@@ -164,7 +164,9 @@ function HistoryPage() {
 
     const { showToast } = useToast();
     const {
+        filters,
         options: filterOptions,
+        setFilter,
         clearFilters: clearCombinedFilters,
         filteredData: combinedFilteredHistory,
         activeFilterCount,
@@ -526,7 +528,11 @@ function HistoryPage() {
                         onClick={clearFilters}
                     />
                 </div>
-                <StandardFilterFields date={{ value: dateFilter, onChange: setDateFilter }} />
+                <StandardFilterFields
+                    date={{ value: dateFilter, onChange: setDateFilter }}
+                    department={{ value: filters.departamento, options: filterOptions.departamento || [], onChange: (value) => setFilter("departamento", value) }}
+                    center={{ value: filters.local, options: filterOptions.local || [], onChange: (value) => setFilter("local", value) }}
+                />
                 <div className="dashboard-filter-grid">
                     <CombinedMultiSelect name="status" label="Status" options={filterOptions.status} placeholder="Todos os status" panelClassName="dashboard-filter-dropdown" />
                     <CombinedMultiSelect name="motivo" label="Motivo" options={filterOptions.motivo} placeholder="Todos os motivos" panelClassName="dashboard-filter-dropdown" />

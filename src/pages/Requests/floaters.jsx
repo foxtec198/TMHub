@@ -46,6 +46,7 @@ export function Floaters() {
 
     // Handles de busca para colaboradores
     const [colaboradores, setColaboradores] = useState([])
+    const [standardFilters, setStandardFilters] = useState({ departamentos: [], centros: [] });
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 760px)").matches);
@@ -59,15 +60,16 @@ export function Floaters() {
 
     const reservasFiltradas = useMemo(() => {
         const busca = searchReservas.trim().toLowerCase();
-        if (!busca) return reservas;
         return reservas.filter(c => {
+            if (standardFilters.departamentos.length && !standardFilters.departamentos.includes(c.departamento)) return false;
+            if (standardFilters.centros.length && !standardFilters.centros.includes(c.centro_custo_id)) return false;
             return (
                 c.nome.toLowerCase().includes(busca) ||
                 c.cargo.toLowerCase().includes(busca) ||
                 c.matricula.toString().includes(busca)
             );
         });
-    }, [reservas, searchReservas]);
+    }, [reservas, searchReservas, standardFilters]);
 
     // Debounce evita consultar colaboradores a cada tecla digitada.
     useEffect(() => {
@@ -83,14 +85,21 @@ export function Floaters() {
         async function load() {
             try {
                 setLoading(true);
-                const cobs = await connect.get(`/funcionarios?search=${debouncedSearch}&situacao=1&limit=50`);
+                const params = {
+                    search: debouncedSearch,
+                    situacao: 1,
+                    limit: 50,
+                    departamentos: standardFilters.departamentos.join(",") || undefined,
+                    centro_ids: standardFilters.centros.join(",") || undefined,
+                };
+                const cobs = await connect.get("/funcionarios", { params });
                 setColaboradores(cobs.data);
 
             }
             catch (err) { showToast("error", "Erro na requisição", err.response.data) }
             finally { setLoading(false) }
         }; load();
-    }, [debouncedSearch, setLoading, showToast]);
+    }, [debouncedSearch, refresh, standardFilters, setLoading, showToast]);
 
     // A tela precisa apenas das reservas; não carrega toda a base de colaboradores
     // somente para alimentar cards de resumo.
@@ -105,6 +114,26 @@ export function Floaters() {
         }
         loadReservations();
     }, [refresh, showToast]);
+
+    const reservationFilterOptions = useMemo(() => {
+        const departments = [...new Set(reservas
+            .map((item) => item.departamento)
+            .filter((value) => value !== null && value !== undefined && value !== ""))]
+            .sort((left, right) => String(left).localeCompare(String(right), "pt-BR", { numeric: true }))
+            .map((value) => ({ label: `DPTO. ${value}`, value }));
+        const centers = [...new Map(reservas
+            .filter((item) => item.centro_custo_id != null && item.centro_custo)
+            .map((item) => [item.centro_custo_id, { label: item.centro_custo, value: item.centro_custo_id }]))
+            .values()]
+            .sort((left, right) => left.label.localeCompare(right.label, "pt-BR"));
+        return { departments, centers };
+    }, [reservas]);
+
+    useEffect(() => {
+        const reloadForScope = () => setRefresh((value) => !value);
+        window.addEventListener("tmhub:standard-filters-changed", reloadForScope);
+        return () => window.removeEventListener("tmhub:standard-filters-changed", reloadForScope);
+    }, []);
 
     async function setReserva(id, nome) {
         try {
@@ -189,7 +218,7 @@ export function Floaters() {
                 title="Reservas Técnicas"
                 description="Gerencie os colaboradores ativos e a equipe disponível para cobrir as reposições."
                 actions={<div className="floaters-header-actions">
-                    <StandardFilterButton panelRef={filterPanel} />
+                    <StandardFilterButton panelRef={filterPanel} count={standardFilters.departamentos.length + standardFilters.centros.length} />
                     <Button
                         label="Exportar"
                         icon={<AppIcon name="download" />}
@@ -214,7 +243,10 @@ export function Floaters() {
                     <strong>Filtros das reservas</strong>
                     <span>As opções se ajustam ao recorte atual.</span>
                 </div>
-                <StandardFilterFields />
+                <StandardFilterFields
+                    department={{ value: standardFilters.departamentos, options: reservationFilterOptions.departments, onChange: (value) => setStandardFilters((current) => ({ ...current, departamentos: value || [] })) }}
+                    center={{ value: standardFilters.centros, options: reservationFilterOptions.centers, onChange: (value) => setStandardFilters((current) => ({ ...current, centros: value || [] })) }}
+                />
             </OverlayPanel>
 
             <Splitter className="floaters-splitter" layout={isMobile ? "vertical" : "horizontal"} gutterSize={12}>

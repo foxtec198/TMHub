@@ -319,7 +319,10 @@ export function Pcd() {
         <Button type="button" icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={() => setFilters(EMPTY_FILTERS)} />
       </div>
       <Divider />
-      <StandardFilterFields />
+      <StandardFilterFields
+        department={{ value: filters.departamentos, options: options.departamentos || [], onChange: (value) => setFilter("departamentos", value) }}
+        center={{ value: filters.centros, options: options.centros || [], onChange: (value) => setFilter("centros", value) }}
+      />
 
       {[
         ["supervisores", "Supervisores"],

@@ -215,9 +215,11 @@ function DisallowanceControlContent() {
   }, [dialogOpen, form.cobertura]);
 
   const {
+    filters,
     filteredData: multiSelectFilteredRecords,
     options: filterOptions,
     activeFilterCount,
+    setFilter,
     clearFilters: clearMultiSelectFilters,
   } = useCombinedFilters(records);
 
@@ -475,7 +477,11 @@ function DisallowanceControlContent() {
         <div><strong>Filtrar glosas</strong><span>A exportação usa exatamente estes filtros.</span></div>
         <Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} />
       </div>
-      <StandardFilterFields date={{ value: period, onChange: setPeriod }} />
+      <StandardFilterFields
+        date={{ value: period, onChange: setPeriod }}
+        department={{ value: filters.departamento, options: filterOptions.departamento || [], onChange: (value) => setFilter("departamento", value) }}
+        center={{ value: filters.contrato, options: filterOptions.contrato || [], onChange: (value) => setFilter("contrato", value) }}
+      />
       <div className="glosa-filter-grid">
         <CombinedMultiSelect name="cobertura" label="Situação" options={filterOptions.cobertura} placeholder="Todas as situações" />
         <CombinedMultiSelect name="colaborador" label="Colaborador" options={filterOptions.colaborador} placeholder="Todos os colaboradores" className="is-wide" />

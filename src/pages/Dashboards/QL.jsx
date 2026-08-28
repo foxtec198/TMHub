@@ -106,6 +106,20 @@ export function QLDashboard() {
 
   const summary = data?.resumo || {};
   const evolution = useMemo(() => data?.evolucao || [], [data?.evolucao]);
+  const qlDepartmentOptions = useMemo(() => {
+    const values = [
+      ...(data?.filtros?.departamentos || []),
+      ...(dailyData?.filtros?.departamentos || []),
+    ];
+    return [...new Map(values.map((option) => [String(option.value), option])).values()];
+  }, [data?.filtros?.departamentos, dailyData?.filtros?.departamentos]);
+  const qlCompanyOptions = useMemo(() => {
+    const values = [
+      ...(data?.filtros?.empresas || []),
+      ...(dailyData?.filtros?.empresas || []),
+    ];
+    return [...new Map(values.map((option) => [String(option.value), option])).values()];
+  }, [data?.filtros?.empresas, dailyData?.filtros?.empresas]);
   const chartData = useMemo(() => ({
     labels: evolution.map((row) => new Date(`${row.data}T12:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })),
     datasets: [
@@ -225,7 +239,12 @@ export function QLDashboard() {
         <div><strong>Filtrar dashboard</strong><span>As métricas, evolução e tabela respeitam o recorte selecionado.</span></div>
         <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
-      <StandardFilterFields date={{ value: filters.mes, onChange: (value) => setFilters((current) => ({ ...current, mes: value || currentMonth() })), view: "month" }} />
+      <StandardFilterFields
+        date={{ value: filters.mes, onChange: (value) => setFilters((current) => ({ ...current, mes: value || currentMonth() })), view: "month" }}
+        department={{ value: filters.departamentos, options: qlDepartmentOptions, onChange: (value) => setFilters((current) => ({ ...current, departamentos: value || [] })) }}
+        center={{ options: [] }}
+        company={{ value: filters.empresas, options: qlCompanyOptions, optionLabel: "label", optionValue: "value", onChange: (value) => setFilters((current) => ({ ...current, empresas: value || [] })) }}
+      />
     </OverlayPanel>
   </main>;
 }
