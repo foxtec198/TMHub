@@ -12,6 +12,17 @@ const STORAGE = {
   branches: "selected_filial_ids",
 };
 
+// O recorte do painel vale somente durante a sessão atual da aplicação. Ao
+// recarregar a página o módulo é reinicializado e os filtros retornam ao padrão.
+let panelFilterStorageInitialized = false;
+const initializePanelFilterStorage = () => {
+  if (panelFilterStorageInitialized) return;
+  panelFilterStorageInitialized = true;
+  localStorage.removeItem(STORAGE.date);
+  localStorage.removeItem(STORAGE.departments);
+  localStorage.removeItem(STORAGE.centers);
+};
+
 const readIds = (key) => {
   try {
     const value = JSON.parse(localStorage.getItem(key) || "[]");
@@ -43,6 +54,7 @@ const normalizeOptions = (options, prefix = "") => (options || []).map((option) 
  * escopo persistente enviado em todas as requisições autenticadas.
  */
 export function StandardFilterFields({ date, department, center }) {
+  initializePanelFilterStorage();
   const [catalog, setCatalog] = useState({ companies: [], branches: [], centers: [] });
   const [scope, setScope] = useState(() => ({
     date: readDates(),
