@@ -135,22 +135,29 @@ export function StandardFilterFields({ date, department, center }) {
       ? new Date(now.getFullYear(), now.getMonth(), 1)
       : [new Date(now.getFullYear(), now.getMonth(), 1), now];
     const resetDate = date ? (date.defaultValue ?? defaultDate) : [];
-    const empty = { date: resetDate, departments: [], centers: [], companies: [], branches: [] };
+    // Empresa e filial são escopo global e só podem ser limpas pelo seletor
+    // global do layout. O botão deste painel atua apenas nos filtros locais.
+    const empty = {
+      date: resetDate,
+      departments: [],
+      centers: [],
+      companies: scope.companies,
+      branches: scope.branches,
+    };
     setScope(empty);
     date?.onChange?.(resetDate);
     department?.onChange?.([]);
     center?.onChange?.([]);
-    Object.values(STORAGE).forEach((key) => localStorage.removeItem(key));
-    window.dispatchEvent(new CustomEvent("tmhub:global-scope-cleared"));
+    [STORAGE.date, STORAGE.departments, STORAGE.centers].forEach((key) => localStorage.removeItem(key));
     window.dispatchEvent(new CustomEvent("tmhub:standard-filters-changed", { detail: { name: "clear" } }));
   };
 
   return <div className="standard-filter-fields">
-    <div className="standard-filter-fields__toolbar"><strong>Filtros padrão</strong><Button type="button" label="Limpar" icon={<AppIcon name="filter-off" />} text size="small" onClick={clearPanelFilters} /></div>
+    <div className="standard-filter-fields__toolbar"><strong>Filtros padrão</strong><Button type="button" label="Limpar locais" icon={<AppIcon name="filter-off" />} text size="small" aria-label="Limpar filtros locais" onClick={clearPanelFilters} /></div>
     <label className="is-wide"><span>DATA</span><Calendar value={controlledDate} onChange={(event) => onDateChange(event.value)} selectionMode={date?.selectionMode || "range"} view={date?.view || "date"} dateFormat={date?.dateFormat || (date?.view === "month" ? "mm/yy" : "dd/mm/yy")} readOnlyInput showIcon showButtonBar={date?.view !== "month"} hideOnRangeSelection={date?.view !== "month"} placeholder={date?.placeholder || "Selecione o período"} /></label>
     <label><span>DPTO</span><MultiSelect value={controlledDepartments || []} options={normalizeOptions(department?.options || globalDepartments, "DPTO. ")} optionLabel={department?.optionLabel || "label"} optionValue={department?.optionValue || "value"} onChange={(event) => onDepartmentChange(event.value || [])} placeholder="Todos os departamentos" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
     <label><span>CENTRO DE CUSTO</span><MultiSelect value={controlledCenters || []} options={normalizeOptions(center?.options || globalCenters)} optionLabel={center?.optionLabel || "label"} optionValue={center?.optionValue || "value"} onChange={(event) => onCenterChange(event.value || [])} placeholder="Todos os centros" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-    <label><span>EMPRESA</span><MultiSelect value={scope.companies} options={catalog.companies} optionLabel="nome" optionValue="id" onChange={(event) => updateScope("companies", event.value || [])} placeholder="Todas as empresas" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionadas" /></label>
-    <label><span>FILIAL</span><MultiSelect value={scope.branches} options={catalog.branches} optionLabel="nome" optionValue="id" onChange={(event) => updateScope("branches", event.value || [])} placeholder="Todas as filiais" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionadas" /></label>
+    <label><span>EMPRESA</span><MultiSelect value={scope.companies} options={catalog.companies} optionLabel="nome" optionValue="id" onChange={(event) => updateScope("companies", event.value || [])} placeholder="Todas as empresas" display="comma" filter maxSelectedLabels={2} selectedItemsLabel="{0} selecionadas" /></label>
+    <label><span>FILIAL</span><MultiSelect value={scope.branches} options={catalog.branches} optionLabel="nome" optionValue="id" onChange={(event) => updateScope("branches", event.value || [])} placeholder="Todas as filiais" display="comma" filter maxSelectedLabels={2} selectedItemsLabel="{0} selecionadas" /></label>
   </div>;
 }
