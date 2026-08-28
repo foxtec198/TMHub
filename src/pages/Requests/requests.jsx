@@ -191,6 +191,8 @@ export function Requests() {
             setLoading(true);
             await connect.patch("/reservas", {
                 id: availabilityDialog.reserva_floater_id,
+                requisicao_id: availabilityDialog.id,
+                supervisor_usuario_id: availabilityDialog.supervisor_usuario_id || undefined,
                 disponivel: false,
                 motivo,
                 motivo_falta: motivo === "FALTA" ? absenceReason : undefined,

@@ -300,6 +300,23 @@
   line-height: 1.5;
 }
 
+.floater-availability-dialog .reserve-availability-reason {
+  display: grid;
+  gap: .4rem;
+  margin-top: 1rem;
+}
+
+.floater-availability-dialog .reserve-availability-reason > span {
+  color: var(--text-color-secondary);
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.floater-availability-dialog .reserve-availability-reason small {
+  color: var(--text-color-secondary);
+}
+
 .floater-availability-options {
   display: flex;
   justify-content: flex-end;
