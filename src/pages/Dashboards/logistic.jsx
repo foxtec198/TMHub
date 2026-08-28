@@ -71,11 +71,6 @@ export function DashboardLogistic() {
     const activeFilterCount = ['product', 'type', 'employee', 'center']
         .filter((key) => filters[key]?.length).length;
     const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
-    const clearFilters = () => setFilters({
-        ...DEFAULT_FILTERS,
-        period: [new Date(today.getFullYear(), today.getMonth(), 1), new Date()],
-    });
-
     const movementChart = useMemo(() => ({
         labels: (data?.serie || []).map((item) => new Date(`${item.data}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })),
         datasets: [
@@ -243,7 +238,6 @@ export function DashboardLogistic() {
                     <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
                         <div className="dashboard-filter-title">
                             <div><strong>Filtrar logística</strong><span>Todos os indicadores usam o mesmo recorte.</span></div>
-                            <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
                         </div>
                         <StandardFilterFields date={{ value: filters.period, onChange: (value) => setFilter('period', value) }} center={{ value: filters.center, options: options.centros_custo, onChange: (value) => setFilter('center', value) }} />
                         <div className="dashboard-filter-grid">

@@ -89,6 +89,17 @@ export function MainLayout() {
     return () => window.removeEventListener("tmhub:standard-filters-changed", remountCurrentPage);
   }, []);
 
+  useEffect(() => {
+    const clearGlobalScope = () => {
+      setSelectedCompanyIds([]);
+      setSelectedFilialIds([]);
+      localStorage.removeItem("selected_company_ids");
+      localStorage.removeItem("selected_filial_ids");
+    };
+    window.addEventListener("tmhub:global-scope-cleared", clearGlobalScope);
+    return () => window.removeEventListener("tmhub:global-scope-cleared", clearGlobalScope);
+  }, []);
+
   const navigateTo = (path) => {
     navigate(path);
 
