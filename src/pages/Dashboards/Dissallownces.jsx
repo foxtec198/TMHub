@@ -1,5 +1,6 @@
 import { AppIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
@@ -54,7 +55,7 @@ export function GlosaDashboard() {
   const chart = useMemo(() => ({ labels: (data?.evolucao_mensal || []).map((row) => row.competencia), datasets: [{ label: "Valor", data: (data?.evolucao_mensal || []).map((row) => row.valor), backgroundColor: chartTheme.danger, borderRadius: 8 }] }), [data, chartTheme]);
 
   return <main className="project-dashboard">
-    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} /></>} />
+    <PageHeader section="Dashboards" title="Dashboard de Glosas" description="Acompanhamento financeiro e operacional das glosas registradas." actions={<><StandardFilterButton panelRef={filterPanel} count={activeFilterCount} /></>} />
     <section className="project-dashboard-summary">
       <Summary icon={<AppIcon name="file" />} label="Glosas" value={summary.total_registros || 0} detail="registros no período" />
       <Summary icon={<AppIcon name="cash" />} label="Valor total" value={money(summary.valor_total)} detail="valor apontado" tone="violet" />

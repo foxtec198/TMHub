@@ -1,5 +1,6 @@
 import { AppIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -397,12 +398,7 @@ function TerminationControlContent() {
         title="Controle de Rescisões"
         description="Acompanhe valores calculados por filial e simule provisões antes do desligamento."
         actions={<>
-          <Button
-            label={`Filtros${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
-            icon={<AppIcon name="filter" />}
-            outlined
-            onClick={(event) => filterPanel.current?.toggle(event)}
-          />
+          <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
           <Button label="Calcular rescisão" icon={<AppIcon name="calculator" />} outlined onClick={openCalculation} />
           {canImport && <Button label="Importar planilha" icon={<AppIcon name="file-import" />} onClick={() => setImportOpen(true)} />}
           {isAdmin && <Button label="Excluir tudo" icon={<AppIcon name="trash" />} severity="danger" outlined disabled={!records.length} onClick={() => setDeleteAllOpen(true)} />}

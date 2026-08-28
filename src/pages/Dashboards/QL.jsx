@@ -1,5 +1,6 @@
 import { AppIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import "./ql.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -172,11 +173,7 @@ export function QLDashboard() {
       title="Dashboard de QL"
       description="Acompanhe o quadro de lotação por departamento e a evolução diária do efetivo."
       actions={<>
-        <Button
-          icon={<AppIcon name="filter-filled" />}
-          label={filterCount ? `Filtros (${filterCount})` : "Filtros"}
-          onClick={(event) => filterPanel.current?.toggle(event)}
-        />
+        <StandardFilterButton panelRef={filterPanel} count={filterCount} />
       </>}
     />
 

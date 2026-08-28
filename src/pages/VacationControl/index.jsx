@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -357,7 +358,7 @@ function VacationControlContent() {
       title="Controle de Férias"
       description="Acompanhe o histórico, os dias a gozar e os períodos que precisam de programação."
       actions={<>
-        <Button label={`Filtros${activeFilterCount ? ` (${activeFilterCount})` : ""}`} icon={<AppIcon name="filter" />} outlined onClick={(event) => filterPanel.current?.toggle(event)} />
+        <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
       </>}
     />
 

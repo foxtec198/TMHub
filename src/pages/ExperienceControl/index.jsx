@@ -1,5 +1,6 @@
 import { AppIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 // Controle de período de experiência.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -424,7 +425,7 @@ export function ExperienceControl() {
         title="Período de experiência"
         description="Acompanhe as avaliações de 90 dias e as tratativas pendentes."
         actions={<>
-          <Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+          <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
           <Button label="Tela do supervisor" icon={<AppIcon name="external-link" />} outlined onClick={openSupervisorPage} />
         </>}
       />

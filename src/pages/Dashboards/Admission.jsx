@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import './admission.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -161,7 +162,7 @@ export function AdmissionDashboard() {
                 title="SLA de Admissões"
                 description="Acompanhe a velocidade de resposta e conclusão. Vagas com saída prevista permanecem fora do SLA."
                 actions={<>
-                    <Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : 'Filtros'} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
+                    <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
                 </>}
             />
 

@@ -1,5 +1,6 @@
 import { AppIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
@@ -311,7 +312,7 @@ export function RequestReport() {
         section="Dashboards"
         title="Dashboard de Reposições"
         description="Acompanhe coberturas, pendências e indisponibilidades de reservas no recorte selecionado."
-        actions={<Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />}
+        actions={<StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />}
       />
 
       <OverlayPanel ref={filterPanel} className="request-dashboard-filter-panel">

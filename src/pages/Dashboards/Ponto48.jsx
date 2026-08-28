@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
@@ -330,7 +331,7 @@ export function Ponto48Dashboard() {
           {data.importacoes.length ? <Dropdown value={selectedBatch} options={data.importacoes} optionValue="id" optionLabel="periodo_inicio" valueTemplate={() => formatPeriod(data.importacao)} itemTemplate={formatPeriod} onChange={(event) => loadDashboard(event.value)} /> : null}
           {isAdmin ? <Button icon={<AppIcon name="upload" />} label="Importar CSVs" outlined onClick={() => setImportVisible(true)} /> : null}
           {isAdmin && selectedBatch ? <Button icon={<AppIcon name="trash" />} label="Limpar dados" severity="danger" outlined loading={clearing} onClick={confirmClearImportedData} /> : null}
-          <Button icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} onClick={(event) => filterPanel.current?.toggle(event)} />
+          <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
         </>}
       />
 

@@ -20,6 +20,7 @@ import { get_first_name } from "../../utils/ui";
 import { can } from "../../utils/permissions";
 import { exportTechnicalReservationsXlsx } from "../../utils/exportTechnicalReservationsXlsx";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import "./floaters.css";
 
 // Login and UI (uiiii)
@@ -188,12 +189,7 @@ export function Floaters() {
                 title="Reservas Técnicas"
                 description="Gerencie os colaboradores ativos e a equipe disponível para cobrir as reposições."
                 actions={<div className="floaters-header-actions">
-                    <Button
-                        label="Filtros"
-                        icon={<AppIcon name="filter-filled" />}
-                        outlined
-                        onClick={(event) => filterPanel.current?.toggle(event)}
-                    />
+                    <StandardFilterButton panelRef={filterPanel} />
                     <Button
                         label="Exportar"
                         icon={<AppIcon name="download" />}

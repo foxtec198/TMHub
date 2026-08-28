@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
@@ -300,13 +301,7 @@ export function Pcd() {
       description="Colaboradores com deficiência, organizados por departamento e centro de custo."
       actions={<>
         <Button icon={<AppIcon name="refresh" />} label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-        <Button
-          type="button"
-          icon={<AppIcon name="filter-filled" />}
-          label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
-          outlined
-          onClick={(event) => filterPanel.current?.toggle(event)}
-        />
+        <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
       </>}
     />
 

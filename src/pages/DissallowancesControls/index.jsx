@@ -1,5 +1,6 @@
 import { AppIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -464,7 +465,7 @@ function DisallowanceControlContent() {
       title="Controle de Glosas"
       description="Acompanhe coberturas, valores em análise e perdas por competência."
       actions={<>
-        <Button label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} icon={<AppIcon name="filter-filled" />} onClick={(event) => filterPanel.current?.toggle(event)} />
+        <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
         <Button label="Exportar XLSX" icon={<AppIcon name="file-spreadsheet" />} outlined onClick={exportSpreadsheet} />
         {canCreate && <Button label="Nova glosa" icon={<AppIcon name="plus" />} onClick={openCreate} />}
       </>}

@@ -7,6 +7,10 @@
   border-bottom: 1px solid var(--surface-border);
 }
 
+.standard-filter-button {
+  flex: 0 0 auto;
+}
+
 .standard-filter-fields__toolbar {
   grid-column: 1 / -1;
   display: flex;

@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { ButtonGroup } from "primereact/buttongroup";
@@ -500,12 +501,7 @@ function HistoryPage() {
                     title="Histórico"
                     description="Consulte requisições concluídas por período, edite informações e acompanhe cada evento da timeline."
                     actions={<>
-                        <Button
-                            className="dashboard-filter-trigger"
-                            icon={<AppIcon name="filter-filled" />}
-                            label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
-                            onClick={(event) => filterPanel.current?.toggle(event)}
-                        />
+                        <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
                         <Button
                             icon={<AppIcon name="file-spreadsheet" />}
                             label="Exportar XLSX"

@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import './Termination.css'
 import './pcd.css';
 
@@ -84,14 +85,7 @@ function SummaryCard({ icon, label, value, detail, tone = 'neutral' }) {
 
 function TerminationFilterButton({ panelRef, activeCount = 0 }) {
     return (
-        <Button
-            type="button"
-            icon={<AppIcon name="filter-filled" />}
-            label={activeCount ? `Filtros (${activeCount})` : 'Filtros'}
-            className="dashboard-filter-trigger"
-            aria-label="Abrir filtros do dashboard de rescisões"
-            onClick={(event) => panelRef.current?.toggle(event)}
-        />
+        <StandardFilterButton panelRef={panelRef} count={activeCount} ariaLabel="Abrir filtros do dashboard de rescisões" />
     );
 }
 

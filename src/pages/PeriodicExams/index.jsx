@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 // Controle de exames periódicos.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
@@ -220,7 +221,7 @@ export function PeriodicExams() {
       title="Exames periódicos"
       description="Acompanhe vencimentos, pendências e conclusões dos exames ocupacionais."
       actions={<>
-        <Button icon={<AppIcon name="filter" />} label={filterCount ? `Filtros (${filterCount})` : "Filtros"} outlined onClick={(event) => filterPanel.current?.toggle(event)} />
+        <StandardFilterButton panelRef={filterPanel} count={filterCount} />
         {selected.length > 0 && <Button icon={<AppIcon name="square-check" />} label={`Atualizar (${selected.length})`} onClick={() => { setBulkByFilter(false); setBulkOpen(true); }} />}
         {isAdmin && <Button icon={<AppIcon name="trash" />} label="Excluir tudo" severity="danger" outlined disabled={!records.length} onClick={() => setDeleteAllOpen(true)} />}
       </>}

@@ -1,5 +1,6 @@
 import { AppIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
@@ -88,7 +89,7 @@ export function AbsenceDashboard() {
             <AppIcon name="calendar"  />
             <span>{formatPeriod(filters.period)}</span>
           </div>
-          <Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
+          <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
         </>}
       />
 

@@ -1,5 +1,6 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
@@ -260,16 +261,7 @@ export function DisciplinaryMeasures() {
         description="Histórico, acompanhamento e orientações para advertências e suspensões."
         actions={(
           <div className="disciplinary-header-actions">
-            <Button
-              type="button"
-              icon={<AppIcon name="filter-filled" />}
-              label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"}
-              outlined
-              onClick={(event) => {
-                ensureFilterOptions();
-                filterPanel.current?.toggle(event);
-              }}
-            />
+            <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} onBeforeToggle={ensureFilterOptions} />
             {canCreate && <Button type="button" icon={<AppIcon name="file-spreadsheet" />} label="Importar" onClick={openImport} />}
             {isAdmin && <Button type="button" icon={<AppIcon name="trash" />} label="Excluir tudo" severity="danger" outlined onClick={confirmDeleteAll} />}
           </div>
