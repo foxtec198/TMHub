@@ -92,11 +92,10 @@ export function StandardFilterFields({ date, department, center }) {
     setScope((current) => ({ ...current, [name]: next }));
     const dateValues = Array.isArray(next) ? next : [next];
     save(STORAGE[name], name === "date" ? dateValues.map((item) => item?.toISOString?.() || item) : next);
+    // Range calendars emit once with only the start date; wait for the end
+    // before refreshing the current panel.
     if (name === "date" && Array.isArray(next) && next.length > 1 && !next[1]) return;
-    if (name !== "date") {
-      window.dispatchEvent(new CustomEvent("tmhub:standard-filters-changed", { detail: { name, value: next } }));
-      window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", { detail: { name, value: next } }));
-    }
+    window.dispatchEvent(new CustomEvent("tmhub:standard-filters-changed", { detail: { name, value: next } }));
   };
 
   const controlledDate = date?.value !== undefined ? date.value : scope.date;
