@@ -199,7 +199,7 @@ export function EmployeesPage() {
   const columns = [
     { header: "Matrícula", field: "matricula", sortable: true }, { header: "Colaborador", field: "nome", sortable: true },
     { header: "Situação", field: "situacao", body: (row) => <Tag value={row.situacao || "Não informada"} severity={Number(row.situacao_id) === 1 ? "success" : "secondary"} /> },
-    { header: "Cargo", field: "cargo" }, { header: "Empresa", field: "empresa_nome" }, { header: "Departamento", body: (row) => row.departamento == null ? "—" : `DPTO. ${row.departamento}` },
+    { header: "Cargo", field: "cargo" }, { header: "Empresa", body: (row) => <Tag value={row.empresa_nome || "Sem empresa"} severity={row.empresa_nome ? "info" : "warning"} /> }, { header: "Departamento", body: (row) => row.departamento == null ? "—" : `DPTO. ${row.departamento}` },
     { header: "Centro de custo", body: (row) => `${row.centro_numero || "—"} - ${row.centro_local || "Sem local"}` }, { header: "Admissão", body: (row) => date(row.data_admissao) },
     ...(isAdmin ? [{ header: "Ações", body: (row) => <Button icon={<AppIcon name="pencil" />} text rounded aria-label={`Editar ${row.nome}`} onClick={() => { setEditing(row); setForm({ nome: row.nome || "", cargo_id: row.cargo_id || null, situacao_id: row.situacao_id || null, centro_id: row.centro_id || null }); }} /> }] : []),
   ];
