@@ -128,7 +128,6 @@ export function TMOpsTasks() {
         section="TM Ops"
         title="Tarefas"
         description="Acompanhe as tarefas geradas pelas rotinas e suas execuções."
-        actions={<Button icon={<AppIcon name="refresh" />} outlined onClick={load} />}
       />
       <section className="tm-ops-task-cards">
         <div>

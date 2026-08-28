@@ -24,11 +24,13 @@ connect.interceptors.request.use((config) => {
   // Public forms must not inherit the authenticated layout's branch context.
   if (token && !config.skipStandardFilters) {
     const selectedFilialIds = localStorage.getItem("selected_filial_ids");
-    if (selectedFilialIds && selectedFilialIds !== "[]") {
+    // A present empty selection is intentional: the API must return zero
+    // records, never fall back to the unrestricted scope.
+    if (selectedFilialIds !== null) {
       config.headers["X-Filial-Ids"] = selectedFilialIds;
     }
     const selectedCompanyIds = localStorage.getItem("selected_company_ids");
-    if (selectedCompanyIds && selectedCompanyIds !== "[]") {
+    if (selectedCompanyIds !== null) {
       config.headers["X-Empresa-Ids"] = selectedCompanyIds;
     }
     const selectedDepartmentIds = localStorage.getItem("selected_department_ids");

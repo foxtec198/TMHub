@@ -86,7 +86,7 @@ export function Structure() {
     useEffect(() => {
         if (!isAdmin) return undefined;
         let active = true;
-        connect.get("/centro/empresas")
+        connect.get("/centro/empresas", { skipStandardFilters: true })
             .then(({ data }) => {
                 if (!active) return;
                 setCompanies((Array.isArray(data) ? data : []).filter((company) => company.ativa));
@@ -369,15 +369,7 @@ export function Structure() {
                 title="Estrutura de Contratos"
                 description="Organize locais e ativos por departamento e contrato."
                 actions={(
-                    <>
-                        <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
-                        <Button
-                            icon={<AppIcon name="refresh" />}
-                            outlined
-                            aria-label="Atualizar estrutura"
-                            onClick={() => setRefresh((value) => value + 1)}
-                        />
-                    </>
+                    <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
                 )}
             />
 

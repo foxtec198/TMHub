@@ -21,7 +21,7 @@ const currentMonth = () => {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 };
 
-const initialFilters = () => ({ empresas: [], departamentos: [], mes: currentMonth() });
+const initialFilters = () => ({ departamentos: [], mes: currentMonth() });
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
   return <article className={`ql-summary-card tm-dashboard-card is-${tone}`}>
@@ -78,7 +78,6 @@ export function QLDashboard() {
     setLoading(true);
     const params = {
       departamento_empresa: filters.departamentos.join(",") || undefined,
-      empresa: filters.empresas.join(",") || undefined,
     };
     const month = `${filters.mes.getFullYear()}-${String(filters.mes.getMonth() + 1).padStart(2, "0")}`;
     Promise.all([
@@ -113,13 +112,6 @@ export function QLDashboard() {
     ];
     return [...new Map(values.map((option) => [String(option.value), option])).values()];
   }, [data?.filtros?.departamentos, dailyData?.filtros?.departamentos]);
-  const qlCompanyOptions = useMemo(() => {
-    const values = [
-      ...(data?.filtros?.empresas || []),
-      ...(dailyData?.filtros?.empresas || []),
-    ];
-    return [...new Map(values.map((option) => [String(option.value), option])).values()];
-  }, [data?.filtros?.empresas, dailyData?.filtros?.empresas]);
   const chartData = useMemo(() => ({
     labels: evolution.map((row) => new Date(`${row.data}T12:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })),
     datasets: [
@@ -180,7 +172,7 @@ export function QLDashboard() {
     },
   ], [dailyData?.dias]);
 
-  const filterCount = filters.departamentos.length + filters.empresas.length;
+  const filterCount = filters.departamentos.length;
   return <main className="ql-dashboard p-4">
     <PageHeader
       section="Dashboards"
@@ -240,10 +232,9 @@ export function QLDashboard() {
         <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
       <StandardFilterFields
-        date={{ value: filters.mes, onChange: (value) => setFilters((current) => ({ ...current, mes: value || currentMonth() })), view: "month" }}
+        date={{ value: filters.mes, onChange: (value) => setFilters((current) => ({ ...current, mes: value || currentMonth() })), view: "month", selectionMode: "single" }}
         department={{ value: filters.departamentos, options: qlDepartmentOptions, onChange: (value) => setFilters((current) => ({ ...current, departamentos: value || [] })) }}
         center={{ options: [] }}
-        company={{ value: filters.empresas, options: qlCompanyOptions, optionLabel: "label", optionValue: "value", onChange: (value) => setFilters((current) => ({ ...current, empresas: value || [] })) }}
       />
     </OverlayPanel>
   </main>;

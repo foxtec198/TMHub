@@ -16,7 +16,7 @@ import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import "./employees.css";
 
-const EMPTY_FILTERS = { empresas: [], departamentos: [], centros: [], cargos: [], situacoes: [] };
+const EMPTY_FILTERS = { departamentos: [], centros: [], cargos: [], situacoes: [] };
 const CHUNK = 512 * 1024;
 
 function date(value) {
@@ -87,7 +87,7 @@ function ImportEmployees({ onCompleted }) {
   }, []);
 
   useEffect(() => {
-    connect.get("/importacao-colaboradores/empresas").then(({ data }) => {
+    connect.get("/importacao-colaboradores/empresas", { skipStandardFilters: true }).then(({ data }) => {
       setCompanies((Array.isArray(data) ? data : []).filter((item) => item.ativa).map((item) => ({ label: item.nome, value: item.id })));
     }).catch(() => showToast("error", "Empresas", "Não foi possível carregar as empresas."));
   }, [showToast]);
@@ -152,7 +152,7 @@ function ImportEmployees({ onCompleted }) {
     {job?.status === "completed" && <small className="entity-import-card__result">Cargos criados: {job.cargos_criados || 0} · Ignorados: {job.colaboradores_ignorados || 0} · Duplicidades: {job.duplicidades || 0}</small>}
     <Button label={running ? "Importação em andamento" : "Iniciar importação"} icon={<AppIcon name="upload" />} disabled={!file || !companyId || running} onClick={upload} />
   </article><section className="employee-import-history">
-    <div className="employee-import-history__heading"><div><strong>Histórico de importações</strong><small>Últimas cargas recebidas pelo TMHub</small></div><Button icon={<AppIcon name="refresh" />} text rounded aria-label="Atualizar histórico" onClick={loadHistory} /></div>
+    <div className="employee-import-history__heading"><div><strong>Histórico de importações</strong><small>Últimas cargas recebidas pelo TMHub</small></div></div>
     {history.length ? <div className="employee-import-history__list">{history.map((item) => <article key={item.job_id}>
       <div><strong>{item.empresa_nome}</strong><small>{item.origem === "script" ? `Script${item.lotes ? ` · ${item.lotes} lote(s)` : ""}` : `Sistema · ${item.usuario_nome || "Usuário não identificado"}`} · {dateTime(item.iniciado_em)}</small></div>
       <div><Tag value={item.status === "completed" ? "CONCLUÍDA" : item.status === "error" ? "ERRO" : "EM ANDAMENTO"} severity={item.status === "completed" ? "success" : item.status === "error" ? "danger" : "info"} /><small>{item.total || 0} total · {item.colaboradores_criados || 0} criados · {item.colaboradores_atualizados || 0} atualizados</small></div>
@@ -165,7 +165,7 @@ export function EmployeesPage() {
   const overlay = useRef(null);
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   const [filters, setFilters] = useState(EMPTY_FILTERS);
-  const [options, setOptions] = useState({ empresas: [], departamentos: [], centros: [], cargos: [], situacoes: [] });
+  const [options, setOptions] = useState({ departamentos: [], centros: [], cargos: [], situacoes: [] });
   const [search, setSearch] = useState("");
   const [rows, setRows] = useState([]); const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0); const [rowsPerPage, setRowsPerPage] = useState(50); const [loading, setLoading] = useState(true);
@@ -173,7 +173,7 @@ export function EmployeesPage() {
   const [importVisible, setImportVisible] = useState(false);
 
   const query = useMemo(() => ({ paginado: true, page: page + 1, per_page: rowsPerPage, search: search || undefined,
-    empresa_ids: filters.empresas.join(",") || undefined, departamentos: filters.departamentos.join(",") || undefined,
+    departamentos: filters.departamentos.join(",") || undefined,
     centro_ids: filters.centros.join(",") || undefined, cargo_ids: filters.cargos.join(",") || undefined,
     situacao_ids: filters.situacoes.join(",") || undefined }), [filters, page, rowsPerPage, search]);
 

@@ -29,8 +29,6 @@ const STATUS_META = {
 };
 
 const FILTER_FIELDS = {
-  empresa: (item) => item.empresa || "Sem empresa",
-  filial: (item) => item.filial || "Sem filial",
   contrato: (item) => item.local,
   departamento: (item) => item.dpto,
   supervisor: (item) => item.supervisor || "Sem supervisor",
@@ -45,7 +43,7 @@ function defaultPeriod() {
 }
 
 function initialFilters() {
-  return { empresa: [], filial: [], contrato: [], departamento: [], supervisor: [], motivo: [], status: [], colaborador: [] };
+  return { contrato: [], departamento: [], supervisor: [], motivo: [], status: [], colaborador: [] };
 }
 
 function dateParam(value) {
@@ -181,8 +179,6 @@ export function RequestReport() {
   );
 
   const filterOptions = useMemo(() => ({
-    empresa: makeOptions(records, filters, "empresa"),
-    filial: makeOptions(records, filters, "filial"),
     contrato: makeOptions(records, filters, "contrato"),
     departamento: makeOptions(records, filters, "departamento"),
     supervisor: makeOptions(records, filters, "supervisor"),

@@ -43,7 +43,7 @@ export function CostCentersPage() {
   }, [load]);
   useEffect(() => {
     if (!isAdmin) return;
-    connect.get("/centro/empresas")
+    connect.get("/centro/empresas", { skipStandardFilters: true })
       .then(({ data }) => setCompanies((data || []).filter((item) => item.ativa).map((item) => ({ label: item.nome, value: item.id }))))
       .catch(() => {});
   }, [isAdmin]);

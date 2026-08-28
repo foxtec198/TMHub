@@ -86,8 +86,8 @@ export function MainLayout() {
     const clearGlobalScope = () => {
       setSelectedCompanyIds([]);
       setSelectedFilialIds([]);
-      localStorage.removeItem("selected_company_ids");
-      localStorage.removeItem("selected_filial_ids");
+      localStorage.setItem("selected_company_ids", JSON.stringify([]));
+      localStorage.setItem("selected_filial_ids", JSON.stringify([]));
     };
     window.addEventListener("tmhub:global-scope-cleared", clearGlobalScope);
     return () => window.removeEventListener("tmhub:global-scope-cleared", clearGlobalScope);
@@ -505,7 +505,7 @@ export function MainLayout() {
           setFls([]);
           setSelectedFilialIds([]);
           localStorage.removeItem("selected_filial_ids");
-          const { data: companyRows } = await connect.get("/centro/empresas");
+          const { data: companyRows } = await connect.get("/centro/empresas", { skipStandardFilters: true });
           const activeCompanies = (Array.isArray(companyRows) ? companyRows : []).filter((company) => company.ativa !== false);
           const ids = activeCompanies.map((company) => Number(company.id));
           setCompanies(activeCompanies);
@@ -515,8 +515,8 @@ export function MainLayout() {
         }
 
         const [{ data: branches }, { data: companyRows }] = await Promise.all([
-          connect.get("/filiais"),
-          connect.get("/centro/empresas"),
+          connect.get("/filiais", { skipStandardFilters: true }),
+          connect.get("/centro/empresas", { skipStandardFilters: true }),
         ]);
         if (!active) return;
 
@@ -564,10 +564,10 @@ export function MainLayout() {
         setFls([]);
         setSelectedFilialIds([]);
         setCanSelectFiliais(false);
-        localStorage.removeItem("selected_filial_ids");
+        localStorage.setItem("selected_filial_ids", JSON.stringify([]));
         setCompanies([]);
         setSelectedCompanyIds([]);
-        localStorage.removeItem("selected_company_ids");
+        localStorage.setItem("selected_company_ids", JSON.stringify([]));
         // Falha pontual de rede não deve invalidar nem redirecionar a sessão.
         setProfileStatus("ready");
       }
@@ -591,24 +591,12 @@ export function MainLayout() {
     const ids = (event.value || []).map(Number);
     setSelectedFilialIds(ids);
     localStorage.setItem("selected_filial_ids", JSON.stringify(ids));
-    window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
-      detail: { filialIds: ids },
-    }));
-    window.dispatchEvent(new CustomEvent("tmhub:standard-filters-changed", {
-      detail: { name: "branches", value: ids },
-    }));
   };
 
   const handleCompaniesChange = (event) => {
     const ids = (event.value || []).map(Number);
     setSelectedCompanyIds(ids);
     localStorage.setItem("selected_company_ids", JSON.stringify(ids));
-    window.dispatchEvent(new CustomEvent("tmhub:filiais-changed", {
-      detail: { filialIds: selectedFilialIds, companyIds: ids },
-    }));
-    window.dispatchEvent(new CustomEvent("tmhub:standard-filters-changed", {
-      detail: { name: "companies", value: ids },
-    }));
   };
 
   useEffect(() => {
@@ -646,6 +634,11 @@ export function MainLayout() {
       socketio.off("system_notification", handleNotification);
     };
   }, [location.pathname, showToast]);
+
+  // Trocar o recorte global deve reinicializar a tela ativa para que todas as
+  // consultas sejam refeitas com os novos cabeçalhos, inclusive páginas que
+  // não precisam conhecer o seletor global explicitamente.
+  const globalScopeKey = `${selectedCompanyIds.join(",")}|${selectedFilialIds.join(",")}`;
 
   return (
     <div className={`app-layout ${isMenuVisible ? "menu-open" : "menu-closed"}`}>
@@ -740,7 +733,7 @@ export function MainLayout() {
 
         {/* PANEL FRAME */}
         <main className="layout-outlet">
-          <Outlet />
+          <Outlet key={globalScopeKey} />
         </main>
       </div>
     </div>
