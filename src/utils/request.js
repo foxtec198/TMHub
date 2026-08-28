@@ -10,7 +10,7 @@ const connect = axios.create({ baseURL: server });
 connect.interceptors.request.use((config) => {
   const token = config.skipAuth ? null : getAccessToken();
 
-  if (token && !config.skipStandardFilters) {
+  if (token) {
     config.headers["Access-Token"] = token;
     // A resposta precisa conseguir distinguir uma falha de sessão de um 401
     // devolvido por uma chamada pública ou por uma requisição antiga.
@@ -22,7 +22,7 @@ connect.interceptors.request.use((config) => {
   }
 
   // Public forms must not inherit the authenticated layout's branch context.
-  if (token) {
+  if (token && !config.skipStandardFilters) {
     const selectedFilialIds = localStorage.getItem("selected_filial_ids");
     if (selectedFilialIds !== null) {
       config.headers["X-Filial-Ids"] = selectedFilialIds;
