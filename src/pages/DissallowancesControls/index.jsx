@@ -1,4 +1,5 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -473,11 +474,9 @@ function DisallowanceControlContent() {
         <div><strong>Filtrar glosas</strong><span>A exportação usa exatamente estes filtros.</span></div>
         <Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} />
       </div>
+      <StandardFilterFields date={{ value: period, onChange: setPeriod }} />
       <div className="glosa-filter-grid">
-        <label className="is-wide"><span>Competência</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" showIcon readOnlyInput hideOnRangeSelection /></label>
         <CombinedMultiSelect name="cobertura" label="Situação" options={filterOptions.cobertura} placeholder="Todas as situações" />
-        <CombinedMultiSelect name="departamento" label="Departamento" options={filterOptions.departamento} placeholder="Todos os departamentos" />
-        <CombinedMultiSelect name="contrato" label="Contrato" options={filterOptions.contrato} placeholder="Todos os contratos" className="is-wide" />
         <CombinedMultiSelect name="colaborador" label="Colaborador" options={filterOptions.colaborador} placeholder="Todos os colaboradores" className="is-wide" />
       </div>
     </OverlayPanel>

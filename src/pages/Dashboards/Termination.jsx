@@ -1,10 +1,10 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import './Termination.css'
 import './pcd.css';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
-import { Calendar } from 'primereact/calendar';
 import { Chart } from 'primereact/chart';
 import { Column } from 'primereact/column';
 import { DataTable } from "../../components/tables/DataTable";
@@ -102,6 +102,9 @@ function TerminationFilterPanel({
     fields,
     onClear,
 }) {
+    const department = fields.find((field) => field.name === 'departamento');
+    const center = fields.find((field) => field.name === 'contrato');
+    const specificFields = fields.filter((field) => !['departamento', 'contrato'].includes(field.name));
     return (
         <OverlayPanel ref={panelRef} className="dashboard-filter-panel">
             <div className="dashboard-filter-title">
@@ -119,23 +122,9 @@ function TerminationFilterPanel({
                 />
             </div>
 
+            <StandardFilterFields date={{ value: period, onChange: onPeriodChange }} department={{ value: department?.value, options: department?.options, onChange: department?.onChange }} center={{ value: center?.value, options: center?.options, onChange: center?.onChange }} />
             <div className="dashboard-filter-grid">
-                <label>
-                    <span>Período</span>
-                    <Calendar
-                        value={period}
-                        onChange={(event) => onPeriodChange(event.value)}
-                        selectionMode="range"
-                        readOnlyInput
-                        hideOnRangeSelection
-                        dateFormat="dd/mm/yy"
-                        placeholder="Selecione o período"
-                        showIcon
-                        showButtonBar
-                    />
-                </label>
-
-                {fields.map((field) => (
+                {specificFields.map((field) => (
                     <label key={field.name}>
                         <span>{field.label}</span>
                         <MultiSelect

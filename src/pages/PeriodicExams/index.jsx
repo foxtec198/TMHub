@@ -1,4 +1,5 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 // Controle de exames periódicos.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
@@ -250,11 +251,10 @@ export function PeriodicExams() {
 
     <OverlayPanel ref={filterPanel} className="periodic-exams-filter-panel">
       <div className="periodic-exams-filter-title"><div><strong>Filtrar exames</strong><span>A lista e os indicadores acompanham este recorte.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
+      <StandardFilterFields department={{ value: filters.departamento, options: options.departamento, onChange: (value) => updateFilter("departamento", value) }} center={{ value: filters.contrato, options: options.contrato, onChange: (value) => updateFilter("contrato", value) }} />
       <div className="periodic-exams-filters">
         <label><span>Situação</span><MultiSelect value={filters.status} options={STATUS_OPTIONS} optionLabel="label" optionValue="value" onChange={(event) => updateFilter("status", event.value)} placeholder="Todas as situações" display="chip" /></label>
-        <label><span>Departamento</span><MultiSelect value={filters.departamento} options={options.departamento || []} onChange={(event) => updateFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter /></label>
         <label><span>Supervisor</span><MultiSelect value={filters.supervisor} options={options.supervisor || []} onChange={(event) => updateFilter("supervisor", event.value)} placeholder="Todos os supervisores" display="chip" filter /></label>
-        <label><span>Contrato</span><MultiSelect value={filters.contrato} options={options.contrato || []} onChange={(event) => updateFilter("contrato", event.value)} placeholder="Todos os contratos" display="chip" filter /></label>
         <label><span>Mês de vencimento</span><MultiSelect value={filters.competencia} options={(options.competencia || []).map((value) => ({ label: value.split("-").reverse().join("/"), value }))} optionLabel="label" optionValue="value" onChange={(event) => updateFilter("competencia", event.value)} placeholder="Todos os meses" display="chip" /></label>
       </div>
     </OverlayPanel>

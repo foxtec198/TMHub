@@ -1,7 +1,7 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -69,10 +69,8 @@ export function GlosaDashboard() {
         <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
         <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
+      <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => setFilter("periodo", value) }} department={{ value: filters.departamento, options: (options.departamentos || []).map((value) => ({ label: value, value })), onChange: (value) => setFilter("departamento", value) }} center={{ value: filters.contrato, options: options.contratos, onChange: (value) => setFilter("contrato", value) }} />
       <div className="dashboard-filter-grid">
-        <label className="is-wide"><span>Data</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
-        <label><span>DPTO</span><MultiSelect value={filters.departamento} options={(options.departamentos || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-        <label className="is-wide"><span>Centro de custo / Contrato</span><MultiSelect value={filters.contrato} options={options.contratos || []} onChange={(event) => setFilter("contrato", event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
         <label><span>Situação</span><MultiSelect value={filters.cobertura} options={[{ label: "Em análise", value: "em_analise" }, { label: "Coberta", value: "coberta" }, { label: "Parcial", value: "parcial" }, { label: "Descoberta", value: "descoberta" }]} onChange={(event) => setFilter("cobertura", event.value)} placeholder="Todas as situações" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
         <label className="is-wide"><span>Colaborador</span><MultiSelect value={filters.colaborador} options={options.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
       </div>

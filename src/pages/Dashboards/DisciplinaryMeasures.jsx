@@ -1,8 +1,8 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -745,23 +745,8 @@ export function DisciplinaryMeasuresDashboard() {
             onClick={() => setFilters(defaultFilters())}
           />
         </div>
+        <StandardFilterFields date={{ value: filters.period, onChange: (value) => setFilter("period", value) }} department={{ value: filters.department, options: options.departamentos, onChange: (value) => setFilter("department", value) }} center={{ value: filters.costCenter, options: options.centros_custo, onChange: (value) => setFilter("costCenter", value) }} />
         <div className="dashboard-filter-grid">
-          <label className="is-wide">
-            <span>Período</span>
-            <Calendar
-              value={filters.period}
-              onChange={(event) => setFilters((current) => ({ ...current, period: event.value }))}
-              selectionMode="range"
-              readOnlyInput
-              hideOnRangeSelection
-              dateFormat="dd/mm/yy"
-              placeholder="Selecione o período"
-              showIcon
-              showButtonBar
-            />
-          </label>
-          <label><span>Departamento</span><MultiSelect value={filters.department} options={options.departamentos || []} onChange={(event) => setFilter("department", event.value)} placeholder="Todos os departamentos" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-          <label><span>Centro de custo</span><MultiSelect value={filters.costCenter} options={options.centros_custo || []} onChange={(event) => setFilter("costCenter", event.value)} placeholder="Todos os centros" display="chip" filter showClear maxSelectedLabels={1} selectedItemsLabel="{0} selecionados" /></label>
           <label><span>Supervisor da época</span><MultiSelect value={filters.supervisor} options={options.supervisores || []} onChange={(event) => setFilter("supervisor", event.value)} placeholder="Todos os supervisores" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
           <label><span>Colaborador</span><MultiSelect value={filters.collaborator} options={options.colaboradores || []} onChange={(event) => setFilter("collaborator", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
           <label><span>Tipo da medida</span><MultiSelect value={filters.type} options={options.tipos || []} onChange={(event) => setFilter("type", event.value)} placeholder="Todos os tipos" display="chip" showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>

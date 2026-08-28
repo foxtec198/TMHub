@@ -1,7 +1,7 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -305,8 +305,8 @@ export function ProjectDashboard() {
               <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
               <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
             </div>
+            <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => setFilter("periodo", value) }} />
             <div className="dashboard-filter-grid">
-              <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
               <label><span>Projetos</span><MultiSelect value={filters.projeto} options={proceduralOptions.projetos || []} onChange={(event) => setFilter("projeto", event.value)} placeholder="Todos os projetos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
               <label><span>Colaboradores</span><MultiSelect value={filters.colaborador} options={proceduralOptions.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
               <label className="is-wide"><span>Cards</span><MultiSelect value={filters.card} options={proceduralOptions.cards || []} onChange={(event) => setFilter("card", event.value)} placeholder="Todos os cards" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>

@@ -1,4 +1,5 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -453,11 +454,9 @@ function TerminationControlContent() {
           <div><strong>Filtrar rescisões</strong><span>Os indicadores acompanham este recorte.</span></div>
           <Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} />
         </div>
+        <StandardFilterFields date={{ value: period, onChange: setPeriod }} department={{ value: filters.departamento, options: (filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value })), onChange: (value) => setFilters((current) => ({ ...current, departamento: value })) }} center={{ value: filters.centro_custo_id, options: filterOptions.centros, onChange: (value) => setFilters((current) => ({ ...current, centro_custo_id: value })) }} />
         <div className="termination-filter-grid">
-          <label className="is-wide"><span>Período de demissão</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" dateFormat="dd/mm/yy" showIcon readOnlyInput hideOnRangeSelection /></label>
           <label className="is-wide"><span>Motivo</span><MultiSelect value={filters.motivo} options={(filterOptions.motivos || []).map((value) => ({ label: value, value }))} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, motivo: event.value || [] }))} placeholder="Todos os motivos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
-          <label><span>Departamento</span><MultiSelect value={filters.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, departamento: event.value || [] }))} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
-          <label><span>Contrato</span><MultiSelect value={filters.centro_custo_id} options={filterOptions.centros || []} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, centro_custo_id: event.value || [] }))} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
           <label className="is-wide"><span>Supervisor</span><MultiSelect value={filters.supervisor_id} options={filterOptions.supervisores || []} optionLabel="label" optionValue="value" onChange={(event) => setFilters((current) => ({ ...current, supervisor_id: event.value || [] }))} placeholder="Todos os supervisores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>
         </div>
       </OverlayPanel>

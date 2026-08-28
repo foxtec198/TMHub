@@ -1,4 +1,5 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
@@ -323,11 +324,9 @@ export function Pcd() {
         <Button type="button" icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={() => setFilters(EMPTY_FILTERS)} />
       </div>
       <Divider />
+      <StandardFilterFields />
 
       {[
-        ["filiais", "Filiais"],
-        ["departamentos", "Departamentos"],
-        ["centros", "Centros de custo"],
         ["supervisores", "Supervisores"],
         ["tipos", "Tipos de PCD"],
         ["situacoes", "Situação"],

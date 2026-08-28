@@ -1,8 +1,8 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -386,10 +386,8 @@ export function ExperienceDashboard() {
 
       <OverlayPanel ref={filterPanel} className="experience-dashboard-filter-panel">
         <div className="experience-dashboard-filter-header"><div><strong>Filtrar dashboard</strong><span>Indicadores, gráficos e lista usam o mesmo recorte.</span></div><Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
+        <StandardFilterFields date={{ value: filters.period, onChange: (value) => setFilters((current) => ({ ...current, period: value })) }} department={{ value: filters.department, options: options.departamentos, onChange: (value) => setFilter("department", value) }} center={{ value: filters.costCenter, options: options.centros_custo, onChange: (value) => setFilter("costCenter", value) }} />
         <div className="experience-dashboard-filters">
-          <label><span>Fim da experiência</span><Calendar value={filters.period} onChange={(event) => setFilters((current) => ({ ...current, period: event.value }))} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput showIcon /></label>
-          <label><span>Departamento</span><MultiSelect value={filters.department} options={options.departamentos || []} onChange={(event) => setFilter("department", event.value)} placeholder="Todos os departamentos" filter showClear /></label>
-          <label><span>Centro de custo</span><MultiSelect value={filters.costCenter} options={options.centros_custo || []} onChange={(event) => setFilter("costCenter", event.value)} placeholder="Todos os centros" filter showClear /></label>
           <label><span>Supervisor</span><MultiSelect value={filters.supervisor} options={options.supervisores || []} onChange={(event) => setFilter("supervisor", event.value)} placeholder="Todos os supervisores" filter showClear /></label>
           <label><span>Situação</span><MultiSelect value={filters.status} options={options.situacoes || []} onChange={(event) => setFilter("status", event.value)} placeholder="Todas as situações" filter showClear /></label>
         </div>

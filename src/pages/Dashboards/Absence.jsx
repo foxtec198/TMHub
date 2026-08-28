@@ -1,7 +1,7 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -117,10 +117,8 @@ export function AbsenceDashboard() {
           <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
           <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
         </div>
+        <StandardFilterFields date={{ value: filters.period, onChange: (value) => setFilter("period", value) }} department={{ value: filters.department, options: asOptions(options.departamentos, "DPTO. "), onChange: (value) => setFilter("department", value) }} center={{ value: filters.contract, options: asOptions(options.contratos), onChange: (value) => setFilter("contract", value) }} />
         <div className="dashboard-filter-grid">
-          <label className="is-wide"><span>Data</span><Calendar value={filters.period} onChange={(event) => setFilter("period", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
-          <label><span>DPTO</span><MultiSelect value={filters.department} options={asOptions(options.departamentos, "DPTO. ")} onChange={(event) => setFilter("department", event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-          <label className="is-wide"><span>Centro de custo / Contrato</span><MultiSelect value={filters.contract} options={asOptions(options.contratos)} onChange={(event) => setFilter("contract", event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
           <label><span>Situação</span><MultiSelect value={filters.status} options={[{ label: "Pendentes", value: "pendente" }, { label: "Tratadas", value: "tratada" }]} onChange={(event) => setFilter("status", event.value)} placeholder="Todas as situações" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
           <label><span>Classificação</span><MultiSelect value={filters.classification} options={[{ label: "Justificadas", value: "justificada" }, { label: "Injustificadas", value: "injustificada" }, { label: "Em análise", value: "em_analise" }]} onChange={(event) => setFilter("classification", event.value)} placeholder="Todas as classificações" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
           <label><span>Supervisor</span><MultiSelect value={filters.supervisor} options={asOptions(options.supervisores)} onChange={(event) => setFilter("supervisor", event.value)} placeholder="Todos os supervisores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>

@@ -1,8 +1,8 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -316,9 +316,9 @@ export function RequestReport() {
 
       <OverlayPanel ref={filterPanel} className="request-dashboard-filter-panel">
         <div className="request-dashboard-filter-panel__heading"><div><strong>Filtros do dashboard</strong><span>As opções se ajustam ao recorte atual.</span></div><Button icon={<AppIcon name="filter-off" />} label="Limpar" text onClick={clearFilters} /></div>
+        <StandardFilterFields date={{ value: period, onChange: setPeriod }} department={{ value: filters.departamento, options: filterOptions.departamento, onChange: (value) => setFilter("departamento", value) }} center={{ value: filters.contrato, options: filterOptions.contrato, onChange: (value) => setFilter("contrato", value) }} />
         <div className="request-dashboard-filter-grid">
-          <label className="is-wide"><span>Data</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" locale="pt-BR" dateFormat="dd/mm/yy" readOnlyInput hideOnRangeSelection showIcon showButtonBar placeholder="Selecione o período" /></label>
-          {[["departamento", "DPTO / Centro de custo"], ["empresa", "Empresa"], ["filial", "Filial"], ["contrato", "Contrato"], ["supervisor", "Supervisor"], ["motivo", "Motivo"], ["status", "Status"], ["colaborador", "Colaborador"]].map(([field, label]) => <label key={field}><span>{label}</span><MultiSelect value={filters[field]} options={filterOptions[field]} optionLabel="label" optionValue="value" onChange={(event) => setFilter(field, event.value)} placeholder={`Todos: ${label.toLowerCase()}`} display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>)}
+          {[["supervisor", "Supervisor"], ["motivo", "Motivo"], ["status", "Status"], ["colaborador", "Colaborador"]].map(([field, label]) => <label key={field}><span>{label}</span><MultiSelect value={filters[field]} options={filterOptions[field]} optionLabel="label" optionValue="value" onChange={(event) => setFilter(field, event.value)} placeholder={`Todos: ${label.toLowerCase()}`} display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" panelClassName="dashboard-filter-dropdown" /></label>)}
         </div>
       </OverlayPanel>
 

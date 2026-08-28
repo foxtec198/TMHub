@@ -1,0 +1,41 @@
+.standard-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.standard-filter-fields label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.standard-filter-fields label > span:first-child {
+  color: var(--text-color-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+}
+
+.standard-filter-fields .is-wide {
+  grid-column: 1 / -1;
+}
+
+.standard-filter-fields .p-calendar,
+.standard-filter-fields .p-multiselect {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .standard-filter-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .standard-filter-fields .is-wide {
+    grid-column: auto;
+  }
+}
