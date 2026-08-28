@@ -27,6 +27,10 @@ connect.interceptors.request.use((config) => {
     if (selectedFilialIds !== null) {
       config.headers["X-Filial-Ids"] = selectedFilialIds;
     }
+    const selectedCompanyIds = localStorage.getItem("selected_company_ids");
+    if (selectedCompanyIds !== null) {
+      config.headers["X-Empresa-Ids"] = selectedCompanyIds;
+    }
   }
 
   if (!(config.data instanceof FormData)) {

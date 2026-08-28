@@ -73,7 +73,6 @@ export function AdmissionDashboard() {
     const [period, setPeriod] = useState([new Date(now.getFullYear(), now.getMonth() - 5, 1), now]);
     const [filters, setFilters] = useState({ departamento: [], status: [], contrato: [], responsavel: [], colaborador: [] });
     const [data, setData] = useState(null);
-    const [refresh, setRefresh] = useState(0);
     const [activeTable, setActiveTable] = useState('departments');
     const setGlobalLoading = useLoading();
     const { showToast } = useToast();
@@ -106,7 +105,7 @@ export function AdmissionDashboard() {
         };
         load();
         return () => { cancelled = true; };
-    }, [period, filters, refresh, setGlobalLoading, showToast]);
+    }, [period, filters, setGlobalLoading, showToast]);
 
     // Barras mostram volume e a linha usa um segundo eixo para não distorcer a escala de vagas.
     const monthlyChart = useMemo(() => ({
@@ -249,10 +248,10 @@ export function AdmissionDashboard() {
                     <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
                 </div>
                 <div className="dashboard-filter-grid">
-                    <label className="is-wide"><span>Período</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
-                    <label><span>Departamentos</span><MultiSelect value={filters.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} onChange={(event) => setFilter('departamento', event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+                    <label className="is-wide"><span>Data</span><Calendar value={period} onChange={(event) => setPeriod(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
+                    <label><span>DPTO</span><MultiSelect value={filters.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} onChange={(event) => setFilter('departamento', event.value)} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+                    <label className="is-wide"><span>Centro de custo / Contrato</span><MultiSelect value={filters.contrato} options={(filterOptions.contratos || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter('contrato', event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
                     <label><span>Status</span><MultiSelect value={filters.status} options={(filterOptions.status || []).map((value) => ({ label: STATUS_LABELS[value] || value, value }))} onChange={(event) => setFilter('status', event.value)} placeholder="Todos os status" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-                    <label className="is-wide"><span>Contratos</span><MultiSelect value={filters.contrato} options={(filterOptions.contratos || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter('contrato', event.value)} placeholder="Todos os contratos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
                     <label><span>Responsáveis</span><MultiSelect value={filters.responsavel} options={(filterOptions.responsaveis || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter('responsavel', event.value)} placeholder="Todos os responsáveis" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
                     <label className="is-wide"><span>Colaboradores</span><MultiSelect value={filters.colaborador} options={(filterOptions.colaboradores || []).map((value) => ({ label: value, value }))} onChange={(event) => setFilter('colaborador', event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
                 </div>
