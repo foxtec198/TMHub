@@ -1,4 +1,5 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 // Controle de período de experiência.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -458,9 +459,9 @@ export function ExperienceControl() {
 
       <OverlayPanel ref={filterPanel} className="experience-filter-panel">
         <div className="experience-filter-title"><div><strong>Filtrar avaliações</strong><span>Os indicadores e a lista acompanham este recorte.</span></div><Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
+        <StandardFilterFields department={{ value: selectedDepartments, options: departmentOptions, onChange: setSelectedDepartments }} />
         <div className="experience-filters">
           <label className="experience-search is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left"><AppIcon name="search"  /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula ou contrato" /></span></label>
-          <label><span>Departamento</span><MultiSelect value={selectedDepartments} options={departmentOptions} onChange={(event) => setSelectedDepartments(event.value || [])} placeholder="Todos os departamentos" filter showClear /></label>
           <label><span>Supervisor</span><MultiSelect value={selectedSupervisors} options={supervisors} onChange={(event) => setSelectedSupervisors(event.value || [])} placeholder="Todos os supervisores" filter showClear /></label>
           <label><span>Situação</span><MultiSelect value={selectedStatuses} options={STATUS_OPTIONS} onChange={(event) => setSelectedStatuses(event.value || [])} placeholder="Todas as situações" showClear /></label>
         </div>

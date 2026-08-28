@@ -1,7 +1,7 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
@@ -337,8 +337,8 @@ export function Ponto48Dashboard() {
       <OverlayPanel ref={filterPanel} className="ponto48-filter-panel">
         <div className="ponto48-filter-title"><div><strong>Filtrar Ponto 48 horas</strong><span>Um único conjunto de filtros para as duas abas.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded onClick={clearFilters} /></div>
         <Divider />
-        <label className="ponto48-filter-field"><span>Data dos ajustes</span><Calendar value={dateRange} onChange={(event) => setDateRange(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Um dia ou período" showButtonBar /></label>
-        {[["departamentos", "Departamentos"], ["centros", "Centros de custo"], ["supervisores", "Supervisores"], ["vinculos", "Vínculos por nome"], ["motivos", "Motivos dos ajustes"], ["responsaveis", "Responsáveis pelos ajustes"]].map(([name, label]) => (
+        <StandardFilterFields date={{ value: dateRange, onChange: setDateRange }} department={{ value: filters.departamentos, options: options.departamentos, onChange: (value) => setFilters((current) => ({ ...current, departamentos: value })) }} center={{ value: filters.centros, options: options.centros, onChange: (value) => setFilters((current) => ({ ...current, centros: value })) }} />
+        {[["supervisores", "Supervisores"], ["vinculos", "Vínculos por nome"], ["motivos", "Motivos dos ajustes"], ["responsaveis", "Responsáveis pelos ajustes"]].map(([name, label]) => (
           <label className="ponto48-filter-field" key={name}><span>{label}</span><MultiSelect value={filters[name]} options={options[name]} optionLabel="label" optionValue="value" display="chip" filter className="w-full" onChange={(event) => setFilters((current) => ({ ...current, [name]: event.value || [] }))} /></label>
         ))}
       </OverlayPanel>

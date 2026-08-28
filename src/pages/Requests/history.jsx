@@ -1,8 +1,8 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { ButtonGroup } from "primereact/buttongroup";
-import { Calendar } from "primereact/calendar";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -530,24 +530,11 @@ function HistoryPage() {
                         onClick={clearFilters}
                     />
                 </div>
+                <StandardFilterFields date={{ value: dateFilter, onChange: setDateFilter }} />
                 <div className="dashboard-filter-grid">
-                    <label className="is-wide">
-                        <span>Período</span>
-                        <Calendar
-                            value={dateFilter}
-                            onChange={(event) => setDateFilter(event.value)}
-                            selectionMode="range"
-                            readOnlyInput
-                            hideOnRangeSelection
-                            showIcon
-                            dateFormat="dd/mm/yy"
-                        />
-                    </label>
                     <CombinedMultiSelect name="status" label="Status" options={filterOptions.status} placeholder="Todos os status" panelClassName="dashboard-filter-dropdown" />
                     <CombinedMultiSelect name="motivo" label="Motivo" options={filterOptions.motivo} placeholder="Todos os motivos" panelClassName="dashboard-filter-dropdown" />
-                    <CombinedMultiSelect name="departamento" label="Departamento" options={filterOptions.departamento} placeholder="Todos os departamentos" panelClassName="dashboard-filter-dropdown" />
                     <CombinedMultiSelect name="supervisor" label="Supervisor" options={filterOptions.supervisor} placeholder="Todos os supervisores" panelClassName="dashboard-filter-dropdown" />
-                    <CombinedMultiSelect name="local" label="Local / contrato" options={filterOptions.local} placeholder="Todos os locais" className="is-wide" panelClassName="dashboard-filter-dropdown" />
                     <CombinedMultiSelect name="ausente" label="Ausente" options={filterOptions.ausente} placeholder="Todos os ausentes" panelClassName="dashboard-filter-dropdown" />
                     <CombinedMultiSelect name="reserva" label="Reserva" options={filterOptions.reserva} placeholder="Todas as reservas" panelClassName="dashboard-filter-dropdown" />
                 </div>

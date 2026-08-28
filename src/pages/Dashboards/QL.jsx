@@ -1,11 +1,10 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import "./ql.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Chart } from "primereact/chart";
-import { MultiSelect } from "primereact/multiselect";
 import { OverlayPanel } from "primereact/overlaypanel";
 
 import { PageHeader } from "../../components/PageHeader";
@@ -105,8 +104,6 @@ export function QLDashboard() {
   }, [filters, refresh, setLoading, showToast]);
 
   const summary = data?.resumo || {};
-  const options = data?.filtros?.departamentos || [];
-  const companyOptions = data?.filtros?.empresas || [];
   const evolution = useMemo(() => data?.evolucao || [], [data?.evolucao]);
   const chartData = useMemo(() => ({
     labels: evolution.map((row) => new Date(`${row.data}T12:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })),
@@ -231,11 +228,7 @@ export function QLDashboard() {
         <div><strong>Filtrar dashboard</strong><span>As métricas, evolução e tabela respeitam o recorte selecionado.</span></div>
         <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
-      <div className="dashboard-filter-grid">
-        <label className="is-wide"><span>Data</span><Calendar value={filters.mes} onChange={(event) => setFilters((current) => ({ ...current, mes: event.value || currentMonth() }))} view="month" dateFormat="mm/yy" readOnlyInput showIcon className="w-full" /></label>
-        <label><span>DPTO / Centro de custo</span><MultiSelect value={filters.departamentos} options={options} onChange={(event) => setFilters((current) => ({ ...current, departamentos: event.value || [] }))} placeholder="Todos os departamentos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-        <label><span>Empresa / Filial</span><MultiSelect value={filters.empresas} options={companyOptions} onChange={(event) => setFilters((current) => ({ ...current, empresas: event.value || [] }))} placeholder="Todas as empresas" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-      </div>
+      <StandardFilterFields date={{ value: filters.mes, onChange: (value) => setFilters((current) => ({ ...current, mes: value || currentMonth() })), view: "month" }} />
     </OverlayPanel>
   </main>;
 }

@@ -1,4 +1,5 @@
 import { AppIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 // Controle de Faltas - FaltsControl.jsx
 // Utils
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -479,14 +480,12 @@ function AbsenceControlPage() {
 
     <OverlayPanel ref={filterPanel} className="absence-filter-panel">
       <div className="absence-filter-title"><div><strong>Filtrar faltas</strong><span>O período começa no mês atual.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
+      <StandardFilterFields date={{ value: dateRange, onChange: setDateRange }} />
       <div className="absence-filter-grid">
-        <label className="is-wide"><span>Período</span><Calendar value={dateRange} onChange={(event) => setDateRange(event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" showIcon /></label>
         <CombinedMultiSelect name="status" label="Situação" options={filterOptions.status} placeholder="Todas as situações" />
         <CombinedMultiSelect name="classificacao" label="Classificação" options={filterOptions.classificacao} placeholder="Todas as classificações" />
-        <CombinedMultiSelect name="departamento" label="Departamento" options={filterOptions.departamento} placeholder="Todos os departamentos" />
         <CombinedMultiSelect name="supervisor" label="Supervisor" options={filterOptions.supervisor} placeholder="Todos os supervisores" />
         <CombinedMultiSelect name="motivo" label="Motivo" options={filterOptions.motivo} placeholder="Todos os motivos" className="is-wide" />
-        <CombinedMultiSelect name="contrato" label="Contrato" options={filterOptions.contrato} placeholder="Todos os contratos" className="is-wide" />
         <CombinedMultiSelect name="colaborador" label="Colaborador" options={filterOptions.colaborador} placeholder="Todos os colaboradores" className="is-wide" />
       </div>
     </OverlayPanel>

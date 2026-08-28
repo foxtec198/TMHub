@@ -1,8 +1,8 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { DataTable } from "../../components/tables/DataTable";
@@ -295,6 +295,7 @@ export function DisciplinaryMeasures() {
           />
         </div>
         <Divider />
+        <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => updateFilter("periodo", value) }} department={{ value: filters.departamento, options: departments, onChange: (value) => updateFilter("departamento", value) }} />
         <div className="dashboard-filter-grid disciplinary-filter-grid">
           <label className="is-wide">
             <span>Busca</span>
@@ -306,14 +307,6 @@ export function DisciplinaryMeasures() {
           <label>
             <span>Colaboradores</span>
             <MultiSelect value={filters.colaborador_id} options={employees} onChange={(event) => updateFilter("colaborador_id", event.value)} placeholder="Todos os colaboradores" display="chip" filter maxSelectedLabels={1} />
-          </label>
-          <label>
-            <span>Período</span>
-            <Calendar value={filters.periodo} onChange={(event) => updateFilter("periodo", event.value)} selectionMode="range" dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar readOnlyInput />
-          </label>
-          <label>
-            <span>Departamentos</span>
-            <MultiSelect value={filters.departamento} options={departments} onChange={(event) => updateFilter("departamento", event.value)} placeholder="Todos os departamentos" display="chip" filter maxSelectedLabels={1} />
           </label>
           <label>
             <span>Supervisores</span>

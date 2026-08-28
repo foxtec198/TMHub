@@ -1,4 +1,5 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
@@ -471,6 +472,7 @@ export function Structure() {
                         onClick={clearFilters}
                     />
                 </div>
+                <StandardFilterFields />
                 <div className="structure-filter-grid">
                     <label className="structure-filter-search">
                         Busca
@@ -482,28 +484,6 @@ export function Structure() {
                                 onChange={(event) => setFilters({ ...filters, search: event.target.value })}
                             />
                         </span>
-                    </label>
-                    <label>
-                        Departamento
-                        <Dropdown
-                            value={filters.department}
-                            options={filterOptions.departments}
-                            showClear
-                            filter
-                            placeholder="Todos"
-                            onChange={(event) => setFilters({ ...filters, department: event.value })}
-                        />
-                    </label>
-                    <label>
-                        Contrato
-                        <Dropdown
-                            value={filters.contract}
-                            options={filterOptions.contracts}
-                            showClear
-                            filter
-                            placeholder="Todos"
-                            onChange={(event) => setFilters({ ...filters, contract: event.value })}
-                        />
                     </label>
                     <label>
                         Supervisor
