@@ -446,6 +446,12 @@ export function MainLayout() {
       command: () => { navigateTo("/projetos") }
     },
     {
+      label: 'Marketplace',
+      icon: appIcon("shopping-cart"),
+      visible: String(role || "").toUpperCase() === "ADMIN",
+      command: () => { navigateTo("/marketplace") }
+    },
+    {
       label: 'Configurações',
       icon: appIcon("settings"),
       command: () => { navigateTo("/configuracoes") }
