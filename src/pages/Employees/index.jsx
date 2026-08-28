@@ -186,6 +186,11 @@ export function EmployeesPage() {
     const timer = window.setTimeout(() => { load(); }, 0);
     return () => window.clearTimeout(timer);
   }, [load]);
+  useEffect(() => {
+    const reloadForScope = () => { setPage(0); load(); };
+    window.addEventListener("tmhub:standard-filters-changed", reloadForScope);
+    return () => window.removeEventListener("tmhub:standard-filters-changed", reloadForScope);
+  }, [load]);
   useEffect(() => { connect.get("/funcionarios/filtros").then(({ data }) => setOptions(data || {})).catch(() => {}); }, []);
 
   const exportRows = async () => {

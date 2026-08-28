@@ -61,7 +61,6 @@ const REALTIME_CHANNELS_BY_ROUTE = {
 };
 
 export function MainLayout() {
-  const [standardFilterVersion, setStandardFilterVersion] = useState(0);
   const [fls, setFls] = useState([]);
   const [selectedFilialIds, setSelectedFilialIds] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -82,12 +81,6 @@ export function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const deny = deny_roles.includes(role)
-
-  useEffect(() => {
-    const remountCurrentPage = () => setStandardFilterVersion((value) => value + 1);
-    window.addEventListener("tmhub:standard-filters-changed", remountCurrentPage);
-    return () => window.removeEventListener("tmhub:standard-filters-changed", remountCurrentPage);
-  }, []);
 
   useEffect(() => {
     const clearGlobalScope = () => {
@@ -747,7 +740,7 @@ export function MainLayout() {
 
         {/* PANEL FRAME */}
         <main className="layout-outlet">
-          <Outlet key={standardFilterVersion} />
+          <Outlet />
         </main>
       </div>
     </div>

@@ -37,6 +37,11 @@ export function CostCentersPage() {
     return () => window.clearTimeout(timer);
   }, [load]);
   useEffect(() => {
+    const reloadForScope = () => { setPage(0); load(); };
+    window.addEventListener("tmhub:standard-filters-changed", reloadForScope);
+    return () => window.removeEventListener("tmhub:standard-filters-changed", reloadForScope);
+  }, [load]);
+  useEffect(() => {
     if (!isAdmin) return;
     connect.get("/centro/empresas")
       .then(({ data }) => setCompanies((data || []).filter((item) => item.ativa).map((item) => ({ label: item.nome, value: item.id }))))
