@@ -9,7 +9,6 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { PageHeader } from "../../components/PageHeader";
 import { Placeholder } from "../../components/Placeholder";
 import { UserAvatar } from "../../components/UserAvatar";
-import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useChartTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
@@ -83,12 +82,12 @@ export function ProjectDashboard() {
   const [filters, setFilters] = useState(defaultFilters);
   const [photosByUserId, setPhotosByUserId] = useState({});
   const filterPanel = useRef(null);
-  const setLoading = useLoading();
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(true)
   const { showToast } = useToast();
 
   useEffect(() => {
     if (!filters.periodo?.[0] || !filters.periodo?.[1]) return;
-    setLoading(true);
     connect.get("/projetos/dashboard", {
       params: {
         inicio: asDate(filters.periodo[0]), fim: asDate(filters.periodo[1]),
@@ -97,9 +96,12 @@ export function ProjectDashboard() {
       },
     })
       .then(({ data: response }) => setData(response))
-      .catch((error) => showToast("error", "Dashboard de Projetos", error.response?.data || "Não foi possível carregar os dados."))
-      .finally(() => setLoading(false));
-  }, [filters, setLoading, showToast]);
+      .catch((error) => {
+        showToast("error", "Dashboard de Projetos", error.response?.data || "Não foi possível carregar os dados.");
+        setError(error)
+      })
+      .finally(setLoading(false))
+  }, [filters, showToast]);
 
   useEffect(() => {
     const membersAlreadyHavePhotos = [
@@ -184,122 +186,134 @@ export function ProjectDashboard() {
         title="Dashboard de Projetos"
         description="Prazos, execução e distribuição dos cards pelos membros."
         actions={<>
-          <div className="project-dashboard-period"><AppIcon name="calendar"  />{filters.periodo?.[0]?.toLocaleDateString("pt-BR")} — {filters.periodo?.[1]?.toLocaleDateString("pt-BR")}</div>
+          <div className="project-dashboard-period"><AppIcon name="calendar" />{filters.periodo?.[0]?.toLocaleDateString("pt-BR")} — {filters.periodo?.[1]?.toLocaleDateString("pt-BR")}</div>
           <Button type="button" icon={<AppIcon name="filter-filled" />} label={activeFilterCount ? `Filtros (${activeFilterCount})` : "Filtros"} aria-label="Abrir filtros do dashboard" onClick={(event) => filterPanel.current?.toggle(event)} />
         </>}
       />
 
-      <section className="project-progress-overview">
-        <div>
-          <span className="project-dashboard-eyebrow">Progresso dos cards</span>
-          <h2>Visão geral do portfólio</h2>
-        </div>
-        <div className="project-progress-segments">
-          {statusProgress.map((item) => (
-            <div className={`is-${item.tone}`} key={item.key}>
-              <span>{item.label}</span>
-              <strong>{percentage(item.value, totalCards)}%</strong>
-              <small>{item.value} cards</small>
+      {loading && !data ?
+        <Placeholder loading variant="dashboard" /> : error && !data ? (
+          <Placeholder
+            icon={<AppIcon name="alert-triangle" />}
+            title="Não foi possível abrir o dashboard"
+            description={error}
+            action={<Button label="Tentar novamente" icon={<AppIcon name="refresh"
+            />}
+            />}
+          />
+        ) : <>
+          <section className="project-progress-overview">
+            <div>
+              <span className="project-dashboard-eyebrow">Progresso dos cards</span>
+              <h2>Visão geral do portfólio</h2>
             </div>
-          ))}
-        </div>
-        <div className="project-progress-totals">
-          <span><AppIcon name="users"  /><strong>{summary.participantes || 0}</strong><small>Participantes</small></span>
-          <span><AppIcon name="folder-open"  /><strong>{summary.projetos || 0}</strong><small>Projetos</small></span>
-        </div>
-      </section>
-
-      <section className="project-command-grid">
-        <article className="project-command-card tm-dashboard-panel project-participants-card">
-          <header><span>Pessoas</span><h2>Times por projeto</h2></header>
-          <div className="project-participant-groups">
-            {(data?.participantes_por_projeto || []).map((group) => (
-              <div className="project-participant-group" key={group.projeto_id}>
-                <div>
-                  <i style={{ "--project-color": group.cor || "#168447" }} />
-                  <span><strong>{group.projeto}</strong><small>{group.membros.length} participante(s)</small></span>
+            <div className="project-progress-segments">
+              {statusProgress.map((item) => (
+                <div className={`is-${item.tone}`} key={item.key}>
+                  <span>{item.label}</span>
+                  <strong>{percentage(item.value, totalCards)}%</strong>
+                  <small>{item.value} cards</small>
                 </div>
-                <div className="project-member-stack">
-                  {group.membros.slice(0, 6).map((member) => <MemberAvatar member={member} photosByUserId={photosByUserId} key={member.id} />)}
-                  {group.membros.length > 6 && <span className="project-member-more">+{group.membros.length - 6}</span>}
+              ))}
+            </div>
+            <div className="project-progress-totals">
+              <span><AppIcon name="users" /><strong>{summary.participantes || 0}</strong><small>Participantes</small></span>
+              <span><AppIcon name="folder-open" /><strong>{summary.projetos || 0}</strong><small>Projetos</small></span>
+            </div>
+          </section>
+
+          <section className="project-command-grid">
+            <article className="project-command-card tm-dashboard-panel project-participants-card">
+              <header><span>Pessoas</span><h2>Times por projeto</h2></header>
+              <div className="project-participant-groups">
+                {(data?.participantes_por_projeto || []).map((group) => (
+                  <div className="project-participant-group" key={group.projeto_id}>
+                    <div>
+                      <i style={{ "--project-color": group.cor || "#168447" }} />
+                      <span><strong>{group.projeto}</strong><small>{group.membros.length} participante(s)</small></span>
+                    </div>
+                    <div className="project-member-stack">
+                      {group.membros.slice(0, 6).map((member) => <MemberAvatar member={member} photosByUserId={photosByUserId} key={member.id} />)}
+                      {group.membros.length > 6 && <span className="project-member-more">+{group.membros.length - 6}</span>}
+                    </div>
+                  </div>
+                ))}
+                {!data?.participantes_por_projeto?.length && <EmptyChart text="Nenhum participante no recorte." />}
+              </div>
+            </article>
+
+            <article className="project-command-card tm-dashboard-panel project-performance-card">
+              <header><span>Performance</span><h2>Entrega contra o prazo</h2></header>
+              <div className="project-performance-content">
+                <div
+                  className="project-performance-ring"
+                  style={{ "--deadline-progress": `${Math.min(100, Number(summary.percentual_dentro_prazo || 0)) * 3.6}deg` }}
+                >
+                  <span><strong>{summary.percentual_dentro_prazo || 0}%</strong><small>dentro do prazo</small></span>
                 </div>
-              </div>
-            ))}
-            {!data?.participantes_por_projeto?.length && <EmptyChart text="Nenhum participante no recorte." />}
-          </div>
-        </article>
-
-        <article className="project-command-card tm-dashboard-panel project-performance-card">
-          <header><span>Performance</span><h2>Entrega contra o prazo</h2></header>
-          <div className="project-performance-content">
-            <div
-              className="project-performance-ring"
-              style={{ "--deadline-progress": `${Math.min(100, Number(summary.percentual_dentro_prazo || 0)) * 3.6}deg` }}
-            >
-              <span><strong>{summary.percentual_dentro_prazo || 0}%</strong><small>dentro do prazo</small></span>
-            </div>
-            <div className="project-performance-breakdown">
-              <div className="is-on-time"><span>Dentro do prazo</span><strong>{summary.dentro_prazo || 0}</strong><small>{summary.percentual_dentro_prazo || 0}% do total</small></div>
-              <div className="is-late"><span>Fora do prazo</span><strong>{summary.fora_prazo || 0}</strong><small>{summary.percentual_fora_prazo || 0}% do total</small></div>
-              <div className="is-average"><span>Tempo médio</span><strong>{formatHours(summary.tempo_medio_horas)}</strong><small>até a conclusão</small></div>
-            </div>
-          </div>
-        </article>
-
-        <article className="project-command-card tm-dashboard-panel project-deadlines-card">
-          <header><span>Agenda</span><h2>Próximos vencimentos</h2></header>
-          <div className="project-deadline-feed">
-            {upcomingCards.map((card) => (
-              <div className={card.atrasado ? "is-late" : ""} key={card.id}>
-                <span className="project-deadline-day">{parseCardDate(card.data_fim)?.getDate().toString().padStart(2, "0") || "—"}</span>
-                <span><strong>{card.titulo}</strong><small>{card.projeto || "Projeto não informado"}</small></span>
-                <time>{formatCardDate(card.data_fim, true)}</time>
-              </div>
-            ))}
-            {!upcomingCards.length && <EmptyChart text="Nenhum vencimento no período." />}
-          </div>
-        </article>
-
-        <article className="project-command-card tm-dashboard-panel project-timeline-card">
-          <header><span>Planejamento</span><h2>Timeline dos cards</h2></header>
-          <div className="project-card-timeline">
-            {timelineCards.map((card) => (
-              <div className={`is-${card.status}`} key={card.id}>
-                <time>{formatCardDate(card.data_inicio || card.data_fim)}</time>
-                <span className="project-timeline-marker" />
-                <div>
-                  <span><strong>{card.titulo}</strong><small>{card.projeto}</small></span>
-                  <span className="project-member-stack is-compact">
-                    {(card.membros || []).slice(0, 4).map((member) => <MemberAvatar member={member} photosByUserId={photosByUserId} small key={member.id} />)}
-                  </span>
+                <div className="project-performance-breakdown">
+                  <div className="is-on-time"><span>Dentro do prazo</span><strong>{summary.dentro_prazo || 0}</strong><small>{summary.percentual_dentro_prazo || 0}% do total</small></div>
+                  <div className="is-late"><span>Fora do prazo</span><strong>{summary.fora_prazo || 0}</strong><small>{summary.percentual_fora_prazo || 0}% do total</small></div>
+                  <div className="is-average"><span>Tempo médio</span><strong>{formatHours(summary.tempo_medio_horas)}</strong><small>até a conclusão</small></div>
                 </div>
               </div>
-            ))}
-            {!timelineCards.length && <EmptyChart text="Nenhum card com data no período." />}
-          </div>
-        </article>
+            </article>
 
-        <article className="project-command-card tm-dashboard-panel project-status-card">
-          <header><span>Status</span><h2>Distribuição atual</h2></header>
-          <div className="project-dashboard-doughnut">
-            {totalCards ? <Chart type="doughnut" data={statusChart} options={doughnutOptions} plugins={[projectDoughnutCenterPlugin]} /> : <EmptyChart text="Sem cards no período." />}
-          </div>
-        </article>
-      </section>
+            <article className="project-command-card tm-dashboard-panel project-deadlines-card">
+              <header><span>Agenda</span><h2>Próximos vencimentos</h2></header>
+              <div className="project-deadline-feed">
+                {upcomingCards.map((card) => (
+                  <div className={card.atrasado ? "is-late" : ""} key={card.id}>
+                    <span className="project-deadline-day">{parseCardDate(card.data_fim)?.getDate().toString().padStart(2, "0") || "—"}</span>
+                    <span><strong>{card.titulo}</strong><small>{card.projeto || "Projeto não informado"}</small></span>
+                    <time>{formatCardDate(card.data_fim, true)}</time>
+                  </div>
+                ))}
+                {!upcomingCards.length && <EmptyChart text="Nenhum vencimento no período." />}
+              </div>
+            </article>
 
-      <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
-        <div className="dashboard-filter-title">
-          <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
-          <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
-        </div>
-        <div className="dashboard-filter-grid">
-          <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
-          <label><span>Projetos</span><MultiSelect value={filters.projeto} options={proceduralOptions.projetos || []} onChange={(event) => setFilter("projeto", event.value)} placeholder="Todos os projetos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-          <label><span>Colaboradores</span><MultiSelect value={filters.colaborador} options={proceduralOptions.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-          <label className="is-wide"><span>Cards</span><MultiSelect value={filters.card} options={proceduralOptions.cards || []} onChange={(event) => setFilter("card", event.value)} placeholder="Todos os cards" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-          <label className="is-wide"><span>Status</span><MultiSelect value={filters.status} options={(proceduralOptions.status || ["fazer", "andamento", "conclu"]).map((value) => ({ label: value.replace(/\b\w/g, (letter) => letter.toUpperCase()), value }))} onChange={(event) => setFilter("status", event.value)} placeholder="Todos os status" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-        </div>
-      </OverlayPanel>
+            <article className="project-command-card tm-dashboard-panel project-timeline-card">
+              <header><span>Planejamento</span><h2>Timeline dos cards</h2></header>
+              <div className="project-card-timeline">
+                {timelineCards.map((card) => (
+                  <div className={`is-${card.status}`} key={card.id}>
+                    <time>{formatCardDate(card.data_inicio || card.data_fim)}</time>
+                    <span className="project-timeline-marker" />
+                    <div>
+                      <span><strong>{card.titulo}</strong><small>{card.projeto}</small></span>
+                      <span className="project-member-stack is-compact">
+                        {(card.membros || []).slice(0, 4).map((member) => <MemberAvatar member={member} photosByUserId={photosByUserId} small key={member.id} />)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {!timelineCards.length && <EmptyChart text="Nenhum card com data no período." />}
+              </div>
+            </article>
+
+            <article className="project-command-card tm-dashboard-panel project-status-card">
+              <header><span>Status</span><h2>Distribuição atual</h2></header>
+              <div className="project-dashboard-doughnut">
+                {totalCards ? <Chart type="doughnut" data={statusChart} options={doughnutOptions} plugins={[projectDoughnutCenterPlugin]} /> : <EmptyChart text="Sem cards no período." />}
+              </div>
+            </article>
+          </section>
+
+          <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
+            <div className="dashboard-filter-title">
+              <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
+              <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+            </div>
+            <div className="dashboard-filter-grid">
+              <label className="is-wide"><span>Período</span><Calendar value={filters.periodo} onChange={(event) => setFilter("periodo", event.value)} selectionMode="range" readOnlyInput hideOnRangeSelection dateFormat="dd/mm/yy" placeholder="Selecione o período" showIcon showButtonBar /></label>
+              <label><span>Projetos</span><MultiSelect value={filters.projeto} options={proceduralOptions.projetos || []} onChange={(event) => setFilter("projeto", event.value)} placeholder="Todos os projetos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+              <label><span>Colaboradores</span><MultiSelect value={filters.colaborador} options={proceduralOptions.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+              <label className="is-wide"><span>Cards</span><MultiSelect value={filters.card} options={proceduralOptions.cards || []} onChange={(event) => setFilter("card", event.value)} placeholder="Todos os cards" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+              <label className="is-wide"><span>Status</span><MultiSelect value={filters.status} options={(proceduralOptions.status || ["fazer", "andamento", "conclu"]).map((value) => ({ label: value.replace(/\b\w/g, (letter) => letter.toUpperCase()), value }))} onChange={(event) => setFilter("status", event.value)} placeholder="Todos os status" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+            </div>
+          </OverlayPanel>
+        </>}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 // Utils
 import { MainLayout } from "./layouts/MainLayout";
-import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { createRoot } from "react-dom/client";
 import { useEffect } from "react";
 import { addLocale } from "primereact/api";

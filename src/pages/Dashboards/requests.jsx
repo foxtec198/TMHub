@@ -60,10 +60,12 @@ function parseDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function dateLabel(value, withTime = false) {
+function dateLabel(value, withTime = false, chart = false) {
   const date = parseDate(value);
   if (!date) return "—";
-  return new Intl.DateTimeFormat("pt-BR", withTime
+  return new Intl.DateTimeFormat("pt-BR", chart
+    ? { day: "2-digit", month: "2-digit"}
+    : withTime
     ? { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }
     : { day: "2-digit", month: "2-digit", year: "numeric" },
   ).format(date).replace(",", " ·");
@@ -240,7 +242,7 @@ export function RequestReport() {
     .sort(([, left], [, right]) => right.total - left.total), [filteredRecords]);
 
   const dailyChart = useMemo(() => ({
-    labels: daily.map((item) => dateLabel(item.date)),
+    labels: daily.map((item) => dateLabel(item.date, false, true)),
     datasets: [
       {
         label: "Requisições",

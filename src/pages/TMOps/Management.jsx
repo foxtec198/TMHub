@@ -209,15 +209,6 @@ export function TMOpsManagement({ mode = "routines" }) {
         section="TM Ops"
         title={title}
         description={description}
-        actions={
-          <Button
-            icon={<AppIcon name="refresh" />}
-            outlined
-            aria-label="Atualizar"
-            tooltip="Atualizar"
-            onClick={load}
-          />
-        }
       />
       <section className="tm-ops-content-card">
         <div className="tm-ops-toolbar">

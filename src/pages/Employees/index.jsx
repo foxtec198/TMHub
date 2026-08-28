@@ -23,6 +23,12 @@ function date(value) {
   return Number.isNaN(parsed.getTime()) ? "—" : parsed.toLocaleDateString("pt-BR");
 }
 
+function dateTime(value) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? "—" : parsed.toLocaleString("pt-BR");
+}
+
 function ImportEmployees({ onCompleted }) {
   const { showToast } = useToast();
   const fileRef = useRef(null);
@@ -32,12 +38,21 @@ function ImportEmployees({ onCompleted }) {
   const [job, setJob] = useState(null);
   const [stage, setStage] = useState("idle");
   const [progress, setProgress] = useState(0);
+  const [history, setHistory] = useState([]);
+
+  const loadHistory = useCallback(() => {
+    connect.get("/importacao-colaboradores/historico", { params: { limit: 10 } })
+      .then(({ data }) => setHistory(Array.isArray(data) ? data : []))
+      .catch(() => setHistory([]));
+  }, []);
 
   useEffect(() => {
     connect.get("/importacao-colaboradores/empresas").then(({ data }) => {
       setCompanies((Array.isArray(data) ? data : []).filter((item) => item.ativa).map((item) => ({ label: item.nome, value: item.id })));
     }).catch(() => showToast("error", "Empresas", "Não foi possível carregar as empresas."));
   }, [showToast]);
+
+  useEffect(() => { loadHistory(); }, [loadHistory]);
 
   useEffect(() => {
     if (!job?.id || !["uploading", "processing"].includes(stage)) return undefined;
@@ -49,6 +64,7 @@ function ImportEmployees({ onCompleted }) {
         setJob(data);
         if (data.status === "completed") {
           setStage("completed");
+          loadHistory();
           showToast("success", "Importação concluída", `${data.colaboradores_criados || 0} criado(s) e ${data.colaboradores_atualizados || 0} atualizado(s).`);
           onCompleted?.();
         }
@@ -57,7 +73,7 @@ function ImportEmployees({ onCompleted }) {
     };
     poll(); const timer = window.setInterval(poll, 900);
     return () => { active = false; window.clearInterval(timer); };
-  }, [job?.id, stage, showToast, onCompleted]);
+  }, [job?.id, stage, showToast, onCompleted, loadHistory]);
 
   const choose = (selected) => {
     if (!selected) return;
@@ -85,7 +101,7 @@ function ImportEmployees({ onCompleted }) {
   const running = ["uploading", "processing"].includes(stage);
   const percent = stage === "uploading" ? progress : Number(job?.percentual || 0);
   const label = stage === "uploading" ? `Enviando arquivo: ${progress}%` : `${job?.phase || "Preparando"}: ${job?.processados || 0} de ${job?.total || 0}`;
-  return <article className="entity-import-card">
+  return <div className="employee-import-content"><article className="entity-import-card">
     <div><AppIcon name="upload"  /><span><strong>Importar colaboradores</strong><small>O arquivo atualiza colaboradores apenas na empresa escolhida. Centros são resolvidos pelo código já cadastrado.</small></span></div>
     <Dropdown value={companyId} options={companies} filter showClear disabled={running} onChange={(event) => setCompanyId(event.value)} placeholder="Empresa da importação *" />
     <div className="entity-import-card__drop" role="button" tabIndex={0} onClick={() => !running && fileRef.current?.click()} onKeyDown={(event) => event.key === "Enter" && fileRef.current?.click()}>
@@ -95,7 +111,13 @@ function ImportEmployees({ onCompleted }) {
     {stage !== "idle" && <div className="entity-import-card__progress"><span>{label}</span><ProgressBar value={percent} showValue={false} /></div>}
     {job?.status === "completed" && <small className="entity-import-card__result">Cargos criados: {job.cargos_criados || 0} · Ignorados: {job.colaboradores_ignorados || 0} · Duplicidades: {job.duplicidades || 0}</small>}
     <Button label={running ? "Importação em andamento" : "Iniciar importação"} icon={<AppIcon name="upload" />} disabled={!file || !companyId || running} onClick={upload} />
-  </article>;
+  </article><section className="employee-import-history">
+    <div className="employee-import-history__heading"><div><strong>Histórico de importações</strong><small>Últimas cargas recebidas pelo TMHub</small></div><Button icon={<AppIcon name="refresh" />} text rounded aria-label="Atualizar histórico" onClick={loadHistory} /></div>
+    {history.length ? <div className="employee-import-history__list">{history.map((item) => <article key={item.job_id}>
+      <div><strong>{item.empresa_nome}</strong><small>{item.origem === "script" ? "Script" : `Sistema · ${item.usuario_nome || "Usuário não identificado"}`} · {dateTime(item.iniciado_em)}</small></div>
+      <div><Tag value={item.status === "completed" ? "CONCLUÍDA" : item.status === "error" ? "ERRO" : "EM ANDAMENTO"} severity={item.status === "completed" ? "success" : item.status === "error" ? "danger" : "info"} /><small>{item.total || 0} total · {item.colaboradores_criados || 0} criados · {item.colaboradores_atualizados || 0} atualizados</small></div>
+    </article>)}</div> : <p className="employee-import-history__empty">Nenhuma importação registrada ainda.</p>}
+  </section></div>;
 }
 
 export function EmployeesPage() {

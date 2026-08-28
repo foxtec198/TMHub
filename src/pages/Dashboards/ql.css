@@ -1,37 +1,248 @@
-.ql-dashboard { display: grid; gap: 1.25rem; }
-.ql-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
-.ql-summary-card { min-height: 7.5rem; display: flex; align-items: center; gap: 1rem; padding: 1.2rem; }
-.ql-summary-card__icon { width: 2.8rem; height: 2.8rem; display: grid; place-items: center; border-radius: .85rem; background: color-mix(in srgb, var(--primary-color) 15%, transparent); color: var(--primary-color); font-size: 1.2rem; }
-.ql-summary-card small, .ql-summary-card em { display: block; color: var(--text-color-secondary); font-size: .76rem; font-style: normal; }
-.ql-summary-card strong { display: block; color: var(--text-color); font-size: 1.75rem; line-height: 1.15; margin: .2rem 0; }
-.ql-dashboard-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr); gap: 1rem; }
-.ql-panel { padding: 1.25rem; }
-.ql-panel > header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
-.ql-panel > header span, .ql-insight-panel > span { color: var(--primary-color); font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.ql-panel h2 { margin: .2rem 0 0; font-size: 1.15rem; color: var(--text-color); }
-.ql-panel header small { color: var(--text-color-secondary); text-align: right; max-width: 18rem; }
-.ql-chart { height: 19rem; }
-.ql-empty { height: 100%; display: grid; place-content: center; gap: .6rem; text-align: center; color: var(--text-color-secondary); }
-.ql-empty i { font-size: 1.8rem; color: var(--primary-color); }
-.ql-insight-panel { display: flex; flex-direction: column; justify-content: center; }
-.ql-insight-panel h2 { font-size: 1.55rem; margin: .5rem 0; }
-.ql-insight-panel p { color: var(--text-color-secondary); line-height: 1.6; margin: 0; }
-.ql-insight-panel dl { border-top: 1px solid var(--surface-border); margin: 1.2rem 0 0; padding-top: 1rem; display: grid; gap: .8rem; }
-.ql-insight-panel dl div { display: flex; justify-content: space-between; gap: .75rem; }
-.ql-insight-panel dt { color: var(--text-color-secondary); font-size: .8rem; }
-.ql-insight-panel dd { margin: 0; color: var(--text-color); font-size: .8rem; font-weight: 700; text-align: right; }
-.ql-table-panel :is(.p-datatable, .table-component) { margin-top: .5rem; }
-.ql-muted { color: var(--text-color-secondary); }
-.ql-negative { color: var(--red-500, #ef4444); font-weight: 800; }
-.ql-positive { color: var(--green-500, #22c55e); font-weight: 800; }
-.ql-daily-value { display: inline-flex; align-items: baseline; gap: .32rem; font-variant-numeric: tabular-nums; font-size: .88rem; letter-spacing: .01em; white-space: nowrap; }
-.ql-daily-value strong { font-weight: 800; }
-.ql-daily-value b { font-weight: 700; }
-.ql-daily-value__separator { color: var(--text-color-secondary); font-size: .75rem; font-weight: 700; }
-.ql-daily-value.is-success, .ql-daily-average.is-success { color: var(--green-500, #22c55e); }
-.ql-daily-value.is-info, .ql-daily-average.is-info { color: var(--primary-color); }
-.ql-daily-value.is-danger, .ql-daily-average.is-danger { color: var(--red-500, #ef4444); }
-.ql-daily-value.is-secondary, .ql-daily-average.is-secondary { color: var(--text-color-secondary); }
-.ql-daily-average { display: inline-block; font-variant-numeric: tabular-nums; font-size: .9rem; font-weight: 800; white-space: nowrap; }
-@media (max-width: 1100px) { .ql-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ql-dashboard-grid { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .ql-summary-grid { grid-template-columns: 1fr; } .ql-panel { padding: 1rem; } .ql-panel > header { display: grid; } .ql-panel header small { text-align: left; } .ql-chart { height: 16rem; } }
+.ql-dashboard {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.ql-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ql-summary-card {
+    min-height: 7.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem;
+}
+
+.ql-summary-card__icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    display: grid;
+    place-items: center;
+    border-radius: .85rem;
+    background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.ql-summary-card small,
+.ql-summary-card em {
+    display: block;
+    color: var(--text-color-secondary);
+    font-size: .76rem;
+    font-style: normal;
+}
+
+.ql-summary-card strong {
+    display: block;
+    color: var(--text-color);
+    font-size: 1.75rem;
+    line-height: 1.15;
+    margin: .2rem 0;
+}
+
+.ql-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
+    gap: 1rem;
+}
+
+.ql-panel {
+    padding: 1.25rem;
+}
+
+.ql-panel>header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.ql-panel>header span,
+.ql-insight-panel>span {
+    color: var(--primary-color);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.ql-panel h2 {
+    margin: .2rem 0 0;
+    font-size: 1.15rem;
+    color: var(--text-color);
+}
+
+.ql-panel header small {
+    color: var(--text-color-secondary);
+    text-align: right;
+    max-width: 18rem;
+}
+
+.ql-chart {
+    height: 19rem;
+}
+
+.ql-empty {
+    height: 100%;
+    display: grid;
+    place-content: center;
+    gap: .6rem;
+    text-align: center;
+    color: var(--text-color-secondary);
+}
+
+.ql-empty i {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+.ql-insight-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.ql-insight-panel h2 {
+    font-size: 1.55rem;
+    margin: .5rem 0;
+}
+
+.ql-insight-panel p {
+    color: var(--text-color-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ql-insight-panel dl {
+    border-top: 1px solid var(--surface-border);
+    margin: 1.2rem 0 0;
+    padding-top: 1rem;
+    display: grid;
+    gap: .8rem;
+}
+
+.ql-insight-panel dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+}
+
+.ql-insight-panel dt {
+    color: var(--text-color-secondary);
+    font-size: .8rem;
+}
+
+.ql-insight-panel dd {
+    margin: 0;
+    color: var(--text-color);
+    font-size: .8rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.ql-table-panel :is(.p-datatable, .table-component) {
+    margin-top: .5rem;
+}
+
+.ql-muted {
+    color: var(--text-color-secondary);
+}
+
+.ql-negative {
+    color: var(--red-500, #ef4444);
+    font-weight: 800;
+}
+
+.ql-positive {
+    color: var(--green-500, #22c55e);
+    font-weight: 800;
+}
+
+.ql-daily-value {
+    display: inline-flex;
+    align-items: baseline;
+    gap: .32rem;
+    font-variant-numeric: tabular-nums;
+    font-size: .88rem;
+    letter-spacing: .01em;
+    white-space: nowrap;
+}
+
+.ql-daily-value strong {
+    font-weight: 800;
+}
+
+.ql-daily-value b {
+    font-weight: 700;
+}
+
+.ql-daily-value__separator {
+    color: var(--text-color-secondary);
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.ql-daily-value.is-success,
+.ql-daily-average.is-success {
+    color: var(--green-500, #22c55e);
+}
+
+.ql-daily-value.is-info,
+.ql-daily-average.is-info {
+    color: var(--primary-color);
+}
+
+.ql-daily-value.is-danger,
+.ql-daily-average.is-danger {
+    color: var(--red-500, #ef4444);
+}
+
+.ql-daily-value.is-secondary,
+.ql-daily-average.is-secondary {
+    color: var(--text-color-secondary);
+}
+
+.ql-daily-average {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    font-size: .9rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+    .ql-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ql-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .ql-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ql-panel {
+        padding: 1rem;
+    }
+
+    .ql-panel>header {
+        display: grid;
+    }
+
+    .ql-panel header small {
+        text-align: left;
+    }
+
+    .ql-chart {
+        height: 16rem;
+    }
+}
