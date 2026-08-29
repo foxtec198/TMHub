@@ -60,7 +60,9 @@ export function Settings() {
   const [newEmail, setNewEmail] = useState("");
   const [emailDialog, setEmailDialog] = useState(false);
   const [otp, setOtp] = useState("");
-  const [adornmentSaving, setAdornmentSaving] = useState(false);
+  const [ownedAdornments, setOwnedAdornments] = useState([]);
+  const [adornmentsLoading, setAdornmentsLoading] = useState(true);
+  const [adornmentSaving, setAdornmentSaving] = useState(null);
   const [maintenanceActive, setMaintenanceActive] = useState(false);
   const [maintenanceSaving, setMaintenanceSaving] = useState(false);
   const fileRef = useRef(null);
@@ -77,6 +79,14 @@ export function Settings() {
       error.response?.status === 403 ? "Sem permissão" : "Configurações",
       error.response?.data || "Não foi possível carregar seu perfil.",
     ));
+
+    connect.get("/marketplace/adornos").then(({ data }) => {
+      setOwnedAdornments(data?.adornos || []);
+    }).catch((error) => showToast(
+      "error",
+      "Adornos",
+      error.response?.data || "Não foi possível carregar seus adornos.",
+    )).finally(() => setAdornmentsLoading(false));
   }, [showToast]);
 
   useEffect(() => {
@@ -201,17 +211,38 @@ export function Settings() {
 
   const removeAdornment = async () => {
     if (!profile.adorno_foto) return;
-    setAdornmentSaving(true);
+    setAdornmentSaving("remove");
     try {
       await connect.patch("/marketplace/equipar", { categoria: "adorno", produto_id: null });
       const nextProfile = { ...profile, adorno_foto: null };
       setProfile(nextProfile);
+      setOwnedAdornments((current) => current.map((item) => ({ ...item, equipado: false })));
       storeProfile(nextProfile);
       showToast("success", "Adorno removido", "Sua foto voltou ao formato padrão.");
     } catch (error) {
       showToast("error", "Adorno", error.response?.data || "Não foi possível remover o adorno.");
     } finally {
-      setAdornmentSaving(false);
+      setAdornmentSaving(null);
+    }
+  };
+
+  const equipAdornment = async (adornment) => {
+    if (adornment.equipado) return;
+    setAdornmentSaving(adornment.id);
+    try {
+      await connect.patch("/marketplace/equipar", { categoria: "adorno", produto_id: adornment.id });
+      const nextProfile = { ...profile, adorno_foto: adornment.codigo };
+      setProfile(nextProfile);
+      setOwnedAdornments((current) => current.map((item) => ({
+        ...item,
+        equipado: item.id === adornment.id,
+      })));
+      storeProfile(nextProfile);
+      showToast("success", "Adorno equipado", `${adornment.nome} está em uso.`);
+    } catch (error) {
+      showToast("error", "Adorno", error.response?.data || "Não foi possível equipar o adorno.");
+    } finally {
+      setAdornmentSaving(null);
     }
   };
 
@@ -251,9 +282,38 @@ export function Settings() {
                     icon={<AppIcon name="x" />}
                     severity="danger"
                     outlined
-                    loading={adornmentSaving}
+                    loading={adornmentSaving === "remove"}
+                    disabled={adornmentSaving !== null}
                     onClick={removeAdornment}
                   />
+                )}
+              </div>
+              <div className="adornment-profile-collection">
+                <div className="adornment-profile-collection__title">
+                  <strong>Seus adornos</strong>
+                  <small>Escolha qualquer item que você já adquiriu.</small>
+                </div>
+                {adornmentsLoading ? (
+                  <small className="adornment-profile-empty">Carregando sua coleção…</small>
+                ) : ownedAdornments.length ? (
+                  <div className="adornment-profile-grid">
+                    {ownedAdornments.map((adornment) => (
+                      <article className={adornment.equipado ? "is-equipped" : ""} key={adornment.id}>
+                        <UserAvatar user={profile} adorno_foto={adornment.codigo} className="adornment-profile-item-preview" />
+                        <div><strong>{adornment.nome}</strong><small>{adornment.equipado ? "Equipado agora" : "Disponível na coleção"}</small></div>
+                        <Button
+                          label={adornment.equipado ? "Equipado" : "Equipar"}
+                          icon={<AppIcon name="check" />}
+                          outlined={!adornment.equipado}
+                          disabled={adornment.equipado || adornmentSaving !== null}
+                          loading={adornmentSaving === adornment.id}
+                          onClick={() => equipAdornment(adornment)}
+                        />
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <small className="adornment-profile-empty">Você ainda não possui adornos. Os itens comprados aparecerão aqui.</small>
                 )}
               </div>
             </article>
