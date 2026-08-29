@@ -1,9 +1,27 @@
 .tm-user-avatar {
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
 }
 
 .tm-user-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
+
+.tm-user-avatar[class*="tm-user-avatar--adorno_"]::before,
+.tm-user-avatar[class*="tm-user-avatar--adorno_"]::after { position:absolute; z-index:2; pointer-events:none; }
+.tm-user-avatar[class*="tm-user-avatar--adorno_"]::before { content:""; inset:-.14em; border:.12em solid var(--primary-color); border-radius:50%; box-shadow:0 0 0 .08em color-mix(in srgb,var(--primary-color) 42%,transparent); }
+.tm-user-avatar--adorno_halloween::before { border-color:#f97316!important; box-shadow:0 0 0 .09em #7c3aed!important; }
+.tm-user-avatar--adorno_halloween::after { content:"🎃"; right:-.34em; bottom:-.28em; font-size:.58em; }
+.tm-user-avatar--adorno_natal::before { border-color:#dc2626!important; box-shadow:0 0 0 .09em #16a34a!important; }
+.tm-user-avatar--adorno_natal::after { content:"❄"; right:-.3em; top:-.34em; color:#fff; font-size:.65em; text-shadow:0 1px 4px #0284c7; }
+.tm-user-avatar--adorno_gptw::before { border-color:#eab308!important; box-shadow:0 0 0 .09em #2563eb!important; }
+.tm-user-avatar--adorno_gptw::after { content:"GPTW"; right:-.55em; bottom:-.25em; padding:.04em .13em; border-radius:.15em; background:#2563eb; color:#fff; font-size:.24em; font-weight:900; }
+.tm-user-avatar--adorno_aniversario::before { border-color:#ec4899!important; box-shadow:0 0 0 .09em #8b5cf6!important; }
+.tm-user-avatar--adorno_aniversario::after { content:"🎉"; right:-.38em; top:-.38em; font-size:.58em; }
+.tm-user-avatar--adorno_orgulho::before { border-color:#e40303!important; box-shadow:0 0 0 .07em #ff8c00,0 0 0 .14em #008026,0 0 0 .2em #004dff!important; }
+.tm-user-avatar--adorno_conquista::before { border-color:#facc15!important; box-shadow:0 0 0 .09em #ca8a04!important; }
+.tm-user-avatar--adorno_conquista::after { content:"★"; right:-.34em; top:-.34em; color:#facc15; font-size:.65em; text-shadow:0 1px 3px #713f12; }

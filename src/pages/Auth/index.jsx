@@ -121,6 +121,8 @@ export function Auth() {
             if (res.data.email) localStorage.setItem("email", res.data.email);
             if (res.data.foto_perfil) localStorage.setItem("profile_photo", res.data.foto_perfil);
             else localStorage.removeItem("profile_photo");
+            if (res.data.adorno_foto) localStorage.setItem("profile_adornment", res.data.adorno_foto);
+            else localStorage.removeItem("profile_adornment");
             applyProfileAppearance(res.data);
             setAccessToken(res.data.access_token);
             const requirements = {

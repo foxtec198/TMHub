@@ -1,19 +1,76 @@
-.marketplace-page { padding: 1.25rem; }
-.marketplace-balance { display:flex; align-items:center; gap:.45rem; padding:.6rem .85rem; border:1px solid var(--surface-border); border-radius:999px; color:var(--primary-color); }
-.marketplace-balance strong { font-size:1.1rem; color:var(--text-color); }
-.marketplace-balance span { font-size:.78rem; color:var(--text-color-secondary); }
-.marketplace-tabs { margin-top:1.25rem; }
-.marketplace-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1rem; padding:.75rem 0; }
-.marketplace-card { overflow:hidden; border:1px solid var(--surface-border); border-radius:1rem; background:var(--surface-card); box-shadow:0 8px 24px rgba(0,0,0,.08); }
-.marketplace-card__art { display:grid; place-items:center; height:9rem; color:#fff; font-size:3rem; background:linear-gradient(135deg,#166534,#22c55e); }
-.marketplace-card__art.is-skin { background:linear-gradient(135deg,#581c87,#c026d3); }
+.marketplace-page { padding:1.25rem; max-width:1800px; margin:0 auto; }
+.marketplace-balance { display:flex; align-items:center; gap:.7rem; min-width:12rem; padding:.65rem .9rem; border:1px solid color-mix(in srgb,var(--primary-color) 45%,var(--surface-border)); border-radius:.85rem; background:color-mix(in srgb,var(--primary-color) 8%,var(--surface-card)); }
+.marketplace-balance>.tm-icon { color:var(--primary-color); font-size:2rem; }
+.marketplace-balance div { display:grid; line-height:1.05; }
+.marketplace-balance strong { font-size:1.15rem; color:var(--text-color); }
+.marketplace-balance span { margin-top:.2rem; font-size:.72rem; color:var(--text-color-secondary); }
+.marketplace-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:1.25rem 0; padding:.75rem; border:1px solid var(--surface-border); border-radius:1rem; background:var(--surface-card); }
+.marketplace-categories { display:flex; gap:.5rem; flex-wrap:wrap; }
+.marketplace-search { display:flex; align-items:center; gap:.5rem; min-width:min(22rem,100%); padding:0 .75rem; border:1px solid var(--surface-border); border-radius:.65rem; background:var(--surface-ground); }
+.marketplace-search:focus-within { border-color:var(--primary-color); box-shadow:0 0 0 1px var(--primary-color); }
+.marketplace-search .tm-icon { color:var(--text-color-secondary); }
+.marketplace-search .p-inputtext { width:100%; border:0; box-shadow:none; background:transparent; }
+.marketplace-layout { display:grid; grid-template-columns:minmax(0,1fr) 22rem; gap:1rem; align-items:start; }
+.marketplace-catalog>header,.marketplace-collection>header { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:.8rem; }
+.marketplace-catalog>header span,.marketplace-collection>header span { color:var(--primary-color); font-size:.7rem; font-weight:800; letter-spacing:.1em; }
+.marketplace-catalog h2,.marketplace-collection h2 { margin:.15rem 0 0; font-size:1.25rem; }
+.marketplace-catalog>header small { color:var(--text-color-secondary); }
+.marketplace-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr)); gap:.9rem; }
+.marketplace-card { position:relative; overflow:hidden; border:1px solid var(--surface-border); border-radius:1rem; background:var(--surface-card); box-shadow:0 .65rem 1.7rem rgba(0,0,0,.08); transition:transform .18s ease,border-color .18s ease; }
+.marketplace-card:hover { transform:translateY(-2px); border-color:color-mix(in srgb,var(--primary-color) 60%,var(--surface-border)); }
+.marketplace-card.is-featured::before { content:""; position:absolute; z-index:2; inset:0 0 auto; height:3px; background:linear-gradient(90deg,var(--primary-color),#f7c948); }
+.marketplace-card.is-equipped { box-shadow:0 0 0 1px var(--primary-color),0 .8rem 2rem color-mix(in srgb,var(--primary-color) 16%,transparent); }
+.marketplace-card__art { position:relative; display:grid; place-items:center; height:9.5rem; overflow:hidden; }
+.marketplace-card__art>.tm-icon { position:absolute; right:.8rem; bottom:.7rem; color:#fff; filter:drop-shadow(0 2px 5px #0008); font-size:1.5rem; }
+.marketplace-card__art--theme { background:linear-gradient(135deg,var(--market-colors)); }
+.marketplace-theme-preview { display:flex; width:7.5rem; height:4.75rem; overflow:hidden; border:4px solid #ffffffdd; border-radius:.8rem; box-shadow:0 .7rem 1.4rem #0005; transform:rotate(-4deg); }
+.marketplace-theme-preview i { flex:1; }
+.marketplace-card__art--frame { background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--primary-color) 20%,var(--surface-card)),var(--surface-ground)); }
+.marketplace-frame-preview { position:relative; width:6.25rem; height:6.25rem; padding:.32rem; border:4px solid var(--primary-color); border-radius:50%; box-shadow:0 0 0 4px color-mix(in srgb,var(--primary-color) 24%,transparent); }
+.marketplace-frame-preview img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.is-adorno_halloween .marketplace-frame-preview { border-color:#f97316; box-shadow:0 0 0 4px #7c3aed88,0 0 1.4rem #f9731666; }
+.is-adorno_halloween .marketplace-frame-preview::after { content:"🎃"; position:absolute; right:-.75rem; bottom:-.35rem; font-size:1.8rem; }
+.is-adorno_natal .marketplace-frame-preview { border-color:#dc2626; box-shadow:0 0 0 4px #16a34a99,0 0 1.4rem #fff8; }
+.is-adorno_natal .marketplace-frame-preview::after { content:"❄"; position:absolute; right:-.55rem; top:-.55rem; color:#fff; font-size:1.8rem; text-shadow:0 2px 6px #0ea5e9; }
+.is-adorno_gptw .marketplace-frame-preview { border-color:#eab308; box-shadow:0 0 0 4px #2563eb99,0 0 1.4rem #2563eb55; }
+.is-adorno_gptw .marketplace-frame-preview::after { content:"GPTW"; position:absolute; right:-1rem; bottom:-.25rem; padding:.16rem .3rem; border-radius:.25rem; background:#2563eb; color:#fff; font-size:.58rem; font-weight:900; }
+.is-adorno_aniversario .marketplace-frame-preview { border-color:#ec4899; box-shadow:0 0 0 4px #8b5cf699; }
+.is-adorno_aniversario .marketplace-frame-preview::after { content:"🎉"; position:absolute; right:-.8rem; top:-.6rem; font-size:1.65rem; }
+.is-adorno_orgulho .marketplace-frame-preview { border-color:#e40303; box-shadow:0 0 0 5px #ff8c00,0 0 0 8px #008026,0 0 0 11px #004dff; }
+.is-adorno_conquista .marketplace-frame-preview { border-color:#facc15; box-shadow:0 0 0 4px #ca8a0488,0 0 1.4rem #facc1588; }
+.is-adorno_conquista .marketplace-frame-preview::after { content:"★"; position:absolute; right:-.65rem; top:-.65rem; color:#facc15; font-size:1.8rem; text-shadow:0 2px 5px #713f12; }
 .marketplace-card__body { padding:1rem; }
-.marketplace-card h2 { margin:.65rem 0 .35rem; font-size:1.15rem; }
-.marketplace-card p { min-height:2.8rem; margin:0; color:var(--text-color-secondary); font-size:.9rem; }
-.marketplace-card footer { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:1rem; }
-.marketplace-card footer strong { display:flex; align-items:center; gap:.35rem; color:var(--primary-color); }
-.marketplace-purchases { display:grid; gap:.65rem; padding:.75rem 0; }
-.marketplace-purchases article { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.85rem 1rem; border:1px solid var(--surface-border); border-radius:.75rem; background:var(--surface-card); }
-.marketplace-purchases article div { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
-.marketplace-purchases small { color:var(--text-color-secondary); }
-@media (max-width:640px) { .marketplace-page { padding:.75rem; } .marketplace-balance span { display:none; } .marketplace-purchases article { align-items:flex-start; flex-direction:column; } }
+.marketplace-card__tags { display:flex; gap:.35rem; min-height:1.4rem; }
+.marketplace-card h3 { margin:.65rem 0 .35rem; font-size:1.08rem; }
+.marketplace-card p { min-height:3.6rem; margin:0; color:var(--text-color-secondary); font-size:.84rem; line-height:1.45; }
+.marketplace-card footer { display:flex; align-items:center; justify-content:space-between; gap:.65rem; margin-top:1rem; }
+.marketplace-card footer>strong { display:flex; align-items:center; gap:.3rem; color:var(--primary-color); white-space:nowrap; }
+.marketplace-cart { position:sticky; top:1rem; overflow:hidden; border:1px solid var(--surface-border); border-radius:1rem; background:var(--surface-card); box-shadow:0 .8rem 2rem rgba(0,0,0,.1); }
+.marketplace-cart>header { display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:.9rem 1rem; border-bottom:1px solid var(--surface-border); }
+.marketplace-cart>header>div { display:grid; gap:.2rem; }
+.marketplace-cart>header span { display:flex; align-items:center; gap:.4rem; color:var(--text-color-secondary); font-size:.8rem; }
+.marketplace-cart__items { max-height:23rem; overflow:auto; }
+.marketplace-cart__items article { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:.5rem; padding:.75rem 1rem; border-bottom:1px solid var(--surface-border); }
+.marketplace-cart__items article div { display:grid; min-width:0; }
+.marketplace-cart__items article strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.85rem; }
+.marketplace-cart__items article small { color:var(--text-color-secondary); }
+.marketplace-cart__items article>span { display:flex; align-items:center; gap:.2rem; color:var(--primary-color); font-weight:700; font-size:.8rem; }
+.marketplace-cart__empty { display:grid; justify-items:center; gap:.45rem; padding:2.5rem 1.2rem; text-align:center; color:var(--text-color-secondary); }
+.marketplace-cart__empty>.tm-icon { font-size:2rem; color:var(--primary-color); }
+.marketplace-cart__empty strong { color:var(--text-color); }
+.marketplace-cart__empty span { max-width:15rem; font-size:.8rem; }
+.marketplace-cart>footer { display:grid; gap:.75rem; padding:1rem; border-top:1px solid var(--surface-border); background:var(--surface-ground); }
+.marketplace-cart>footer>div { display:flex; justify-content:space-between; gap:1rem; }
+.marketplace-cart>footer small { color:var(--red-400); text-align:center; }
+.marketplace-collection { margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--surface-border); }
+.marketplace-collection>div { display:grid; gap:.55rem; }
+.marketplace-collection article { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:.8rem; padding:.75rem .9rem; border:1px solid var(--surface-border); border-radius:.75rem; background:var(--surface-card); }
+.marketplace-collection article>div { display:grid; }
+.marketplace-collection article small { color:var(--text-color-secondary); }
+.marketplace-purchase-icon { display:grid; place-items:center; width:2.5rem; height:2.5rem; border-radius:.65rem; color:#fff; background:linear-gradient(135deg,#0f766e,#22c55e); }
+.marketplace-purchase-icon.is-adorno { background:linear-gradient(135deg,#7c3aed,#ec4899); }
+.marketplace-refund-dialog { width:min(30rem,calc(100vw - 2rem)); }
+.marketplace-refund-dialog p { line-height:1.5; }
+.marketplace-refund-dialog small { color:var(--text-color-secondary); }
+@media (max-width:1050px) { .marketplace-layout { grid-template-columns:1fr; } .marketplace-cart { position:static; } }
+@media (max-width:700px) { .marketplace-page { padding:.75rem; } .marketplace-toolbar { align-items:stretch; flex-direction:column; } .marketplace-search { min-width:0; } .marketplace-grid { grid-template-columns:1fr; } .marketplace-collection article { grid-template-columns:auto 1fr auto; } .marketplace-collection article>.p-button { grid-column:2/-1; justify-self:start; } }
