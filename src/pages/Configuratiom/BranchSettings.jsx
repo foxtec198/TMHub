@@ -30,7 +30,7 @@ export function BranchSettings() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus("loading");
     setLoadError("");
-    Promise.all([connect.get("/filiais"), connect.get("/filiais/opcoes")])
+    Promise.all([connect.get("/filiais", { skipStandardFilters: true }), connect.get("/filiais/opcoes", { skipStandardFilters: true })])
       .then(([branchResponse, optionsResponse]) => {
         setBranches(Array.isArray(branchResponse.data) ? branchResponse.data : []);
         setOptions({

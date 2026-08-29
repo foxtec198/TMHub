@@ -481,7 +481,11 @@ function AbsenceControlPage() {
 
     <OverlayPanel ref={filterPanel} className="absence-filter-panel">
       <div className="absence-filter-title"><div><strong>Filtrar faltas</strong><span>O período começa no mês atual.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
-      <StandardFilterFields date={{ value: dateRange, onChange: setDateRange }} />
+      <StandardFilterFields
+        date={{ value: dateRange, onChange: setDateRange }}
+        department={{ value: filters.departamento, options: filterOptions.departamento || [], onChange: (value) => setFilter("departamento", value) }}
+        center={{ value: filters.contrato, options: filterOptions.contrato || [], onChange: (value) => setFilter("contrato", value) }}
+      />
       <div className="absence-filter-grid">
         <CombinedMultiSelect name="status" label="Situação" options={filterOptions.status} placeholder="Todas as situações" />
         <CombinedMultiSelect name="classificacao" label="Classificação" options={filterOptions.classificacao} placeholder="Todas as classificações" />

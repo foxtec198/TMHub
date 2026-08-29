@@ -116,9 +116,9 @@ function statusTag(status) {
 
 export function ExperienceControl() {
   // A tela interna concentra a gestão do RH e preserva as permissões existentes.
-  const [supervisors, setSupervisors] = useState([]);
   const [selectedSupervisors, setSelectedSupervisors] = useState([]);
   const [selectedDepartments, setSelectedDepartments] = useState([]);
+  const [selectedCenters, setSelectedCenters] = useState([]);
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [rhRecords, setRhRecords] = useState([]);
   const [employeesInExperience, setEmployeesInExperience] = useState([]);
@@ -137,16 +137,6 @@ export function ExperienceControl() {
   const canRh = can("controle_experiencia_rh");
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
 
-  const loadSupervisors = useCallback(async () => {
-    if (!canRh) return;
-    try {
-      const { data } = await connect.get("/avaliacoes-experiencia/supervisores");
-      setSupervisors((Array.isArray(data) ? data : []).map((item) => ({ label: item.nome, value: item.id })));
-    } catch (error) {
-      showToast("error", "Período de experiência", errorMessage(error, "Não foi possível carregar os supervisores."));
-    }
-  }, [canRh, showToast]);
-
   const loadRh = useCallback(async () => {
     // Carrega a fila de avaliações e a visão geral dos colaboradores em experiência.
     if (!canRh) return;
@@ -164,7 +154,6 @@ export function ExperienceControl() {
     }
   }, [canRh, isAdmin, showToast]);
 
-  useEffect(() => { loadSupervisors(); }, [loadSupervisors, revision]);
   useEffect(() => { loadRh(); }, [loadRh, revision]);
 
   const openEvaluation = async (evaluationId) => {
@@ -270,6 +259,7 @@ export function ExperienceControl() {
   const clearFilters = () => {
     setSelectedSupervisors([]);
     setSelectedDepartments([]);
+    setSelectedCenters([]);
     setSelectedStatuses([]);
     setSearch("");
   };
@@ -314,6 +304,8 @@ export function ExperienceControl() {
         || selectedSupervisors.includes(item.supervisor?.id);
       const matchesDepartment = !selectedDepartments.length
         || selectedDepartments.includes(String(item.colaborador?.departamento || ""));
+      const matchesCenter = !selectedCenters.length
+        || selectedCenters.includes(item.colaborador?.centro_id);
       const matchesStatus = !selectedStatuses.length || selectedStatuses.includes(item.status);
       const matchesSearch = !term || [
       item.colaborador?.nome,
@@ -322,9 +314,9 @@ export function ExperienceControl() {
       item.supervisor?.nome,
       item.status,
       ].some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(term));
-      return matchesSupervisor && matchesDepartment && matchesStatus && matchesSearch;
+      return matchesSupervisor && matchesDepartment && matchesCenter && matchesStatus && matchesSearch;
     });
-  }, [rhRecords, search, selectedDepartments, selectedStatuses, selectedSupervisors]);
+  }, [rhRecords, search, selectedCenters, selectedDepartments, selectedStatuses, selectedSupervisors]);
 
   const departmentOptions = useMemo(() => (
     [...new Set(rhRecords
@@ -334,8 +326,29 @@ export function ExperienceControl() {
       .map((department) => ({ label: department, value: department }))
   ), [rhRecords]);
 
+  const centerOptions = useMemo(() => (
+    [...new Map(rhRecords
+      .filter((item) => item.colaborador?.centro_id != null && item.colaborador?.centro_custo)
+      .map((item) => [item.colaborador.centro_id, { label: item.colaborador.centro_custo, value: item.colaborador.centro_id }]))
+      .values()]
+      .sort((left, right) => left.label.localeCompare(right.label, "pt-BR"))
+  ), [rhRecords]);
+
+  const supervisorOptions = useMemo(() => (
+    [...new Map(rhRecords
+      .filter((item) => item.supervisor?.id != null && item.supervisor?.nome)
+      .map((item) => [item.supervisor.id, { label: item.supervisor.nome, value: item.supervisor.id }]))
+      .values()]
+      .sort((left, right) => left.label.localeCompare(right.label, "pt-BR"))
+  ), [rhRecords]);
+
+  const filterStatusOptions = useMemo(() => (
+    STATUS_OPTIONS.filter((option) => rhRecords.some((item) => item.status === option.value))
+  ), [rhRecords]);
+
   const activeFilterCount = Number(Boolean(selectedSupervisors.length))
     + Number(Boolean(selectedDepartments.length))
+    + Number(Boolean(selectedCenters.length))
     + Number(Boolean(selectedStatuses.length))
     + Number(Boolean(search.trim()));
 
@@ -460,11 +473,14 @@ export function ExperienceControl() {
 
       <OverlayPanel ref={filterPanel} className="experience-filter-panel">
         <div className="experience-filter-title"><div><strong>Filtrar avaliações</strong><span>Os indicadores e a lista acompanham este recorte.</span></div><Button icon={<AppIcon name="filter-off" />} rounded text aria-label="Limpar filtros" onClick={clearFilters} /></div>
-        <StandardFilterFields department={{ value: selectedDepartments, options: departmentOptions, onChange: setSelectedDepartments }} />
+        <StandardFilterFields
+          department={{ value: selectedDepartments, options: departmentOptions, onChange: setSelectedDepartments }}
+          center={{ value: selectedCenters, options: centerOptions, onChange: setSelectedCenters }}
+        />
         <div className="experience-filters">
           <label className="experience-search is-wide"><span>Buscar colaborador</span><span className="p-input-icon-left"><AppIcon name="search"  /><InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome, matrícula ou contrato" /></span></label>
-          <label><span>Supervisor</span><MultiSelect value={selectedSupervisors} options={supervisors} onChange={(event) => setSelectedSupervisors(event.value || [])} placeholder="Todos os supervisores" filter showClear /></label>
-          <label><span>Situação</span><MultiSelect value={selectedStatuses} options={STATUS_OPTIONS} onChange={(event) => setSelectedStatuses(event.value || [])} placeholder="Todas as situações" showClear /></label>
+          <label><span>Supervisor</span><MultiSelect value={selectedSupervisors} options={supervisorOptions} onChange={(event) => setSelectedSupervisors(event.value || [])} placeholder="Todos os supervisores" filter showClear /></label>
+          <label><span>Situação</span><MultiSelect value={selectedStatuses} options={filterStatusOptions} onChange={(event) => setSelectedStatuses(event.value || [])} placeholder="Todas as situações" showClear /></label>
         </div>
       </OverlayPanel>
 

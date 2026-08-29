@@ -119,6 +119,9 @@ export function PeriodicExams() {
   }, []);
 
   const filterCount = Object.values(filters).filter((values) => values.length).length;
+  const availableStatusOptions = useMemo(() => (
+    (options.status || []).map((value) => STATUS_OPTIONS.find((option) => option.value === value)).filter(Boolean)
+  ), [options.status]);
   const updateFilter = (name, value) => setFilters((current) => ({ ...current, [name]: value || [] }));
   const clearFilters = () => setFilters({ status: [], departamento: [], supervisor: [], contrato: [], competencia: [] });
 
@@ -254,7 +257,7 @@ export function PeriodicExams() {
       <div className="periodic-exams-filter-title"><div><strong>Filtrar exames</strong><span>A lista e os indicadores acompanham este recorte.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={clearFilters} /></div>
       <StandardFilterFields department={{ value: filters.departamento, options: options.departamento, onChange: (value) => updateFilter("departamento", value) }} center={{ value: filters.contrato, options: options.contrato, onChange: (value) => updateFilter("contrato", value) }} />
       <div className="periodic-exams-filters">
-        <label><span>Situação</span><MultiSelect value={filters.status} options={STATUS_OPTIONS} optionLabel="label" optionValue="value" onChange={(event) => updateFilter("status", event.value)} placeholder="Todas as situações" display="chip" /></label>
+        <label><span>Situação</span><MultiSelect value={filters.status} options={availableStatusOptions} optionLabel="label" optionValue="value" onChange={(event) => updateFilter("status", event.value)} placeholder="Todas as situações" display="chip" /></label>
         <label><span>Supervisor</span><MultiSelect value={filters.supervisor} options={options.supervisor || []} onChange={(event) => updateFilter("supervisor", event.value)} placeholder="Todos os supervisores" display="chip" filter /></label>
         <label><span>Mês de vencimento</span><MultiSelect value={filters.competencia} options={(options.competencia || []).map((value) => ({ label: value.split("-").reverse().join("/"), value }))} optionLabel="label" optionValue="value" onChange={(event) => updateFilter("competencia", event.value)} placeholder="Todos os meses" display="chip" /></label>
       </div>

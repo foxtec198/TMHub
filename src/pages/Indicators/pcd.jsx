@@ -35,7 +35,6 @@ const TYPE_ICONS = {
 };
 
 const EMPTY_FILTERS = {
-  filiais: [],
   departamentos: [],
   centros: [],
   supervisores: [],
@@ -122,9 +121,6 @@ export function Pcd() {
   }, []);
 
   const options = useMemo(() => ({
-    filiais: [...new Set(Object.values(filiaisPorDepartamento).flat())]
-      .sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true }))
-      .map((filial) => ({ value: filial, label: filial })),
     departamentos: uniqueOptions(colaboradores, "departamento"),
     centros: uniqueOptions(colaboradores, "centro_id", "centro_custo"),
     supervisores: uniqueOptions(colaboradores, "supervisor_id", "supervisor"),
@@ -134,21 +130,19 @@ export function Pcd() {
         .split(",").map((tipo) => tipo.trim()).filter(Boolean).map((tipo) => ({ tipo }))),
       "tipo",
     ),
-  }), [colaboradores, filiaisPorDepartamento]);
+  }), [colaboradores]);
 
   const filteredColaboradores = useMemo(() => colaboradores.filter((colaborador) => {
     const tipos = (colaborador.type_pcd || "Não informado").split(",").map((tipo) => tipo.trim()).filter(Boolean);
-    const filiais = filiaisPorDepartamento[String(colaborador.departamento)] || [];
     return (
       matches(colaborador, search)
-      && (!filters.filiais.length || filters.filiais.some((filial) => filiais.includes(filial)))
       && (!filters.departamentos.length || filters.departamentos.includes(colaborador.departamento))
       && (!filters.centros.length || filters.centros.includes(colaborador.centro_id))
       && (!filters.supervisores.length || filters.supervisores.includes(colaborador.supervisor_id))
       && (!filters.tipos.length || filters.tipos.some((tipo) => tipos.includes(tipo)))
       && (!filters.situacoes.length || filters.situacoes.includes(colaborador.situacao_id))
     );
-  }), [colaboradores, filiaisPorDepartamento, search, filters]);
+  }), [colaboradores, search, filters]);
 
   const departments = useMemo(() => {
     const grouped = new Map();
@@ -290,7 +284,7 @@ export function Pcd() {
     ] : []),
     { label: "Exportar (em breve)", icon: appIcon("download"), disabled: true, command: () => {} },
     ...(isAdmin ? [
-      { label: "Excluir todos os dados", icon: appIcon("trash"), command: confirmDeleteAll },
+      { label: "Excluir todos os dados", icon: appIcon("trash"), disabled: deletingAll, command: confirmDeleteAll },
     ] : []),
   ];
 
@@ -299,10 +293,7 @@ export function Pcd() {
       section="Indicadores"
       title="Controle de PCD"
       description="Colaboradores com deficiência, organizados por departamento e centro de custo."
-      actions={<>
-        <Button icon={<AppIcon name="refresh" />} label="Atualizar" outlined onClick={() => setRefresh((value) => value + 1)} />
-        <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
-      </>}
+      actions={<StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />}
     />
 
     {(canEdit || isAdmin) && <div className="pcd-speed-dial">
@@ -319,7 +310,10 @@ export function Pcd() {
         <Button type="button" icon={<AppIcon name="filter-off" />} text rounded aria-label="Limpar filtros" onClick={() => setFilters(EMPTY_FILTERS)} />
       </div>
       <Divider />
-      <StandardFilterFields />
+      <StandardFilterFields
+        department={{ value: filters.departamentos, options: options.departamentos || [], onChange: (value) => setFilter("departamentos", value) }}
+        center={{ value: filters.centros, options: options.centros || [], onChange: (value) => setFilter("centros", value) }}
+      />
 
       {[
         ["supervisores", "Supervisores"],

@@ -16,7 +16,7 @@ import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import "./employees.css";
 
-const EMPTY_FILTERS = { empresas: [], departamentos: [], centros: [], cargos: [], situacoes: [] };
+const EMPTY_FILTERS = { departamentos: [], centros: [], cargos: [], situacoes: [] };
 const CHUNK = 512 * 1024;
 
 function date(value) {
@@ -87,7 +87,7 @@ function ImportEmployees({ onCompleted }) {
   }, []);
 
   useEffect(() => {
-    connect.get("/importacao-colaboradores/empresas").then(({ data }) => {
+    connect.get("/importacao-colaboradores/empresas", { skipStandardFilters: true }).then(({ data }) => {
       setCompanies((Array.isArray(data) ? data : []).filter((item) => item.ativa).map((item) => ({ label: item.nome, value: item.id })));
     }).catch(() => showToast("error", "Empresas", "Não foi possível carregar as empresas."));
   }, [showToast]);
@@ -152,7 +152,7 @@ function ImportEmployees({ onCompleted }) {
     {job?.status === "completed" && <small className="entity-import-card__result">Cargos criados: {job.cargos_criados || 0} · Ignorados: {job.colaboradores_ignorados || 0} · Duplicidades: {job.duplicidades || 0}</small>}
     <Button label={running ? "Importação em andamento" : "Iniciar importação"} icon={<AppIcon name="upload" />} disabled={!file || !companyId || running} onClick={upload} />
   </article><section className="employee-import-history">
-    <div className="employee-import-history__heading"><div><strong>Histórico de importações</strong><small>Últimas cargas recebidas pelo TMHub</small></div><Button icon={<AppIcon name="refresh" />} text rounded aria-label="Atualizar histórico" onClick={loadHistory} /></div>
+    <div className="employee-import-history__heading"><div><strong>Histórico de importações</strong><small>Últimas cargas recebidas pelo TMHub</small></div></div>
     {history.length ? <div className="employee-import-history__list">{history.map((item) => <article key={item.job_id}>
       <div><strong>{item.empresa_nome}</strong><small>{item.origem === "script" ? `Script${item.lotes ? ` · ${item.lotes} lote(s)` : ""}` : `Sistema · ${item.usuario_nome || "Usuário não identificado"}`} · {dateTime(item.iniciado_em)}</small></div>
       <div><Tag value={item.status === "completed" ? "CONCLUÍDA" : item.status === "error" ? "ERRO" : "EM ANDAMENTO"} severity={item.status === "completed" ? "success" : item.status === "error" ? "danger" : "info"} /><small>{item.total || 0} total · {item.colaboradores_criados || 0} criados · {item.colaboradores_atualizados || 0} atualizados</small></div>
@@ -165,7 +165,7 @@ export function EmployeesPage() {
   const overlay = useRef(null);
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   const [filters, setFilters] = useState(EMPTY_FILTERS);
-  const [options, setOptions] = useState({ empresas: [], departamentos: [], centros: [], cargos: [], situacoes: [] });
+  const [options, setOptions] = useState({ departamentos: [], centros: [], cargos: [], situacoes: [] });
   const [search, setSearch] = useState("");
   const [rows, setRows] = useState([]); const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0); const [rowsPerPage, setRowsPerPage] = useState(50); const [loading, setLoading] = useState(true);
@@ -173,7 +173,7 @@ export function EmployeesPage() {
   const [importVisible, setImportVisible] = useState(false);
 
   const query = useMemo(() => ({ paginado: true, page: page + 1, per_page: rowsPerPage, search: search || undefined,
-    empresa_ids: filters.empresas.join(",") || undefined, departamentos: filters.departamentos.join(",") || undefined,
+    departamentos: filters.departamentos.join(",") || undefined,
     centro_ids: filters.centros.join(",") || undefined, cargo_ids: filters.cargos.join(",") || undefined,
     situacao_ids: filters.situacoes.join(",") || undefined }), [filters, page, rowsPerPage, search]);
 
@@ -214,7 +214,10 @@ export function EmployeesPage() {
   return <section className="entity-page">
     <PageHeader section="RH" title="Colaboradores" description="Consulte os colaboradores da filial selecionada. Dados sensíveis não são exibidos." actions={<div className="entity-page__actions">{isAdmin && <Button label="Importar" icon={<AppIcon name="upload" />} outlined onClick={() => setImportVisible(true)} />}<Button label="Exportar" icon={<AppIcon name="file-spreadsheet" />} outlined onClick={exportRows} /><StandardFilterButton panelRef={overlay} count={activeFilters} /></div>} />
     <article className="entity-table-card"><div className="entity-table-card__header"><div><strong>Base de colaboradores</strong><small>{total.toLocaleString("pt-BR")} registro(s) no escopo atual</small></div></div><Table data={rows} columns={columns} loading={loading} search searchValue={search} onSearchChange={(value) => { setPage(0); setSearch(value); }} remotePagination={{ totalRecords: total, first: page * rowsPerPage, onPageChange: (event) => { setPage(event.page); setRowsPerPage(event.rows); } }} rows={rowsPerPage} rowsPerPageOptions={[25, 50, 100]} tableStyle={{ minWidth: "1080px" }} emptyTitle="Nenhum colaborador encontrado" emptyDescription="Ajuste os filtros ou a filial global." /></article>
-    <OverlayPanel ref={overlay} className="entity-filter-panel"><div className="entity-filter-panel__head"><strong>Filtros de colaboradores</strong><Button icon={<AppIcon name="filter-off" />} text rounded onClick={() => { setPage(0); setFilters(EMPTY_FILTERS); }} /></div><StandardFilterFields />{[["cargos", "Cargos"], ["situacoes", "Situações"]].map(([key, label]) => <label key={key}><span>{label}</span><MultiSelect value={filters[key]} options={options[key] || []} optionLabel="label" optionValue="value" filter display="chip" placeholder={`Todos os ${label.toLowerCase()}`} onChange={(event) => { setPage(0); setFilters((current) => ({ ...current, [key]: event.value || [] })); }} /></label>)}</OverlayPanel>
+    <OverlayPanel ref={overlay} className="entity-filter-panel"><div className="entity-filter-panel__head"><strong>Filtros de colaboradores</strong><Button icon={<AppIcon name="filter-off" />} text rounded onClick={() => { setPage(0); setFilters(EMPTY_FILTERS); }} /></div><StandardFilterFields
+      department={{ value: filters.departamentos, options: options.departamentos || [], onChange: (value) => { setPage(0); setFilters((current) => ({ ...current, departamentos: value || [] })); } }}
+      center={{ value: filters.centros, options: options.centros || [], onChange: (value) => { setPage(0); setFilters((current) => ({ ...current, centros: value || [] })); } }}
+    />{[["cargos", "Cargos"], ["situacoes", "Situações"]].map(([key, label]) => <label key={key}><span>{label}</span><MultiSelect value={filters[key]} options={options[key] || []} optionLabel="label" optionValue="value" filter display="chip" placeholder={`Todos os ${label.toLowerCase()}`} onChange={(event) => { setPage(0); setFilters((current) => ({ ...current, [key]: event.value || [] })); }} /></label>)}</OverlayPanel>
     <Dialog header="Importar colaboradores" visible={importVisible} modal className="employee-dialog entity-import-dialog" onHide={() => setImportVisible(false)}><ImportEmployees onCompleted={() => { setImportVisible(false); load(); }} /></Dialog>
     <Dialog header={`Editar ${editing?.nome || "colaborador"}`} visible={Boolean(editing)} modal className="employee-dialog" onHide={() => setEditing(null)} footer={<div className="dialog-actions"><Button label="Cancelar" text onClick={() => setEditing(null)} /><Button label="Salvar" icon={<AppIcon name="check" />} onClick={save} /></div>}><div className="employee-dialog__form"><label>Nome<InputText value={form.nome || ""} onChange={(event) => setForm({ ...form, nome: event.target.value })} /></label><label>Cargo<Dropdown value={form.cargo_id} options={options.cargos || []} optionLabel="label" optionValue="value" filter showClear onChange={(event) => setForm({ ...form, cargo_id: event.value })} /></label><label>Situação<Dropdown value={form.situacao_id} options={options.situacoes || []} optionLabel="label" optionValue="value" filter showClear onChange={(event) => setForm({ ...form, situacao_id: event.value })} /></label><label>Centro de custo<Dropdown value={form.centro_id} options={options.centros || []} optionLabel="label" optionValue="value" filter showClear onChange={(event) => setForm({ ...form, centro_id: event.value })} /></label></div></Dialog>
   </section>;

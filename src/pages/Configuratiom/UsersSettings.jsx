@@ -80,7 +80,7 @@ export function UsersSettings() {
     }
     loadUsers();
     if (canManage) {
-      connect.get("/filiais").then(({ data }) => setBranches((Array.isArray(data) ? data : []).filter((branch) => branch.ativa))).catch((error) => showToast("error", "Filiais", error.response?.data || "Não foi possível carregar as filiais dos usuários."));
+      connect.get("/filiais", { skipStandardFilters: true }).then(({ data }) => setBranches((Array.isArray(data) ? data : []).filter((branch) => branch.ativa))).catch((error) => showToast("error", "Filiais", error.response?.data || "Não foi possível carregar as filiais dos usuários."));
       connect.get("/usuarios/permissoes/catalogo").then(({ data }) => setPermissionCatalog(Array.isArray(data) ? data : [])).catch((error) => showToast("error", "Permissões", error.response?.data || "Não foi possível carregar o catálogo de permissões."));
     }
   }, [canManage, refresh, showToast]);

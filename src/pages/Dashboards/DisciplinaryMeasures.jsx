@@ -473,14 +473,6 @@ export function DisciplinaryMeasuresDashboard() {
               <span>{formatPeriod(filters.period)}</span>
             </div>
             <StandardFilterButton panelRef={filterPanel} count={activeFilterCount} />
-            <Button
-              type="button"
-              icon={<AppIcon name="refresh" />}
-              label="Atualizar"
-              outlined
-              loading={loading && Boolean(data)}
-              onClick={() => setRefresh((value) => value + 1)}
-            />
           </>
         )}
       />

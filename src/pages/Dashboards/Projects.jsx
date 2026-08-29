@@ -101,7 +101,7 @@ export function ProjectDashboard() {
         showToast("error", "Dashboard de Projetos", error.response?.data || "Não foi possível carregar os dados.");
         setError(error)
       })
-      .finally(setLoading(false))
+      .finally(() => setLoading(false))
   }, [filters, showToast]);
 
   useEffect(() => {
@@ -306,12 +306,16 @@ export function ProjectDashboard() {
               <div><strong>Filtrar dashboard</strong><span>Combine os filtros para atualizar todos os indicadores e gráficos.</span></div>
               <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
             </div>
-            <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => setFilter("periodo", value) }} />
+            <StandardFilterFields
+              date={{ value: filters.periodo, onChange: (value) => setFilter("periodo", value) }}
+              department={{ options: [] }}
+              center={{ options: [] }}
+            />
             <div className="dashboard-filter-grid">
               <label><span>Projetos</span><MultiSelect value={filters.projeto} options={proceduralOptions.projetos || []} onChange={(event) => setFilter("projeto", event.value)} placeholder="Todos os projetos" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
               <label><span>Colaboradores</span><MultiSelect value={filters.colaborador} options={proceduralOptions.colaboradores || []} onChange={(event) => setFilter("colaborador", event.value)} placeholder="Todos os colaboradores" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
               <label className="is-wide"><span>Cards</span><MultiSelect value={filters.card} options={proceduralOptions.cards || []} onChange={(event) => setFilter("card", event.value)} placeholder="Todos os cards" display="chip" filter showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-              <label className="is-wide"><span>Status</span><MultiSelect value={filters.status} options={(proceduralOptions.status || ["fazer", "andamento", "conclu"]).map((value) => ({ label: value.replace(/\b\w/g, (letter) => letter.toUpperCase()), value }))} onChange={(event) => setFilter("status", event.value)} placeholder="Todos os status" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+              <label className="is-wide"><span>Status</span><MultiSelect value={filters.status} options={(proceduralOptions.status || []).map((value) => ({ label: value.replace(/\b\w/g, (letter) => letter.toUpperCase()), value }))} onChange={(event) => setFilter("status", event.value)} placeholder="Todos os status" display="chip" showClear className="w-full" maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
             </div>
           </OverlayPanel>
         </>}

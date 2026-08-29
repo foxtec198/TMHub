@@ -52,7 +52,6 @@ export default function WeatherWidget({
 }) {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -84,7 +83,6 @@ export default function WeatherWidget({
       } finally {
         if (mounted) {
           setLoading(false);
-          setRefreshing(false);
         }
       }
     }
@@ -127,7 +125,6 @@ export default function WeatherWidget({
   }, [weather?.icon, theme.type, theme.time]);
 
   function refresh() {
-    setRefreshing(true);
     setReloadKey((value) => value + 1);
   }
 
@@ -193,15 +190,6 @@ export default function WeatherWidget({
           </Location>
         </MainInfo>
 
-        <RefreshButton
-          type="button"
-          onClick={refresh}
-          disabled={refreshing}
-          aria-label="Atualizar clima"
-          title="Atualizar clima"
-        >
-          <RefreshCw className={refreshing ? 'spin' : ''} size={17} />
-        </RefreshButton>
       </MainCard>
 
       <DetailsCard>
@@ -614,25 +602,6 @@ const Location = styled.div`
   color: var(--widget-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-const RefreshButton = styled.button`
-  position: relative;
-  z-index: 1;
-  align-self: start;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid var(--widget-border);
-  border-radius: 50%;
-  background: rgb(255 255 255 / 10%);
-  color: var(--widget-muted);
-  cursor: pointer;
-
-  &:hover { color: var(--widget-text); }
-  &:disabled { cursor: wait; opacity: 0.65; }
 `;
 
 const DetailsCard = styled.div`

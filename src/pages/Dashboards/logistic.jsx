@@ -25,6 +25,7 @@ const DEFAULT_FILTERS = {
     type: [],
     employee: [],
     center: [],
+    department: [],
 };
 
 function isoDate(value) {
@@ -55,6 +56,7 @@ export function DashboardLogistic() {
         if (filters.type.length) params.tipo = filters.type.join(',');
         if (filters.employee.length) params.colaborador_id = filters.employee.join(',');
         if (filters.center.length) params.centro_custo_id = filters.center.join(',');
+        if (filters.department.length) params.departamento = filters.department.join(',');
         connect.get('/estoque/movimentos/dashboard', { params })
             .then(({ data: response }) => active && setData(response))
             .catch((error) => active && showToast(
@@ -69,7 +71,7 @@ export function DashboardLogistic() {
 
     const indicators = data?.indicadores || {};
     const options = data?.filtros || {};
-    const activeFilterCount = ['product', 'type', 'employee', 'center']
+    const activeFilterCount = ['product', 'type', 'employee', 'center', 'department']
         .filter((key) => filters[key]?.length).length;
     const setFilter = (key, value) => setFilters((current) => ({ ...current, [key]: value || [] }));
     const movementChart = useMemo(() => ({
@@ -234,10 +236,14 @@ export function DashboardLogistic() {
                         <div className="dashboard-filter-title">
                             <div><strong>Filtrar logística</strong><span>Todos os indicadores usam o mesmo recorte.</span></div>
                         </div>
-                        <StandardFilterFields date={{ value: filters.period, onChange: (value) => setFilter('period', value) }} center={{ value: filters.center, options: options.centros_custo, onChange: (value) => setFilter('center', value) }} />
+                        <StandardFilterFields
+                            date={{ value: filters.period, onChange: (value) => setFilter('period', value) }}
+                            department={{ value: filters.department, options: options.departamentos || [], onChange: (value) => setFilter('department', value) }}
+                            center={{ value: filters.center, options: options.centros_custo || [], onChange: (value) => setFilter('center', value) }}
+                        />
                         <div className="dashboard-filter-grid">
                             <label><span>Produto</span><MultiSelect value={filters.product} options={options.produtos || []} onChange={(event) => setFilter('product', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
-                            <label><span>Tipo</span><MultiSelect value={filters.type} options={[{ label: 'Entrada', value: 'entrada' }, { label: 'Saída', value: 'saida' }]} onChange={(event) => setFilter('type', event.value)} showClear display="chip" placeholder="Todos" /></label>
+                            <label><span>Tipo</span><MultiSelect value={filters.type} options={options.tipos || []} onChange={(event) => setFilter('type', event.value)} showClear display="chip" placeholder="Todos" /></label>
                             <label className="is-wide"><span>Colaborador</span><MultiSelect value={filters.employee} options={options.colaboradores || []} onChange={(event) => setFilter('employee', event.value)} filter showClear display="chip" placeholder="Todos" /></label>
                         </div>
                     </OverlayPanel>

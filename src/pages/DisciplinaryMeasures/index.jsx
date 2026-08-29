@@ -23,44 +23,6 @@ import connect from "../../utils/request";
 
 import "./styles.css";
 
-const ALINEA_LABELS = {
-  a: "Improbidade",
-  b: "Má conduta",
-  c: "Negociação sem permissão",
-  d: "Condenação criminal",
-  e: "Desídia",
-  f: "Embriaguez",
-  g: "Violação de segredo",
-  h: "Indisciplina/insubordinação",
-  i: "Abandono de emprego",
-  j: "Ofensa contra pessoa",
-  k: "Ofensa à chefia",
-  l: "Jogos de azar",
-  m: "Perda de habilitação",
-};
-
-function alineaOption(...letters) {
-  const prefix = letters.length === 1 ? "Alínea" : "Alíneas";
-  return {
-    value: `alinea_${letters.join("_")}`,
-    label: `${prefix} ${letters.map((letter) => letter.toUpperCase()).join("/")} — ${letters.map((letter) => ALINEA_LABELS[letter]).join(" + ")}`,
-  };
-}
-
-const DEFAULT_OPTIONS = {
-  tipos: [
-    { label: "Advertência", value: "advertencia" },
-    { label: "Suspensão", value: "suspensao" },
-  ],
-  motivos: [
-    ...Object.keys(ALINEA_LABELS).map((letter) => alineaOption(letter)),
-    alineaOption("a", "e"),
-    alineaOption("b", "h"),
-    alineaOption("e", "h"),
-    alineaOption("e", "k"),
-  ],
-};
-
 const emptyFilters = () => ({
   busca: "",
   colaborador_id: [],
@@ -68,6 +30,7 @@ const emptyFilters = () => ({
   tipo: [],
   motivo: [],
   departamento: [],
+  centro_custo: [],
   periodo: null,
 });
 
@@ -98,7 +61,10 @@ export function DisciplinaryMeasures() {
   const [employees, setEmployees] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [options, setOptions] = useState(DEFAULT_OPTIONS);
+  const [centers, setCenters] = useState([]);
+  // Não exibe catálogo estático enquanto o recorte real da tabela não foi
+  // carregado; listas vazias significam que ainda não há dados disponíveis.
+  const [options, setOptions] = useState({ tipos: [], motivos: [] });
   const [refresh, setRefresh] = useState(0);
   const [importVisible, setImportVisible] = useState(false);
   const [importFile, setImportFile] = useState(null);
@@ -129,6 +95,7 @@ export function DisciplinaryMeasures() {
             tipo: filters.tipo.join(",") || undefined,
             motivo: filters.motivo.join(",") || undefined,
             departamento: filters.departamento.join(",") || undefined,
+            centro_custo: filters.centro_custo.join(",") || undefined,
             inicio: dateParam(filters.periodo?.[0]),
             fim: dateParam(filters.periodo?.[1]),
           },
@@ -137,7 +104,7 @@ export function DisciplinaryMeasures() {
         setRecords(data.registros || []);
         setSummary(data.resumo || { total: 0, advertencias: 0, suspensoes: 0 });
         setTotalRecords(Number(data.paginacao?.total || 0));
-        setOptions({ ...DEFAULT_OPTIONS, ...(data.opcoes || {}) });
+        setOptions({ tipos: data.opcoes?.tipos || [], motivos: data.opcoes?.motivos || [] });
       } catch (error) {
         if (controller.signal.aborted || error.code === "ERR_CANCELED") return;
         showToast("error", "Medidas disciplinares", errorMessage(error, "Não foi possível carregar os registros."));
@@ -164,6 +131,7 @@ export function DisciplinaryMeasures() {
         })));
         setSupervisors(data.supervisores || []);
         setDepartments(data.departamentos || []);
+        setCenters(data.centros || []);
         filterOptionsLoaded.current = true;
         return true;
       })
@@ -249,6 +217,7 @@ export function DisciplinaryMeasures() {
     filters.tipo.length > 0,
     filters.motivo.length > 0,
     filters.departamento.length > 0,
+    filters.centro_custo.length > 0,
     Boolean(filters.periodo?.[0]),
   ].filter(Boolean).length;
 
@@ -287,7 +256,7 @@ export function DisciplinaryMeasures() {
           />
         </div>
         <Divider />
-        <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => updateFilter("periodo", value) }} department={{ value: filters.departamento, options: departments, onChange: (value) => updateFilter("departamento", value) }} />
+        <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => updateFilter("periodo", value) }} department={{ value: filters.departamento, options: departments, onChange: (value) => updateFilter("departamento", value) }} center={{ value: filters.centro_custo || [], options: centers, onChange: (value) => updateFilter("centro_custo", value) }} />
         <div className="dashboard-filter-grid disciplinary-filter-grid">
           <label className="is-wide">
             <span>Busca</span>
