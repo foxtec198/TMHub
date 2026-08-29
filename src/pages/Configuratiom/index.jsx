@@ -36,6 +36,15 @@ import "./settings.css";
 // Mantida igual à validação do backend para feedback imediato no formulário.
 const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/;
 
+const ADORNMENT_NAMES = {
+  adorno_halloween: "Halloween",
+  adorno_natal: "Natal",
+  adorno_gptw: "Great Place to Work",
+  adorno_aniversario: "Aniversário",
+  adorno_orgulho: "Orgulho",
+  adorno_conquista: "Conquista",
+};
+
 export function Settings() {
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   // Perfil, preferência visual e estados dos fluxos de senha/e-mail.
@@ -51,6 +60,7 @@ export function Settings() {
   const [newEmail, setNewEmail] = useState("");
   const [emailDialog, setEmailDialog] = useState(false);
   const [otp, setOtp] = useState("");
+  const [adornmentSaving, setAdornmentSaving] = useState(false);
   const [maintenanceActive, setMaintenanceActive] = useState(false);
   const [maintenanceSaving, setMaintenanceSaving] = useState(false);
   const fileRef = useRef(null);
@@ -189,6 +199,22 @@ export function Settings() {
     finally { setLoading(false); }
   };
 
+  const removeAdornment = async () => {
+    if (!profile.adorno_foto) return;
+    setAdornmentSaving(true);
+    try {
+      await connect.patch("/marketplace/equipar", { categoria: "adorno", produto_id: null });
+      const nextProfile = { ...profile, adorno_foto: null };
+      setProfile(nextProfile);
+      storeProfile(nextProfile);
+      showToast("success", "Adorno removido", "Sua foto voltou ao formato padrão.");
+    } catch (error) {
+      showToast("error", "Adorno", error.response?.data || "Não foi possível remover o adorno.");
+    } finally {
+      setAdornmentSaving(false);
+    }
+  };
+
   // Cards separam preferências visuais de operações sensíveis da conta.
   return <section className="settings-page">
     <PageHeader section="Sistema" title="Configurações" description="Personalize seu perfil, acesso e aparência do TM Hub." />
@@ -208,6 +234,28 @@ export function Settings() {
             <article className="settings-card">
               <div className="settings-card-title"><AppIcon name="mail"  /><div><h2>E-mail</h2><p>Atual: {profile.email || "Não informado"}</p></div></div>
               <label>Novo e-mail</label><div className="settings-inline"><InputText autoComplete="off" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="voce@empresa.com" /><Button label="Verificar" icon={<AppIcon name="send" />} onClick={requestCode} /></div>
+            </article>
+
+            <article className="settings-card">
+              <div className="settings-card-title"><AppIcon name="sparkles" /><div><h2>Adorno</h2><p>Personalização exibida ao redor da sua foto.</p></div></div>
+              <div className="adornment-profile-row">
+                <UserAvatar user={profile} className="adornment-profile-preview" />
+                <div className="adornment-profile-copy">
+                  <span>Adorno atual</span>
+                  <strong>{ADORNMENT_NAMES[profile.adorno_foto] || (profile.adorno_foto ? "Adorno personalizado" : "Nenhum adorno equipado")}</strong>
+                  <small>{profile.adorno_foto ? "Você pode removê-lo sem perder o item adquirido." : "Equipe um adorno pela Loja de Edinhos."}</small>
+                </div>
+                {profile.adorno_foto && (
+                  <Button
+                    label="Remover"
+                    icon={<AppIcon name="x" />}
+                    severity="danger"
+                    outlined
+                    loading={adornmentSaving}
+                    onClick={removeAdornment}
+                  />
+                )}
+              </div>
             </article>
 
             {isAdmin && (

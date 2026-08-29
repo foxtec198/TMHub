@@ -33,7 +33,7 @@ async function loadUserDirectory() {
 }
 
 /** Avatar padronizado: usa foto do payload e resolve pelo id quando necessário. */
-export function UserAvatar({ user, userId, nome, foto_perfil, style, className, ...props }) {
+export function UserAvatar({ user, userId, nome, foto_perfil, adorno_foto, style, className, ...props }) {
   const id = Number(user?.id ?? userId);
   const suppliedName = nome ?? user?.nome;
   const [cachedUser, setCachedUser] = useState(() => findCachedUser(id));
@@ -44,9 +44,21 @@ export function UserAvatar({ user, userId, nome, foto_perfil, style, className, 
   const resolvedUser = cachedForCurrentUser || findCachedUser(id);
   const displayName = suppliedName ?? resolvedUser?.nome ?? "Usuário";
   const image = foto_perfil ?? user?.foto_perfil ?? resolvedUser?.foto_perfil;
+  const [profileAdornment, setProfileAdornment] = useState(() => localStorage.getItem("profile_adornment"));
+  const isCurrentUser = id === Number(localStorage.getItem("current_id"));
+  const adornment = adorno_foto ?? user?.adorno_foto ?? resolvedUser?.adorno_foto ?? (isCurrentUser ? profileAdornment : null);
 
   useEffect(() => {
-    if (image || findCachedUser(id) || !Number.isInteger(id) || id <= 0) return undefined;
+    if (!isCurrentUser) return undefined;
+    const syncProfile = (event) => setProfileAdornment(event.detail?.adorno_foto || null);
+    window.addEventListener("tmhub:profile", syncProfile);
+    return () => window.removeEventListener("tmhub:profile", syncProfile);
+  }, [isCurrentUser]);
+
+  useEffect(() => {
+    // Mesmo quando a foto já veio no payload, o diretório ainda pode ser
+    // necessário para resolver o adorno equipado por aquele usuário.
+    if (findCachedUser(id) || !Number.isInteger(id) || id <= 0) return undefined;
 
     let active = true;
 
@@ -59,12 +71,12 @@ export function UserAvatar({ user, userId, nome, foto_perfil, style, className, 
       });
 
     return () => { active = false; };
-  }, [id, image]);
+  }, [id]);
 
   return (
     <Avatar
       {...props}
-      className={`tm-user-avatar ${className || ""}`.trim()}
+      className={`tm-user-avatar ${adornment ? `tm-user-avatar--${adornment}` : ""} ${className || ""}`.trim()}
       image={image || undefined}
       imageAlt={displayName}
       label={image ? undefined : getInitials(displayName)}

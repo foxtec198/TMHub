@@ -450,6 +450,11 @@ export function MainLayout() {
       command: () => { navigateTo("/projetos") }
     },
     {
+      label: 'Timo',
+      icon: appIcon("sparkles"),
+      command: () => { navigateTo("/timo") }
+    },
+    {
       label: 'Marketplace',
       icon: appIcon("shopping-cart"),
       visible: String(role || "").toUpperCase() === "ADMIN",

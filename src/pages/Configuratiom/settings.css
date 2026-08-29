@@ -237,6 +237,41 @@
   color: var(--text-color-secondary);
 }
 
+.adornment-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.adornment-profile-preview {
+  flex: 0 0 auto;
+  width: 3.75rem;
+  height: 3.75rem;
+  font-size: 1rem;
+}
+
+.adornment-profile-copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.adornment-profile-copy span,
+.adornment-profile-copy small {
+  color: var(--text-color-secondary);
+}
+
+.adornment-profile-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .theme-option {
   justify-content: space-between;
   background: var(--surface-2);
@@ -323,6 +358,15 @@
 
   .settings-inline {
     flex-direction: column;
+  }
+
+  .adornment-profile-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .adornment-profile-row .p-button {
+    width: 100%;
   }
 }
 
