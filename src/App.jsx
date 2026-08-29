@@ -65,7 +65,6 @@ import { ExperienceControl } from "./pages/ExperienceControl";
 import { ExperienceSupervisor } from "./pages/ExperienceControl/supervisor";
 import { PeriodicExams } from "./pages/PeriodicExams";
 import { MarketPlace } from "./pages/Marketplace";
-import { TimoAssistant } from "./pages/TimoAssistant";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -227,7 +226,6 @@ export function AppRoutes() {
             }
           />
           <Route path="/configuracoes" element={<Settings />} />
-          <Route path="/timo" element={<TimoAssistant />} />
           <Route
             path="/tickets"
             element={<PermissionGate screen="tickets"><TicketsDashboard /></PermissionGate>}
