@@ -16,6 +16,12 @@ const QUICK_COMMANDS = [
   { label: "Vagas abertas", command: "quantas vagas estão abertas", icon: "briefcase" },
 ];
 
+const PLAYFUL_ANIMATIONS = [
+  { name: "fly_loop", duration: 5000 },
+  { name: "playful_spin", duration: 4500 },
+  { name: "peekaboo", duration: 4700 },
+];
+
 function nowLabel() {
   return new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
@@ -27,9 +33,12 @@ export function TimoAssistant() {
   const [modelReady, setModelReady] = useState(false);
   const [modelFailed, setModelFailed] = useState(false);
   const [animation, setAnimation] = useState("idle");
+  const [skin, setSkin] = useState(() => localStorage.getItem("timo_skin") || "default");
   const [messages, setMessages] = useState([{ id: "welcome", role: "timo", text: "Olá! Sou o Timo. Escreva o que você quer consultar no TMHub ou escolha um comando rápido.", time: nowLabel() }]);
   const conversationRef = useRef(null);
   const animationTimerRef = useRef(null);
+  const playfulnessTimerRef = useRef(null);
+  const interactionRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -40,7 +49,32 @@ export function TimoAssistant() {
     return () => { mounted = false; };
   }, []);
 
-  useEffect(() => () => window.clearTimeout(animationTimerRef.current), []);
+  useEffect(() => () => {
+    window.clearTimeout(animationTimerRef.current);
+    window.clearTimeout(playfulnessTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const syncSkin = (event) => setSkin(event.detail?.timo_skin || localStorage.getItem("timo_skin") || "default");
+    window.addEventListener("tmhub:profile", syncSkin);
+    return () => window.removeEventListener("tmhub:profile", syncSkin);
+  }, []);
+
+  useEffect(() => {
+    if (!modelReady || sending) return undefined;
+    const schedule = () => {
+      const delay = 14000 + Math.round(Math.random() * 14000);
+      playfulnessTimerRef.current = window.setTimeout(() => {
+        if (!interactionRef.current) {
+          const playful = PLAYFUL_ANIMATIONS[Math.floor(Math.random() * PLAYFUL_ANIMATIONS.length)];
+          playTemporaryAnimation(playful.name, playful.duration);
+        }
+        schedule();
+      }, delay);
+    };
+    schedule();
+    return () => window.clearTimeout(playfulnessTimerRef.current);
+  }, [modelReady, sending]);
 
   useEffect(() => {
     conversationRef.current?.scrollTo({ top: conversationRef.current.scrollHeight, behavior: "smooth" });
@@ -102,6 +136,9 @@ export function TimoAssistant() {
     }
   };
 
+  const modelSource = skin === "timo_gold" ? "/timo-gold.glb?v=gold-1" : "/timo.glb?v=eva-2";
+  const modelPoster = skin === "timo_gold" ? "/timo-gold-poster.png" : "/timo-poster.png";
+
   return <main className="timo-assistant-page">
     <PageHeader section="Assistente virtual" title="Timo" description="Consulte informações do TMHub por texto, com as mesmas permissões do seu usuário." />
     <section className="timo-assistant-shell">
@@ -113,7 +150,7 @@ export function TimoAssistant() {
       <div className="timo-assistant-main">
         <div className="timo-assistant-stage" aria-label="Timo em três dimensões">
           <div className="timo-assistant-orbit" />
-          {modelFailed || !modelReady ? <img src="/timo-poster.png" alt="Timo" /> : <model-viewer className="timo-assistant-model" src="/timo.glb" poster="/timo-poster.png" alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="350" interaction-prompt="none" camera-controls disable-zoom shadow-intensity="1" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" onLoad={() => playAnimationSequence([{ name: "wave", duration: 2400 }, { name: "idle" }])} onPointerDown={() => !sending && playTemporaryAnimation("dragging", 900)} onPointerUp={() => !sending && setAnimation("idle")} onError={() => setModelFailed(true)} />}
+          {modelFailed || !modelReady ? <img src={modelPoster} alt="Timo" /> : <model-viewer key={modelSource} className="timo-assistant-model" src={modelSource} poster={modelPoster} alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="420" interaction-prompt="none" camera-controls disable-zoom shadow-intensity="1" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" onLoad={() => playAnimationSequence([{ name: "wave", duration: 4100 }, { name: "idle" }])} onPointerDown={() => { interactionRef.current = true; if (!sending) playTemporaryAnimation("dragging", 1200); }} onPointerUp={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onPointerCancel={() => { interactionRef.current = false; }} onError={() => setModelFailed(true)} />}
           <div className="timo-assistant-status"><i /> {animation === "thinking" ? "Consultando" : animation === "speaking" ? "Respondendo" : animation === "disabled" ? "Indisponível" : "Timo online"}</div>
         </div>
         <section className="timo-conversation" aria-label="Conversa com o Timo">
@@ -121,7 +158,7 @@ export function TimoAssistant() {
             {message.role === "timo" && <span className="timo-message__avatar"><AppIcon name="sparkles" /></span>}
             <div><p>{message.text}</p>{message.action?.type === "navigate" && <Button label="Abrir tela" icon={<AppIcon name="external-link" />} text onClick={() => navigate(message.action.path)} />}<small>{message.role === "timo" ? "Timo" : "Você"} · {message.time}</small></div>
           </article>)}{sending && <article className="timo-message is-timo"><span className="timo-message__avatar"><AppIcon name="sparkles" /></span><div className="timo-typing" aria-label="Timo está consultando"><i /><i /><i /></div></article>}</div>
-          <footer><div className="timo-composer"><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => !sending && setAnimation("listening")} onBlur={() => !sending && setAnimation("idle")} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Escreva uma pergunta ou comando para o Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" />} rounded aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div><small>Enter para enviar · Shift + Enter para quebrar linha · Somente texto</small></footer>
+          <footer><div className="timo-composer"><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => { interactionRef.current = true; if (!sending) setAnimation("listening"); }} onBlur={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Escreva uma pergunta ou comando para o Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" />} rounded aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div><small>Enter para enviar · Shift + Enter para quebrar linha · Somente texto</small></footer>
         </section>
       </div>
     </section>

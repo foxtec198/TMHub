@@ -13,6 +13,7 @@ export function storeProfile(profile) {
   else localStorage.removeItem("profile_photo");
   if (profile.adorno_foto) localStorage.setItem("profile_adornment", profile.adorno_foto);
   else localStorage.removeItem("profile_adornment");
+  localStorage.setItem("timo_skin", profile.timo_skin || "default");
   if (profile.gerencia_faltas != null) localStorage.setItem("gerencia_faltas", profile.gerencia_faltas ? "true" : "false");
   if (Array.isArray(profile.permissions)) localStorage.setItem("permissions", JSON.stringify(profile.permissions));
   if (profile.tema || profile.modo_tema) applyProfileAppearance(profile);

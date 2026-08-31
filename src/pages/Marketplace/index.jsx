@@ -13,7 +13,8 @@ import connect from "../../utils/request";
 import { storeProfile } from "../../utils/profile";
 import "./style.css";
 
-const CATEGORY_LABELS = { todos: "Todos", tema: "Temas", adorno: "Adornos de foto" };
+const CATEGORY_LABELS = { todos: "Todos", tema: "Temas", adorno: "Adornos de foto", timo_skin: "Skins do Timo" };
+const PRODUCT_CATEGORY_LABELS = { tema: "Tema", adorno: "Adorno de foto", timo_skin: "Skin do Timo" };
 const themeById = new Map(THEME_OPTIONS.map((theme) => [theme.id, theme]));
 
 function errorMessage(error, fallback) {
@@ -26,6 +27,12 @@ function ProductArt({ product }) {
     return <div className="marketplace-card__art marketplace-card__art--theme" style={{ "--market-colors": (theme?.preview || ["#0b3518", "#4bd66e", "#fff"]).join(",") }}>
       <span className="marketplace-theme-preview">{(theme?.preview || []).map((color) => <i key={color} style={{ background: color }} />)}</span>
       <AppIcon name={theme?.icon || "palette"} />
+    </div>;
+  }
+  if (product.categoria === "timo_skin") {
+    return <div className="marketplace-card__art marketplace-card__art--timo-gold">
+      <img src="/timo-gold-poster.png" alt="Prévia do Timo Gold Premium" />
+      <span>GOLD</span>
     </div>;
   }
   return <div className={`marketplace-card__art marketplace-card__art--frame is-${product.codigo}`}>
@@ -124,6 +131,18 @@ export function MarketPlace() {
     } finally { setProcessing(false); }
   };
 
+  const removeTimoSkin = async () => {
+    try {
+      setProcessing(true);
+      await connect.patch("/marketplace/equipar", { categoria: "timo_skin", produto_id: null });
+      await refreshProfile();
+      showToast("success", "Timo restaurado", "O acabamento branco padrão voltou a ser usado.");
+      await load();
+    } catch (error) {
+      showToast("error", "Não foi possível restaurar", errorMessage(error, "Tente novamente."));
+    } finally { setProcessing(false); }
+  };
+
   const refund = async () => {
     if (!refundTarget) return;
     try {
@@ -154,9 +173,9 @@ export function MarketPlace() {
             return <article className={`marketplace-card${product.destaque ? " is-featured" : ""}${product.equipado ? " is-equipped" : ""}`} key={product.id}>
               <ProductArt product={product} />
               <div className="marketplace-card__body">
-                <div className="marketplace-card__tags"><Tag value={product.categoria === "tema" ? "TEMA" : "ADORNO"} severity="info" />{product.destaque && <Tag value="DESTAQUE" severity="warning" />}{product.equipado && <Tag value="EM USO" severity="success" />}</div>
+                <div className="marketplace-card__tags"><Tag value={PRODUCT_CATEGORY_LABELS[product.categoria]?.toUpperCase() || product.categoria.toUpperCase()} severity="info" />{product.destaque && <Tag value="DESTAQUE" severity="warning" />}{product.equipado && <Tag value="EM USO" severity="success" />}</div>
                 <h3>{product.nome}</h3><p>{product.descricao}</p>
-                <footer><strong><AppIcon name="star-filled" /> {product.preco_edinhos || "Grátis"}</strong>
+                <footer><strong><AppIcon name="star-filled" /> {product.preco_edinhos ? product.preco_edinhos.toLocaleString("pt-BR") : "Grátis"}</strong>
                   {product.adquirido ? <Button label={product.equipado ? "Equipado" : "Usar"} icon={<AppIcon name="check" />} outlined={!product.equipado} disabled={product.equipado || processing} onClick={() => equip(product)} /> : <Button label={inCart ? "No carrinho" : "Adicionar"} icon={<AppIcon name={inCart ? "check" : "shopping-cart"} />} severity={inCart ? "success" : undefined} outlined={inCart} onClick={() => toggleCart(product)} />}
                 </footer>
               </div>
@@ -165,13 +184,13 @@ export function MarketPlace() {
         </section>
         <aside className="marketplace-cart">
           <header><div><span><AppIcon name="shopping-cart" /> Carrinho</span><strong>{cartProducts.length} item(ns)</strong></div>{cart.length > 0 && <Button label="Limpar" text onClick={() => setCart([])} />}</header>
-          <div className="marketplace-cart__items">{cartProducts.map((product) => <article key={product.id}><div><strong>{product.nome}</strong><small>{product.categoria === "tema" ? "Tema" : "Adorno de foto"}</small></div><span>{product.preco_edinhos} <AppIcon name="star-filled" /></span><Button icon={<AppIcon name="x" />} text rounded aria-label={`Remover ${product.nome}`} onClick={() => toggleCart(product)} /></article>)}{!cartProducts.length && <div className="marketplace-cart__empty"><AppIcon name="shopping-cart" /><strong>Seu carrinho está vazio</strong><span>Escolha itens no catálogo para comprar tudo de uma vez.</span></div>}</div>
+          <div className="marketplace-cart__items">{cartProducts.map((product) => <article key={product.id}><div><strong>{product.nome}</strong><small>{PRODUCT_CATEGORY_LABELS[product.categoria] || product.categoria}</small></div><span>{product.preco_edinhos.toLocaleString("pt-BR")} <AppIcon name="star-filled" /></span><Button icon={<AppIcon name="x" />} text rounded aria-label={`Remover ${product.nome}`} onClick={() => toggleCart(product)} /></article>)}{!cartProducts.length && <div className="marketplace-cart__empty"><AppIcon name="shopping-cart" /><strong>Seu carrinho está vazio</strong><span>Escolha itens no catálogo para comprar tudo de uma vez.</span></div>}</div>
           <footer><div><span>Total</span><strong>{cartTotal.toLocaleString("pt-BR")} Edinhos</strong></div><Button label="Finalizar compra" icon={<AppIcon name="check" />} disabled={!cart.length || cartTotal > catalog.saldo_edinhos} loading={processing} onClick={checkout} />{cartTotal > catalog.saldo_edinhos && <small>Saldo insuficiente para este carrinho.</small>}</footer>
         </aside>
       </div>
       <section className="marketplace-collection">
-        <header><div><span>MINHA COLEÇÃO</span><h2>Compras e reembolsos</h2></div>{catalog.equipados?.adorno && <Button label="Remover adorno atual" icon={<AppIcon name="x" />} text onClick={removeFrame} disabled={processing} />}</header>
-        <div>{purchases.map((purchase) => <article key={purchase.id}><span className={`marketplace-purchase-icon is-${purchase.produto.categoria}`}><AppIcon name={purchase.produto.categoria === "tema" ? "palette" : "photo"} /></span><div><strong>{purchase.produto.nome}</strong><small>{new Date(purchase.created_at).toLocaleString("pt-BR")} · {purchase.preco_edinhos} Edinhos</small></div><Tag value={purchase.status === "concluida" ? "ADQUIRIDO" : purchase.status.replaceAll("_", " ").toUpperCase()} severity={purchase.status === "concluida" ? "success" : "secondary"} />{purchase.pode_reembolsar && <Button label="Reembolsar" icon={<AppIcon name="arrow-back-up" />} text onClick={() => setRefundTarget(purchase)} />}</article>)}{!purchases.length && <Placeholder variant="content" title="Nenhuma compra ainda" description="Sua coleção aparecerá aqui." />}</div>
+        <header><div><span>MINHA COLEÇÃO</span><h2>Compras e reembolsos</h2></div><div className="marketplace-collection__actions">{catalog.equipados?.adorno && <Button label="Remover adorno atual" icon={<AppIcon name="x" />} text onClick={removeFrame} disabled={processing} />}{catalog.equipados?.timo_skin && catalog.equipados.timo_skin !== "default" && <Button label="Usar Timo padrão" icon={<AppIcon name="arrow-back-up" />} text onClick={removeTimoSkin} disabled={processing} />}</div></header>
+        <div>{purchases.map((purchase) => <article key={purchase.id}><span className={`marketplace-purchase-icon is-${purchase.produto.categoria}`}><AppIcon name={purchase.produto.categoria === "tema" ? "palette" : purchase.produto.categoria === "timo_skin" ? "sparkles" : "photo"} /></span><div><strong>{purchase.produto.nome}</strong><small>{new Date(purchase.created_at).toLocaleString("pt-BR")} · {purchase.preco_edinhos.toLocaleString("pt-BR")} Edinhos</small></div><Tag value={purchase.status === "concluida" ? "ADQUIRIDO" : purchase.status.replaceAll("_", " ").toUpperCase()} severity={purchase.status === "concluida" ? "success" : "secondary"} />{purchase.pode_reembolsar && <Button label="Reembolsar" icon={<AppIcon name="arrow-back-up" />} text onClick={() => setRefundTarget(purchase)} />}</article>)}{!purchases.length && <Placeholder variant="content" title="Nenhuma compra ainda" description="Sua coleção aparecerá aqui." />}</div>
       </section>
     </>}
     <Dialog visible={Boolean(refundTarget)} modal header="Confirmar reembolso" className="marketplace-refund-dialog" onHide={() => !processing && setRefundTarget(null)} footer={<><Button label="Cancelar" text onClick={() => setRefundTarget(null)} disabled={processing} /><Button label="Reembolsar" severity="warning" icon={<AppIcon name="arrow-back-up" />} onClick={refund} loading={processing} /></>}><p>O item <strong>{refundTarget?.produto.nome}</strong> será removido da sua coleção e <strong>{refundTarget?.preco_edinhos} Edinhos</strong> voltarão ao saldo.</p><small>Se ele estiver em uso, a personalização será removida automaticamente.</small></Dialog>

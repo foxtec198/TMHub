@@ -123,6 +123,7 @@ export function Auth() {
             else localStorage.removeItem("profile_photo");
             if (res.data.adorno_foto) localStorage.setItem("profile_adornment", res.data.adorno_foto);
             else localStorage.removeItem("profile_adornment");
+            localStorage.setItem("timo_skin", res.data.timo_skin || "default");
             applyProfileAppearance(res.data);
             setAccessToken(res.data.access_token);
             const requirements = {

@@ -26,6 +26,11 @@
 .marketplace-theme-preview { display:flex; width:7.5rem; height:4.75rem; overflow:hidden; border:4px solid #ffffffdd; border-radius:.8rem; box-shadow:0 .7rem 1.4rem #0005; transform:rotate(-4deg); }
 .marketplace-theme-preview i { flex:1; }
 .marketplace-card__art--frame { background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--primary-color) 20%,var(--surface-card)),var(--surface-ground)); }
+.marketplace-card__art--timo-gold { background:radial-gradient(circle at 50% 38%,#6f4a12 0,#17120b 52%,#070706 100%); isolation:isolate; }
+.marketplace-card__art--timo-gold::before { content:""; position:absolute; inset:-50%; z-index:-1; background:conic-gradient(from 20deg,transparent,#ffd96a55,transparent 25%,#fff2b333,transparent 55%); animation:timo-gold-shine 7s linear infinite; }
+.marketplace-card__art--timo-gold img { width:8.6rem; height:8.6rem; object-fit:contain; filter:drop-shadow(0 .7rem 1rem #000b); }
+.marketplace-card__art--timo-gold span { position:absolute; right:.75rem; bottom:.7rem; padding:.2rem .42rem; border:1px solid #ffe19c; border-radius:.35rem; background:#2b1b07cc; color:#ffe19c; font-size:.62rem; font-weight:900; letter-spacing:.14em; }
+@keyframes timo-gold-shine { to { transform:rotate(1turn); } }
 .marketplace-frame-preview { position:relative; width:6.25rem; height:6.25rem; padding:.32rem; border:4px solid var(--primary-color); border-radius:50%; box-shadow:0 0 0 4px color-mix(in srgb,var(--primary-color) 24%,transparent); }
 .marketplace-frame-preview img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
 .is-adorno_halloween .marketplace-frame-preview { border-color:#f97316; box-shadow:0 0 0 4px #7c3aed88,0 0 1.4rem #f9731666; }
@@ -63,12 +68,14 @@
 .marketplace-cart>footer>div { display:flex; justify-content:space-between; gap:1rem; }
 .marketplace-cart>footer small { color:var(--red-400); text-align:center; }
 .marketplace-collection { margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid var(--surface-border); }
+.marketplace-collection__actions { display:flex; justify-content:flex-end; gap:.4rem; flex-wrap:wrap; }
 .marketplace-collection>div { display:grid; gap:.55rem; }
 .marketplace-collection article { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:.8rem; padding:.75rem .9rem; border:1px solid var(--surface-border); border-radius:.75rem; background:var(--surface-card); }
 .marketplace-collection article>div { display:grid; }
 .marketplace-collection article small { color:var(--text-color-secondary); }
 .marketplace-purchase-icon { display:grid; place-items:center; width:2.5rem; height:2.5rem; border-radius:.65rem; color:#fff; background:linear-gradient(135deg,#0f766e,#22c55e); }
 .marketplace-purchase-icon.is-adorno { background:linear-gradient(135deg,#7c3aed,#ec4899); }
+.marketplace-purchase-icon.is-timo_skin { background:linear-gradient(135deg,#7a4b08,#f7c948); color:#fff8d3; }
 .marketplace-refund-dialog { width:min(30rem,calc(100vw - 2rem)); }
 .marketplace-refund-dialog p { line-height:1.5; }
 .marketplace-refund-dialog small { color:var(--text-color-secondary); }
