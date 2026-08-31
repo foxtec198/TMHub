@@ -7,6 +7,25 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { SpeedDial } from "primereact/speeddial";
 import { Tooltip } from "primereact/tooltip";
+import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  Calendar,
+  ChartColumn,
+  Check,
+  ChevronDown,
+  CloudUpload,
+  FileCheck,
+  LoaderCircle,
+  Plus,
+  Save,
+  Trash2,
+  TriangleAlert,
+  Upload,
+  Wallet,
+  X,
+} from "lucide-react";
 
 import { PageHeader } from "../../components/PageHeader";
 import { Table } from "../../components/tables/Table";
@@ -19,7 +38,7 @@ import "./styles.css";
 const IMPORT_TYPES = [
   { label: "Histórico DRE · maio a julho/2026", value: "historico_dre" },
   { label: "Contratos e faturamento", value: "contratos" },
-  { label: "Folha analítica", value: "folha" },
+  { label: "Folha de pagamento · extratos do RH", value: "folha" },
   { label: "Custos operacionais", value: "custos" },
   { label: "Glosas", value: "glosas" },
 ];
@@ -27,9 +46,13 @@ const IMPORT_TYPES = [
 const MANUAL_CATEGORIES = [
   { label: "Receita bruta realizada", value: "rob" },
   { label: "Receita prevista", value: "receita_prevista" },
+  { label: "Impostos", value: "impostos" },
+  { label: "Encargos", value: "encargos" },
+  { label: "Glosa demonstrativa", value: "glosa_analitica" },
+  { label: "Folha salarial", value: "salarios" },
   { label: "Horas extras", value: "horas_extras" },
-  { label: "Vale-alimentação", value: "valor_va" },
-  { label: "Vale-transporte", value: "valor_vt" },
+  { label: "Vale-alimentação (valor nominal)", value: "valor_va" },
+  { label: "Vale-transporte (custo total)", value: "valor_vt" },
   { label: "Materiais", value: "materiais" },
   { label: "Uniformes", value: "uniformes" },
   { label: "EPIs", value: "epis" },
@@ -39,6 +62,17 @@ const MANUAL_CATEGORIES = [
   { label: "Máquinas e equipamentos", value: "maquinario" },
   { label: "Ajuste de custos", value: "ajuste_custos" },
 ];
+
+const DRE_VIEWS = [
+  { label: "Resumo", value: "resumo", icon: ChartColumn },
+  { label: "Recebimentos", value: "recebimentos", icon: ArrowDownRight },
+  { label: "Custos", value: "custos", icon: ArrowUpRight },
+  { label: "Previsão", value: "previsao", icon: Calendar },
+];
+
+const dropdownIcon = (iconProps) => <ChevronDown {...iconProps} size={16} />;
+
+const BRANCH_MARGIN_GOAL = 20;
 
 function currentCompetence() {
   const now = new Date();
@@ -75,14 +109,6 @@ function errorMessage(error, fallback) {
   return error?.response ? fallback : "Não foi possível conectar ao servidor.";
 }
 
-function metric(label, value, detail, tone = "", signal = "+") {
-  return <article className={`dre-summary__metric ${tone}`.trim()}>
-    <span>{label}</span>
-    <strong>{signal} {compactCurrency(Math.abs(Number(value || 0)))}</strong>
-    <small>{detail}</small>
-  </article>;
-}
-
 function detailMetric(label, value, tone = "is-expense", signal = "−") {
   return <div className={`dre-detail__item ${tone}`}>
     <span>{label}</span>
@@ -90,34 +116,48 @@ function detailMetric(label, value, tone = "is-expense", signal = "−") {
   </div>;
 }
 
+function detailGroup({ title, description, total, tone, signal = "−", children }) {
+  return <details className={`dre-detail__group ${tone}`}>
+    <summary>
+      <div className="dre-detail__group-heading"><span>{title}</span><strong>{description}</strong></div>
+      <div className="dre-detail__group-total"><b>{signal} {currency(Math.abs(Number(total || 0)))}</b><ChevronDown size={16} /></div>
+    </summary>
+    <div className="dre-detail__group-content"><div className="dre-detail__grid">{children}</div></div>
+  </details>;
+}
+
 export function DreControl() {
   const [records, setRecords] = useState([]);
-  const [summary, setSummary] = useState({});
   const [filterOptions, setFilterOptions] = useState({ competencias: [], departamentos: [] });
   const [selectedCompetence, setSelectedCompetence] = useState(null);
   const [branches, setBranches] = useState([]);
   const [selectedBranchId, setSelectedBranchId] = useState(null);
+  const [companies, setCompanies] = useState([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
   const [canDelete, setCanDelete] = useState(false);
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState(null);
+  const [expandedRows, setExpandedRows] = useState({});
+  const [activeView, setActiveView] = useState("resumo");
   const [importOpen, setImportOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [benefitsOpen, setBenefitsOpen] = useState(false);
-  const [importFile, setImportFile] = useState(null);
+  const [importFiles, setImportFiles] = useState([]);
   const [importPreview, setImportPreview] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [importForm, setImportForm] = useState({ tipo: "", competencia: currentCompetence() });
-  const [manualForm, setManualForm] = useState({ competencia: currentCompetence(), departamento: null, categoria: "", valor: null, descricao: "" });
+  const [manualForm, setManualForm] = useState({ competencia: currentCompetence(), departamento: null, categoria: "", valor: null, descricao: "", substitui_importacao: true });
   const fileInput = useRef(null);
   const setLoading = useLoading();
   const { showToast } = useToast();
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   const canCreate = isAdmin && can("controle_dre", "create");
+  const selectedBranch = branches.find((branch) => Number(branch.id) === Number(selectedBranchId));
+  const selectedCompany = companies.find((company) => Number(company.id) === Number(selectedCompanyId));
 
   const requestParams = useMemo(() => ({
-    ...(selectedCompetence ? { competencia: selectedCompetence } : {}),
     ...(selectedBranchId ? { filial_id: selectedBranchId } : {}),
-  }), [selectedBranchId, selectedCompetence]);
+    ...(selectedCompanyId ? { empresa_id: selectedCompanyId } : {}),
+  }), [selectedBranchId, selectedCompanyId]);
 
   const recordsByCompetence = useMemo(() => {
     const groups = new Map();
@@ -140,16 +180,33 @@ export function DreControl() {
     .sort()
     .map((value) => ({ label: competenceLabel(value), value })), [filterOptions.competencias]);
 
-  const selectedDepartment = useMemo(
-    () => records.find((record) => record.id === selectedDepartmentId) || records[0] || null,
-    [records, selectedDepartmentId],
-  );
+  const effectiveSelectedCompetence = selectedCompetence
+    && competenceOptions.some((item) => item.value === selectedCompetence)
+    ? selectedCompetence
+    : competenceOptions[competenceOptions.length - 1]?.value || null;
 
-  const plannedRevenue = Number(summary.previsto || 0);
-  const realizedRevenue = Number(summary.rob || 0);
-  const resultValue = Number(summary.margem || 0);
-  const plannedCompletion = plannedRevenue > 0 ? (realizedRevenue / plannedRevenue) * 100 : 0;
-  const plannedCompletionMeter = Math.max(0, Math.min(plannedCompletion, 100));
+  const selectedCompetenceData = useMemo(() => (
+    recordsByCompetence.find((item) => item.competence === effectiveSelectedCompetence)
+    || recordsByCompetence[recordsByCompetence.length - 1]
+    || null
+  ), [effectiveSelectedCompetence, recordsByCompetence]);
+
+  const displayedSummary = useMemo(() => {
+    const rows = selectedCompetenceData?.rows || [];
+    const totals = rows.reduce((current, record) => ({
+      previsto: current.previsto + Number(record.receita_prevista || 0),
+      rob: current.rob + Number(record.rob || 0),
+      rol: current.rol + Number(record.rol || 0),
+      glosas: current.glosas + Number(record.glosas || 0),
+      custos: current.custos + Number(record.total_custos || 0),
+      margem: current.margem + Number(record.margem || 0),
+    }), { previsto: 0, rob: 0, rol: 0, glosas: 0, custos: 0, margem: 0 });
+
+    return {
+      ...totals,
+      percentual_margem: totals.rol ? (totals.margem / totals.rol) * 100 : 0,
+    };
+  }, [selectedCompetenceData]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -159,19 +216,22 @@ export function DreControl() {
         ...record,
         id: `${record.competencia}-${record.departamento}`,
       })));
-      setSummary(data?.resumo || {});
       setFilterOptions(data?.filtros || { competencias: [], departamentos: [] });
       setBranches(Array.isArray(data?.filiais) ? data.filiais : []);
+      setCompanies(Array.isArray(data?.empresas) ? data.empresas : []);
       setCanDelete(Boolean(data?.pode_excluir));
       if (data?.filial_selecionada && Number(data.filial_selecionada) !== Number(selectedBranchId)) {
         setSelectedBranchId(data.filial_selecionada);
+      }
+      if (data?.empresa_selecionada && Number(data.empresa_selecionada) !== Number(selectedCompanyId)) {
+        setSelectedCompanyId(data.empresa_selecionada);
       }
     } catch (error) {
       showToast("error", "Controle DRE", errorMessage(error, "Não foi possível carregar o demonstrativo."));
     } finally {
       setLoading(false);
     }
-  }, [requestParams, selectedBranchId, setLoading, showToast]);
+  }, [requestParams, selectedBranchId, selectedCompanyId, setLoading, showToast]);
 
   // Carrega ao abrir a página e novamente somente quando os filtros mudam.
   useEffect(() => {
@@ -183,19 +243,23 @@ export function DreControl() {
     await loadData();
   }, [loadData]);
 
-  const openImport = () => {
-    setImportFile(null);
-    setImportPreview(null);
-    setImportForm({ tipo: "", competencia: currentCompetence() });
-    setImportOpen(true);
+  const toggleDepartment = (record) => {
+    setExpandedRows((current) => {
+      if (!current[record.id]) return { ...current, [record.id]: true };
+      const remaining = { ...current };
+      delete remaining[record.id];
+      return remaining;
+    });
   };
 
-  const previewImport = async (file = importFile, form = importForm) => {
-    if (!file || !form.tipo || !form.competencia) return;
+  const previewImport = async (files = importFiles, form = importForm) => {
+    if (!files.length || !form.tipo || !form.competencia) return;
     const payload = new FormData();
-    payload.append("file", file);
+    files.forEach((file) => payload.append("files", file));
     payload.append("tipo", form.tipo);
     payload.append("competencia", form.competencia);
+    if (selectedBranchId) payload.append("filial_id", String(selectedBranchId));
+    if (selectedCompanyId) payload.append("empresa_id", String(selectedCompanyId));
     setPreviewLoading(true);
     try {
       const { data } = await connect.post("/dre/importar/previa", payload, { timeout: 120000 });
@@ -208,28 +272,35 @@ export function DreControl() {
   };
 
   const selectImportFile = (event) => {
-    const file = event.target.files?.[0] || null;
-    setImportFile(file);
+    const files = Array.from(event.target.files || []);
+    setImportFiles(files);
     setImportPreview(null);
-    if (file) previewImport(file);
+    if (files.length) previewImport(files);
   };
 
   const changeImportField = (name, value) => {
     const next = { ...importForm, [name]: value };
     setImportForm(next);
     setImportPreview(null);
-    if (importFile && next.tipo && next.competencia) previewImport(importFile, next);
+    if (name === "tipo") {
+      setImportFiles([]);
+      if (fileInput.current) fileInput.current.value = "";
+      return;
+    }
+    if (importFiles.length && next.tipo && next.competencia) previewImport(importFiles, next);
   };
 
   const importSource = async () => {
-    if (!importFile || !importForm.tipo || !importForm.competencia) {
+    if (!importFiles.length || !importForm.tipo || !importForm.competencia) {
       showToast("warn", "Importação", "Informe o tipo, a competência e a planilha.");
       return;
     }
     if (importPreview?.error) return;
     const payload = new FormData();
-    payload.append("file", importFile);
+    importFiles.forEach((file) => payload.append("files", file));
     Object.entries(importForm).forEach(([key, value]) => payload.append(key, String(value)));
+    if (selectedBranchId) payload.append("filial_id", String(selectedBranchId));
+    if (selectedCompanyId) payload.append("empresa_id", String(selectedCompanyId));
     setLoading(true);
     try {
       const { data } = await connect.post("/dre/importar", payload, { timeout: 120000 });
@@ -244,11 +315,11 @@ export function DreControl() {
   };
 
   const deleteSelectedCompetence = async () => {
-    if (!selectedCompetence) return;
+    if (!effectiveSelectedCompetence) return;
     setLoading(true);
     try {
-      const { data } = await connect.delete(`/dre/competencias/${selectedCompetence}`, {
-        params: selectedBranchId ? { filial_id: selectedBranchId } : {},
+      const { data } = await connect.delete(`/dre/competencias/${effectiveSelectedCompetence}`, {
+        params: requestParams,
       });
       showToast("success", "Competência excluída", data?.message || "Os dados foram excluídos.");
       setDeleteOpen(false);
@@ -265,6 +336,8 @@ export function DreControl() {
     if (!importForm.competencia) return;
     const payload = new FormData();
     payload.append("competencia", importForm.competencia);
+    if (selectedBranchId) payload.append("filial_id", String(selectedBranchId));
+    if (selectedCompanyId) payload.append("empresa_id", String(selectedCompanyId));
     setLoading(true);
     try {
       const { data } = await connect.post("/dre/beneficios/gerar", payload);
@@ -285,8 +358,12 @@ export function DreControl() {
     }
     setLoading(true);
     try {
-      await connect.post("/dre/manual", manualForm);
-      showToast("success", "Lançamento manual", "O valor foi incluído no demonstrativo.");
+      const { data } = await connect.post("/dre/manual", {
+        ...manualForm,
+        filial_id: selectedBranchId,
+        empresa_id: selectedCompanyId,
+      });
+      showToast("success", "Lançamento manual", data?.message || "O valor foi atualizado no demonstrativo.");
       setManualOpen(false);
       await refreshData();
     } catch (error) {
@@ -296,153 +373,231 @@ export function DreControl() {
     }
   };
 
-  const detailPanel = (record) => {
-    if (!record) return <aside className="dre-department-detail dre-department-detail--empty">
-      <i className="pi pi-chart-bar" />
-      <strong>Selecione um departamento</strong>
-      <span>Os valores detalhados da competência aparecerão aqui.</span>
-    </aside>;
+  const operationalMargin = Number(displayedSummary.percentual_margem || 0);
+  const operationalGoalProgress = Math.max(0, Math.min(
+    (operationalMargin / BRANCH_MARGIN_GOAL) * 100,
+    100,
+  ));
 
-    return <aside className="dre-department-detail">
-      <div className="dre-detail">
-    <div className="dre-detail__heading">
-      <div><span>DETALHE DO DEPARTAMENTO</span><strong>Departamento {record.departamento}</strong></div>
-      <small>Competência {competenceLabel(record.competencia)}</small>
-    </div>
-    <section className="dre-detail__section is-planned">
-      <div className="dre-detail__section-heading"><span>PREVISÃO DA COMPETÊNCIA</span><strong>Valor contratado antes do fechamento</strong></div>
-      <div className="dre-detail__grid">
-        {detailMetric("Faturamento previsto em contrato", record.receita_prevista, "is-planned", "+")}
+  const detailTemplate = (record) => {
+    const marginPercent = Number(record.percentual_margem || 0);
+    const goalProgress = Math.max(0, Math.min((marginPercent / BRANCH_MARGIN_GOAL) * 100, 100));
+    const goalTone = goalProgress < 40 ? "is-negative" : goalProgress < 80 ? "is-warning" : "is-income";
+    const rhCosts = Number(record.composicao?.salarios || 0) + Number(record.composicao?.horas_extras || 0) + Number(record.composicao?.va || 0) + Number(record.composicao?.vt || 0);
+    const taxCosts = Number(record.impostos || 0) + Number(record.composicao?.encargos || 0);
+    const operationalCosts = Number(record.glosas || 0) + Number(record.custos_operacionais || 0) + Number(record.composicao?.materiais || 0) + Number(record.composicao?.uniformes || 0) + Number(record.composicao?.epis || 0) + Number(record.composicao?.combustivel || 0) + Number(record.composicao?.locacao || 0) + Number(record.composicao?.manutencao || 0) + Number(record.composicao?.maquinario || 0) + Number(record.composicao?.ajuste_custos || 0);
+
+    return <div className="dre-detail">
+      <div className="dre-detail__heading">
+        <div><span>DETALHAMENTO DO DEPARTAMENTO</span><strong>Departamento {record.departamento}</strong></div>
+        <small>Competência {competenceLabel(record.competencia)}</small>
       </div>
-    </section>
-      <section className="dre-detail__section is-income">
-        <div className="dre-detail__section-heading"><span>RECEBIMENTOS REALIZADOS</span><strong>Entradas e receita operacional do mês</strong></div>
-        <div className="dre-detail__grid">
-          {detailMetric("Faturamento realizado", record.rob, "is-income", "+")}
-          {detailMetric("Outros faturamentos", record.outros_faturamentos, "is-income", "+")}
-          {detailMetric("Repactuação", record.repactuacao, "is-income", "+")}
-          {detailMetric("Receita operacional líquida", record.rol, "is-income", "+")}
-        </div>
+      <section className={`dre-detail__impact ${Number(record.margem) < 0 ? "is-negative" : "is-income"}`}>
+        <div><span>RESULTADO DO DEPARTAMENTO</span><strong>{Number(record.margem) < 0 ? "−" : "+"} {currency(Math.abs(Number(record.margem || 0)))}</strong></div>
+        <div className={`dre-detail__goal ${goalTone}`}><span>Margem de {marginPercent.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% · meta de {BRANCH_MARGIN_GOAL}%</span><div className="dre-department-goal"><span style={{ width: `${goalProgress}%` }} /></div></div>
       </section>
-      <section className="dre-detail__section is-expense">
-        <div className="dre-detail__section-heading"><span>CUSTOS TRIBUTÁRIOS</span><strong>Impostos e encargos incidentes sobre a operação</strong></div>
-        <div className="dre-detail__grid">
-          {detailMetric("Impostos", record.impostos)}
-          {detailMetric("Encargos", record.composicao?.encargos)}
-        </div>
-      </section>
-      <section className="dre-detail__section is-expense">
-        <div className="dre-detail__section-heading"><span>CUSTOS DE RH</span><strong>Folha e benefícios</strong></div>
-        <div className="dre-detail__grid">
-          {detailMetric("Folha salarial", record.composicao?.salarios)}
-          {detailMetric("Horas extras", record.composicao?.horas_extras)}
-          {detailMetric("VA e VT", Number(record.composicao?.va || 0) + Number(record.composicao?.vt || 0))}
-        </div>
-      </section>
-      <section className="dre-detail__section is-expense">
-        <div className="dre-detail__section-heading"><span>CUSTOS OPERACIONAIS</span><strong>Materiais e serviços necessários à operação</strong></div>
-        <div className="dre-detail__grid">
-          {detailMetric("Glosas", record.glosas)}
-          {detailMetric("Custos operacionais", record.custos_operacionais)}
-          {detailMetric("Materiais", record.composicao?.materiais)}
-          {detailMetric("Uniformes e EPIs", Number(record.composicao?.uniformes || 0) + Number(record.composicao?.epis || 0))}
-          {detailMetric("Combustível", record.composicao?.combustivel)}
-          {detailMetric("Locação, manutenção e máquinas", Number(record.composicao?.locacao || 0) + Number(record.composicao?.manutencao || 0) + Number(record.composicao?.maquinario || 0))}
-          {detailMetric("Ajustes de custos", record.composicao?.ajuste_custos)}
-        </div>
-      </section>
-      <section className={`dre-detail__section dre-detail__result ${Number(record.margem) < 0 ? "is-negative" : "is-income"}`}>
-        <div className="dre-detail__section-heading"><span>RESULTADO</span><strong>Margem final do departamento</strong></div>
-        <div className="dre-detail__grid">
-          {detailMetric("Resultado do departamento", record.margem, Number(record.margem) < 0 ? "is-negative" : "is-income", Number(record.margem) < 0 ? "−" : "+")}
+      <div className="dre-detail__groups">
+        {detailGroup({ title: "PREVISÃO", description: "Faturamento contratado", total: record.receita_prevista, tone: "is-planned", signal: "+", children: detailMetric("Faturamento previsto em contrato", record.receita_prevista, "is-planned", "+") })}
+        {detailGroup({ title: "RECEITAS E FATURAMENTO", description: "Entradas e receita operacional do mês", total: record.rol, tone: "is-income", signal: "+", children: <>{detailMetric("Faturamento realizado", record.rob, "is-income", "+")}{detailMetric("Outros faturamentos", record.outros_faturamentos, "is-income", "+")}{detailMetric("Repactuação", record.repactuacao, "is-income", "+")}{detailMetric("Receita operacional líquida", record.rol, "is-income", "+")}</> })}
+        {detailGroup({ title: "TRIBUTOS E ENCARGOS", description: "Obrigações incidentes sobre a operação", total: taxCosts, tone: "is-expense", children: <>{detailMetric("Impostos", record.impostos)}{detailMetric("Encargos", record.composicao?.encargos)}</> })}
+        {detailGroup({ title: "RH E BENEFÍCIOS", description: "Folha, horas extras e benefícios", total: rhCosts, tone: "is-expense", children: <>{detailMetric("Folha salarial", record.composicao?.salarios)}{detailMetric("Horas extras", record.composicao?.horas_extras)}{detailMetric("Vale-alimentação", record.composicao?.va)}{detailMetric("Vale-transporte", record.composicao?.vt)}</> })}
+        {detailGroup({ title: "OPERAÇÃO E GLOSAS", description: "Materiais, serviços e ajustes da operação", total: operationalCosts, tone: "is-expense", children: <>{detailMetric("Glosas", record.glosas)}{detailMetric("Custos operacionais", record.custos_operacionais)}{detailMetric("Materiais", record.composicao?.materiais)}{detailMetric("Uniformes e EPIs", Number(record.composicao?.uniformes || 0) + Number(record.composicao?.epis || 0))}{detailMetric("Combustível", record.composicao?.combustivel)}{detailMetric("Locação, manutenção e máquinas", Number(record.composicao?.locacao || 0) + Number(record.composicao?.manutencao || 0) + Number(record.composicao?.maquinario || 0))}{detailMetric("Ajustes de custos", record.composicao?.ajuste_custos)}</> })}
       </div>
-    </section>
-      </div>
-    </aside>;
+    </div>;
   };
 
-  const columns = [
-    { field: "departamento", header: "Departamento", mobileHeader: "Departamento", sortable: true, body: (row) => <div className={`dre-contract ${selectedDepartment?.id === row.id ? "is-selected" : ""}`}><strong>Departamento {row.departamento}</strong><small>Clique para visualizar no painel</small></div>, style: { minWidth: "16rem" } },
+  const departmentColumn = { field: "departamento", header: "Departamento", mobileHeader: "Departamento", sortable: true, body: (row) => <div className="dre-contract"><strong>Departamento {row.departamento}</strong><small>Clique para detalhar</small></div>, style: { minWidth: "16rem" } };
+  const marginGoalTemplate = (row) => {
+    const marginPercent = Number(row.percentual_margem || 0);
+    const goalProgress = Math.max(0, Math.min((marginPercent / BRANCH_MARGIN_GOAL) * 100, 100));
+    const goalTone = goalProgress < 40 ? "is-negative" : goalProgress < 80 ? "is-warning" : "is-positive";
+
+    return <div className={`dre-department-goal-cell ${goalTone}`}>
+      <b>{marginPercent.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%</b>
+      <div className="dre-department-goal" aria-label={`Margem de ${marginPercent.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%, equivalente a ${goalProgress.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% da meta de ${BRANCH_MARGIN_GOAL}%`}><span style={{ width: `${goalProgress}%` }} /></div>
+    </div>;
+  };
+
+  const columns = activeView === "recebimentos" ? [
+    departmentColumn,
+    { field: "rob", header: "Faturamento", mobileHeader: "Faturamento", body: (row) => <span className="dre-income">+ {currency(Math.abs(Number(row.rob || 0)))}</span>, style: { minWidth: "11rem" } },
+    { field: "outros_faturamentos", header: "Outros faturamentos", mobileHeader: "Outros", body: (row) => <span className="dre-income">+ {currency(Math.abs(Number(row.outros_faturamentos || 0)))}</span>, style: { minWidth: "11rem" } },
+    { field: "repactuacao", header: "Repactuação", mobileHeader: "Repactuação", body: (row) => <span className="dre-income">+ {currency(Math.abs(Number(row.repactuacao || 0)))}</span>, style: { minWidth: "11rem" } },
+    { field: "rol", header: "Receita líquida", mobileHeader: "Receita líquida", body: (row) => <span className="dre-income">+ {currency(Math.abs(Number(row.rol || 0)))}</span>, style: { minWidth: "11rem" } },
+  ] : activeView === "custos" ? [
+    departmentColumn,
+    { field: "impostos", header: "Impostos", mobileHeader: "Impostos", body: (row) => <span className="dre-expense">− {currency(Math.abs(Number(row.impostos || 0)))}</span>, style: { minWidth: "11rem" } },
+    { field: "glosas", header: "Glosas", mobileHeader: "Glosas", body: (row) => <span className="dre-expense">− {currency(Math.abs(Number(row.glosas || 0)))}</span>, style: { minWidth: "11rem" } },
+    { field: "custos_operacionais", header: "Custos operacionais", mobileHeader: "Operacionais", body: (row) => <span className="dre-expense">− {currency(Math.abs(Number(row.custos_operacionais || 0)))}</span>, style: { minWidth: "12rem" } },
+    { field: "total_custos", header: "Custos totais", mobileHeader: "Total", body: (row) => <span className="dre-expense">− {currency(Math.abs(Number(row.total_custos || 0)))}</span>, style: { minWidth: "11rem" } },
+  ] : activeView === "previsao" ? [
+    departmentColumn,
+    { field: "receita_prevista", header: "Faturamento previsto", mobileHeader: "Previsto", body: (row) => <strong className="dre-planned dre-planned--value">+ {currency(Math.abs(Number(row.receita_prevista || 0)))}</strong>, style: { minWidth: "14rem" } },
+    { field: "rob", header: "Faturamento realizado", mobileHeader: "Realizado", body: (row) => <span className="dre-income">+ {currency(Math.abs(Number(row.rob || 0)))}</span>, style: { minWidth: "14rem" } },
+  ] : [
+    departmentColumn,
     { field: "rob", header: "Faturamento", mobileHeader: "Faturamento", body: (row) => <span className="dre-income">+ {currency(Math.abs(Number(row.rob || 0)))}</span>, style: { minWidth: "11rem" } },
     { field: "total_custos", header: "Custos", mobileHeader: "Custos", body: (row) => <span className="dre-expense">− {currency(Math.abs(Number(row.total_custos || 0)))}</span>, style: { minWidth: "11rem" } },
-    { field: "margem", header: "Resultado", mobileHeader: "Resultado", body: (row) => <div className={Number(row.margem) < 0 ? "dre-result is-negative" : "dre-result is-positive"}><strong>{Number(row.margem) < 0 ? "−" : "+"} {currency(Math.abs(Number(row.margem || 0)))}</strong><small>{Number(row.percentual_margem || 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% de margem</small></div>, style: { minWidth: "12rem" } },
+    { field: "margem", header: "Resultado", mobileHeader: "Resultado", body: (row) => <div className={Number(row.margem) < 0 ? "dre-result is-negative" : "dre-result is-positive"}>
+        <strong>{Number(row.margem) < 0 ? "−" : "+"} {currency(Math.abs(Number(row.margem || 0)))}</strong>
+      </div>, style: { minWidth: "12rem" } },
+    { field: "percentual_margem", header: "Meta", mobileHeader: "Meta", body: marginGoalTemplate, style: { minWidth: "9rem" } },
   ];
 
+  const openManualEntry = () => {
+    setManualForm({
+      competencia: effectiveSelectedCompetence || currentCompetence(),
+      departamento: null,
+      categoria: "",
+      valor: null,
+      descricao: "",
+      substitui_importacao: true,
+    });
+    setManualOpen(true);
+  };
+
+  const manualValueRule = manualForm.categoria === "valor_va"
+    ? {
+      label: "Valor nominal do VA",
+      hint: manualForm.valor === null
+        ? "O DRE aplicará automaticamente o desconto empresarial de 20% sobre o valor informado."
+        : `Custo que será registrado na DRE: ${currency(Number(manualForm.valor) * 0.8)}.`,
+    }
+    : manualForm.categoria === "valor_vt"
+      ? {
+        label: "Custo total do VT",
+        hint: "O valor informado será registrado integralmente na DRE, sem desconto automático.",
+      }
+      : {
+        label: "Valor total após alteração",
+        hint: "Informe o valor final da categoria para a competência e o departamento selecionados.",
+      };
+
   const speedDialItems = canCreate ? [
-    { label: "Importar fonte", icon: "pi pi-upload", command: openImport },
-    { label: "Gerar benefícios do cadastro", icon: "pi pi-wallet", command: () => setBenefitsOpen(true) },
-    { label: "Lançamento manual", icon: "pi pi-plus", command: () => setManualOpen(true) },
+    { label: "Importar fonte", icon: <Upload size={18} />, command: () => { setImportFiles([]); setImportPreview(null); setImportForm({ tipo: "", competencia: currentCompetence() }); setImportOpen(true); } },
+    { label: "Gerar benefícios do cadastro", icon: <Wallet size={18} />, command: () => setBenefitsOpen(true) },
+    { label: "Lançamento manual", icon: <Plus size={18} />, command: openManualEntry },
   ] : [];
 
   return <section className="dre-page">
     <PageHeader
       section="Financeiro"
-      title="DRE · Londrina"
-      description="Acompanhe faturamento, custos e resultado por departamento e competência."
+      title={`DRE · ${selectedBranch?.nome || "Filial"}`}
+      description={`Acompanhe faturamento, custos e resultado${selectedCompany ? ` da ${selectedCompany.nome}` : ""} por departamento e competência.`}
+      actions={canDelete && <Button label="Excluir competência" icon={<Trash2 size={16} />} severity="danger" outlined disabled={!effectiveSelectedCompetence} onClick={() => setDeleteOpen(true)} />}
     />
 
+    <section className="dre-executive-summary" aria-label="Leitura executiva da competência">
+      <article className="dre-executive-summary__card is-income">
+        <div><span>ADERÊNCIA AO PLANEJADO</span><small>Realizado em relação ao faturamento contratado</small></div>
+        <strong>{compactCurrency(displayedSummary.rob)}</strong>
+        <div className="dre-executive-summary__comparison"><span className="dre-planned">Previsto: {compactCurrency(displayedSummary.previsto)}</span><b>{Number(displayedSummary.previsto || 0) > 0 ? `${((Number(displayedSummary.rob || 0) / Number(displayedSummary.previsto || 0)) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : "—"}</b></div>
+        <div className="dre-executive-summary__meter"><span style={{ width: `${Math.min(100, Math.max(0, Number(displayedSummary.previsto || 0) > 0 ? (Number(displayedSummary.rob || 0) / Number(displayedSummary.previsto || 0)) * 100 : 0))}%` }} /></div>
+      </article>
+      <article className={`dre-executive-summary__card ${operationalMargin < 0 ? "is-negative" : operationalMargin >= BRANCH_MARGIN_GOAL ? "is-positive" : "is-warning"}`}>
+        <div><span>RECEITA OPERACIONAL</span><small>Meta de margem da filial: {BRANCH_MARGIN_GOAL}%</small></div>
+        <strong>{compactCurrency(displayedSummary.rol)}</strong>
+        <div className="dre-executive-summary__comparison"><span>Resultado: {Number(displayedSummary.margem || 0) < 0 ? "−" : "+"} {compactCurrency(Math.abs(Number(displayedSummary.margem || 0)))}</span><b>{operationalMargin.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%</b></div>
+        <div className="dre-executive-summary__meter"><span style={{ width: `${operationalGoalProgress}%` }} /></div>
+        <small>Custos: {compactCurrency(displayedSummary.custos)} · Glosas: {compactCurrency(displayedSummary.glosas)}</small>
+      </article>
+    </section>
+
     <div className="dre-selection-bar">
-      {(isAdmin || branches.length > 1) && <label className="dre-competence-selector"><span>Filial</span><Dropdown value={selectedBranchId} options={branches} optionLabel="nome" optionValue="id" onChange={(event) => { setSelectedBranchId(event.value); setSelectedCompetence(null); }} placeholder="Selecione a filial" /></label>}
-      <label className="dre-competence-selector"><span>Competência</span><Dropdown value={selectedCompetence} options={competenceOptions} optionLabel="label" optionValue="value" onChange={(event) => setSelectedCompetence(event.value || null)} placeholder="Todas as competências" showClear /></label>
-      {canDelete && <Button label="Excluir competência" icon="pi pi-trash" severity="danger" outlined disabled={!selectedCompetence} onClick={() => setDeleteOpen(true)} />}
+      {(isAdmin || branches.length > 1) && <label className="dre-competence-selector"><span>Filial</span><Dropdown value={selectedBranchId} options={branches} optionLabel="nome" optionValue="id" dropdownIcon={dropdownIcon} onChange={(event) => { setSelectedBranchId(event.value); setSelectedCompanyId(null); setSelectedCompetence(null); }} placeholder="Selecione a filial" /></label>}
+      {(isAdmin || companies.length > 1) && <label className="dre-competence-selector"><span>Empresa</span><Dropdown value={selectedCompanyId} options={companies} optionLabel="nome" optionValue="id" dropdownIcon={dropdownIcon} onChange={(event) => { setSelectedCompanyId(event.value); setSelectedCompetence(null); }} placeholder="Selecione a empresa" /></label>}
+      <label className="dre-competence-selector"><span>Competência</span><Dropdown value={effectiveSelectedCompetence} options={competenceOptions} optionLabel="label" optionValue="value" dropdownIcon={dropdownIcon} onChange={(event) => setSelectedCompetence(event.value)} placeholder="Selecione a competência" /></label>
     </div>
 
-    <section className="dre-executive-summary" aria-label="Leitura executiva da competência">
-      <article className="dre-executive-summary__card is-planned">
-        <div><span>ADERÊNCIA AO PLANEJADO</span><small>Faturamento realizado em relação ao contrato</small></div>
-        <strong>{compactCurrency(realizedRevenue)}</strong>
-        <div className="dre-executive-summary__comparison"><span>Previsto: {compactCurrency(plannedRevenue)}</span><b>{plannedRevenue > 0 ? `${plannedCompletion.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : "—"}</b></div>
-        <div className="dre-executive-summary__meter"><span style={{ width: `${plannedCompletionMeter}%` }} /></div>
-      </article>
-      <article className={`dre-executive-summary__card ${resultValue < 0 ? "is-negative" : "is-positive"}`}>
-        <div><span>RESULTADO OPERACIONAL</span><small>Resultado líquido após custos, impostos e glosas</small></div>
-        <strong>{resultValue < 0 ? "−" : "+"} {compactCurrency(Math.abs(resultValue))}</strong>
-        <div className="dre-executive-summary__comparison"><span>Custos: {compactCurrency(summary.custos)}</span><b>{Number(summary.percentual_margem || 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}% de margem</b></div>
-        <small>Glosas do recorte: {compactCurrency(summary.glosas)}</small>
-      </article>
+    <nav className="dre-view-tabs" aria-label="Visões do demonstrativo">
+      {DRE_VIEWS.map((view) => { const Icon = view.icon; return <button key={view.value} type="button" className={activeView === view.value ? "is-active" : ""} onClick={() => setActiveView(view.value)}><Icon size={16} />{view.label}</button>; })}
+    </nav>
+
+    <section className="dre-execution-pipeline" aria-label="Fluxo financeiro da competência">
+      <div className="dre-execution-pipeline__heading"><div><span>FECHAMENTO DA COMPETÊNCIA</span><strong>{effectiveSelectedCompetence ? competenceLabel(effectiveSelectedCompetence) : "Selecione uma competência"}</strong></div><small>Planejado, realizado, custos e resultado</small></div>
+      <div className="dre-execution-pipeline__stages"><span className="is-planned">Planejado <b>{compactCurrency(displayedSummary.previsto)}</b></span><ArrowRight size={16} /><span className="is-income">Realizado <b>{compactCurrency(displayedSummary.rob)}</b></span><ArrowRight size={16} /><span className="is-expense">Custos <b>− {compactCurrency(displayedSummary.custos)}</b></span><ArrowRight size={16} /><span className={Number(displayedSummary.margem || 0) < 0 ? "is-negative" : "is-positive"}>Resultado <b>{Number(displayedSummary.margem || 0) < 0 ? "−" : "+"} {compactCurrency(Math.abs(Number(displayedSummary.margem || 0)))}</b></span></div>
     </section>
 
-    <section className="dre-workspace">
-      <article className="dre-panel dre-workspace__list">
-        <div className="dre-panel__heading"><div><span>DEPARTAMENTOS</span><h2>Resultado por departamento</h2></div><small>Ordem crescente · selecione uma linha para analisar</small></div>
-        {recordsByCompetence.length ? recordsByCompetence.map(({ competence, rows }) => <div className="dre-workspace__month" key={competence}>
-          <div className="dre-workspace__month-heading"><strong>{competenceLabel(competence)}</strong><span>{rows.length} departamento(s)</span></div>
-          <Table
-            data={rows}
-            columns={columns}
-            dataKey="id"
-            onRowClick={(event) => setSelectedDepartmentId(event.data.id)}
-            rows={10}
-            rowsPerPageOptions={[10, 25, 50, 100]}
-            tableClassName="dre-table"
-            emptyMessage="Nenhum lançamento foi encontrado para esta competência."
-          />
-        </div>) : <Table data={[]} columns={columns} tableClassName="dre-table" emptyMessage="Nenhum lançamento foi encontrado para o recorte aplicado." />}
-      </article>
-      {detailPanel(selectedDepartment)}
-    </section>
+    {selectedCompetenceData ? <article className="dre-panel dre-month-panel">
+      <div className="dre-panel__heading"><div><span>DEMONSTRATIVO OPERACIONAL</span><h2>{competenceLabel(selectedCompetenceData.competence)}</h2></div><small>{selectedCompetenceData.rows.length} departamento(s) · ordem crescente · clique para expandir</small></div>
+      <Table
+        data={selectedCompetenceData.rows}
+        columns={columns}
+        dataKey="id"
+        expandedRows={expandedRows}
+        onRowToggle={(event) => setExpandedRows(event.data)}
+        onRowClick={(event) => toggleDepartment(event.data)}
+        rowExpansionTemplate={detailTemplate}
+        rows={10}
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        tableClassName="dre-table"
+        emptyMessage="Nenhum lançamento foi encontrado para esta competência."
+      />
+    </article> : <article className="dre-panel"><div className="dre-panel__heading"><div><span>DEMONSTRATIVO OPERACIONAL</span><h2>Resultado por departamento</h2></div></div><Table data={[]} columns={columns} tableClassName="dre-table" emptyMessage="Nenhum lançamento foi encontrado para o recorte aplicado." /></article>}
 
-    <Dialog header="Importar fonte da DRE" visible={importOpen} modal className="dre-import-dialog" onHide={() => setImportOpen(false)}>
+    <Dialog header="Importar fonte da DRE" visible={importOpen} modal className="dre-import-dialog" closeIcon={<X size={18} />} onHide={() => setImportOpen(false)}>
       <div className="dre-dialog-content">
-        <div className="dre-import-note"><i className="pi pi-info-circle" /><span>A prévia valida a planilha antes de gravar. Um novo arquivo da mesma fonte substitui somente a versão ativa daquela competência.</span></div>
+        <div className="dre-import-note"><TriangleAlert size={18} /><span>A prévia valida a planilha antes de gravar. Um novo arquivo da mesma fonte substitui somente a versão ativa daquela competência.</span></div>
         <div className="dre-dialog-grid">
-          <label><span>Tipo de fonte</span><Dropdown value={importForm.tipo} options={IMPORT_TYPES} optionLabel="label" optionValue="value" onChange={(event) => changeImportField("tipo", event.value)} placeholder="Selecione a fonte" /></label>
+          <label><span>Tipo de fonte</span><Dropdown value={importForm.tipo} options={IMPORT_TYPES} optionLabel="label" optionValue="value" dropdownIcon={dropdownIcon} onChange={(event) => changeImportField("tipo", event.value)} placeholder="Selecione a fonte" /></label>
           <label><span>Competência</span><InputText type="month" value={importForm.competencia} onChange={(event) => changeImportField("competencia", event.target.value)} /></label>
         </div>
-        <button type="button" className={`dre-dropzone ${importFile ? "has-file" : ""}`} onClick={() => fileInput.current?.click()}><input ref={fileInput} type="file" accept=".xlsx" onChange={selectImportFile} /><i className={`pi ${importFile ? "pi-file-check" : "pi-cloud-upload"}`} /><strong>{importFile?.name || "Selecionar planilha .xlsx"}</strong><span>{importFile ? `${(importFile.size / 1024).toFixed(1)} KB` : "Nenhum dado será gravado antes da confirmação."}</span></button>
-        {previewLoading && <div className="dre-preview is-loading"><i className="pi pi-spin pi-spinner" /><span>Lendo a planilha…</span></div>}
-        {importPreview?.error && <div className="dre-preview is-error"><i className="pi pi-exclamation-triangle" /><span>{importPreview.error}</span></div>}
+        <button type="button" className={`dre-dropzone ${importFiles.length ? "has-file" : ""}`} onClick={() => fileInput.current?.click()}><input ref={fileInput} type="file" accept=".xlsx" multiple={importForm.tipo === "folha"} onChange={selectImportFile} />{importFiles.length ? <FileCheck size={28} /> : <CloudUpload size={28} />}<strong>{importFiles.length ? `${importFiles.length} planilha(s) selecionada(s)` : "Selecionar planilha .xlsx"}</strong><span>{importFiles.length ? importFiles.map((file) => file.name).join(" · ") : importForm.tipo === "folha" ? "Selecione os extratos do RH do mesmo mês." : "Nenhum dado será gravado antes da confirmação."}</span></button>
+        {previewLoading && <div className="dre-preview is-loading"><LoaderCircle className="dre-spin" size={18} /><span>Lendo a planilha…</span></div>}
+        {importPreview?.error && <div className="dre-preview is-error"><TriangleAlert size={18} /><span>{importPreview.error}</span></div>}
         {importPreview && !importPreview.error && <div className="dre-preview"><div><span>PRÉVIA DA IMPORTAÇÃO</span><strong>{importPreview.lancamentos} lançamento(s) em {importPreview.departamentos} departamento(s)</strong></div><small>{(importPreview.categorias || []).map((item) => `${item.nome}: ${currency(item.valor)}`).join(" · ")}</small></div>}
-        <div className="dre-dialog-actions"><Button label="Cancelar" text onClick={() => setImportOpen(false)} /><Button label="Importar" icon="pi pi-check" onClick={importSource} disabled={!importFile || !importPreview || Boolean(importPreview.error) || previewLoading} /></div>
+        <div className="dre-dialog-actions"><Button label="Cancelar" text onClick={() => setImportOpen(false)} /><Button label="Importar" icon={<Check size={16} />} onClick={importSource} disabled={!importFiles.length || !importPreview || Boolean(importPreview.error) || previewLoading} /></div>
       </div>
     </Dialog>
 
-    <Dialog header="Gerar benefícios do cadastro" visible={benefitsOpen} modal className="dre-simple-dialog" onHide={() => setBenefitsOpen(false)}><div className="dre-dialog-content"><p>Cria a fotografia mensal de VA e VT dos colaboradores ativos de Londrina. O VA usa o valor vigente no cadastro do colaborador e aplica o desconto empresarial de 20%.</p><label><span>Competência</span><InputText type="month" value={importForm.competencia} onChange={(event) => changeImportField("competencia", event.target.value)} /></label><div className="dre-dialog-actions"><Button label="Cancelar" text onClick={() => setBenefitsOpen(false)} /><Button label="Gerar benefícios" icon="pi pi-wallet" onClick={generateBenefits} /></div></div></Dialog>
+    <Dialog header="Gerar benefícios do cadastro" visible={benefitsOpen} modal className="dre-simple-dialog" closeIcon={<X size={18} />} onHide={() => setBenefitsOpen(false)}><div className="dre-dialog-content"><p>Cria a fotografia mensal de VA e VT dos colaboradores ativos da empresa selecionada. O VA usa o valor vigente no cadastro do colaborador e aplica o desconto empresarial de 20%.</p><label><span>Competência</span><InputText type="month" value={importForm.competencia} onChange={(event) => changeImportField("competencia", event.target.value)} /></label><div className="dre-dialog-actions"><Button label="Cancelar" text onClick={() => setBenefitsOpen(false)} /><Button label="Gerar benefícios" icon={<Wallet size={16} />} onClick={generateBenefits} /></div></div></Dialog>
 
-    <Dialog header="Lançamento manual da DRE" visible={manualOpen} modal className="dre-manual-dialog" onHide={() => setManualOpen(false)}><div className="dre-dialog-content dre-dialog-grid"><label><span>Competência</span><InputText type="month" value={manualForm.competencia} onChange={(event) => setManualForm((current) => ({ ...current, competencia: event.target.value }))} /></label><label><span>Departamento</span><Dropdown value={manualForm.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} optionLabel="label" optionValue="value" onChange={(event) => setManualForm((current) => ({ ...current, departamento: event.value }))} placeholder="Selecione" /></label><label><span>Categoria</span><Dropdown value={manualForm.categoria} options={MANUAL_CATEGORIES} optionLabel="label" optionValue="value" onChange={(event) => setManualForm((current) => ({ ...current, categoria: event.value }))} placeholder="Selecionar categoria" /></label><label><span>Valor</span><InputNumber value={manualForm.valor} onValueChange={(event) => setManualForm((current) => ({ ...current, valor: event.value }))} mode="currency" currency="BRL" locale="pt-BR" /></label><label className="dre-dialog-wide"><span>Descrição</span><InputText value={manualForm.descricao} onChange={(event) => setManualForm((current) => ({ ...current, descricao: event.target.value }))} placeholder="Identifique a origem ou o motivo do lançamento" /></label><div className="dre-dialog-actions dre-dialog-wide"><Button label="Cancelar" text onClick={() => setManualOpen(false)} /><Button label="Salvar lançamento" icon="pi pi-save" onClick={createManualEntry} /></div></div></Dialog>
+    <Dialog
+      header="Lançamento manual da DRE"
+      visible={manualOpen}
+      modal
+      className="dre-manual-dialog"
+      closeIcon={<X size={18} />}
+      onHide={() => setManualOpen(false)}
+    >
+      <div className="dre-dialog-content dre-dialog-grid">
+        <label>
+          <span>Competência</span>
+          <InputText type="month" value={manualForm.competencia} onChange={(event) => setManualForm((current) => ({ ...current, competencia: event.target.value }))} />
+        </label>
+        <label>
+          <span>Departamento</span>
+          <Dropdown value={manualForm.departamento} options={(filterOptions.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value }))} optionLabel="label" optionValue="value" dropdownIcon={dropdownIcon} onChange={(event) => setManualForm((current) => ({ ...current, departamento: event.value }))} placeholder="Selecione" />
+        </label>
+        <label>
+          <span>Categoria</span>
+          <Dropdown value={manualForm.categoria} options={MANUAL_CATEGORIES} optionLabel="label" optionValue="value" dropdownIcon={dropdownIcon} onChange={(event) => setManualForm((current) => ({ ...current, categoria: event.value }))} placeholder="Selecionar categoria" />
+        </label>
+        <label>
+          <span>{manualValueRule.label}</span>
+          <InputNumber value={manualForm.valor} onValueChange={(event) => setManualForm((current) => ({ ...current, valor: event.value }))} mode="currency" currency="BRL" locale="pt-BR" />
+          <small className="dre-manual-value-hint">{manualValueRule.hint}</small>
+        </label>
+        <div className="dre-manual-mode dre-dialog-wide">
+          <label className="dre-checkbox">
+            <input type="checkbox" checked={manualForm.substitui_importacao} onChange={(event) => setManualForm((current) => ({ ...current, substitui_importacao: event.target.checked }))} />
+            <span>Substituir valor importado</span>
+          </label>
+          <small>{manualForm.substitui_importacao ? "O valor informado passa a ser o total da categoria nesta competência e departamento." : "O valor será somado ao total que já veio das fontes importadas."}</small>
+        </div>
+        <label className="dre-dialog-wide">
+          <span>Descrição</span>
+          <InputText value={manualForm.descricao} onChange={(event) => setManualForm((current) => ({ ...current, descricao: event.target.value }))} placeholder="Identifique a origem ou o motivo do lançamento" />
+        </label>
+        <div className="dre-dialog-actions dre-dialog-wide">
+          <Button label="Cancelar" text onClick={() => setManualOpen(false)} />
+          <Button label={manualForm.substitui_importacao ? "Substituir valor" : "Somar ajuste"} icon={<Save size={16} />} onClick={createManualEntry} />
+        </div>
+      </div>
+    </Dialog>
 
-    <Dialog header="Excluir competência da DRE" visible={deleteOpen} modal className="dre-simple-dialog" onHide={() => setDeleteOpen(false)}><div className="dre-dialog-content"><div className="dre-delete-warning"><i className="pi pi-exclamation-triangle" /><div><strong>Excluir os dados de {competenceLabel(selectedCompetence)}?</strong><span>A ação remove somente esta competência da filial selecionada, incluindo suas fontes e lançamentos. Ela não altera colaboradores, departamentos ou os outros meses.</span></div></div><div className="dre-dialog-actions"><Button label="Cancelar" text onClick={() => setDeleteOpen(false)} /><Button label="Excluir dados" icon="pi pi-trash" severity="danger" onClick={deleteSelectedCompetence} /></div></div></Dialog>
+    <Dialog header="Excluir competência da DRE" visible={deleteOpen} modal className="dre-simple-dialog" closeIcon={<X size={18} />} onHide={() => setDeleteOpen(false)}><div className="dre-dialog-content"><div className="dre-delete-warning"><TriangleAlert size={18} /><div><strong>Excluir os dados de {competenceLabel(effectiveSelectedCompetence)}?</strong><span>A ação remove somente esta competência da filial e empresa selecionadas, incluindo suas fontes e lançamentos. Ela não altera colaboradores, departamentos ou os outros meses.</span></div></div><div className="dre-dialog-actions"><Button label="Cancelar" text onClick={() => setDeleteOpen(false)} /><Button label="Excluir dados" icon={<Trash2 size={16} />} severity="danger" onClick={deleteSelectedCompetence} /></div></div></Dialog>
 
-    {speedDialItems.length > 0 && <div className="dre-speed-dial"><Tooltip target=".dre-speed-dial .p-speeddial-action" position="left" showDelay={150} /><SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={110} showIcon="pi pi-plus" hideIcon="pi pi-times" aria-label="Ações da DRE" /></div>}
+    {speedDialItems.length > 0 && <div className="dre-speed-dial"><Tooltip target=".dre-speed-dial .p-speeddial-action" position="left" showDelay={150} /><SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={110} showIcon={<Plus size={20} />} hideIcon={<X size={20} />} aria-label="Ações da DRE" /></div>}
   </section>;
 }

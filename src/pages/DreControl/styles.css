@@ -1,18 +1,37 @@
-.dre-page { display: flex; flex-direction: column; gap: 1.25rem; padding: 1.5rem; }
+.dre-page {
+  --dre-income-color: var(--green-500);
+  --dre-expense-color: var(--orange-500);
+  --dre-warning-color: var(--orange-500);
+  --dre-negative-color: var(--red-500);
+  --dre-planned-color: var(--blue-500);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+/* Mantém o TMHub corporativo e dá identidade própria aos demais temas. */
+:root[data-theme]:not([data-theme="tmhub"]) .dre-page {
+  --dre-income-color: var(--primary);
+  --dre-expense-color: var(--secondary);
+  --dre-warning-color: var(--chart-4);
+  --dre-negative-color: var(--accent);
+  --dre-planned-color: var(--chart-5);
+}
 .dre-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-card); }
 .dre-summary__metric { display: flex; min-width: 0; flex-direction: column; gap: .28rem; padding: 1rem; border-left: 1px solid var(--surface-border); }
 .dre-summary__metric:first-child { border-left: 0; }
 .dre-summary__metric span, .dre-panel__heading span, .dre-detail span, .dre-dialog-content label > span { color: var(--text-color-secondary); font-size: .72rem; font-weight: 800; letter-spacing: .02em; }
 .dre-summary__metric strong { overflow: hidden; color: var(--text-color); font-size: 1.1rem; text-overflow: ellipsis; white-space: nowrap; }
 .dre-summary__metric small { color: var(--text-color-secondary); font-size: .74rem; }
-.dre-summary__metric.is-success strong { color: var(--green-500); }
+.dre-summary__metric.is-success strong { color: var(--dre-income-color); }
 .dre-summary__metric.is-planned strong { color: var(--primary-color); }
-.dre-summary__metric.is-income strong { color: var(--green-500); }
-.dre-summary__metric.is-warning strong { color: var(--orange-500); }
-.dre-summary__metric.is-danger strong { color: var(--red-500); }
+.dre-summary__metric.is-income strong { color: var(--dre-income-color); }
+.dre-summary__metric.is-warning strong { color: var(--dre-warning-color); }
+.dre-summary__metric.is-danger strong { color: var(--dre-negative-color); }
 .dre-panel { overflow: hidden; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-card); }
-.dre-selection-bar { display: flex; align-items: end; gap: .75rem; flex-wrap: wrap; }
-.dre-selection-bar > .p-button { align-self: center; margin-left: auto; }
+.dre-selection-bar { display: flex; align-items: end; justify-content: flex-start; gap: .75rem; flex-wrap: wrap; }
+.dre-selection-bar > .p-button { align-self: center; }
 .dre-competence-selector { display: flex; align-items: center; gap: .75rem; width: fit-content; min-width: min(100%, 18rem); padding: .75rem 1rem; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-card); }
 .dre-competence-selector > span { flex: 0 0 auto; color: var(--text-color-secondary); font-size: .76rem; font-weight: 800; }
 .dre-competence-selector .p-dropdown { min-width: 13rem; flex: 1; }
@@ -24,39 +43,47 @@
 .dre-executive-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .dre-executive-summary__card { display: flex; min-width: 0; flex-direction: column; gap: .7rem; padding: 1.15rem 1.25rem; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-card); }
 .dre-executive-summary__card > div:first-child { display: flex; flex-direction: column; gap: .18rem; }
-.dre-executive-summary__card span { color: var(--text-color-secondary); font-size: .72rem; font-weight: 800; letter-spacing: .02em; }
+.dre-executive-summary__card span, .dre-execution-pipeline span { color: var(--text-color-secondary); font-size: .72rem; font-weight: 800; letter-spacing: .02em; }
 .dre-executive-summary__card small { color: var(--text-color-secondary); font-size: .78rem; }
 .dre-executive-summary__card > strong { font-size: 1.5rem; }
-.dre-executive-summary__card.is-planned > strong { color: var(--primary-color); }
-.dre-executive-summary__card.is-positive > strong { color: var(--green-500); }
-.dre-executive-summary__card.is-negative > strong { color: var(--red-500); }
+.dre-executive-summary__card.is-income > strong, .dre-executive-summary__card.is-positive > strong, .dre-execution-pipeline .is-positive { color: var(--dre-income-color); }
+.dre-executive-summary__card.is-warning > strong { color: var(--dre-warning-color); }
+.dre-executive-summary__card.is-negative > strong, .dre-execution-pipeline .is-negative { color: var(--dre-negative-color); }
 .dre-executive-summary__comparison { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
 .dre-executive-summary__comparison b { color: var(--text-color); font-size: .86rem; }
 .dre-executive-summary__meter { overflow: hidden; height: .5rem; border-radius: 999px; background: var(--surface-ground); }
 .dre-executive-summary__meter > span { display: block; height: 100%; border-radius: inherit; background: var(--primary-color); }
-.dre-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem); align-items: start; gap: 1rem; }
-.dre-workspace__list { min-width: 0; }
-.dre-workspace__month + .dre-workspace__month { border-top: 1px solid var(--surface-border); }
-.dre-workspace__month-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1rem; color: var(--text-color); }
-.dre-workspace__month-heading strong { font-size: .9rem; }
-.dre-workspace__month-heading span { color: var(--text-color-secondary); font-size: .76rem; }
-.dre-workspace__list .p-datatable-tbody > tr { cursor: pointer; }
-.dre-workspace__list .p-datatable-tbody > tr:hover > td { background: color-mix(in srgb, var(--primary-color) 7%, var(--surface-card)); }
-.dre-contract.is-selected strong { color: var(--primary-color); }
-.dre-department-detail { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow: auto; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-card); }
-.dre-department-detail .dre-detail { gap: 1rem; padding: 1.15rem; border-top: 0; }
-.dre-department-detail .dre-detail__grid { grid-template-columns: 1fr; }
-.dre-department-detail .dre-detail__result { width: 100%; }
-.dre-department-detail--empty { display: flex; min-height: 17rem; align-items: center; justify-content: center; flex-direction: column; gap: .6rem; padding: 1.5rem; color: var(--text-color-secondary); text-align: center; }
-.dre-department-detail--empty i { color: var(--primary-color); font-size: 1.75rem; }
-.dre-department-detail--empty strong { color: var(--text-color); }
+.dre-executive-summary__card.is-positive .dre-executive-summary__meter > span { background: var(--dre-income-color); }
+.dre-executive-summary__card.is-warning .dre-executive-summary__meter > span { background: var(--dre-warning-color); }
+.dre-executive-summary__card.is-negative .dre-executive-summary__meter > span { background: var(--dre-negative-color); }
+.dre-executive-summary__comparison .dre-planned, .dre-planned, .dre-detail__item.is-planned strong { color: var(--dre-planned-color); }
+.dre-planned--value { font-weight: 800; }
+.dre-view-tabs { display: flex; align-items: center; gap: .15rem; overflow-x: auto; border-bottom: 1px solid var(--surface-border); }
+.dre-view-tabs button { display: inline-flex; align-items: center; gap: .45rem; padding: .8rem 1rem; border: 0; border-bottom: 2px solid transparent; color: var(--text-color-secondary); background: transparent; cursor: pointer; font: inherit; font-size: .86rem; font-weight: 700; white-space: nowrap; }
+.dre-view-tabs button:hover { color: var(--text-color); background: var(--surface-hover); }
+.dre-view-tabs button.is-active { border-bottom-color: var(--primary-color); color: var(--text-color); }
+.dre-view-tabs button svg { color: var(--primary-color); }
+.dre-execution-pipeline { display: flex; flex-direction: column; gap: .85rem; padding: 1rem 1.15rem; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-card); }
+.dre-execution-pipeline__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.dre-execution-pipeline__heading > div { display: flex; flex-direction: column; gap: .15rem; }
+.dre-execution-pipeline__heading span { color: var(--primary-color); }
+.dre-execution-pipeline__heading strong { font-size: 1rem; }
+.dre-execution-pipeline__heading small { color: var(--text-color-secondary); font-size: .78rem; }
+.dre-execution-pipeline__stages { display: flex; align-items: center; gap: .65rem; overflow-x: auto; padding-bottom: .1rem; }
+.dre-execution-pipeline__stages > span { display: flex; min-width: max-content; flex: 1; align-items: baseline; justify-content: space-between; gap: .75rem; padding: .7rem .8rem; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--surface-ground); }
+.dre-execution-pipeline__stages b { color: var(--text-color); font-size: .82rem; }
+.dre-execution-pipeline__stages > .is-planned b { color: var(--dre-planned-color); }
+.dre-execution-pipeline__stages > .is-income b, .dre-execution-pipeline__stages > .is-positive b { color: var(--dre-income-color); }
+.dre-execution-pipeline__stages > .is-expense b { color: var(--dre-expense-color); }
+.dre-execution-pipeline__stages > .is-negative b { color: var(--dre-negative-color); }
+.dre-execution-pipeline__stages > svg { flex: 0 0 auto; color: var(--text-color-secondary); }
 .dre-contract, .dre-result { display: flex; min-width: 0; flex-direction: column; gap: .15rem; }
 .dre-contract strong, .dre-contract small, .dre-result strong, .dre-result small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dre-contract small, .dre-result small { color: var(--text-color-secondary); font-size: .73rem; }
 .dre-result small { padding-left: 1rem; color: var(--primary-color); }
 .dre-result { align-items: flex-start; }
-.dre-result.is-negative strong { color: var(--red-500); }
-.dre-result.is-positive strong, .dre-income { color: var(--green-500); font-weight: 800; }
+.dre-result.is-negative strong { color: var(--dre-negative-color); }
+.dre-result.is-positive strong, .dre-income { color: var(--dre-income-color); font-weight: 800; }
 .dre-table .p-datatable-row-expansion > td { padding: 0; background: var(--surface-ground); }
 .dre-month-panel .p-datatable-tbody > tr:not(.p-datatable-row-expansion) { cursor: pointer; }
 .dre-detail { display: flex; flex-direction: column; gap: .8rem; padding: 1rem 1.25rem; border-top: 1px solid var(--surface-border); }
@@ -67,21 +94,58 @@
 .dre-detail__section-heading { display: flex; flex-direction: column; gap: .12rem; padding-left: .65rem; border-left: 3px solid var(--surface-border); }
 .dre-detail__section-heading span { font-size: .7rem; font-weight: 800; letter-spacing: .03em; }
 .dre-detail__section-heading strong { font-size: .82rem; }
-.dre-detail__section.is-income .dre-detail__section-heading { border-left-color: var(--green-500); }
-.dre-detail__section.is-income .dre-detail__section-heading span { color: var(--green-500); }
-.dre-detail__section.is-planned .dre-detail__section-heading { border-left-color: var(--primary-color); }
-.dre-detail__section.is-planned .dre-detail__section-heading span { color: var(--primary-color); }
-.dre-detail__section.is-negative .dre-detail__section-heading { border-left-color: var(--red-500); }
-.dre-detail__section.is-negative .dre-detail__section-heading span { color: var(--red-500); }
-.dre-detail__section.is-expense .dre-detail__section-heading { border-left-color: var(--orange-500); }
-.dre-detail__section.is-expense .dre-detail__section-heading span { color: var(--orange-500); }
+.dre-detail__section.is-income .dre-detail__section-heading { border-left-color: var(--dre-income-color); }
+.dre-detail__section.is-income .dre-detail__section-heading span { color: var(--dre-income-color); }
+.dre-detail__section.is-planned .dre-detail__section-heading { border-left-color: var(--dre-planned-color); }
+.dre-detail__section.is-planned .dre-detail__section-heading span { color: var(--dre-planned-color); }
+.dre-detail__section.is-negative .dre-detail__section-heading { border-left-color: var(--dre-negative-color); }
+.dre-detail__section.is-negative .dre-detail__section-heading span { color: var(--dre-negative-color); }
+.dre-detail__section.is-expense .dre-detail__section-heading { border-left-color: var(--dre-expense-color); }
+.dre-detail__section.is-expense .dre-detail__section-heading span { color: var(--dre-expense-color); }
 .dre-detail__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; }
 .dre-detail__grid > div { display: flex; min-width: 0; flex-direction: column; gap: .2rem; padding: .7rem; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--surface-card); }
 .dre-detail__grid strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dre-expense, .dre-detail__item.is-expense strong { color: var(--orange-500); font-weight: 800; }
-.dre-detail__item.is-income strong { color: var(--green-500); }
-.dre-detail__item.is-planned strong { color: var(--primary-color); }
-.dre-detail__item.is-negative strong { color: var(--red-500); }
+.dre-expense, .dre-detail__item.is-expense strong { color: var(--dre-expense-color); font-weight: 800; }
+.dre-detail__item.is-income strong { color: var(--dre-income-color); }
+.dre-detail__impact { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(16rem, .9fr); gap: 1rem; padding: 1rem; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-card); }
+.dre-detail__impact > div { display: flex; flex-direction: column; justify-content: center; gap: .3rem; }
+.dre-detail__impact > div:first-child { padding-left: .75rem; border-left: 3px solid var(--surface-border); }
+.dre-detail__impact.is-income > div:first-child { border-left-color: var(--dre-income-color); }
+.dre-detail__impact.is-negative > div:first-child { border-left-color: var(--dre-negative-color); }
+.dre-detail__impact span { color: var(--text-color-secondary); font-size: .7rem; font-weight: 800; letter-spacing: .03em; }
+.dre-detail__impact strong { font-size: 1.2rem; }
+.dre-detail__impact.is-income strong { color: var(--dre-income-color); }
+.dre-detail__impact.is-negative strong { color: var(--dre-negative-color); }
+.dre-detail__goal > span { color: var(--text-color-secondary); }
+.dre-detail__goal.is-income > span { color: var(--dre-income-color); }
+.dre-detail__goal.is-warning > span { color: var(--dre-warning-color); }
+.dre-detail__goal.is-negative > span { color: var(--dre-negative-color); }
+.dre-detail__goal .dre-department-goal { width: 100%; margin-top: .1rem; }
+.dre-detail__groups { display: flex; flex-direction: column; gap: .55rem; }
+.dre-detail__group { overflow: hidden; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-card); }
+.dre-detail__group summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1rem; cursor: pointer; list-style: none; }
+.dre-detail__group summary::-webkit-details-marker { display: none; }
+.dre-detail__group-heading { display: flex; min-width: 0; flex-direction: column; gap: .16rem; }
+.dre-detail__group-heading span { color: var(--text-color-secondary); font-size: .7rem; font-weight: 800; letter-spacing: .03em; }
+.dre-detail__group-heading strong { font-size: .82rem; }
+.dre-detail__group-total { display: flex; align-items: center; gap: .7rem; }
+.dre-detail__group-total b { font-size: .9rem; white-space: nowrap; }
+.dre-detail__group-total svg { color: var(--text-color-secondary); transition: transform .16s ease; }
+.dre-detail__group[open] .dre-detail__group-total svg { transform: rotate(180deg); }
+.dre-detail__group-content { padding: .85rem 1rem 1rem; border-top: 1px solid var(--surface-border); }
+.dre-detail__group.is-planned .dre-detail__group-total b { color: var(--dre-planned-color); }
+.dre-detail__group.is-income .dre-detail__group-total b { color: var(--dre-income-color); }
+.dre-detail__group.is-expense .dre-detail__group-total b { color: var(--dre-expense-color); }
+.dre-department-goal { overflow: hidden; width: min(100%, 8rem); height: .32rem; margin-top: .1rem; border-radius: 999px; background: var(--surface-ground); }
+.dre-department-goal > span { display: block; height: 100%; border-radius: inherit; background: var(--dre-warning-color); }
+.dre-department-goal-cell.is-positive .dre-department-goal > span { background: var(--dre-income-color); }
+.dre-department-goal-cell.is-negative .dre-department-goal > span { background: var(--dre-negative-color); }
+.dre-department-goal-cell { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: .15rem; }
+.dre-department-goal-cell b { font-size: .78rem; }
+.dre-department-goal-cell.is-negative b { color: var(--dre-negative-color); }
+.dre-department-goal-cell.is-warning b { color: var(--dre-warning-color); }
+.dre-department-goal-cell.is-positive b { color: var(--dre-income-color); }
+.dre-detail__item.is-negative strong { color: var(--dre-negative-color); }
 .dre-detail__result { width: min(100%, 18rem); }
 .dre-detail__result .dre-detail__grid { grid-template-columns: 1fr; }
 .dre-filter-panel { width: min(44rem, calc(100vw - 2rem)); }
@@ -97,11 +161,11 @@
 .dre-import-dialog .p-dialog-header, .dre-simple-dialog .p-dialog-header, .dre-manual-dialog .p-dialog-header { padding: 1.1rem 1.25rem .9rem; border-bottom: 1px solid var(--surface-border); }
 .dre-import-dialog .p-dialog-content, .dre-simple-dialog .p-dialog-content, .dre-manual-dialog .p-dialog-content { padding: 1rem 1.25rem 1.25rem; }
 .dre-import-note, .dre-preview { display: flex; align-items: flex-start; gap: .65rem; padding: .85rem; border: 1px solid color-mix(in srgb, var(--primary-color) 28%, var(--surface-border)); border-radius: 10px; color: var(--text-color-secondary); background: color-mix(in srgb, var(--primary-color) 6%, var(--surface-card)); font-size: .82rem; line-height: 1.42; }
-.dre-import-note i { margin-top: .1rem; color: var(--primary-color); }
+.dre-import-note svg { flex: 0 0 auto; margin-top: .1rem; color: var(--primary-color); }
 .dre-dropzone { display: flex; align-items: center; justify-content: center; min-height: 10rem; flex-direction: column; gap: .45rem; width: 100%; padding: 1rem; border: 1.5px dashed var(--surface-border); border-radius: 12px; color: var(--text-color); background: var(--surface-ground); cursor: pointer; }
 .dre-dropzone:hover, .dre-dropzone.has-file { border-color: var(--primary-color); background: color-mix(in srgb, var(--primary-color) 6%, var(--surface-ground)); }
 .dre-dropzone input { display: none; }
-.dre-dropzone > i { color: var(--primary-color); font-size: 1.8rem; }
+.dre-dropzone > svg { color: var(--primary-color); }
 .dre-dropzone span { color: var(--text-color-secondary); font-size: .8rem; }
 .dre-preview { flex-direction: column; gap: .3rem; }
 .dre-preview > div { display: flex; flex-direction: column; gap: .15rem; }
@@ -109,12 +173,18 @@
 .dre-preview small { color: var(--text-color-secondary); line-height: 1.5; }
 .dre-preview.is-loading, .dre-preview.is-error { flex-direction: row; align-items: center; }
 .dre-preview.is-error { border-color: color-mix(in srgb, var(--red-500) 35%, var(--surface-border)); color: var(--red-500); background: color-mix(in srgb, var(--red-500) 6%, var(--surface-card)); }
+.dre-spin { animation: dre-spin .8s linear infinite; }
+
+@keyframes dre-spin { to { transform: rotate(360deg); } }
 .dre-delete-warning { display: flex; align-items: flex-start; gap: .75rem; padding: .9rem; border: 1px solid color-mix(in srgb, var(--red-500) 36%, var(--surface-border)); border-radius: 10px; background: color-mix(in srgb, var(--red-500) 6%, var(--surface-card)); }
-.dre-delete-warning > i { margin-top: .1rem; color: var(--red-500); }
+.dre-delete-warning > svg { flex: 0 0 auto; margin-top: .1rem; color: var(--red-500); }
 .dre-delete-warning > div { display: flex; flex-direction: column; gap: .28rem; }
 .dre-delete-warning span { color: var(--text-color-secondary); font-size: .82rem; line-height: 1.45; }
 .dre-checkbox { flex-direction: row !important; align-items: center; color: var(--text-color); font-size: .82rem; font-weight: 700; }
 .dre-checkbox input { width: 1rem; height: 1rem; accent-color: var(--primary-color); }
+.dre-manual-mode { display: flex; flex-direction: column; gap: .35rem; padding: .8rem; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--surface-ground); }
+.dre-manual-mode small { color: var(--text-color-secondary); font-size: .76rem; line-height: 1.35; }
+.dre-manual-value-hint { color: var(--text-color-secondary); font-size: .74rem; font-weight: 500; line-height: 1.35; }
 .dre-dialog-actions { display: flex; justify-content: flex-end; gap: .65rem; margin-top: .25rem; }
 .dre-dialog-wide { grid-column: 1 / -1; }
 .dre-speed-dial { position: fixed; z-index: 20; right: 1.5rem; bottom: 1.5rem; }
@@ -133,13 +203,7 @@
 .dre-speed-dial .p-speeddial-button .p-speeddial-button-icon { color: #000 !important; }
 .dre-speed-dial .p-speeddial-action-label { padding: .42rem .6rem; border: 1px solid var(--surface-border); border-radius: 7px; color: var(--text-color); background: var(--surface-overlay); box-shadow: var(--shadow-sm); font-size: .76rem; font-weight: 700; white-space: nowrap; }
 
-@media (max-width: 1100px) {
-  .dre-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .dre-summary__metric:nth-child(4) { border-left: 0; }
-  .dre-workspace { grid-template-columns: 1fr; }
-  .dre-department-detail { position: static; max-height: none; }
-  .dre-department-detail .dre-detail__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
+@media (max-width: 1100px) { .dre-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .dre-summary__metric:nth-child(4) { border-left: 0; } .dre-execution-pipeline__stages > span { min-width: 12rem; } }
 @media (max-width: 768px) {
   .dre-page { gap: 1rem; padding: 1rem; }
   .dre-page .app-page-header { align-items: stretch; flex-direction: column; gap: .8rem; }
@@ -154,6 +218,13 @@
   .dre-executive-summary__card { padding: 1rem; }
   .dre-executive-summary__card > strong { font-size: 1.3rem; }
   .dre-executive-summary__comparison { align-items: flex-start; flex-direction: column; gap: .18rem; }
+  .dre-view-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; margin: 0; padding: 0; }
+  .dre-view-tabs button { justify-content: center; min-width: 0; gap: .3rem; padding: .7rem .25rem; font-size: .7rem; white-space: normal; }
+  .dre-execution-pipeline { padding: .9rem; }
+  .dre-execution-pipeline__heading { align-items: flex-start; flex-direction: column; gap: .25rem; }
+  .dre-execution-pipeline__stages { align-items: stretch; flex-direction: column; overflow: visible; }
+  .dre-execution-pipeline__stages > span { width: 100%; min-width: 0; }
+  .dre-execution-pipeline__stages > svg { display: none; }
   .dre-selection-bar { align-items: stretch; flex-direction: column; }
   .dre-selection-bar > .p-button { width: 100%; justify-content: center; margin-left: 0; }
   .dre-competence-selector { width: 100%; }
@@ -162,10 +233,13 @@
   .dre-table .dre-contract strong, .dre-table .dre-contract small { overflow: visible; overflow-wrap: anywhere; text-overflow: clip; white-space: normal; }
   .dre-table .dre-result { width: 100%; align-items: flex-end; }
   .dre-table .dre-result small { padding-left: 0; text-align: right; }
+  .dre-table .tm-table-card-value .dre-department-goal-cell { align-items: flex-end; margin-left: auto; }
   .dre-detail { padding: .85rem; }
-  .dre-workspace__month-heading { align-items: flex-start; flex-direction: column; gap: .2rem; }
-  .dre-department-detail .dre-detail__grid { grid-template-columns: 1fr; }
   .dre-detail__heading { flex-direction: column; gap: .2rem; }
+  .dre-detail__impact { grid-template-columns: 1fr; gap: .8rem; }
+  .dre-detail__group summary { padding: .8rem; }
+  .dre-detail__group-total { align-self: flex-start; }
+  .dre-detail__group-content { padding: .75rem .8rem .8rem; }
   .dre-detail__grid, .dre-dialog-grid { grid-template-columns: 1fr; }
   .dre-dialog-wide { grid-column: auto; }
   .dre-dialog-actions { flex-direction: column-reverse; }
