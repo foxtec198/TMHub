@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { InputTextarea } from "primereact/inputtextarea";
 import { AppIcon } from "../../components/icons/AppIcon";
+import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
+import { storeProfile } from "../../utils/profile";
 import "./style.css";
 
 const QUICK_COMMANDS = [
@@ -33,6 +35,7 @@ function nowLabel() {
 
 export function TimoAssistant() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const worldRef = useRef(null);
   const modelViewerRef = useRef(null);
   const conversationRef = useRef(null);
@@ -48,7 +51,8 @@ export function TimoAssistant() {
   const [scenesOpen, setScenesOpen] = useState(false);
   const [skin, setSkin] = useState(() => localStorage.getItem("timo_skin") || "default");
   const [scenarioId, setScenarioId] = useState(() => localStorage.getItem("timo_scene") || "workshop");
-  const [ownedSceneCodes, setOwnedSceneCodes] = useState(new Set());
+  const [ownedScenes, setOwnedScenes] = useState(new Map());
+  const [savingScenario, setSavingScenario] = useState(false);
   const [messages, setMessages] = useState([{
     id: "welcome",
     role: "timo",
@@ -59,8 +63,10 @@ export function TimoAssistant() {
   const scenario = ALL_SCENARIOS.find((item) => item.id === scenarioId) || BASE_SCENARIOS[0];
   const availableScenarios = useMemo(() => [
     ...BASE_SCENARIOS,
-    ...PREMIUM_SCENARIOS.filter((item) => ownedSceneCodes.has(item.productCode) || item.id === scenarioId),
-  ], [ownedSceneCodes, scenarioId]);
+    ...PREMIUM_SCENARIOS
+      .filter((item) => ownedScenes.has(item.productCode) || item.id === scenarioId)
+      .map((item) => ({ ...item, productId: ownedScenes.get(item.productCode)?.id })),
+  ], [ownedScenes, scenarioId]);
   const latestTimoMessage = useMemo(
     () => [...messages].reverse().find((message) => message.role === "timo"),
     [messages],
@@ -85,9 +91,9 @@ export function TimoAssistant() {
     let mounted = true;
     connect.get("/marketplace/cenarios").then(({ data }) => {
       if (!mounted) return;
-      setOwnedSceneCodes(new Set((data?.cenarios || []).map((item) => item.codigo)));
+      setOwnedScenes(new Map((data?.cenarios || []).map((item) => [item.codigo, item])));
     }).catch(() => {
-      if (mounted) setOwnedSceneCodes(new Set());
+      if (mounted) setOwnedScenes(new Map());
     });
     return () => { mounted = false; };
   }, []);
@@ -135,15 +141,29 @@ export function TimoAssistant() {
   };
 
   const selectScenario = async (nextScenario) => {
+    if (savingScenario || nextScenario.id === scenarioId) {
+      setScenesOpen(false);
+      return;
+    }
     const previousScenario = scenarioId;
     setScenarioId(nextScenario.id);
     setScenesOpen(false);
     localStorage.setItem("timo_scene", nextScenario.id);
     try {
-      await connect.patch("/usuarios/perfil", { timo_cenario: nextScenario.id });
-    } catch {
+      setSavingScenario(true);
+      if (nextScenario.productId) {
+        await connect.patch("/marketplace/equipar", { categoria: "timo_cenario", produto_id: nextScenario.productId });
+      } else {
+        await connect.patch("/usuarios/perfil", { timo_cenario: nextScenario.id });
+      }
+      const { data: profile } = await connect.get("/usuarios/perfil");
+      storeProfile(profile);
+    } catch (error) {
       setScenarioId(previousScenario);
       localStorage.setItem("timo_scene", previousScenario);
+      showToast("error", "Cenário não alterado", error.response?.data?.message || error.response?.data || "Não foi possível aplicar o cenário agora.");
+    } finally {
+      setSavingScenario(false);
     }
   };
 
@@ -186,7 +206,8 @@ export function TimoAssistant() {
 
   return (
     <main className="timo-world-page">
-      <section ref={worldRef} className={`timo-world timo-world--${scenario.id}`} style={{ "--timo-scene": `url(${scenario.image})` }}>
+      <section ref={worldRef} className={`timo-world timo-world--${scenario.id}`}>
+        <img key={scenario.id} className="timo-world__scene" src={scenario.image} alt="" aria-hidden="true" />
         <div className="timo-world__shade" />
         <header className="timo-world__toolbar">
           <div className="timo-world__identity"><span><AppIcon name="sparkles" /></span><div><strong>TIMO</strong><small>{scenario.description}</small></div></div>
@@ -195,7 +216,7 @@ export function TimoAssistant() {
             <button type="button" className="is-icon" onClick={() => setHistoryOpen((open) => !open)} aria-label="Abrir histórico da conversa" title="Histórico"><AppIcon name="messages" /></button>
             <button type="button" className="is-icon" onClick={toggleFullscreen} aria-label="Alternar tela cheia" title="Tela cheia"><AppIcon name="maximize" /></button>
           </div>
-          {scenesOpen && <div className="timo-scene-picker" role="menu" aria-label="Escolher cenário">{availableScenarios.map((item) => <button type="button" key={item.id} className={item.id === scenario.id ? "is-active" : ""} onClick={() => selectScenario(item)}><span style={{ backgroundImage: `url(${item.image})` }} /><div><strong>{item.label}</strong><small>{item.description}</small></div>{item.id === scenario.id && <AppIcon name="check" />}</button>)}</div>}
+          {scenesOpen && <div className="timo-scene-picker" role="menu" aria-label="Escolher cenário">{availableScenarios.map((item) => <button type="button" key={item.id} className={item.id === scenario.id ? "is-active" : ""} disabled={savingScenario} onClick={() => selectScenario(item)}><span style={{ backgroundImage: `url(${item.image})` }} /><div><strong>{item.label}</strong><small>{item.description}</small></div>{item.id === scenario.id && <AppIcon name="check" />}</button>)}</div>}
         </header>
 
         <section className="timo-world__center" aria-label="Timo em três dimensões">
