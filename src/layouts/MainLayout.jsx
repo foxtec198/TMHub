@@ -16,6 +16,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { FloatLabel } from "primereact/floatlabel";
 import { ThemeLogo } from "../components/ThemeLogo";
 import { UserAvatar } from "../components/UserAvatar";
+import { getPreferredHomePath } from "../utils/profile";
 import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
 import { UsageTelemetryTracker } from "../components/UsageTelemetryTracker";
 
@@ -667,7 +668,7 @@ export function MainLayout() {
             type="button"
             className="layout-brand fadein animation-duration-2000"
             aria-label="Ir para a tela inicial"
-            onClick={() => navigateTo("/init")}
+            onClick={() => navigateTo(getPreferredHomePath())}
           >
             <ThemeLogo className="layout-brand-logo" />
           </button>

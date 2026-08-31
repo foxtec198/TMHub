@@ -14,6 +14,7 @@ import { ThemeProvider } from "./theme/ThemeProvider";
 import { PermissionGate } from "./components/PermissionGate";
 import { AuthRequirementsGate } from "./components/AuthRequirementsGate";
 import { clearAccessToken, getAccessToken } from "./utils/authSession";
+import { getPreferredHomePath } from "./utils/profile";
 
 // Styles
 import "primereact/resources/themes/saga-green/theme.css";
@@ -518,7 +519,7 @@ export function AppRoutes() {
             }
           />
         </Route>
-        <Route path="*" element={<Navigate to={token() ? "/init" : "/"} />} />
+        <Route path="*" element={<Navigate to={token() ? getPreferredHomePath() : "/"} />} />
       </Routes>
       <AuthRequirementsGate />
     </>

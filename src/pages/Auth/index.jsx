@@ -14,6 +14,7 @@ import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import { clearAccessToken, setAccessToken } from "../../utils/authSession";
 import { applyProfileAppearance } from "../../theme/theme";
+import { getPreferredHomePath } from "../../utils/profile";
 import { LOGIN_INFORMATIVES } from "./informativos";
 import { ThemeLogo } from "../../components/ThemeLogo";
 
@@ -124,6 +125,8 @@ export function Auth() {
             if (res.data.adorno_foto) localStorage.setItem("profile_adornment", res.data.adorno_foto);
             else localStorage.removeItem("profile_adornment");
             localStorage.setItem("timo_skin", res.data.timo_skin || "default");
+            localStorage.setItem("timo_scene", res.data.timo_cenario || "workshop");
+            localStorage.setItem("timo_home", res.data.timo_tela_inicial ? "true" : "false");
             applyProfileAppearance(res.data);
             setAccessToken(res.data.access_token);
             const requirements = {
@@ -138,7 +141,7 @@ export function Auth() {
             localStorage.setItem("auth_requirements", JSON.stringify(requirements));
             window.dispatchEvent(new CustomEvent("tmhub:auth-requirements", { detail: requirements }));
             localStorage.setItem("current_id", res.data.id);
-            navigate("/init")
+            navigate(getPreferredHomePath())
         } catch (error) {
             const msg = error.response?.data || "Não foi possível autenticar."
             const isPwdError = msg.toLowerCase().includes("senha")

@@ -13,8 +13,13 @@ import connect from "../../utils/request";
 import { storeProfile } from "../../utils/profile";
 import "./style.css";
 
-const CATEGORY_LABELS = { todos: "Todos", tema: "Temas", adorno: "Adornos de foto", timo_skin: "Skins do Timo" };
-const PRODUCT_CATEGORY_LABELS = { tema: "Tema", adorno: "Adorno de foto", timo_skin: "Skin do Timo" };
+const CATEGORY_LABELS = { todos: "Todos", tema: "Temas", adorno: "Adornos de foto", timo_skin: "Skins do Timo", timo_cenario: "Cenários do Timo" };
+const PRODUCT_CATEGORY_LABELS = { tema: "Tema", adorno: "Adorno de foto", timo_skin: "Skin do Timo", timo_cenario: "Cenário do Timo" };
+const TIMO_SCENE_ART = {
+  timo_cenario_christmas: "/timo-scenes/christmas.webp",
+  timo_cenario_halloween: "/timo-scenes/halloween.webp",
+  timo_cenario_muertos: "/timo-scenes/muertos.webp",
+};
 const themeById = new Map(THEME_OPTIONS.map((theme) => [theme.id, theme]));
 
 function errorMessage(error, fallback) {
@@ -33,6 +38,12 @@ function ProductArt({ product }) {
     return <div className="marketplace-card__art marketplace-card__art--timo-gold">
       <img src="/timo-gold-poster.png" alt="Prévia do Timo Gold Premium" />
       <span>GOLD</span>
+    </div>;
+  }
+  if (product.categoria === "timo_cenario") {
+    return <div className="marketplace-card__art marketplace-card__art--timo-scene">
+      <img src={TIMO_SCENE_ART[product.codigo]} alt={`Prévia do cenário ${product.nome}`} />
+      <span><AppIcon name="photo" /> CENÁRIO</span>
     </div>;
   }
   return <div className={`marketplace-card__art marketplace-card__art--frame is-${product.codigo}`}>
@@ -143,6 +154,18 @@ export function MarketPlace() {
     } finally { setProcessing(false); }
   };
 
+  const removeTimoScenario = async () => {
+    try {
+      setProcessing(true);
+      await connect.patch("/marketplace/equipar", { categoria: "timo_cenario", produto_id: null });
+      await refreshProfile();
+      showToast("success", "Cenário restaurado", "O Timo voltou para sua Oficina padrão.");
+      await load();
+    } catch (error) {
+      showToast("error", "Não foi possível restaurar", errorMessage(error, "Tente novamente."));
+    } finally { setProcessing(false); }
+  };
+
   const refund = async () => {
     if (!refundTarget) return;
     try {
@@ -189,7 +212,7 @@ export function MarketPlace() {
         </aside>
       </div>
       <section className="marketplace-collection">
-        <header><div><span>MINHA COLEÇÃO</span><h2>Compras e reembolsos</h2></div><div className="marketplace-collection__actions">{catalog.equipados?.adorno && <Button label="Remover adorno atual" icon={<AppIcon name="x" />} text onClick={removeFrame} disabled={processing} />}{catalog.equipados?.timo_skin && catalog.equipados.timo_skin !== "default" && <Button label="Usar Timo padrão" icon={<AppIcon name="arrow-back-up" />} text onClick={removeTimoSkin} disabled={processing} />}</div></header>
+        <header><div><span>MINHA COLEÇÃO</span><h2>Compras e reembolsos</h2></div><div className="marketplace-collection__actions">{catalog.equipados?.adorno && <Button label="Remover adorno atual" icon={<AppIcon name="x" />} text onClick={removeFrame} disabled={processing} />}{catalog.equipados?.timo_skin && catalog.equipados.timo_skin !== "default" && <Button label="Usar Timo padrão" icon={<AppIcon name="arrow-back-up" />} text onClick={removeTimoSkin} disabled={processing} />}{catalog.equipados?.timo_cenario && catalog.equipados.timo_cenario !== "workshop" && <Button label="Usar cenário padrão" icon={<AppIcon name="arrow-back-up" />} text onClick={removeTimoScenario} disabled={processing} />}</div></header>
         <div>{purchases.map((purchase) => <article key={purchase.id}><span className={`marketplace-purchase-icon is-${purchase.produto.categoria}`}><AppIcon name={purchase.produto.categoria === "tema" ? "palette" : purchase.produto.categoria === "timo_skin" ? "sparkles" : "photo"} /></span><div><strong>{purchase.produto.nome}</strong><small>{new Date(purchase.created_at).toLocaleString("pt-BR")} · {purchase.preco_edinhos.toLocaleString("pt-BR")} Edinhos</small></div><Tag value={purchase.status === "concluida" ? "ADQUIRIDO" : purchase.status.replaceAll("_", " ").toUpperCase()} severity={purchase.status === "concluida" ? "success" : "secondary"} />{purchase.pode_reembolsar && <Button label="Reembolsar" icon={<AppIcon name="arrow-back-up" />} text onClick={() => setRefundTarget(purchase)} />}</article>)}{!purchases.length && <Placeholder variant="content" title="Nenhuma compra ainda" description="Sua coleção aparecerá aqui." />}</div>
       </section>
     </>}

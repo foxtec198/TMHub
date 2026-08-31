@@ -48,7 +48,7 @@ const ADORNMENT_NAMES = {
 export function Settings() {
   const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
   // Perfil, preferência visual e estados dos fluxos de senha/e-mail.
-  const [profile, setProfile] = useState({ nome: "", email: "", foto_perfil: null, tema: "tmhub", modo_tema: "light" });
+  const [profile, setProfile] = useState({ nome: "", email: "", foto_perfil: null, tema: "tmhub", modo_tema: "light", timo_tela_inicial: false, timo_cenario: "workshop" });
   const { theme, mode, particlesEnabled, setTheme, setMode, setParticlesEnabled } = useTheme();
   const availableThemes = useMemo(
     () => getAvailableThemeOptions(profile.temas_disponiveis),
@@ -146,6 +146,18 @@ export function Settings() {
     setParticlesEnabled(enabled);
     if (!(await save({ particulas_ativas: enabled }, enabled ? "Partículas ativadas." : "Partículas desativadas."))) {
       setParticlesEnabled(previous);
+    }
+  };
+
+  const changeTimoHome = async (enabled) => {
+    const previous = Boolean(profile.timo_tela_inicial);
+    const nextProfile = { ...profile, timo_tela_inicial: enabled };
+    setProfile(nextProfile);
+    storeProfile(nextProfile);
+    if (!(await save({ timo_tela_inicial: enabled }, enabled ? "O Timo será sua tela inicial." : "A tela inicial padrão foi restaurada."))) {
+      const restoredProfile = { ...profile, timo_tela_inicial: previous };
+      setProfile(restoredProfile);
+      storeProfile(restoredProfile);
     }
   };
 
@@ -407,6 +419,18 @@ export function Settings() {
                   binary
                   checked={particlesEnabled}
                   onChange={(event) => changeParticles(Boolean(event.checked))}
+                />
+              </div>
+              <div className="appearance-effects">
+                <div>
+                  <strong>Timo como tela inicial</strong>
+                  <small>Ao entrar no TM Hub e ao clicar na marca, abra diretamente o ambiente do Timo.</small>
+                </div>
+                <Checkbox
+                  inputId="timo-home-screen"
+                  binary
+                  checked={Boolean(profile.timo_tela_inicial)}
+                  onChange={(event) => changeTimoHome(Boolean(event.checked))}
                 />
               </div>
             </article>

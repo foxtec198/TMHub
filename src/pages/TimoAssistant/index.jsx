@@ -1,26 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { InputTextarea } from "primereact/inputtextarea";
 import { AppIcon } from "../../components/icons/AppIcon";
-import { PageHeader } from "../../components/PageHeader";
 import connect from "../../utils/request";
 import "./style.css";
 
 const QUICK_COMMANDS = [
   { label: "Faltas hoje", command: "quantas faltas tivemos hoje", icon: "calendar-x" },
   { label: "Faltas pendentes", command: "quantas faltas estão pendentes", icon: "alert-circle" },
-  { label: "Absenteísmo do mês", command: "qual o absenteísmo deste mês", icon: "percentage" },
-  { label: "Reservas disponíveis", command: "quantas reservas estão disponíveis", icon: "users" },
+  { label: "Absenteísmo", command: "qual o absenteísmo deste mês", icon: "percentage" },
+  { label: "Reservas", command: "quantas reservas estão disponíveis", icon: "users" },
   { label: "Quadro de lotação", command: "como está o quadro de lotação", icon: "chart-bar" },
   { label: "Vagas abertas", command: "quantas vagas estão abertas", icon: "briefcase" },
 ];
 
-const PLAYFUL_ANIMATIONS = [
-  { name: "fly_loop", duration: 5000 },
-  { name: "playful_spin", duration: 4500 },
-  { name: "peekaboo", duration: 4700 },
+const BASE_SCENARIOS = [
+  { id: "workshop", label: "Oficina", description: "A base criativa do Timo", icon: "tool", image: "/timo-scenes/workshop.webp" },
+  { id: "orbit", label: "Órbita", description: "Observatório sobre a Terra", icon: "rocket", image: "/timo-scenes/orbit.webp" },
+  { id: "garden", label: "Jardim", description: "Refúgio bioluminescente", icon: "leaf", image: "/timo-scenes/garden.webp" },
 ];
+const PREMIUM_SCENARIOS = [
+  { id: "christmas", productCode: "timo_cenario_christmas", label: "Natal", description: "Oficina iluminada de Natal", icon: "gift", image: "/timo-scenes/christmas.webp" },
+  { id: "halloween", productCode: "timo_cenario_halloween", label: "Halloween", description: "Uma noite misteriosamente divertida", icon: "moon", image: "/timo-scenes/halloween.webp" },
+  { id: "muertos", productCode: "timo_cenario_muertos", label: "Día de los Muertos", description: "Jardim de cempasúchil", icon: "leaf", image: "/timo-scenes/muertos.webp" },
+];
+const ALL_SCENARIOS = [...BASE_SCENARIOS, ...PREMIUM_SCENARIOS];
 
 function nowLabel() {
   return new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -28,57 +33,100 @@ function nowLabel() {
 
 export function TimoAssistant() {
   const navigate = useNavigate();
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
-  const [modelReady, setModelReady] = useState(false);
-  const [modelFailed, setModelFailed] = useState(false);
-  const [animation, setAnimation] = useState("idle");
-  const [skin, setSkin] = useState(() => localStorage.getItem("timo_skin") || "default");
-  const [messages, setMessages] = useState([{ id: "welcome", role: "timo", text: "Olá! Sou o Timo. Escreva o que você quer consultar no TMHub ou escolha um comando rápido.", time: nowLabel() }]);
+  const worldRef = useRef(null);
+  const modelViewerRef = useRef(null);
   const conversationRef = useRef(null);
   const animationTimerRef = useRef(null);
-  const playfulnessTimerRef = useRef(null);
   const interactionRef = useRef(false);
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [viewerReady, setViewerReady] = useState(false);
+  const [modelLoaded, setModelLoaded] = useState(false);
+  const [modelFailed, setModelFailed] = useState(false);
+  const [animation, setAnimation] = useState("idle");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [scenesOpen, setScenesOpen] = useState(false);
+  const [skin, setSkin] = useState(() => localStorage.getItem("timo_skin") || "default");
+  const [scenarioId, setScenarioId] = useState(() => localStorage.getItem("timo_scene") || "workshop");
+  const [ownedSceneCodes, setOwnedSceneCodes] = useState(new Set());
+  const [messages, setMessages] = useState([{
+    id: "welcome",
+    role: "timo",
+    text: "Olá! Eu sou o Timo. O que vamos descobrir hoje?",
+    time: nowLabel(),
+  }]);
+
+  const scenario = ALL_SCENARIOS.find((item) => item.id === scenarioId) || BASE_SCENARIOS[0];
+  const availableScenarios = useMemo(() => [
+    ...BASE_SCENARIOS,
+    ...PREMIUM_SCENARIOS.filter((item) => ownedSceneCodes.has(item.productCode) || item.id === scenarioId),
+  ], [ownedSceneCodes, scenarioId]);
+  const latestTimoMessage = useMemo(
+    () => [...messages].reverse().find((message) => message.role === "timo"),
+    [messages],
+  );
+  const modelSource = skin === "timo_gold" ? "/timo-gold.glb?v=gold-1" : "/timo.glb?v=current-1";
+  const modelPoster = skin === "timo_gold" ? "/timo-gold-poster.png" : "/timo-poster.png";
 
   useEffect(() => {
     let mounted = true;
     import("@google/model-viewer").then(({ ModelViewerElement }) => {
       ModelViewerElement.minimumRenderScale = 1;
-      if (mounted) setModelReady(true);
-    }).catch(() => { if (mounted) setModelFailed(true); });
+      if (mounted) setViewerReady(true);
+    }).catch(() => {
+      if (mounted) setModelFailed(true);
+    });
     return () => { mounted = false; };
   }, []);
 
-  useEffect(() => () => {
-    window.clearTimeout(animationTimerRef.current);
-    window.clearTimeout(playfulnessTimerRef.current);
+  useEffect(() => () => window.clearTimeout(animationTimerRef.current), []);
+
+  useEffect(() => {
+    let mounted = true;
+    connect.get("/marketplace/cenarios").then(({ data }) => {
+      if (!mounted) return;
+      setOwnedSceneCodes(new Set((data?.cenarios || []).map((item) => item.codigo)));
+    }).catch(() => {
+      if (mounted) setOwnedSceneCodes(new Set());
+    });
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
-    const syncSkin = (event) => setSkin(event.detail?.timo_skin || localStorage.getItem("timo_skin") || "default");
-    window.addEventListener("tmhub:profile", syncSkin);
-    return () => window.removeEventListener("tmhub:profile", syncSkin);
-  }, []);
-
-  useEffect(() => {
-    if (!modelReady || sending) return undefined;
-    const schedule = () => {
-      const delay = 14000 + Math.round(Math.random() * 14000);
-      playfulnessTimerRef.current = window.setTimeout(() => {
-        if (!interactionRef.current) {
-          const playful = PLAYFUL_ANIMATIONS[Math.floor(Math.random() * PLAYFUL_ANIMATIONS.length)];
-          playTemporaryAnimation(playful.name, playful.duration);
-        }
-        schedule();
-      }, delay);
+    const syncProfile = (event) => {
+      setSkin(event.detail?.timo_skin || localStorage.getItem("timo_skin") || "default");
+      setScenarioId(event.detail?.timo_cenario || localStorage.getItem("timo_scene") || "workshop");
     };
-    schedule();
-    return () => window.clearTimeout(playfulnessTimerRef.current);
-  }, [modelReady, sending]);
+    window.addEventListener("tmhub:profile", syncProfile);
+    return () => window.removeEventListener("tmhub:profile", syncProfile);
+  }, []);
 
   useEffect(() => {
     conversationRef.current?.scrollTo({ top: conversationRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, sending]);
+  }, [messages, sending, historyOpen]);
+
+  useEffect(() => {
+    if (!viewerReady || !modelViewerRef.current) return undefined;
+    const viewer = modelViewerRef.current;
+    const handleLoad = () => {
+      setModelLoaded(true);
+      setModelFailed(false);
+      setAnimation("idle");
+    };
+    const handleError = () => {
+      setModelLoaded(false);
+      setModelFailed(true);
+    };
+    setModelLoaded(false);
+    setModelFailed(false);
+    viewer.addEventListener("load", handleLoad);
+    viewer.addEventListener("error", handleError);
+    viewer.setAttribute("src", modelSource);
+    return () => {
+      viewer.removeEventListener("load", handleLoad);
+      viewer.removeEventListener("error", handleError);
+    };
+  }, [modelSource, viewerReady]);
 
   const playTemporaryAnimation = (name, duration = 1800) => {
     window.clearTimeout(animationTimerRef.current);
@@ -86,16 +134,17 @@ export function TimoAssistant() {
     animationTimerRef.current = window.setTimeout(() => setAnimation("idle"), duration);
   };
 
-  const playAnimationSequence = (steps) => {
-    window.clearTimeout(animationTimerRef.current);
-    const playStep = ([step, ...remaining]) => {
-      if (!step) return;
-      setAnimation(step.name);
-      if (remaining.length) {
-        animationTimerRef.current = window.setTimeout(() => playStep(remaining), step.duration);
-      }
-    };
-    playStep(steps);
+  const selectScenario = async (nextScenario) => {
+    const previousScenario = scenarioId;
+    setScenarioId(nextScenario.id);
+    setScenesOpen(false);
+    localStorage.setItem("timo_scene", nextScenario.id);
+    try {
+      await connect.patch("/usuarios/perfil", { timo_cenario: nextScenario.id });
+    } catch {
+      setScenarioId(previousScenario);
+      localStorage.setItem("timo_scene", previousScenario);
+    }
   };
 
   const send = async (command = text) => {
@@ -105,28 +154,25 @@ export function TimoAssistant() {
     setMessages((current) => [...current, { id: crypto.randomUUID(), role: "user", text: content, time: nowLabel() }]);
     try {
       setSending(true);
-      window.clearTimeout(animationTimerRef.current);
       setAnimation("thinking");
       const { data } = await connect.post("/timo/process", { text: content }, { headers: { "X-Timo-Channel": "web-text" } });
       setMessages((current) => [...current, {
-        id: crypto.randomUUID(), role: "timo", text: data?.message || "Consulta concluída.",
-        time: nowLabel(), action: data?.action || null, understood: data?.understood !== false,
+        id: crypto.randomUUID(), role: "timo", text: data?.message || "Consulta concluída.", time: nowLabel(), action: data?.action || null, understood: data?.understood !== false,
       }]);
-      if (data?.understood === false) {
-        playTemporaryAnimation("thinking", 1600);
-      } else {
-        playAnimationSequence([
-          { name: "speaking", duration: 1900 },
-          { name: "happy", duration: 1400 },
-          { name: "idle" },
-        ]);
-      }
+      playTemporaryAnimation(data?.understood === false ? "thinking" : "speaking", 1900);
     } catch (error) {
       setMessages((current) => [...current, {
         id: crypto.randomUUID(), role: "timo", text: error.response?.data?.message || error.response?.data || "Não consegui concluir essa consulta agora.", time: nowLabel(), error: true,
       }]);
       playTemporaryAnimation("disabled", 1800);
-    } finally { setSending(false); }
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const toggleFullscreen = async () => {
+    if (!document.fullscreenElement) await worldRef.current?.requestFullscreen?.();
+    else await document.exitFullscreen?.();
   };
 
   const handleKeyDown = (event) => {
@@ -136,31 +182,42 @@ export function TimoAssistant() {
     }
   };
 
-  const modelSource = skin === "timo_gold" ? "/timo-gold.glb?v=gold-1" : "/timo.glb?v=eva-2";
-  const modelPoster = skin === "timo_gold" ? "/timo-gold-poster.png" : "/timo-poster.png";
+  const statusLabel = modelFailed ? "Modo compatibilidade" : !modelLoaded ? "Preparando o Timo" : animation === "thinking" ? "Consultando" : animation === "speaking" ? "Respondendo" : animation === "disabled" ? "Indisponível" : "Timo online";
 
-  return <main className="timo-assistant-page">
-    <PageHeader section="Assistente virtual" title="Timo" description="Consulte informações do TMHub por texto, com as mesmas permissões do seu usuário." />
-    <section className="timo-assistant-shell">
-      <aside className="timo-assistant-shortcuts">
-        <header><span>COMANDOS RÁPIDOS</span><h2>O que você quer saber?</h2><p>As respostas usam os dados reais disponíveis no seu escopo.</p></header>
-        <div>{QUICK_COMMANDS.map((item) => <button type="button" key={item.command} onClick={() => send(item.command)} disabled={sending}><AppIcon name={item.icon} /><span>{item.label}</span><AppIcon name="arrow-right" /></button>)}</div>
-        <small><AppIcon name="shield" /> O Timo respeita suas empresas, filiais e permissões.</small>
-      </aside>
-      <div className="timo-assistant-main">
-        <div className="timo-assistant-stage" aria-label="Timo em três dimensões">
-          <div className="timo-assistant-orbit" />
-          {modelFailed || !modelReady ? <img src={modelPoster} alt="Timo" /> : <model-viewer key={modelSource} className="timo-assistant-model" src={modelSource} poster={modelPoster} alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="420" interaction-prompt="none" camera-controls disable-zoom shadow-intensity="1" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" onLoad={() => playAnimationSequence([{ name: "wave", duration: 4100 }, { name: "idle" }])} onPointerDown={() => { interactionRef.current = true; if (!sending) playTemporaryAnimation("dragging", 1200); }} onPointerUp={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onPointerCancel={() => { interactionRef.current = false; }} onError={() => setModelFailed(true)} />}
-          <div className="timo-assistant-status"><i /> {animation === "thinking" ? "Consultando" : animation === "speaking" ? "Respondendo" : animation === "disabled" ? "Indisponível" : "Timo online"}</div>
-        </div>
-        <section className="timo-conversation" aria-label="Conversa com o Timo">
-          <div className="timo-conversation__messages" ref={conversationRef}>{messages.map((message) => <article key={message.id} className={`timo-message is-${message.role}${message.error ? " is-error" : ""}`}>
-            {message.role === "timo" && <span className="timo-message__avatar"><AppIcon name="sparkles" /></span>}
-            <div><p>{message.text}</p>{message.action?.type === "navigate" && <Button label="Abrir tela" icon={<AppIcon name="external-link" />} text onClick={() => navigate(message.action.path)} />}<small>{message.role === "timo" ? "Timo" : "Você"} · {message.time}</small></div>
-          </article>)}{sending && <article className="timo-message is-timo"><span className="timo-message__avatar"><AppIcon name="sparkles" /></span><div className="timo-typing" aria-label="Timo está consultando"><i /><i /><i /></div></article>}</div>
-          <footer><div className="timo-composer"><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => { interactionRef.current = true; if (!sending) setAnimation("listening"); }} onBlur={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Escreva uma pergunta ou comando para o Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" />} rounded aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div><small>Enter para enviar · Shift + Enter para quebrar linha · Somente texto</small></footer>
+  return (
+    <main className="timo-world-page">
+      <section ref={worldRef} className={`timo-world timo-world--${scenario.id}`} style={{ "--timo-scene": `url(${scenario.image})` }}>
+        <div className="timo-world__shade" />
+        <header className="timo-world__toolbar">
+          <div className="timo-world__identity"><span><AppIcon name="sparkles" /></span><div><strong>TIMO</strong><small>{scenario.description}</small></div></div>
+          <div className="timo-world__actions">
+            <button type="button" onClick={() => setScenesOpen((open) => !open)} aria-label={`Cenário: ${scenario.label}`} aria-expanded={scenesOpen}><AppIcon name={scenario.icon} /><span>{scenario.label}</span><AppIcon name="chevron-down" /></button>
+            <button type="button" className="is-icon" onClick={() => setHistoryOpen((open) => !open)} aria-label="Abrir histórico da conversa" title="Histórico"><AppIcon name="messages" /></button>
+            <button type="button" className="is-icon" onClick={toggleFullscreen} aria-label="Alternar tela cheia" title="Tela cheia"><AppIcon name="maximize" /></button>
+          </div>
+          {scenesOpen && <div className="timo-scene-picker" role="menu" aria-label="Escolher cenário">{availableScenarios.map((item) => <button type="button" key={item.id} className={item.id === scenario.id ? "is-active" : ""} onClick={() => selectScenario(item)}><span style={{ backgroundImage: `url(${item.image})` }} /><div><strong>{item.label}</strong><small>{item.description}</small></div>{item.id === scenario.id && <AppIcon name="check" />}</button>)}</div>}
+        </header>
+
+        <section className="timo-world__center" aria-label="Timo em três dimensões">
+          {latestTimoMessage && <article className={`timo-world-bubble${latestTimoMessage.error ? " is-error" : ""}`}><strong>Timo</strong><p>{sending ? "Só um instante, estou consultando isso para você…" : latestTimoMessage.text}</p>{latestTimoMessage.action?.type === "navigate" && <Button label="Abrir tela" icon={<AppIcon name="external-link" />} size="small" onClick={() => navigate(latestTimoMessage.action.path)} />}</article>}
+          <div className={`timo-model-wrap${modelLoaded ? " is-ready" : ""}${modelFailed ? " is-fallback" : ""}`}>
+            <div className="timo-model-loading" aria-hidden={modelLoaded}><span className="timo-model-loading__halo" /><img src={modelPoster} alt="" />{!modelFailed && <small><i /><i /><i /> Carregando o Timo</small>}</div>
+            {viewerReady && !modelFailed && <model-viewer ref={modelViewerRef} key={modelSource} className="timo-world-model" alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="420" interaction-prompt="none" camera-controls disable-zoom shadow-intensity="1.2" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" onPointerDown={() => { interactionRef.current = true; if (!sending) setAnimation("dragging"); }} onPointerUp={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onPointerCancel={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} />}
+          </div>
+          <div className={`timo-world-status${modelFailed ? " is-warning" : ""}`}><i />{statusLabel}</div>
         </section>
-      </div>
-    </section>
-  </main>;
+
+        <div className="timo-world__bottom">
+          <nav className="timo-quick-actions" aria-label="Comandos rápidos">{QUICK_COMMANDS.map((item) => <button type="button" key={item.command} onClick={() => send(item.command)} disabled={sending}><AppIcon name={item.icon} /><span>{item.label}</span></button>)}</nav>
+          <div className="timo-world-composer"><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => { interactionRef.current = true; if (!sending) setAnimation("listening"); }} onBlur={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Pergunte algo ao Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" />} aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div>
+          <small>Enter para enviar · O Timo respeita suas empresas, filiais e permissões.</small>
+        </div>
+
+        <aside className={`timo-history${historyOpen ? " is-open" : ""}`} aria-hidden={!historyOpen}>
+          <header><div><span>CONVERSA</span><strong>Histórico com o Timo</strong></div><button type="button" onClick={() => setHistoryOpen(false)} aria-label="Fechar histórico"><AppIcon name="x" /></button></header>
+          <div ref={conversationRef}>{messages.map((message) => <article key={message.id} className={`timo-history-message is-${message.role}${message.error ? " is-error" : ""}`}><div><strong>{message.role === "timo" ? "Timo" : "Você"}</strong><small>{message.time}</small></div><p>{message.text}</p>{message.action?.type === "navigate" && <Button label="Abrir tela" text size="small" onClick={() => navigate(message.action.path)} />}</article>)}</div>
+        </aside>
+      </section>
+    </main>
+  );
 }

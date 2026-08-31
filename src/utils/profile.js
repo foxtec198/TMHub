@@ -14,9 +14,15 @@ export function storeProfile(profile) {
   if (profile.adorno_foto) localStorage.setItem("profile_adornment", profile.adorno_foto);
   else localStorage.removeItem("profile_adornment");
   localStorage.setItem("timo_skin", profile.timo_skin || "default");
+  localStorage.setItem("timo_scene", profile.timo_cenario || "workshop");
+  localStorage.setItem("timo_home", profile.timo_tela_inicial ? "true" : "false");
   if (profile.gerencia_faltas != null) localStorage.setItem("gerencia_faltas", profile.gerencia_faltas ? "true" : "false");
   if (Array.isArray(profile.permissions)) localStorage.setItem("permissions", JSON.stringify(profile.permissions));
   if (profile.tema || profile.modo_tema) applyProfileAppearance(profile);
   if (profile.particulas_ativas != null) applyProfileParticles(profile);
   window.dispatchEvent(new CustomEvent("tmhub:profile", { detail: profile }));
+}
+
+export function getPreferredHomePath() {
+  return localStorage.getItem("timo_home") === "true" ? "/timo" : "/init";
 }
