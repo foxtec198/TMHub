@@ -34,3 +34,4 @@ jobs: # Jobs will run
 
             npm install
             npm run build
+            find dist/assets -type f -mtime +14 -delete

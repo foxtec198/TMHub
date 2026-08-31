@@ -8,6 +8,18 @@
     <link rel="apple-touch-icon" href="/icons/ios/180.png" />
     <title>TM Hub</title>
     <link id="app-manifest" rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      window.addEventListener("vite:preloadError", function (event) {
+        event.preventDefault();
+        var reloadKey = "tmhub:chunk-reload-at";
+        var now = Date.now();
+        var lastReload = Number(sessionStorage.getItem(reloadKey) || 0);
+        if (now - lastReload > 60000) {
+          sessionStorage.setItem(reloadKey, String(now));
+          window.location.reload();
+        }
+      });
+    </script>
     <script type="module" src="/src/theme/bootstrap.js"></script>
     <script>
       if (/^\/(tm-ops|schedular)(\/|$)/.test(window.location.pathname)) {
