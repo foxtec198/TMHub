@@ -458,7 +458,6 @@ export function MainLayout() {
     {
       label: 'Marketplace',
       icon: appIcon("shopping-cart"),
-      visible: String(role || "").toUpperCase() === "ADMIN",
       command: () => { navigateTo("/marketplace") }
     },
     {

@@ -296,7 +296,7 @@ export function AppRoutes() {
           />
           <Route 
             path="/marketplace"
-            element={<PermissionGate screen="marketplace" adminOnly><MarketPlace /></PermissionGate>}
+            element={<MarketPlace />}
           />
           <Route
             path="/reports/admissoes"
