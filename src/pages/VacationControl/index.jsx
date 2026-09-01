@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { MultiSelect } from "primereact/multiselect";
@@ -103,6 +104,8 @@ function VacationControlContent() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [importFile, setImportFile] = useState(null);
+  const [importCompanyId, setImportCompanyId] = useState(null);
+  const [importCompanies, setImportCompanies] = useState([]);
   const [importPreview, setImportPreview] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
@@ -173,6 +176,23 @@ function VacationControlContent() {
     return () => socketio.off("vacation_update", reload);
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    connect.get("/centro/empresas", { skipStandardFilters: true })
+      .then(({ data }) => {
+        if (!active) return;
+        setImportCompanies(
+          (Array.isArray(data) ? data : [])
+            .filter((company) => company.ativa !== false)
+            .map((company) => ({ label: company.nome, value: Number(company.id) })),
+        );
+      })
+      .catch(() => {
+        if (active) setImportCompanies([]);
+      });
+    return () => { active = false; };
+  }, []);
+
   const activeFilterCount = Object.values(filters).filter((values) => values.length).length + Number(Boolean(search));
   const availableStatusOptions = useMemo(() => (
     (filterOptions.situacoes || []).map((value) => STATUS_OPTIONS.find((option) => option.value === value)).filter(Boolean)
@@ -194,12 +214,13 @@ function VacationControlContent() {
   }
 
   async function importSpreadsheet() {
-    if (!importFile) {
-      showToast("warn", "Importação", "Selecione a planilha .xlsx.");
+    if (!importFile || !importCompanyId) {
+      showToast("warn", "Importação", "Selecione a empresa e a planilha .xlsx.");
       return;
     }
     const payload = new FormData();
     payload.append("file", importFile);
+    payload.append("empresa_id", String(importCompanyId));
     setLoading(true);
     try {
       const { data } = await connect.post("/ferias/importar", payload);
@@ -209,6 +230,7 @@ function VacationControlContent() {
       }
       setImportOpen(false);
       setImportFile(null);
+      setImportCompanyId(null);
       setImportPreview(null);
       setRevision((value) => value + 1);
     } catch (error) {
@@ -218,11 +240,12 @@ function VacationControlContent() {
     }
   }
 
-  async function previewSpreadsheet(file) {
+  async function previewSpreadsheet(file, companyId) {
     setImportPreview(null);
-    if (!file) return;
+    if (!file || !companyId) return;
     const payload = new FormData();
     payload.append("file", file);
+    payload.append("empresa_id", String(companyId));
     setPreviewLoading(true);
     try {
       const { data } = await connect.post("/ferias/importar/previa", payload);
@@ -237,7 +260,20 @@ function VacationControlContent() {
   function selectImportFile(event) {
     const file = event.target.files?.[0] || null;
     setImportFile(file);
-    previewSpreadsheet(file);
+    previewSpreadsheet(file, importCompanyId);
+  }
+
+  function selectImportCompany(event) {
+    const companyId = event.value || null;
+    setImportCompanyId(companyId);
+    previewSpreadsheet(importFile, companyId);
+  }
+
+  function closeImportDialog() {
+    setImportOpen(false);
+    setImportFile(null);
+    setImportCompanyId(null);
+    setImportPreview(null);
   }
 
   async function exportSpreadsheet() {
@@ -398,9 +434,10 @@ function VacationControlContent() {
       </div>
     </OverlayPanel>
 
-    <Dialog header="Importar férias calculadas" visible={importOpen} modal className="vacation-import-dialog" onHide={() => { setImportOpen(false); setImportFile(null); setImportPreview(null); }}>
+    <Dialog header="Importar férias calculadas" visible={importOpen} modal className="vacation-import-dialog" onHide={closeImportDialog}>
       <div className="vacation-import-content">
-        <div className="vacation-import-note"><AppIcon name="info-circle"  /><span>Use a planilha “Relação de Férias Calculadas”. A prévia valida períodos, matrículas e escopo antes de qualquer gravação.</span></div>
+        <div className="vacation-import-note"><AppIcon name="info-circle"  /><span>Use a planilha “Relação de Férias Calculadas”. A prévia valida empresa, períodos, matrículas e escopo antes de qualquer gravação.</span></div>
+        <label className="vacation-import-company"><span>Empresa da planilha</span><Dropdown value={importCompanyId} options={importCompanies} optionLabel="label" optionValue="value" placeholder="Selecione a empresa" filter showClear onChange={selectImportCompany} /></label>
         <button type="button" className={`vacation-dropzone ${importFile ? "has-file" : ""}`} onClick={() => fileInput.current?.click()}>
           <input ref={fileInput} type="file" accept=".xlsx" onChange={selectImportFile} />
           <AppIcon name={importFile ? "file-check" : "cloud-upload"} />
@@ -421,7 +458,7 @@ function VacationControlContent() {
           <div className="vacation-import-preview__range"><AppIcon name="calendar"  /><span>Períodos de gozo no arquivo</span><strong>{dateLabel(importPreview.resumo?.primeiro_gozo)} a {dateLabel(importPreview.resumo?.ultimo_gozo)}</strong></div>
         </div>}
 
-        <div className="vacation-dialog-actions"><Button label="Cancelar" text onClick={() => setImportOpen(false)} /><Button label="Importar" icon={<AppIcon name="check" />} onClick={importSpreadsheet} disabled={!importFile || previewLoading || !importPreview || Boolean(importPreview.error)} /></div>
+        <div className="vacation-dialog-actions"><Button label="Cancelar" text onClick={closeImportDialog} /><Button label="Importar" icon={<AppIcon name="check" />} onClick={importSpreadsheet} disabled={!importFile || !importCompanyId || previewLoading || !importPreview || Boolean(importPreview.error)} /></div>
       </div>
     </Dialog>
 
