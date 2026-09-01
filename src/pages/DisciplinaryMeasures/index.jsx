@@ -61,7 +61,6 @@ export function DisciplinaryMeasures() {
   const [employees, setEmployees] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [centers, setCenters] = useState([]);
   // Não exibe catálogo estático enquanto o recorte real da tabela não foi
   // carregado; listas vazias significam que ainda não há dados disponíveis.
   const [options, setOptions] = useState({ tipos: [], motivos: [] });
@@ -131,7 +130,6 @@ export function DisciplinaryMeasures() {
         })));
         setSupervisors(data.supervisores || []);
         setDepartments(data.departamentos || []);
-        setCenters(data.centros || []);
         filterOptionsLoaded.current = true;
         return true;
       })
@@ -256,7 +254,7 @@ export function DisciplinaryMeasures() {
           />
         </div>
         <Divider />
-        <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => updateFilter("periodo", value) }} department={{ value: filters.departamento, options: departments, onChange: (value) => updateFilter("departamento", value) }} center={{ value: filters.centro_custo || [], options: centers, onChange: (value) => updateFilter("centro_custo", value) }} />
+        <StandardFilterFields date={{ value: filters.periodo, onChange: (value) => updateFilter("periodo", value) }} department={{ value: filters.departamento, options: departments, onChange: (value) => updateFilter("departamento", value) }} center={{ remote: true, value: filters.centro_custo || [], onChange: (value) => updateFilter("centro_custo", value) }} />
         <div className="dashboard-filter-grid disciplinary-filter-grid">
           <label className="is-wide">
             <span>Busca</span>

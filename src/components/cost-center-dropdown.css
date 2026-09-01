@@ -1,0 +1,5 @@
+.cost-center-dropdown{width:100%}
+.cost-center-dropdown-option{display:grid;min-width:0;gap:.12rem;padding:.18rem 0;line-height:1.25}
+.cost-center-dropdown-option strong{overflow:hidden;color:var(--text-color);font-size:.82rem;text-overflow:ellipsis;white-space:nowrap}
+.cost-center-dropdown-option small{overflow:hidden;color:var(--text-color-secondary);font-size:.68rem;text-overflow:ellipsis;white-space:nowrap}
+.cost-center-dropdown-option.is-selected small{white-space:normal}

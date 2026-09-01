@@ -338,7 +338,7 @@ export function Ponto48Dashboard() {
       <OverlayPanel ref={filterPanel} className="ponto48-filter-panel">
         <div className="ponto48-filter-title"><div><strong>Filtrar Ponto 48 horas</strong><span>Um único conjunto de filtros para as duas abas.</span></div><Button icon={<AppIcon name="filter-off" />} text rounded onClick={clearFilters} /></div>
         <Divider />
-        <StandardFilterFields date={{ value: dateRange, onChange: setDateRange }} department={{ value: filters.departamentos, options: options.departamentos, onChange: (value) => setFilters((current) => ({ ...current, departamentos: value })) }} center={{ value: filters.centros, options: options.centros, onChange: (value) => setFilters((current) => ({ ...current, centros: value })) }} />
+        <StandardFilterFields date={{ value: dateRange, onChange: setDateRange }} department={{ value: filters.departamentos, options: options.departamentos, onChange: (value) => setFilters((current) => ({ ...current, departamentos: value })) }} center={{ remote: true, value: filters.centros, onChange: (value) => setFilters((current) => ({ ...current, centros: value })) }} />
         {[["supervisores", "Supervisores"], ["vinculos", "Vínculos por nome"], ["motivos", "Motivos dos ajustes"], ["responsaveis", "Responsáveis pelos ajustes"]].map(([name, label]) => (
           <label className="ponto48-filter-field" key={name}><span>{label}</span><MultiSelect value={filters[name]} options={options[name]} optionLabel="label" optionValue="value" display="chip" filter className="w-full" onChange={(event) => setFilters((current) => ({ ...current, [name]: event.value || [] }))} /></label>
         ))}

@@ -1,4 +1,5 @@
 import { AppIcon } from "../icons/AppIcon";
+import { CostCenterDropdown } from "../CostCenterDropdown";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { AutoComplete } from "primereact/autocomplete";
@@ -263,16 +264,18 @@ export function RoutineDialog({
         </label>
         <label>
           Contrato
-          <Dropdown
+          <CostCenterDropdown
             value={routine.centro_custo_id}
-            options={contracts}
+            selectedOption={selectedContract ? {
+              id: selectedContract.value,
+              local: selectedContract.label,
+            } : null}
             disabled={Boolean(fixedStructure)}
-            filter
             placeholder="Selecione"
-            onChange={(event) =>
+            onChange={(value) =>
               setRoutine({
                 ...routine,
-                centro_custo_id: event.value,
+                centro_custo_id: value,
                 local_id: null,
               })
             }

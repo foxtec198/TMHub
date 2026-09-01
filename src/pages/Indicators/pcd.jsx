@@ -312,7 +312,7 @@ export function Pcd() {
       <Divider />
       <StandardFilterFields
         department={{ value: filters.departamentos, options: options.departamentos || [], onChange: (value) => setFilter("departamentos", value) }}
-        center={{ value: filters.centros, options: options.centros || [], onChange: (value) => setFilter("centros", value) }}
+        center={{ remote: true, value: filters.centros, onChange: (value) => setFilter("centros", value) }}
       />
 
       {[

@@ -7,19 +7,13 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
+import { CostCenterDropdown } from "../../components/CostCenterDropdown";
 import connect from "../../utils/request";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 
 const REASONS = ["AFASTAMENTO", "ATESTADO", "DECLARAÇÃO", "FÉRIAS", "POSTO VAGO", "REMANEJAMENTO", "INJUSTIFICADA", "OUTROS"];
 const initialForm = () => ({ supervisor: null, absent: null, reservation: null, center: null, reason: null, warning: null, obs: "", noCoverage: false, date: new Date() });
-const centerLabel = (center) => {
-  const local = String(center.local || "").trim();
-  const id = String(center.id);
-  const identifiedLocal = local === id || local.startsWith(`${id} -`) ? local : `${id} - ${local}`;
-  return `${identifiedLocal} - DPTO. ${center.departamento}`;
-};
-
 const reservationTemplate = (reservation, selected = false) => {
   if (!reservation) return null;
   return (
@@ -31,7 +25,8 @@ const reservationTemplate = (reservation, selected = false) => {
 };
 
 export function QuickRequestDialog({ visible, onHide, onCreated }) {
-  const [options, setOptions] = useState({ supervisors: [], reservations: [], centers: [] });
+  const [options, setOptions] = useState({ supervisors: [], reservations: [] });
+  const [selectedCenter, setSelectedCenter] = useState(null);
   const [canChooseSupervisor, setCanChooseSupervisor] = useState(false);
   const [optionsLoaded, setOptionsLoaded] = useState(false);
   const [form, setForm] = useState(initialForm);
@@ -40,19 +35,17 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
 
   const selectAbsent = (value, collaborator) => {
     const centerId = collaborator?.centro_id ?? null;
-    if (centerId && !options.centers.some((center) => center.value === centerId)) {
-      setOptions((current) => ({
-        ...current,
-        centers: [...current.centers, {
-          label: centerLabel({ id: centerId, local: collaborator.centro_local, departamento: collaborator.departamento }),
-          value: centerId,
-        }],
-      }));
-    }
+    setSelectedCenter(centerId ? {
+      id: centerId,
+      numero: collaborator?.centro_numero,
+      local: collaborator?.centro_local,
+      departamento: collaborator?.departamento,
+    } : null);
     setForm((current) => ({ ...current, absent: value, center: centerId }));
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!visible) setOptionsLoaded(false);
   }, [visible]);
 
@@ -60,8 +53,8 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
   // deste lote porque a quantidade de registros tornava a abertura da tela muito lenta.
   useEffect(() => {
     if (!visible || optionsLoaded) return;
-    Promise.all([connect.get("/repo/request/solicitante"), connect.get("/reservas"), connect.get("/centro")])
-      .then(([requester, reservations, centers]) => {
+    Promise.all([connect.get("/repo/request/solicitante"), connect.get("/reservas")])
+      .then(([requester, reservations]) => {
         const requesterData = requester.data || {};
         const supervisorOptions = (requesterData.supervisores || []).map((item) => ({ label: item.nome, value: item.id }));
         const currentSupervisor = requesterData.supervisor?.id || null;
@@ -69,7 +62,6 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
         setOptions({
         supervisors: supervisorOptions,
         reservations: reservations.data.map((item) => ({ ...item, label: item.nome, value: item.id })),
-        centers: centers.data.map((item) => ({ label: centerLabel(item), value: item.id })),
         });
         setForm((current) => ({ ...current, supervisor: currentSupervisor }));
         setOptionsLoaded(true);
@@ -123,7 +115,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
         placeholder="Colaborador ausente"
         onError={() => showToast("error", "Lançamento rápido", "Não foi possível buscar os colaboradores.")}
       />
-      <Dropdown value={form.center} options={options.centers} onChange={(e) => setForm({ ...form, center: e.value })} placeholder="Centro de custo" filter />
+      <CostCenterDropdown value={form.center} selectedOption={selectedCenter} onChange={(value, center) => { setSelectedCenter(center); setForm({ ...form, center: value }); }} placeholder="Centro de custo" />
       {!form.noCoverage && <Dropdown value={form.reservation} options={options.reservations} onChange={(e) => setForm({ ...form, reservation: e.value })} placeholder="Reserva" filter itemTemplate={(option) => reservationTemplate(option)} valueTemplate={(option, props) => option ? reservationTemplate(option, true) : <span className="p-placeholder">{props.placeholder}</span>} />}
       <Dropdown value={form.reason} options={REASONS} onChange={(e) => setForm({ ...form, reason: e.value })} placeholder="Motivo" />
       {form.reason === "INJUSTIFICADA" && <Dropdown value={form.warning} options={["Aplicado", "Não Aplicado"]} onChange={(e) => setForm({ ...form, warning: e.value })} placeholder="Advertência" />}

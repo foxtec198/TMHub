@@ -21,6 +21,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { BarcodeScanner } from './BarcodeScanner';
 import { PageHeader } from '../../components/PageHeader';
+import { CostCenterDropdown } from '../../components/CostCenterDropdown';
 import { isProductBarcode, productIdFromBarcode } from './barcode';
 import { can } from '../../utils/permissions';
 
@@ -62,7 +63,6 @@ export function Movements() {
     const [employeeOptions, setEmployeeOptions] = useState([]);
     const [assetMovements, setAssetMovements] = useState([]);
     const [assetOptions, setAssetOptions] = useState([]);
-    const [costCenterOptions, setCostCenterOptions] = useState([]);
     const [structureLocations, setStructureLocations] = useState([]);
     const [refresh, setRefresh] = useState(false);
     const [movementView, setMovementView] = useState('estoque');
@@ -156,7 +156,6 @@ export function Movements() {
                 const { data } = await connect.get(ASSET_MOVEMENTS_ENDPOINT);
                 setAssetMovements(data?.movimentacoes ?? []);
                 setAssetOptions(data?.ativos ?? []);
-                setCostCenterOptions(data?.centros_custo ?? []);
                 setStructureLocations(data?.locais ?? []);
             } catch (err) {
                 console.warn(err);
@@ -709,17 +708,14 @@ export function Movements() {
                     )}
 
                     <FloatLabel>
-                        <Dropdown
+                        <CostCenterDropdown
                             id="asset-movement-destination"
+                            inputId="asset-movement-destination"
                             value={assetMovementForm.centro_custo_destino_id}
-                            options={costCenterOptions}
-                            optionLabel="label"
-                            optionValue="id"
-                            filter
                             className="w-full"
-                            onChange={(event) => setAssetMovementForm((current) => ({
+                            onChange={(value) => setAssetMovementForm((current) => ({
                                 ...current,
-                                centro_custo_destino_id: event.value,
+                                centro_custo_destino_id: value,
                                 local_destino_id: null,
                             }))}
                         />

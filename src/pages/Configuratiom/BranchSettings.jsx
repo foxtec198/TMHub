@@ -1,5 +1,5 @@
 import { AppIcon } from "../../components/icons/AppIcon";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputSwitch } from "primereact/inputswitch";
@@ -11,12 +11,14 @@ import connect from "../../utils/request";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { SpeedDial } from "primereact/speeddial";
+import { CostCenterMultiSelect } from "../../components/CostCenterDropdown";
 
 const EMPTY_FORM = { nome: "", ativa: true, usuario_ids: [], centro_custo_ids: [], departamentos: [] };
 
 export function BranchSettings() {
   const [branches, setBranches] = useState([]);
-  const [options, setOptions] = useState({ usuarios: [], centros_custo: [] });
+  const [options, setOptions] = useState({ usuarios: [], departamentos: [] });
+  const [selectedCenterOptions, setSelectedCenterOptions] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [dialog, setDialog] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -35,7 +37,7 @@ export function BranchSettings() {
         setBranches(Array.isArray(branchResponse.data) ? branchResponse.data : []);
         setOptions({
           usuarios: Array.isArray(optionsResponse.data?.usuarios) ? optionsResponse.data.usuarios : [],
-          centros_custo: Array.isArray(optionsResponse.data?.centros_custo) ? optionsResponse.data.centros_custo : [],
+          departamentos: Array.isArray(optionsResponse.data?.departamentos) ? optionsResponse.data.departamentos : [],
         });
         setStatus("ready");
       })
@@ -49,31 +51,24 @@ export function BranchSettings() {
       });
   }, [refresh, showToast]);
 
-  const departmentOptions = useMemo(() => [...new Set(options.centros_custo.map((center) => center.departamento).filter((value) => value != null))]
-    .sort((a, b) => Number(a) - Number(b)).map((value) => ({ label: `DPTO. ${value}`, value })), [options.centros_custo]);
-  const additionalCenterOptions = useMemo(() => {
-    const selectedDepartments = new Set((form.departamentos || []).map(Number));
-    return options.centros_custo.filter((center) => !selectedDepartments.has(Number(center.departamento)));
-  }, [form.departamentos, options.centros_custo]);
+  const departmentOptions = options.departamentos.map((value) => ({ label: `DPTO. ${value}`, value }));
   const changeDepartments = (departments) => {
     const selectedDepartments = new Set((departments || []).map(Number));
-    const redundantCenterIds = new Set(
-      options.centros_custo
-        .filter((center) => selectedDepartments.has(Number(center.departamento)))
-        .map((center) => Number(center.id)),
+    const remainingCenters = selectedCenterOptions.filter(
+      (center) => !selectedDepartments.has(Number(center.departamento)),
     );
+    setSelectedCenterOptions(remainingCenters);
     setForm((current) => ({
       ...current,
       departamentos: departments || [],
-      centro_custo_ids: (current.centro_custo_ids || []).filter(
-        (centerId) => !redundantCenterIds.has(Number(centerId)),
-      ),
+      centro_custo_ids: remainingCenters.map((center) => center.id),
     }));
   };
-  const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setDialog(true); };
+  const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setSelectedCenterOptions([]); setDialog(true); };
   const openEdit = (branch) => {
     setEditingId(branch.id);
     setForm({ nome: branch.nome || "", ativa: branch.ativa !== false, usuario_ids: branch.usuario_ids || [], centro_custo_ids: branch.centro_custo_ids || [], departamentos: branch.departamentos || [] });
+    setSelectedCenterOptions(branch.centros_custo || []);
     setDialog(true);
   };
 
@@ -95,7 +90,8 @@ export function BranchSettings() {
     { header: "Filial", field: "nome", sortable: true },
     { header: "Status", field: "ativa", body: (branch) => <Tag value={branch.ativa ? "ATIVA" : "INATIVA"} severity={branch.ativa ? "success" : "secondary"} /> },
     { header: "Usuários", body: (branch) => branch.usuario_ids?.length || 0 },
-    { header: "Contratos adicionais", body: (branch) => branch.centro_custo_ids?.length || 0 },
+    { header: "Contratos no escopo", body: (branch) => branch.centros_custo_total ?? branch.centro_custo_ids?.length ?? 0 },
+    { header: "Adicionais", body: (branch) => branch.centro_custo_ids?.length || 0 },
     { header: "Departamentos", class: 'text-truncate', body: (branch) => branch.departamentos?.join(", ") || "—" },
     { header: "Ações", body: (branch) => <Button icon={<AppIcon name="pencil" />} rounded text aria-label={`Editar ${branch.nome}`} onClick={() => openEdit(branch)} /> },
   ];
@@ -122,8 +118,8 @@ export function BranchSettings() {
         <label htmlFor="branch-departments">Departamentos responsáveis</label>
         <MultiSelect inputId="branch-departments" value={form.departamentos} options={departmentOptions} onChange={(event) => changeDepartments(event.value)} filter display="chip" placeholder="Selecione os departamentos" />
         <label htmlFor="branch-centers">Contratos adicionais</label>
-        <MultiSelect inputId="branch-centers" value={form.centro_custo_ids} options={additionalCenterOptions} optionValue="id" optionLabel="local" onChange={(event) => setForm({ ...form, centro_custo_ids: event.value })} filter display="chip" placeholder="Selecione contratos de outros departamentos" itemTemplate={(center) => <span>{center.local} <small>· DPTO. {center.departamento ?? "—"}</small></span>} />
-        <small>Os contratos adicionais são somados a todos os contratos dos departamentos selecionados.</small>
+        <CostCenterMultiSelect inputId="branch-centers" value={form.centro_custo_ids} selectedOptions={selectedCenterOptions} excludeDepartments={form.departamentos} skipStandardFilters onChange={(value, centers) => { setForm({ ...form, centro_custo_ids: value }); setSelectedCenterOptions(centers); }} placeholder="Busque contratos de outros departamentos" />
+        <small>Os contratos dos departamentos selecionados já estão incluídos e não são repetidos aqui. Este campo mostra apenas contratos adicionais de outros departamentos.</small>
         <label htmlFor="branch-users">Usuários com acesso</label>
         <MultiSelect inputId="branch-users" value={form.usuario_ids} options={options.usuarios} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, usuario_ids: event.value })} filter display="chip" placeholder="Selecione os usuários" />
         <div className="branch-active"><div><strong>Filial ativa</strong><small>Filiais inativas não liberam dados aos usuários.</small></div><InputSwitch checked={form.ativa} onChange={(event) => setForm({ ...form, ativa: event.value })} /></div>

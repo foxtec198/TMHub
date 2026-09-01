@@ -16,6 +16,7 @@ import { Dialog } from 'primereact/dialog';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { DashCard } from '../../components/DashCard';
 import { CollaboratorDropdown } from '../../components/CollaboratorDropdown';
+import { CostCenterDropdown } from '../../components/CostCenterDropdown';
 import { InterviewHistoryDialog } from './InterviewHistoryDialog';
 import { PageHeader } from '../../components/PageHeader';
 
@@ -612,7 +613,6 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
     const [form, setForm] = useState(createEmptyForm);
     const [scheduleSuggestions, setScheduleSuggestions] = useState([]);
     const [supervisors, setSupervisors] = useState([]);
-    const [costCenters, setCostCenters] = useState([]);
 
     const setLoading = useLoading();
     const { showToast } = useToast();
@@ -640,16 +640,6 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
             .then(({ data }) => setSupervisors((data ?? []).map((item) => ({ label: item.nome, value: item.id }))))
             .catch(() => showToast('error', 'Erro!', 'Não foi possível carregar os supervisores.'));
     }, [showToast]);
-
-    useEffect(() => {
-        if (!isAdditive) return;
-        connect.get('/centro')
-            .then(({ data }) => setCostCenters((data ?? []).map((item) => ({
-                label: `${item.local} · DPTO. ${item.departamento ?? '-'}`,
-                value: item.id,
-            }))))
-            .catch(() => showToast('error', 'Erro!', 'Não foi possível carregar os contratos.'));
-    }, [isAdditive, showToast]);
 
     const departamentoOptions = useMemo(() => {
         const set = new Set(vacancies.map((v) => v.departamento).filter(Boolean));
@@ -909,14 +899,13 @@ export function Vacancies({ vacancyType = 'substituicao' }) {
                 <form className="flex flex-column gap-4 pt-3" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                     {isAdditive ? (
                         <FloatLabel className="mt-4">
-                            <Dropdown
+                            <CostCenterDropdown
                                 id="centro_custo_id"
+                                inputId="centro_custo_id"
                                 className="w-full"
                                 value={form.centro_custo_id}
-                                onChange={(event) => setForm({ ...form, centro_custo_id: event.value })}
-                                options={costCenters}
-                                filter
-                                virtualScrollerOptions={{ itemSize: 44 }}
+                                onChange={(value) => setForm({ ...form, centro_custo_id: value })}
+                                onError={() => showToast('error', 'Erro!', 'Não foi possível buscar os contratos.')}
                             />
                             <label htmlFor="centro_custo_id">Contrato que receberá o aditivo *</label>
                         </FloatLabel>

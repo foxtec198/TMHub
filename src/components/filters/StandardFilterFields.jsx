@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { MultiSelect } from "primereact/multiselect";
+import { CostCenterMultiSelect } from "../CostCenterDropdown";
 import "./standard-filter-fields.css";
 
 const STORAGE = {
@@ -44,6 +45,35 @@ const normalizeOptions = (options, prefix = "") => (options || []).map((option) 
   if (option && typeof option === "object") return option;
   return { label: `${prefix}${option}`, value: option };
 });
+
+function BoundedCenterMultiSelect({ value, options, optionLabel, optionValue, onChange }) {
+  const [search, setSearch] = useState("");
+  const normalized = normalizeOptions(options);
+  const selectedValues = new Set((value || []).map((item) => String(item)));
+  const selected = normalized.filter((option) => selectedValues.has(String(option?.[optionValue])));
+  const selectedKeys = new Set(selected.map((option) => String(option?.[optionValue])));
+  const term = search.trim().toLocaleLowerCase("pt-BR");
+  const visible = normalized
+    .filter((option) => !selectedKeys.has(String(option?.[optionValue])))
+    .filter((option) => !term || String(option?.[optionLabel] ?? "").toLocaleLowerCase("pt-BR").includes(term))
+    .slice(0, 50);
+
+  return <MultiSelect
+    value={value || []}
+    options={[...selected, ...visible]}
+    optionLabel={optionLabel}
+    optionValue={optionValue}
+    onChange={(event) => onChange(event.value || [])}
+    onFilter={(event) => setSearch(event.filter || "")}
+    placeholder="Todos os centros"
+    display="comma"
+    filter
+    resetFilterOnHide
+    showClear
+    maxSelectedLabels={2}
+    selectedItemsLabel="{0} selecionados"
+  />;
+}
 
 /**
  * Campos estruturais obrigatórios de qualquer painel de filtros do TMHub.
@@ -97,6 +127,15 @@ export function StandardFilterFields({ date, department, center }) {
     <div className="standard-filter-fields__toolbar"><strong>Filtros padrão</strong></div>
     <label className="is-wide"><span>DATA</span><Calendar value={controlledDate} onChange={(event) => onDateChange(event.value)} selectionMode={date?.selectionMode || (date?.view === "month" ? "single" : "range")} view={date?.view || "date"} dateFormat={date?.dateFormat || (date?.view === "month" ? "mm/yy" : "dd/mm/yy")} readOnlyInput showIcon showButtonBar={date?.view !== "month"} hideOnRangeSelection={date?.view !== "month"} placeholder={date?.placeholder || "Selecione o período"} /></label>
     <label><span>DPTO</span><MultiSelect value={controlledDepartments || []} options={normalizeOptions(departmentOptions, "DPTO. ")} optionLabel={department?.optionLabel || "label"} optionValue={department?.optionValue || "value"} onChange={(event) => onDepartmentChange(event.value || [])} placeholder="Todos os departamentos" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
-    <label><span>CENTRO DE CUSTO</span><MultiSelect value={controlledCenters || []} options={normalizeOptions(centerOptions)} optionLabel={center?.optionLabel || "label"} optionValue={center?.optionValue || "value"} onChange={(event) => onCenterChange(event.value || [])} placeholder="Todos os centros" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+    <label><span>CENTRO DE CUSTO</span>{center?.remote
+      ? <CostCenterMultiSelect
+          value={controlledCenters || []}
+          onChange={(value) => onCenterChange(value || [])}
+          selectedOptions={center.selectedOptions || []}
+          queryParams={center.queryParams || {}}
+          excludeDepartments={center.excludeDepartments || []}
+          placeholder="Todos os centros"
+        />
+      : <BoundedCenterMultiSelect value={controlledCenters || []} options={centerOptions} optionLabel={center?.optionLabel || "label"} optionValue={center?.optionValue || "value"} onChange={onCenterChange} />}</label>
   </div>;
 }

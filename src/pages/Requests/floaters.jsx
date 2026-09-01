@@ -245,7 +245,7 @@ export function Floaters() {
                 </div>
                 <StandardFilterFields
                     department={{ value: standardFilters.departamentos, options: reservationFilterOptions.departments, onChange: (value) => setStandardFilters((current) => ({ ...current, departamentos: value || [] })) }}
-                    center={{ value: standardFilters.centros, options: reservationFilterOptions.centers, onChange: (value) => setStandardFilters((current) => ({ ...current, centros: value || [] })) }}
+                    center={{ remote: true, value: standardFilters.centros, onChange: (value) => setStandardFilters((current) => ({ ...current, centros: value || [] })) }}
                 />
             </OverlayPanel>
 
