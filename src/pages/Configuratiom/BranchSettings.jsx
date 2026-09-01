@@ -51,6 +51,25 @@ export function BranchSettings() {
 
   const departmentOptions = useMemo(() => [...new Set(options.centros_custo.map((center) => center.departamento).filter((value) => value != null))]
     .sort((a, b) => Number(a) - Number(b)).map((value) => ({ label: `DPTO. ${value}`, value })), [options.centros_custo]);
+  const additionalCenterOptions = useMemo(() => {
+    const selectedDepartments = new Set((form.departamentos || []).map(Number));
+    return options.centros_custo.filter((center) => !selectedDepartments.has(Number(center.departamento)));
+  }, [form.departamentos, options.centros_custo]);
+  const changeDepartments = (departments) => {
+    const selectedDepartments = new Set((departments || []).map(Number));
+    const redundantCenterIds = new Set(
+      options.centros_custo
+        .filter((center) => selectedDepartments.has(Number(center.departamento)))
+        .map((center) => Number(center.id)),
+    );
+    setForm((current) => ({
+      ...current,
+      departamentos: departments || [],
+      centro_custo_ids: (current.centro_custo_ids || []).filter(
+        (centerId) => !redundantCenterIds.has(Number(centerId)),
+      ),
+    }));
+  };
   const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setDialog(true); };
   const openEdit = (branch) => {
     setEditingId(branch.id);
@@ -76,7 +95,7 @@ export function BranchSettings() {
     { header: "Filial", field: "nome", sortable: true },
     { header: "Status", field: "ativa", body: (branch) => <Tag value={branch.ativa ? "ATIVA" : "INATIVA"} severity={branch.ativa ? "success" : "secondary"} /> },
     { header: "Usuários", body: (branch) => branch.usuario_ids?.length || 0 },
-    { header: "Contratos", body: (branch) => branch.centro_custo_ids?.length || 0 },
+    { header: "Contratos adicionais", body: (branch) => branch.centro_custo_ids?.length || 0 },
     { header: "Departamentos", class: 'text-truncate', body: (branch) => branch.departamentos?.join(", ") || "—" },
     { header: "Ações", body: (branch) => <Button icon={<AppIcon name="pencil" />} rounded text aria-label={`Editar ${branch.nome}`} onClick={() => openEdit(branch)} /> },
   ];
@@ -84,7 +103,7 @@ export function BranchSettings() {
   return <div>
     {/* Article da TABELA de filiais  */}
     <article className="settings-card branch-table-card">
-      <div className="settings-card-title"><AppIcon name="building"  /><div><h2>Filiais</h2><p>Defina os usuários e contratos de cada unidade</p></div></div>
+      <div className="settings-card-title"><AppIcon name="building"  /><div><h2>Filiais</h2><p>Combine departamentos completos com contratos específicos</p></div></div>
       {status === "loading" && <div className="settings-feedback"><AppIcon name="loader-2"  /> Carregando filiais e vínculos...</div>}
       {status === "error" && <div className="settings-feedback is-error"><AppIcon name="alert-triangle"  /><span>{loadError}</span><Button label="Tentar novamente" text onClick={() => setRefresh((value) => value + 1)} /></div>}
       {status === "ready" && branches.length > 0 && <Table data={branches} columns={columns} search rows={5} rowsPerPageOptions={[5, 10, 25]} />}
@@ -101,9 +120,10 @@ export function BranchSettings() {
         <label htmlFor="branch-name">Nome da filial</label>
         <InputText id="branch-name" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required placeholder="Ex.: Filial Londrina" />
         <label htmlFor="branch-departments">Departamentos responsáveis</label>
-        <MultiSelect inputId="branch-departments" value={form.departamentos} options={departmentOptions} onChange={(event) => setForm({ ...form, departamentos: event.value })} filter display="chip" placeholder="Selecione os departamentos" />
-        <label htmlFor="branch-centers">Contratos responsáveis</label>
-        <MultiSelect inputId="branch-centers" value={form.centro_custo_ids} options={options.centros_custo} optionValue="id" optionLabel="local" onChange={(event) => setForm({ ...form, centro_custo_ids: event.value })} filter display="chip" placeholder="Selecione os contratos" itemTemplate={(center) => <span>{center.local} <small>· DPTO. {center.departamento ?? "—"}</small></span>} />
+        <MultiSelect inputId="branch-departments" value={form.departamentos} options={departmentOptions} onChange={(event) => changeDepartments(event.value)} filter display="chip" placeholder="Selecione os departamentos" />
+        <label htmlFor="branch-centers">Contratos adicionais</label>
+        <MultiSelect inputId="branch-centers" value={form.centro_custo_ids} options={additionalCenterOptions} optionValue="id" optionLabel="local" onChange={(event) => setForm({ ...form, centro_custo_ids: event.value })} filter display="chip" placeholder="Selecione contratos de outros departamentos" itemTemplate={(center) => <span>{center.local} <small>· DPTO. {center.departamento ?? "—"}</small></span>} />
+        <small>Os contratos adicionais são somados a todos os contratos dos departamentos selecionados.</small>
         <label htmlFor="branch-users">Usuários com acesso</label>
         <MultiSelect inputId="branch-users" value={form.usuario_ids} options={options.usuarios} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, usuario_ids: event.value })} filter display="chip" placeholder="Selecione os usuários" />
         <div className="branch-active"><div><strong>Filial ativa</strong><small>Filiais inativas não liberam dados aos usuários.</small></div><InputSwitch checked={form.ativa} onChange={(event) => setForm({ ...form, ativa: event.value })} /></div>

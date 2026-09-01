@@ -40,7 +40,6 @@ export function TimoAssistant() {
   const modelViewerRef = useRef(null);
   const conversationRef = useRef(null);
   const animationTimerRef = useRef(null);
-  const interactionRef = useRef(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [viewerReady, setViewerReady] = useState(false);
@@ -223,14 +222,14 @@ export function TimoAssistant() {
           {latestTimoMessage && <article className={`timo-world-bubble${latestTimoMessage.error ? " is-error" : ""}`}><strong>Timo</strong><p>{sending ? "Só um instante, estou consultando isso para você…" : latestTimoMessage.text}</p>{latestTimoMessage.action?.type === "navigate" && <Button label="Abrir tela" icon={<AppIcon name="external-link" />} size="small" onClick={() => navigate(latestTimoMessage.action.path)} />}</article>}
           <div className={`timo-model-wrap${modelLoaded ? " is-ready" : ""}${modelFailed ? " is-fallback" : ""}`}>
             <div className="timo-model-loading" aria-hidden={modelLoaded}><span className="timo-model-loading__halo" /><img src={modelPoster} alt="" />{!modelFailed && <small><i /><i /><i /> Carregando o Timo</small>}</div>
-            {viewerReady && !modelFailed && <model-viewer ref={modelViewerRef} key={modelSource} className="timo-world-model" alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="420" interaction-prompt="none" camera-controls disable-zoom shadow-intensity="1.2" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" onPointerDown={() => { interactionRef.current = true; if (!sending) setAnimation("dragging"); }} onPointerUp={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onPointerCancel={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} />}
+            {viewerReady && !modelFailed && <model-viewer ref={modelViewerRef} key={modelSource} className="timo-world-model" alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="420" interaction-prompt="none" shadow-intensity="1.2" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" />}
           </div>
           <div className={`timo-world-status${modelFailed ? " is-warning" : ""}`}><i />{statusLabel}</div>
         </section>
 
         <div className="timo-world__bottom">
           <nav className="timo-quick-actions" aria-label="Comandos rápidos">{QUICK_COMMANDS.map((item) => <button type="button" key={item.command} onClick={() => send(item.command)} disabled={sending}><AppIcon name={item.icon} /><span>{item.label}</span></button>)}</nav>
-          <div className="timo-world-composer"><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => { interactionRef.current = true; if (!sending) setAnimation("listening"); }} onBlur={() => { interactionRef.current = false; if (!sending) setAnimation("idle"); }} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Pergunte algo ao Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" />} aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div>
+          <div className="timo-world-composer"><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => { if (!sending) setAnimation("listening"); }} onBlur={() => { if (!sending) setAnimation("idle"); }} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Pergunte algo ao Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" />} aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div>
           <small>Enter para enviar · O Timo respeita suas empresas, filiais e permissões.</small>
         </div>
 
