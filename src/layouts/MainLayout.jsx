@@ -127,6 +127,12 @@ export function MainLayout() {
                   command: () => { navigateTo("/reports/reposicoes") }
                 },
                 {
+                  label: "Reservas",
+                  icon: appIcon("users"),
+                  visible: can("reservas"),
+                  command: () => { navigateTo("/reports/reservas") }
+                },
+                {
                   label: 'Rep. ODS',
                   icon: appIcon("external-link"),
                   visible: can("dashboard_reposicoes_ods"),
