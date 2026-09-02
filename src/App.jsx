@@ -49,6 +49,7 @@ import { DashboardLogistic } from "./pages/Dashboards/logistic";
 import { Pcd } from "./pages/Indicators/pcd";
 import { PcdDashboard } from "./pages/Dashboards/Pcd";
 import { QLDashboard } from "./pages/Dashboards/QL";
+import { ReservationDashboard } from "./pages/Dashboards/Reservations";
 import { ProjectDashboard } from "./pages/Dashboards/Projects";
 import { GlosaDashboard } from "./pages/Dashboards/Dissallownces";
 import { RocadaDashboard } from "./pages/Dashboards/Rocada";
@@ -282,6 +283,10 @@ export function AppRoutes() {
                 <RequestReport />
               </PermissionGate>
             }
+          />
+          <Route
+            path="/reports/reservas"
+            element={<PermissionGate screen="reservas"><ReservationDashboard /></PermissionGate>}
           />
           <Route path="/colaboradores" element={<PermissionGate screen="colaboradores"><EmployeesPage /></PermissionGate>} />
           <Route path="/centros-de-custo" element={<PermissionGate screen="estrutura"><CostCentersPage /></PermissionGate>} />
