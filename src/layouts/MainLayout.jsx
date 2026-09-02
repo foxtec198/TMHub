@@ -109,6 +109,21 @@ export function MainLayout() {
     navigateTo("/");
   };
 
+  const openMedia = async () => {
+    try {
+      const { data } = await connect.post("/jellyfin/ticket", null, {
+        skipStandardFilters: true,
+      });
+      if (!data?.entry_url) throw new Error("A API nao devolveu a entrada do Jellyfin.");
+      window.location.assign(data.entry_url);
+    } catch (error) {
+      const message = error.response?.data?.error_description
+        || error.response?.data
+        || "Nao foi possivel abrir a Midia agora.";
+      showToast("error", "Minha midia", String(message));
+    }
+  };
+
   const items = [
     {
       label: 'Dashboards',
@@ -459,6 +474,11 @@ export function MainLayout() {
       label: 'Marketplace',
       icon: appIcon("shopping-cart"),
       command: () => { navigateTo("/marketplace") }
+    },
+    {
+      label: 'Minha mídia',
+      icon: appIcon("library-photo"),
+      command: openMedia,
     },
     {
       label: 'Configurações',
