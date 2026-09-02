@@ -6,6 +6,7 @@ import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
+import { MultiSelect } from "primereact/multiselect";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { OverlayPanel } from "primereact/overlaypanel";
@@ -40,7 +41,7 @@ export function Structure() {
     const [supervisors, setSupervisors] = useState([]);
     const [dialog, setDialog] = useState(null);
     const [supervisorDialog, setSupervisorDialog] = useState(null);
-    const [selectedSupervisorId, setSelectedSupervisorId] = useState(null);
+    const [selectedSupervisorIds, setSelectedSupervisorIds] = useState([]);
     const [companyDialog, setCompanyDialog] = useState(null);
     const [selectedCompanyId, setSelectedCompanyId] = useState(null);
     const [companies, setCompanies] = useState([]);
@@ -182,7 +183,7 @@ export function Structure() {
     const openSupervisorEdit = (event, contract) => {
         event.stopPropagation();
         setSupervisorDialog(contract);
-        setSelectedSupervisorId(contract.supervisor_usuario_id || null);
+        setSelectedSupervisorIds(contract.supervisor_usuario_ids || []);
     };
 
     const openCompanyEdit = (event, contract) => {
@@ -218,15 +219,15 @@ export function Structure() {
     };
 
     const updateSupervisor = async () => {
-        if (!supervisorDialog || !selectedSupervisorId) {
-            showToast("warn", "Estrutura", "Selecione um supervisor.");
+        if (!supervisorDialog || !selectedSupervisorIds.length) {
+            showToast("warn", "Estrutura", "Selecione ao menos um supervisor.");
             return;
         }
         setLoading(true);
         try {
             const { data } = await connect.patch(
                 `/estrutura/contratos/${supervisorDialog.id}/supervisor`,
-                { supervisor_usuario_id: selectedSupervisorId },
+                { supervisor_usuario_ids: selectedSupervisorIds },
             );
             const updatedContract = data.contrato;
             setDepartments((current) => current.map((department) => ({
@@ -519,7 +520,7 @@ export function Structure() {
             />
 
             <Dialog
-                header={supervisorDialog ? `Supervisor — ${supervisorDialog.id}` : "Alterar supervisor"}
+                header={supervisorDialog ? `Supervisores — ${supervisorDialog.id}` : "Alterar supervisores"}
                 visible={Boolean(supervisorDialog)}
                 modal
                 className="structure-supervisor-dialog"
@@ -531,28 +532,31 @@ export function Structure() {
                             label="Confirmar alteração"
                             icon={<AppIcon name="check" />}
                             onClick={updateSupervisor}
-                            disabled={!selectedSupervisorId || selectedSupervisorId === supervisorDialog?.supervisor_usuario_id}
+                            disabled={!selectedSupervisorIds.length}
                         />
                     </div>
                 )}
             >
                 <div className="structure-supervisor-form">
                     <div className="structure-current-supervisor">
-                        <span>Supervisor atual</span>
+                        <span>Supervisores atuais</span>
                         <strong><AppIcon name="user"  /> {supervisorDialog?.supervisor}</strong>
                     </div>
                     <label>
-                        Novo supervisor
-                        <Dropdown
-                            value={selectedSupervisorId}
+                        Supervisores responsáveis
+                        <MultiSelect
+                            value={selectedSupervisorIds}
                             options={supervisors}
                             optionLabel="nome"
                             optionValue="id"
                             filter
                             filterBy="nome"
-                            placeholder="Selecione o supervisor"
+                            placeholder="Selecione um ou mais supervisores"
                             emptyMessage="Nenhum supervisor disponível"
-                            onChange={(event) => setSelectedSupervisorId(event.value)}
+                            display="chip"
+                            showClear
+                            selectedItemsLabel="{0} supervisores selecionados"
+                            onChange={(event) => setSelectedSupervisorIds(event.value || [])}
                         />
                     </label>
                 </div>

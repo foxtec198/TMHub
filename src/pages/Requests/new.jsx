@@ -378,10 +378,13 @@ export function Request() {
                         <StepperPanel header="Requisição">
                             <div className="request-reservation-step request-form-step flex flex-column">
                                 <CollaboratorDropdown
+                                    key={user?.id || "sem-supervisor"}
                                     appendTo="self"
                                     panelStyle={{ width: '100%' }}
                                     className="w-full mb-3 collaborator-dropdown--wrap"
                                     value={absent}
+                                    queryParams={{ contexto: "requisicao", supervisor_usuario_id: user?.id }}
+                                    disabled={!user?.id}
                                     virtualScrollerOptions={null}
                                     onChange={(id, collaborator) => {
                                         selectedAbsent(id);
