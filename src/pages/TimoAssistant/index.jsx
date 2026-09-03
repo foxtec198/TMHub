@@ -7,7 +7,7 @@ import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import { storeProfile } from "../../utils/profile";
 import { getAccessToken } from "../../utils/authSession";
-import { conversationHistory, conversationScope } from "./conversation";
+import { conversationHistory, conversationScope, timoNavigationPath } from "./conversation";
 import "./style.css";
 
 const QUICK_COMMANDS = [
@@ -187,6 +187,8 @@ export function TimoAssistant() {
         id: crypto.randomUUID(), role: "timo", text: data?.message || "Consulta concluída.", time: nowLabel(), action: data?.action || null, understood: data?.understood !== false, scope,
       }]);
       playTemporaryAnimation(data?.understood === false ? "thinking" : "speaking", 1900);
+      const destination = timoNavigationPath(data, scope, conversationScope(localStorage, getAccessToken()));
+      if (destination) navigate(destination);
     } catch (error) {
       setMessages((current) => [...current, {
         id: crypto.randomUUID(), role: "timo", text: error.response?.data?.message || error.response?.data || "Não consegui concluir essa consulta agora.", time: nowLabel(), error: true, scope,
@@ -228,7 +230,7 @@ export function TimoAssistant() {
         </header>
 
         <section className="timo-world__center" aria-label="Timo em três dimensões">
-          {latestTimoMessage && <article className={`timo-world-bubble${latestTimoMessage.error ? " is-error" : ""}`}><strong>Timo</strong><p>{sending ? "Só um instante, estou consultando isso para você…" : latestTimoMessage.text}</p>{latestTimoMessage.action?.type === "navigate" && <Button label="Abrir tela" icon={<AppIcon name="external-link" />} size="small" onClick={() => navigate(latestTimoMessage.action.path)} />}</article>}
+          {latestTimoMessage && <article className={`timo-world-bubble${latestTimoMessage.error ? " is-error" : ""}`}><strong>Timo</strong><p>{sending ? "Só um instante, estou consultando isso para você…" : latestTimoMessage.text}</p></article>}
           <div className={`timo-model-wrap${modelLoaded ? " is-ready" : ""}${modelFailed ? " is-fallback" : ""}`}>
             <div className="timo-model-loading" aria-hidden={modelLoaded}><span className="timo-model-loading__halo" /><img src={modelPoster} alt="" />{!modelFailed && <small><i /><i /><i /> Carregando o Timo</small>}</div>
             {viewerReady && !modelFailed && <model-viewer ref={modelViewerRef} key={modelSource} className="timo-world-model" alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="420" interaction-prompt="none" shadow-intensity="1.2" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" />}
@@ -244,7 +246,7 @@ export function TimoAssistant() {
 
         <aside className={`timo-history${historyOpen ? " is-open" : ""}`} aria-hidden={!historyOpen}>
           <header><div><span>CONVERSA</span><strong>Histórico com o Timo</strong></div><button type="button" onClick={() => setHistoryOpen(false)} aria-label="Fechar histórico"><AppIcon name="x" /></button></header>
-          <div ref={conversationRef}>{messages.map((message) => <article key={message.id} className={`timo-history-message is-${message.role}${message.error ? " is-error" : ""}`}><div><strong>{message.role === "timo" ? "Timo" : "Você"}</strong><small>{message.time}</small></div><p>{message.text}</p>{message.action?.type === "navigate" && <Button label="Abrir tela" text size="small" onClick={() => navigate(message.action.path)} />}</article>)}</div>
+          <div ref={conversationRef}>{messages.map((message) => <article key={message.id} className={`timo-history-message is-${message.role}${message.error ? " is-error" : ""}`}><div><strong>{message.role === "timo" ? "Timo" : "Você"}</strong><small>{message.time}</small></div><p>{message.text}</p></article>)}</div>
         </aside>
       </section>
     </main>

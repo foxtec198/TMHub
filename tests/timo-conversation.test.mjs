@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { conversationHistory, conversationScope } from "../src/pages/TimoAssistant/conversation.js";
+import { conversationHistory, conversationScope, timoNavigationPath } from "../src/pages/TimoAssistant/conversation.js";
 
 test("histórico acompanha a sessão e o escopo dos filtros", () => {
   const values = new Map();
@@ -27,4 +27,18 @@ test("envia apenas seis mensagens válidas, sem metadados ou falhas", () => {
     assert.equal(message.content.length, 500);
     assert.deepEqual(Object.keys(message), ["role", "content"]);
   }
+});
+
+test("abre a rota autorizada sem depender de clique", () => {
+  assert.equal(timoNavigationPath({ success: true, action: { type: "navigate", path: "/tickets" } }, "a", "a"), "/tickets");
+});
+
+test("não navega em falha, mudança de sessão/escopo ou URL externa", () => {
+  const response = { success: true, action: { type: "navigate", path: "/tickets" } };
+  assert.equal(timoNavigationPath(response, "a", "b"), null);
+  assert.equal(timoNavigationPath({ ...response, success: false }, "a", "a"), null);
+  for (const path of ["https://example.com", "//example.com", "/\\example.com", "javascript:alert(1)"]) {
+    assert.equal(timoNavigationPath({ ...response, action: { type: "navigate", path } }, "a", "a"), null);
+  }
+  assert.equal(timoNavigationPath({ success: true, action: null }, "a", "a"), null);
 });

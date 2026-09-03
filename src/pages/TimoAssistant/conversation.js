@@ -19,3 +19,10 @@ export function conversationHistory(messages, scope) {
       content: message.text.slice(0, 500),
     }));
 }
+
+export function timoNavigationPath(response, requestScope, currentScope) {
+  const action = response?.action;
+  if (response?.success !== true || requestScope !== currentScope || action?.type !== "navigate") return null;
+  // A API autoriza a rota; a interface só aceita caminhos internos.
+  return typeof action.path === "string" && /^\/(?!\/)[^\s\\]*$/.test(action.path) ? action.path : null;
+}
