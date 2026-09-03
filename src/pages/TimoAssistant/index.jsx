@@ -6,6 +6,8 @@ import { AppIcon } from "../../components/icons/AppIcon";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import { storeProfile } from "../../utils/profile";
+import { getAccessToken } from "../../utils/authSession";
+import { conversationHistory, conversationScope } from "./conversation";
 import "./style.css";
 
 const QUICK_COMMANDS = [
@@ -40,6 +42,7 @@ export function TimoAssistant() {
   const modelViewerRef = useRef(null);
   const conversationRef = useRef(null);
   const animationTimerRef = useRef(null);
+  const sendingRef = useRef(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [viewerReady, setViewerReady] = useState(false);
@@ -168,23 +171,29 @@ export function TimoAssistant() {
 
   const send = async (command = text) => {
     const content = String(command || "").trim();
-    if (!content || sending) return;
+    if (!content || sendingRef.current) return;
+    sendingRef.current = true;
+    const scope = conversationScope(localStorage, getAccessToken());
+    const history = conversationHistory(messages, scope);
     setText("");
-    setMessages((current) => [...current, { id: crypto.randomUUID(), role: "user", text: content, time: nowLabel() }]);
+    setMessages((current) => [...current, { id: crypto.randomUUID(), role: "user", text: content, time: nowLabel(), scope }]);
     try {
       setSending(true);
       setAnimation("thinking");
-      const { data } = await connect.post("/timo/process", { text: content }, { headers: { "X-Timo-Channel": "web-text" } });
+      const { data } = await connect.post("/timo/process", {
+        text: content, conversation: true, history,
+      }, { headers: { "X-Timo-Channel": "web-text" }, timeout: 35000 });
       setMessages((current) => [...current, {
-        id: crypto.randomUUID(), role: "timo", text: data?.message || "Consulta concluída.", time: nowLabel(), action: data?.action || null, understood: data?.understood !== false,
+        id: crypto.randomUUID(), role: "timo", text: data?.message || "Consulta concluída.", time: nowLabel(), action: data?.action || null, understood: data?.understood !== false, scope,
       }]);
       playTemporaryAnimation(data?.understood === false ? "thinking" : "speaking", 1900);
     } catch (error) {
       setMessages((current) => [...current, {
-        id: crypto.randomUUID(), role: "timo", text: error.response?.data?.message || error.response?.data || "Não consegui concluir essa consulta agora.", time: nowLabel(), error: true,
+        id: crypto.randomUUID(), role: "timo", text: error.response?.data?.message || error.response?.data || "Não consegui concluir essa consulta agora.", time: nowLabel(), error: true, scope,
       }]);
       playTemporaryAnimation("disabled", 1800);
     } finally {
+      sendingRef.current = false;
       setSending(false);
     }
   };
