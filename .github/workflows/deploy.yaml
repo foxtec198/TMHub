@@ -19,6 +19,7 @@ jobs: # Jobs will run
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
@@ -33,5 +34,6 @@ jobs: # Jobs will run
             npm -v
 
             npm install
+            node --test tests/timo-conversation.test.mjs
             npm run build
             find dist/assets -type f -mtime +14 -delete
