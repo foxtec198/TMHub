@@ -26,6 +26,7 @@ import { RequestReport } from "./pages/Dashboards/requests";
 import { EmployeesPage } from "./pages/Employees";
 import { CostCentersPage } from "./pages/CostCenters";
 import { Ponto48Dashboard } from "./pages/Dashboards/Ponto48";
+import { JourneyDashboard } from "./pages/Dashboards/Jornadas";
 import { AdmissionDashboard } from "./pages/Dashboards/Admission.jsx";
 import { Requests } from "./pages/Requests/requests";
 import { Request } from "./pages/Requests/new.jsx";
@@ -296,6 +297,14 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="dashboard_ponto48">
                 <Ponto48Dashboard />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/reports/jornadas"
+            element={
+              <PermissionGate screen="dashboard_jornadas">
+                <JourneyDashboard />
               </PermissionGate>
             }
           />
