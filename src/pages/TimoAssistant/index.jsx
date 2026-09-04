@@ -20,15 +20,15 @@ const QUICK_COMMANDS = [
 ];
 
 const BASE_SCENARIOS = [
-  { id: "workshop", label: "Oficina", description: "A base criativa do Timo", icon: "tool", image: "/timo-scenes/workshop.webp" },
-  { id: "orbit", label: "Órbita", description: "Observatório sobre a Terra", icon: "rocket", image: "/timo-scenes/orbit.webp" },
-  { id: "garden", label: "Jardim", description: "Refúgio bioluminescente", icon: "leaf", image: "/timo-scenes/garden.webp" },
+  { id: "workshop", label: "Oficina", description: "A base criativa do Timo", icon: "tool", image: "/scenes/workshop.webp" },
+  { id: "orbit", label: "Órbita", description: "Observatório sobre a Terra", icon: "rocket", image: "/scenes/orbit.webp" },
+  { id: "garden", label: "Jardim", description: "Refúgio bioluminescente", icon: "leaf", image: "/scenes/garden.webp" },
 ];
 const PREMIUM_SCENARIOS = [
-  { id: "christmas", productCode: "timo_cenario_christmas", label: "Natal", description: "Oficina iluminada de Natal", icon: "gift", image: "/timo-scenes/christmas.webp" },
-  { id: "halloween", productCode: "timo_cenario_halloween", label: "Halloween", description: "Uma noite misteriosamente divertida", icon: "moon", image: "/timo-scenes/halloween.webp" },
-  { id: "muertos", productCode: "timo_cenario_muertos", label: "Día de los Muertos", description: "Jardim de cempasúchil", icon: "leaf", image: "/timo-scenes/muertos.webp" },
-  { id: "cyberpunk", productCode: "timo_cenario_cyber", label: "Cyberpunk", description: "Escritório futurista com hologramas", icon: "chip", image: "/timo-scenes/cyberpunk.webp" },
+  { id: "christmas", productCode: "timo_cenario_christmas", label: "Natal", description: "Oficina iluminada de Natal", icon: "gift", image: "/scenes/christmas.webp" },
+  { id: "halloween", productCode: "timo_cenario_halloween", label: "Halloween", description: "Uma noite misteriosamente divertida", icon: "moon", image: "/scenes/halloween.webp" },
+  { id: "muertos", productCode: "timo_cenario_muertos", label: "Día de los Muertos", description: "Jardim de cempasúchil", icon: "leaf", image: "/scenes/muertos.webp" },
+  { id: "cyberpunk", productCode: "timo_cenario_cyber", label: "Cyberpunk", description: "Escritório futurista com hologramas", icon: "chip", image: "/scenes/cyberpunk.webp" },
 ];
 const ALL_SCENARIOS = [...BASE_SCENARIOS, ...PREMIUM_SCENARIOS];
 
