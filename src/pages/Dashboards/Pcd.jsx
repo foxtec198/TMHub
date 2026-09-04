@@ -1,8 +1,12 @@
 import { AppIcon, appIcon } from "../../components/icons/AppIcon";
+import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
+import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import "./pcd.css";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "primereact/button";
 import { Chart } from "primereact/chart";
+import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 
 import connect from "../../utils/request";
@@ -36,6 +40,8 @@ export function PcdDashboard() {
     const chartTheme = useChartTheme();
     const [data, setData] = useState(null);
     const [refresh, setRefresh] = useState(0);
+    const [filters, setFilters] = useState({ departamento: [], centro_custo_id: [] });
+    const filterPanel = useRef(null);
     const setGlobalLoading = useLoading();
     const { showToast } = useToast();
 
@@ -58,7 +64,12 @@ export function PcdDashboard() {
         const loadDashboard = async () => {
             setGlobalLoading(true);
             try {
-                const response = await connect.get("/dash/pcd");
+                const response = await connect.get("/dash/pcd", {
+                    params: {
+                        departamento: filters.departamento.join(",") || undefined,
+                        centro_custo_id: filters.centro_custo_id.join(",") || undefined,
+                    },
+                });
                 if (!cancelled) setData(response.data);
             } catch (error) {
                 if (!cancelled) {
@@ -78,6 +89,7 @@ export function PcdDashboard() {
         return () => { cancelled = true; };
     }, [
         refresh,
+        filters,
         setGlobalLoading,
         showToast,
     ]);
@@ -97,6 +109,9 @@ export function PcdDashboard() {
     );
     const missingPcd = Math.max(targetHeadcount - totalPcd, 0);
     const targetReached = totalEmployees > 0 && missingPcd === 0;
+    const activeFilterCount = Object.values(filters).filter((value) => value.length).length;
+    const setFilter = (name, value) => setFilters((current) => ({ ...current, [name]: value || [] }));
+    const clearFilters = () => setFilters({ departamento: [], centro_custo_id: [] });
 
     const statusChart = useMemo(() => ({
         labels: branches.map((branch) => branch.nome),
@@ -232,7 +247,19 @@ export function PcdDashboard() {
                 section="Dashboards"
                 title="Dashboard PCD"
                 description="Acompanhe o quadro de colaboradores PCD e o comparativo com a meta."
+                actions={<StandardFilterButton panelRef={filterPanel} count={activeFilterCount} ariaLabel="Abrir filtros do dashboard PCD" />}
             />
+
+            <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
+                <div className="dashboard-filter-title">
+                    <div><strong>Filtrar dashboard PCD</strong><span>Os filtros atualizam todos os indicadores do recorte.</span></div>
+                    <Button type="button" icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={clearFilters} />
+                </div>
+                <StandardFilterFields
+                    department={{ value: filters.departamento, options: (data?.filtros?.departamentos || []).map((value) => ({ label: `DPTO. ${value}`, value })), onChange: (value) => setFilter("departamento", value) }}
+                    center={{ remote: true, value: filters.centro_custo_id, onChange: (value) => setFilter("centro_custo_id", value) }}
+                />
+            </OverlayPanel>
 
             <div className="pcd-dashboard-summary">
                 {cards.map((card) => (

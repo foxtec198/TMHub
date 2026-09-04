@@ -173,6 +173,12 @@ export function MainLayout() {
               command: () => { navigateTo("/reports/ponto-48-horas") }
             },
             {
+              label: 'Jornadas',
+              icon: appIcon("calendar-time"),
+              visible: can("dashboard_jornadas"),
+              command: () => { navigateTo("/reports/jornadas") }
+            },
+            {
               label: 'Admissões',
               icon: appIcon("user-plus"),
               visible: can("dashboard_admissoes"),
