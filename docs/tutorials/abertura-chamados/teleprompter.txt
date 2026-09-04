@@ -1,0 +1,15 @@
+COMO ABRIR E ACOMPANHAR UM CHAMADO NO TMHUB
+
+Fala, pessoal! Neste vídeo, eu vou mostrar como abrir um chamado no TMHub e acompanhar o atendimento. A ideia é registrar o que você precisa com clareza e manter as atualizações organizadas no mesmo lugar. Vamos lá?
+
+Antes de começar, confira a filial do atendimento. Se o seletor de filiais aparecer para você, deixe selecionada somente a filial relacionada à solicitação. Depois, no menu lateral, clique em Chamados. Aqui fica a Central de Chamados, onde você pode consultar as solicitações disponíveis para o seu acesso.
+
+Para registrar uma solicitação, clique em Novo chamado. Primeiro, preencha o título com uma frase curta que explique o problema. Neste exemplo de demonstração, vou usar: erro ao abrir relatório. Evite títulos como “ajuda” ou “urgente” sem contexto. Um título objetivo facilita identificar o que precisa de atendimento.
+
+O campo Motivo é opcional. Se houver uma opção que corresponda à sua solicitação, selecione. Em seguida, preencha a descrição. Explique em qual tela aconteceu, o que você estava tentando fazer, qual foi o resultado e o que esperava que acontecesse. Se uma mensagem de erro apareceu, transcreva essa mensagem. Quanto mais claro for o relato, mais fácil será entender a situação. Não inclua senhas ou informações sensíveis.
+
+Antes de enviar, revise o título e a descrição, que são obrigatórios. Com tudo certo, clique em Abrir chamado. Quando o registro é concluído, o sistema confirma a abertura e leva você para a página do chamado. Observe o número gerado: ele ajuda a identificar essa solicitação durante o acompanhamento.
+
+Nesta página, você acompanha o status, o prazo exibido pelo sistema e as informações da solicitação. Se aparecer “Aguardando atribuição”, significa que o chamado ainda está sem responsável definido. Na conversa ficam registradas as atualizações do atendimento. Se o campo de mensagem estiver disponível para o seu perfil, você pode acrescentar uma informação e clicar em Enviar. Prefira complementar o chamado existente quando for o mesmo assunto, para manter o histórico reunido.
+
+Para consultar depois, volte à Central de Chamados. Use a busca pelo número ou título, ou filtre pelo status. A lista começa mostrando os chamados ativos; use Ver todos para ampliar a consulta. Pronto! O caminho é: conferir a filial, acessar Chamados, clicar em Novo chamado, explicar a solicitação e enviar. Depois, acompanhe as atualizações por aqui. Até o próximo tutorial!

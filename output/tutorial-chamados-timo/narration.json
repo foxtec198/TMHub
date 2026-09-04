@@ -1,0 +1,218 @@
+[
+  {
+    "file": "line-000.wav",
+    "index": 0,
+    "chapter": 1,
+    "text": "Fala, pessoal!"
+  },
+  {
+    "file": "line-001.wav",
+    "index": 1,
+    "chapter": 1,
+    "text": "Neste vídeo, eu vou mostrar como abrir um chamado no TMHub e acompanhar o atendimento."
+  },
+  {
+    "file": "line-002.wav",
+    "index": 2,
+    "chapter": 1,
+    "text": "A ideia é registrar o que você precisa com clareza e manter as atualizações organizadas no mesmo lugar."
+  },
+  {
+    "file": "line-003.wav",
+    "index": 3,
+    "chapter": 1,
+    "text": "Vamos lá?"
+  },
+  {
+    "file": "line-004.wav",
+    "index": 4,
+    "chapter": 2,
+    "text": "Antes de começar, confira a filial do atendimento."
+  },
+  {
+    "file": "line-005.wav",
+    "index": 5,
+    "chapter": 2,
+    "text": "Se o seletor de filiais aparecer para você, deixe selecionada somente a filial relacionada à solicitação."
+  },
+  {
+    "file": "line-006.wav",
+    "index": 6,
+    "chapter": 2,
+    "text": "Depois, no menu lateral, clique em Chamados."
+  },
+  {
+    "file": "line-007.wav",
+    "index": 7,
+    "chapter": 2,
+    "text": "Aqui fica a Central de Chamados, onde você pode consultar as solicitações disponíveis para o seu acesso."
+  },
+  {
+    "file": "line-008.wav",
+    "index": 8,
+    "chapter": 3,
+    "text": "Para registrar uma solicitação, clique em Novo chamado."
+  },
+  {
+    "file": "line-009.wav",
+    "index": 9,
+    "chapter": 3,
+    "text": "Primeiro, preencha o título com uma frase curta que explique o problema."
+  },
+  {
+    "file": "line-010.wav",
+    "index": 10,
+    "chapter": 3,
+    "text": "Neste exemplo de demonstração, vou usar: erro ao abrir relatório."
+  },
+  {
+    "file": "line-011.wav",
+    "index": 11,
+    "chapter": 3,
+    "text": "Evite títulos como “ajuda” ou “urgente” sem contexto."
+  },
+  {
+    "file": "line-012.wav",
+    "index": 12,
+    "chapter": 3,
+    "text": "Um título objetivo facilita identificar o que precisa de atendimento."
+  },
+  {
+    "file": "line-013.wav",
+    "index": 13,
+    "chapter": 4,
+    "text": "O campo Motivo é opcional."
+  },
+  {
+    "file": "line-014.wav",
+    "index": 14,
+    "chapter": 4,
+    "text": "Se houver uma opção que corresponda à sua solicitação, selecione."
+  },
+  {
+    "file": "line-015.wav",
+    "index": 15,
+    "chapter": 4,
+    "text": "Em seguida, preencha a descrição."
+  },
+  {
+    "file": "line-016.wav",
+    "index": 16,
+    "chapter": 4,
+    "text": "Explique em qual tela aconteceu, o que você estava tentando fazer, qual foi o resultado e o que esperava que acontecesse."
+  },
+  {
+    "file": "line-017.wav",
+    "index": 17,
+    "chapter": 4,
+    "text": "Se uma mensagem de erro apareceu, transcreva essa mensagem."
+  },
+  {
+    "file": "line-018.wav",
+    "index": 18,
+    "chapter": 4,
+    "text": "Quanto mais claro for o relato, mais fácil será entender a situação."
+  },
+  {
+    "file": "line-019.wav",
+    "index": 19,
+    "chapter": 4,
+    "text": "Não inclua senhas ou informações sensíveis."
+  },
+  {
+    "file": "line-020.wav",
+    "index": 20,
+    "chapter": 5,
+    "text": "Antes de enviar, revise o título e a descrição, que são obrigatórios."
+  },
+  {
+    "file": "line-021.wav",
+    "index": 21,
+    "chapter": 5,
+    "text": "Com tudo certo, clique em Abrir chamado."
+  },
+  {
+    "file": "line-022.wav",
+    "index": 22,
+    "chapter": 5,
+    "text": "Quando o registro é concluído, o sistema confirma a abertura e leva você para a página do chamado."
+  },
+  {
+    "file": "line-023.wav",
+    "index": 23,
+    "chapter": 5,
+    "text": "Observe o número gerado: ele ajuda a identificar essa solicitação durante o acompanhamento."
+  },
+  {
+    "file": "line-024.wav",
+    "index": 24,
+    "chapter": 6,
+    "text": "Nesta página, você acompanha o status, o prazo exibido pelo sistema e as informações da solicitação."
+  },
+  {
+    "file": "line-025.wav",
+    "index": 25,
+    "chapter": 6,
+    "text": "Se aparecer “Aguardando atribuição”, significa que o chamado ainda está sem responsável definido."
+  },
+  {
+    "file": "line-026.wav",
+    "index": 26,
+    "chapter": 6,
+    "text": "Na conversa ficam registradas as atualizações do atendimento."
+  },
+  {
+    "file": "line-027.wav",
+    "index": 27,
+    "chapter": 6,
+    "text": "Se o campo de mensagem estiver disponível para o seu perfil, você pode acrescentar uma informação e clicar em Enviar."
+  },
+  {
+    "file": "line-028.wav",
+    "index": 28,
+    "chapter": 6,
+    "text": "Prefira complementar o chamado existente quando for o mesmo assunto, para manter o histórico reunido."
+  },
+  {
+    "file": "line-029.wav",
+    "index": 29,
+    "chapter": 7,
+    "text": "Para consultar depois, volte à Central de Chamados."
+  },
+  {
+    "file": "line-030.wav",
+    "index": 30,
+    "chapter": 7,
+    "text": "Use a busca pelo número ou título, ou filtre pelo status."
+  },
+  {
+    "file": "line-031.wav",
+    "index": 31,
+    "chapter": 7,
+    "text": "A lista começa mostrando os chamados ativos; use Ver todos para ampliar a consulta."
+  },
+  {
+    "file": "line-032.wav",
+    "index": 32,
+    "chapter": 7,
+    "text": "Pronto!"
+  },
+  {
+    "file": "line-033.wav",
+    "index": 33,
+    "chapter": 7,
+    "text": "O caminho é: conferir a filial, acessar Chamados, clicar em Novo chamado, explicar a solicitação e enviar."
+  },
+  {
+    "file": "line-034.wav",
+    "index": 34,
+    "chapter": 7,
+    "text": "Depois, acompanhe as atualizações por aqui."
+  },
+  {
+    "file": "line-035.wav",
+    "index": 35,
+    "chapter": 7,
+    "text": "Até o próximo tutorial!"
+  }
+]

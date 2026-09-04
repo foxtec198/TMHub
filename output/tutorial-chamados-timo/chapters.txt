@@ -1,0 +1,38 @@
+;FFMETADATA1
+title=Como abrir e acompanhar um chamado no TMHub
+comment=Timo 3D, voz sintética pt-BR e dados demonstrativos.
+[CHAPTER]
+TIMEBASE=1/1000
+START=0
+END=23500
+title=Abertura
+[CHAPTER]
+TIMEBASE=1/1000
+START=23500
+END=52083
+title=Filial e acesso
+[CHAPTER]
+TIMEBASE=1/1000
+START=52083
+END=82375
+title=Novo chamado e título
+[CHAPTER]
+TIMEBASE=1/1000
+START=82375
+END=124583
+title=Motivo e descrição
+[CHAPTER]
+TIMEBASE=1/1000
+START=124583
+END=152542
+title=Revisar e enviar
+[CHAPTER]
+TIMEBASE=1/1000
+START=152542
+END=194250
+title=Acompanhar e conversar
+[CHAPTER]
+TIMEBASE=1/1000
+START=194250
+END=235917
+title=Encontrar depois e encerrar

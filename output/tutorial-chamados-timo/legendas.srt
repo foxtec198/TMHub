@@ -1,0 +1,156 @@
+1
+00:00:02,000 --> 00:00:04,437
+Fala, pessoal!
+
+2
+00:00:04,792 --> 00:00:11,839
+Neste vídeo, eu vou mostrar como abrir um chamado no TMHub e acompanhar o
+atendimento.
+
+3
+00:00:12,167 --> 00:00:20,393
+A ideia é registrar o que você precisa com clareza e manter as atualizações
+organizadas no mesmo lugar.
+
+4
+00:00:20,750 --> 00:00:22,422
+Vamos lá?
+
+5
+00:00:23,500 --> 00:00:28,169
+Antes de começar, confira a filial do atendimento.
+
+6
+00:00:28,500 --> 00:00:37,239
+Se o seletor de filiais aparecer para você, deixe selecionada somente a filial
+relacionada à solicitação.
+
+7
+00:00:37,583 --> 00:00:42,252
+Depois, no menu lateral, clique em Chamados.
+
+8
+00:00:42,583 --> 00:00:51,005
+Aqui fica a Central de Chamados, onde você pode consultar as solicitações
+disponíveis para o seu acesso.
+
+9
+00:00:52,083 --> 00:00:57,198
+Para registrar uma solicitação, clique em Novo chamado.
+
+10
+00:00:57,542 --> 00:01:03,426
+Primeiro, preencha o título com uma frase curta que explique o problema.
+
+11
+00:01:03,750 --> 00:01:09,811
+Neste exemplo de demonstração, vou usar: erro ao abrir relatório.
+
+12
+00:01:10,167 --> 00:01:14,996
+Evite títulos como “ajuda” ou “urgente” sem contexto.
+
+13
+00:01:15,333 --> 00:01:21,297
+Um título objetivo facilita identificar o que precisa de atendimento.
+
+14
+00:01:22,375 --> 00:01:25,313
+O campo Motivo é opcional.
+
+15
+00:01:25,667 --> 00:01:31,372
+Se houver uma opção que corresponda à sua solicitação, selecione.
+
+16
+00:01:31,708 --> 00:01:35,162
+Em seguida, preencha a descrição.
+
+17
+00:01:35,500 --> 00:01:44,906
+Explique em qual tela aconteceu, o que você estava tentando fazer, qual foi o
+resultado e o que esperava que acontecesse.
+
+18
+00:01:45,250 --> 00:01:50,559
+Se uma mensagem de erro apareceu, transcreva essa mensagem.
+
+19
+00:01:50,917 --> 00:01:56,884
+Quanto mais claro for o relato, mais fácil será entender a situação.
+
+20
+00:01:59,208 --> 00:02:03,477
+Não inclua senhas ou informações sensíveis.
+
+21
+00:02:04,583 --> 00:02:10,845
+Antes de enviar, revise o título e a descrição, que são obrigatórios.
+
+22
+00:02:11,167 --> 00:02:15,273
+Com tudo certo, clique em Abrir chamado.
+
+23
+00:02:15,625 --> 00:02:23,488
+Quando o registro é concluído, o sistema confirma a abertura e leva você para a
+página do chamado.
+
+24
+00:02:23,833 --> 00:02:31,441
+Observe o número gerado: ele ajuda a identificar essa solicitação durante o
+acompanhamento.
+
+25
+00:02:32,542 --> 00:02:41,417
+Nesta página, você acompanha o status, o prazo exibido pelo sistema e as
+informações da solicitação.
+
+26
+00:02:41,750 --> 00:02:49,593
+Se aparecer “Aguardando atribuição”, significa que o chamado ainda está sem
+responsável definido.
+
+27
+00:02:49,917 --> 00:02:55,392
+Na conversa ficam registradas as atualizações do atendimento.
+
+28
+00:02:55,750 --> 00:03:04,935
+Se o campo de mensagem estiver disponível para o seu perfil, você pode
+acrescentar uma informação e clicar em Enviar.
+
+29
+00:03:05,292 --> 00:03:13,150
+Prefira complementar o chamado existente quando for o mesmo assunto, para manter
+o histórico reunido.
+
+30
+00:03:14,250 --> 00:03:19,370
+Para consultar depois, volte à Central de Chamados.
+
+31
+00:03:19,708 --> 00:03:25,042
+Use a busca pelo número ou título, ou filtre pelo status.
+
+32
+00:03:25,375 --> 00:03:32,512
+A lista começa mostrando os chamados ativos; use Ver todos para ampliar a
+consulta.
+
+33
+00:03:32,833 --> 00:03:34,385
+Pronto!
+
+34
+00:03:34,708 --> 00:03:44,131
+O caminho é: conferir a filial, acessar Chamados, clicar em Novo chamado,
+explicar a solicitação e enviar.
+
+35
+00:03:44,458 --> 00:03:48,820
+Depois, acompanhe as atualizações por aqui.
+
+36
+00:03:49,167 --> 00:03:51,823
+Até o próximo tutorial!

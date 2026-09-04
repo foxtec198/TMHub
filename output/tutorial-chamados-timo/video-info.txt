@@ -1,0 +1,44 @@
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'C:\Users\Guilherme\Documents\tmhub\output\tutorial-chamados-timo\TMHub-Chamados-com-Timo-FullHD.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : Como abrir e acompanhar um chamado no TMHub
+    encoder         : Lavf61.7.100
+    comment         : Timo 3D, voz sintÃ©tica pt-BR e dados demonstrativos.
+  Duration: 00:03:55.99, start: 0.000000, bitrate: 419 kb/s
+  Chapters:
+    Chapter #0:0: start 0.000000, end 23.500000
+      Metadata:
+        title           : Abertura
+    Chapter #0:1: start 23.500000, end 52.083000
+      Metadata:
+        title           : Filial e acesso
+    Chapter #0:2: start 52.083000, end 82.375000
+      Metadata:
+        title           : Novo chamado e tÃ­tulo
+    Chapter #0:3: start 82.375000, end 124.583000
+      Metadata:
+        title           : Motivo e descriÃ§Ã£o
+    Chapter #0:4: start 124.583000, end 152.542000
+      Metadata:
+        title           : Revisar e enviar
+    Chapter #0:5: start 152.542000, end 194.250000
+      Metadata:
+        title           : Acompanhar e conversar
+    Chapter #0:6: start 194.250000, end 235.917000
+      Metadata:
+        title           : Encontrar depois e encerrar
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(progressive), 1920x1080 [SAR 1:1 DAR 16:9], 286 kb/s, 24 fps, 24 tbr, 12288 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+        encoder         : Lavc61.19.100 libx264
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 128 kb/s (default)
+      Metadata:
+        handler_name    : SoundHandler
+        vendor_id       : [0][0][0][0]
+  Stream #0:2[0x3](eng): Data: bin_data (text / 0x74786574), 0 kb/s
+      Metadata:
+        handler_name    : SubtitleHandler
+At least one output file must be specified
