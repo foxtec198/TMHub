@@ -67,6 +67,8 @@ import { ExperienceDashboard } from "./pages/Dashboards/Experience.jsx";
 import { ExperienceControl } from "./pages/ExperienceControl";
 import { ExperienceSupervisor } from "./pages/ExperienceControl/supervisor";
 import { PeriodicExams } from "./pages/PeriodicExams";
+import { JourneyControl } from "./pages/JourneyControl";
+import { RpaAgents } from "./pages/RpaAgents";
 import { MarketPlace } from "./pages/Marketplace";
 import { TimoAssistant } from "./pages/TimoAssistant";
 
@@ -264,6 +266,22 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="controle_exames_periodicos">
                 <PeriodicExams />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/jornadas"
+            element={
+              <PermissionGate screen="controle_jornadas">
+                <JourneyControl />
+              </PermissionGate>
+            }
+          />
+          <Route
+            path="/rpa/agentes"
+            element={
+              <PermissionGate screen="controle_jornadas">
+                <RpaAgents />
               </PermissionGate>
             }
           />

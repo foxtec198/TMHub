@@ -28,6 +28,8 @@ import { Divider } from "primereact/divider";
 const REALTIME_CHANNELS_BY_ROUTE = {
   "/configuracoes": ["configuracoes", "colaboradores"],
   "/controle-faltas": ["controle_faltas"],
+  "/jornadas": ["controle_jornadas"],
+  "/rpa/agentes": ["controle_jornadas"],
   "/avaliacoes-experiencia": ["avaliacoes_experiencia"],
   "/controle-glosas": ["glosas"],
   "/indicadores/pcd": ["pcd", "colaboradores"],
@@ -300,6 +302,12 @@ export function MainLayout() {
           command: () => { navigateTo("/controle-faltas") }
         },
         {
+          label: 'Jornadas',
+          icon: appIcon("clock"),
+          visible: can("controle_jornadas"),
+          command: () => { navigateTo("/jornadas") }
+        },
+        {
           label: "Experiências",
           icon: appIcon("clipboard"),
           visible: can("controle_experiencia_rh"),
@@ -401,15 +409,19 @@ export function MainLayout() {
     },
     {
       label: "RPA Center",
-      disabled: true,
-
       icon: appIcon("verified"),
       className: deny ? "hidden" : null,
       items: [
         {
-          label: 'HK Bot',
+          label: "Ponto Mais",
           icon: appIcon("clock"),
-          command: () => { }
+          visible: can("controle_jornadas"),
+          command: () => { navigateTo("/rpa/agentes?categoria=Ponto%20Mais") }
+        },
+        {
+          label: "HK",
+          icon: appIcon("device-desktop"),
+          command: () => { navigateTo("/rpa/agentes?categoria=HK") }
         },
       ]
     },
