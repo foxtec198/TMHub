@@ -15,6 +15,10 @@ import "./style.css";
 
 const CATEGORY_LABELS = { todos: "Todos", tema: "Temas", adorno: "Adornos de foto", timo_skin: "Skins do Timo", timo_cenario: "Cenários do Timo" };
 const PRODUCT_CATEGORY_LABELS = { tema: "Tema", adorno: "Adorno de foto", timo_skin: "Skin do Timo", timo_cenario: "Cenário do Timo" };
+const TIMO_SKIN_ART = {
+  timo_gold: "/timo-gold-poster.png",
+  timo_cyber: "/cyber_timo-poster.png",
+};
 const TIMO_SCENE_ART = {
   timo_cenario_christmas: "/timo-scenes/christmas.webp",
   timo_cenario_halloween: "/timo-scenes/halloween.webp",
@@ -36,9 +40,10 @@ function ProductArt({ product }) {
     </div>;
   }
   if (product.categoria === "timo_skin") {
+    const poster = TIMO_SKIN_ART[product.codigo] || "/timo-gold-poster.png";
     return <div className="marketplace-card__art marketplace-card__art--timo-gold">
-      <img src="/timo-gold-poster.png" alt="Prévia do Timo Gold Premium" />
-      <span>GOLD</span>
+      <img src={poster} alt={`Prévia do ${product.nome}`} />
+      <span>{product.codigo === "timo_cyber" ? "CYBER" : "GOLD"}</span>
     </div>;
   }
   if (product.categoria === "timo_cenario") {
