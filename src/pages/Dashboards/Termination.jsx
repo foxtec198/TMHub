@@ -273,6 +273,7 @@ export function TerminationDashboard() {
                 section="Dashboards"
                 title="Rescisões"
                 description="Acompanhe o volume e os valores das rescisões por período, filial e contrato."
+                actions={<TerminationFilterButton panelRef={filterPanel} activeCount={activeFilterCount} />}
             />
 
             <div className="termination-dashboard-summary">
