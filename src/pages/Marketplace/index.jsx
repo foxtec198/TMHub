@@ -19,6 +19,7 @@ const TIMO_SCENE_ART = {
   timo_cenario_christmas: "/timo-scenes/christmas.webp",
   timo_cenario_halloween: "/timo-scenes/halloween.webp",
   timo_cenario_muertos: "/timo-scenes/muertos.webp",
+  timo_cenario_cyber: "/timo-scenes/cyber.webp",
 };
 const themeById = new Map(THEME_OPTIONS.map((theme) => [theme.id, theme]));
 

@@ -28,6 +28,7 @@ const PREMIUM_SCENARIOS = [
   { id: "christmas", productCode: "timo_cenario_christmas", label: "Natal", description: "Oficina iluminada de Natal", icon: "gift", image: "/timo-scenes/christmas.webp" },
   { id: "halloween", productCode: "timo_cenario_halloween", label: "Halloween", description: "Uma noite misteriosamente divertida", icon: "moon", image: "/timo-scenes/halloween.webp" },
   { id: "muertos", productCode: "timo_cenario_muertos", label: "Día de los Muertos", description: "Jardim de cempasúchil", icon: "leaf", image: "/timo-scenes/muertos.webp" },
+  { id: "cyber", productCode: "timo_cenario_cyber", label: "Cyber", description: "Laboratório futurista neon", icon: "chip", image: "/timo-scenes/cyber.webp" },
 ];
 const ALL_SCENARIOS = [...BASE_SCENARIOS, ...PREMIUM_SCENARIOS];
 
