@@ -234,6 +234,42 @@
   width: min(80rem, calc(100vw - 2rem));
 }
 
+.floaters-usage-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+  padding-bottom: 2rem;
+  padding-top: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.floaters-usage-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.floaters-usage-filters label > span:first-child {
+  color: var(--text-color-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+}
+
+.floaters-usage-filters label .p-calendar,
+.floaters-usage-filters label .p-multiselect {
+  width: 100%;
+  min-width: 0;
+}
+
+.floaters-usage-filters label .p-multiselect-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .floaters-usage-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

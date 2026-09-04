@@ -123,6 +123,41 @@
   width: min(80rem, calc(100vw - 2rem));
 }
 
+.reserve-usage-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.reserve-usage-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.reserve-usage-filters label > span:first-child {
+  color: var(--text-color-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+}
+
+.reserve-usage-filters label .p-calendar,
+.reserve-usage-filters label .p-multiselect {
+  width: 100%;
+  min-width: 0;
+}
+
+.reserve-usage-filters label .p-multiselect-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .reserve-usage-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -188,6 +223,16 @@
 .reserve-availability-dialog p {
   color: var(--text-color-secondary);
   line-height: 1.5;
+}
+
+.reserve-availability-dialog strong {
+  color: var(--text-primary);
+}
+
+.reserve-availability-absence {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--surface-border);
 }
 
 .reserve-availability-reason {

@@ -16,14 +16,14 @@ import "./style.css";
 const CATEGORY_LABELS = { todos: "Todos", tema: "Temas", adorno: "Adornos de foto", timo_skin: "Skins do Timo", timo_cenario: "Cenários do Timo" };
 const PRODUCT_CATEGORY_LABELS = { tema: "Tema", adorno: "Adorno de foto", timo_skin: "Skin do Timo", timo_cenario: "Cenário do Timo" };
 const TIMO_SKIN_ART = {
-  timo_gold: "/timo-gold-poster.png",
-  timo_cyber: "/cyber_timo-poster.png",
+  timo_gold: "/assets/timo-gold-poster.png",
+  timo_cyber: "/3d-models/cyber_timo-poster.png",
 };
 const TIMO_SCENE_ART = {
-  timo_cenario_christmas: "/scenes/christmas.webp",
-  timo_cenario_halloween: "/scenes/halloween.webp",
-  timo_cenario_muertos: "/scenes/muertos.webp",
-  timo_cenario_cyber: "/scenes/cyberpunk.webp",
+  timo_cenario_christmas: "/3d-models/scenes/christmas.webp",
+  timo_cenario_halloween: "/3d-models/scenes/halloween.webp",
+  timo_cenario_muertos: "/3d-models/scenes/muertos.webp",
+  timo_cenario_cyber: "/3d-models/scenes/cyberpunk.webp",
 };
 const themeById = new Map(THEME_OPTIONS.map((theme) => [theme.id, theme]));
 
@@ -53,7 +53,7 @@ function ProductArt({ product }) {
     </div>;
   }
   return <div className={`marketplace-card__art marketplace-card__art--frame is-${product.codigo}`}>
-    <span className="marketplace-frame-preview"><img src="/edinho.png" alt="Prévia do adorno" /></span>
+    <span className="marketplace-frame-preview"><img src="/assets/edinho.png" alt="Prévia do adorno" /></span>
     <AppIcon name="sparkles" />
   </div>;
 }

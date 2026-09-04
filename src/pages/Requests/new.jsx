@@ -387,11 +387,22 @@ export function Request() {
                                     disabled={!user?.id}
                                     virtualScrollerOptions={null}
                                     onChange={(id, collaborator) => {
+                                        console.log("[new.jsx] Collaborator ID:", id);
+                                        console.log("[new.jsx] Collaborator object:", collaborator);
+                                        console.log("[new.jsx] floater_id:", collaborator?.floater_id);
                                         selectedAbsent(id);
                                         setAbsentDetails(collaborator);
                                         setManualCoverage(null);
                                         setAdditionalStepReleased(false);
                                         loadDisciplinaryContext(id);
+                                        
+                                        // Se o ausente for uma reserva, automaticamente marca sem reserva técnica
+                                        const isFloater = Boolean(collaborator?.floater_id);
+                                        console.log("[new.jsx] isFloater:", isFloater);
+                                        if (isFloater) {
+                                            setChecked(true);
+                                            selectedReplace(null);
+                                        }
                                     }}
                                     placeholder="Busque quem faltou"
                                     minSearch={2}

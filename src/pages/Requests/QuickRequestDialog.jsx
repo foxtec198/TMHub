@@ -34,6 +34,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
   const { showToast } = useToast();
 
   const selectAbsent = (value, collaborator) => {
+    console.log("[selectAbsent] Collaborator:", collaborator);
     const centerId = collaborator?.centro_id ?? null;
     setSelectedCenter(centerId ? {
       id: centerId,
@@ -41,7 +42,17 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
       local: collaborator?.centro_local,
       departamento: collaborator?.departamento,
     } : null);
-    setForm((current) => ({ ...current, absent: value, center: centerId }));
+    
+    // Se o ausente for uma reserva (floater_id existe), automaticamente preenche reserva e marca sem cobertura
+    const isFloater = Boolean(collaborator?.floater_id);
+    console.log("[selectAbsent] isFloater:", isFloater, "value:", value);
+    setForm((current) => ({
+      ...current, 
+      absent: value, 
+      center: centerId,
+      noCoverage: isFloater,
+      reservation: isFloater ? value : null
+    }));
   };
 
   useEffect(() => {
@@ -53,7 +64,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
   // deste lote porque a quantidade de registros tornava a abertura da tela muito lenta.
   useEffect(() => {
     if (!visible || optionsLoaded) return;
-    Promise.all([connect.get("/repo/request/solicitante"), connect.get("/reservas")])
+    Promise.all([connect.get("/repo/request/solicitante"), connect.get("/reservas", { params: { disponivel: false } })])
       .then(([requester, reservations]) => {
         const requesterData = requester.data || {};
         const supervisorOptions = (requesterData.supervisores || []).map((item) => ({ label: item.nome, value: item.id }));
@@ -64,6 +75,7 @@ export function QuickRequestDialog({ visible, onHide, onCreated }) {
         reservations: reservations.data.map((item) => ({ ...item, label: item.nome, value: item.id })),
         });
         setForm((current) => ({ ...current, supervisor: currentSupervisor }));
+        console.log("[QuickRequest] Reservations loaded:", reservations.data.length, "items");
         setOptionsLoaded(true);
       })
       .catch(() => showToast("error", "Lançamento rápido", "Não foi possível carregar as opções."));

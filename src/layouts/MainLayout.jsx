@@ -339,7 +339,6 @@ export function MainLayout() {
       items: [
         {
           label: 'Reposições',
-          icon: appIcon("refresh"),
           items: [
             {
               label: 'Nova requisição',
@@ -370,7 +369,6 @@ export function MainLayout() {
         },
         {
           label: "Estoque",
-          icon: appIcon("box"),
           items: [
             {
               label: 'Produtos',
@@ -394,12 +392,11 @@ export function MainLayout() {
         },
         {
           label: "SESMT",
-          icon: appIcon("shield"),
           visible: can("controle_exames_periodicos"),
           items: [
             {
-              label: "Exames periódicos",
-              icon: appIcon("heart"),
+              label: "Exames",
+              icon: appIcon("shield"),
               visible: can("controle_exames_periodicos"),
               command: () => { navigateTo("/exames-periodicos"); },
             },

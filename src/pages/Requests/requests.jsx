@@ -4,6 +4,7 @@ import { Table } from "../../components/tables/Table";
 import { Button } from "primereact/button";
 import { ButtonGroup } from "primereact/buttongroup"
 import { Tag } from "primereact/tag";
+import { MultiSelect } from "primereact/multiselect";
 import { DashCard } from "../../components/DashCard";
 import { Inplace, InplaceDisplay, InplaceContent, } from 'primereact/inplace';
 import { DropdownWS } from "../../components/DropdownWithSearch";
@@ -100,15 +101,14 @@ export function Requests() {
     const [usageDialog, setUsageDialog] = useState(false)
     const [usageDate, setUsageDate] = useState(new Date())
     const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [], indisponiveis: [] })
-    const [availabilityDialog, setAvailabilityDialog] = useState(null)
-    const [absenceReason, setAbsenceReason] = useState(null)
+    const [usageFilters, setUsageFilters] = useState({ departamentos: [], centros: [] })
+    const [usageFiltersOptions, setUsageFiltersOptions] = useState({ departamentos: [], centros: [] })
 
     const { showToast } = useToast();
     const setLoading = useLoading();
     const navigate = useNavigate();
     const canCreate = can("reposicoes", "create");
     const canEdit = can("reposicoes", "edit");
-    const canEditAbsences = can("controle_faltas", "edit");
 
     const requestSummary = useMemo(() => requests.reduce((summary, request) => {
         const situation = getRequestSituation(request.data, currentTime);
@@ -116,15 +116,49 @@ export function Requests() {
         return summary;
     }, { open: 0, late: 0, expired: 0 }), [requests, currentTime]);
 
+    // Callback para atualizar filtros e recarregar dados
+    const handleFilterChange = (field, value) => {
+        console.log(`[handleFilterChange] Field: ${field}, Value:`, value);
+        setUsageFilters((current) => {
+            const newFilters = { ...current, [field]: value || [] };
+            console.log("[handleFilterChange] Recarregando dados com filtros:", newFilters);
+            // Recarrega os dados assim que o filtro muda
+            loadReservationUsage(usageDate, newFilters);
+            return newFilters;
+        });
+    };
+
     // Consulta somente a data selecionada; cada requisição ocupa um único dia.
-    const loadReservationUsage = async (date = usageDate) => {
+    const loadReservationUsage = async (date = usageDate, filters = usageFilters) => {
         const value = new Date(date)
         const yyyyMmDd = `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`
         try {
-            const { data } = await connect.get("/repo/reservas-uso", { params: { data: yyyyMmDd } })
+            const { data } = await connect.get("/repo/reservas-uso", { 
+                params: { 
+                    data: yyyyMmDd,
+                    departamento: filters.departamentos.join(",") || undefined,
+                    centro: filters.centros.join(",") || undefined
+                } 
+            })
             setReservationUsage(data)
         } catch (error) { showToast("error", "Uso das reservas", error.response?.data || "Não foi possível consultar as reservas.") }
     }
+
+    // Buscar opções de filtros ao abrir o dialog
+    useEffect(() => {
+        if (usageDialog) {
+            connect.get("/repo/opcoes-filtros")
+                .then(({ data }) => {
+                    setUsageFiltersOptions({
+                        departamentos: data.departamentos || [],
+                        centros: data.centros || []
+                    })
+                })
+                .catch((error) => {
+                    showToast("error", "Filtros", error.response?.data || "Não foi possível carregar as opções de filtros.")
+                })
+        }
+    }, [usageDialog])
 
     // Quarter-circle actions keep the mobile trigger accessible without covering the table.
     const speedDialItems = [
@@ -133,7 +167,7 @@ export function Requests() {
         { label: "Lançamento rápido", icon: appIcon("circle-plus"), command: () => setQuickDialog(true) },
         { label: "Importar planilha", icon: appIcon("upload"), command: () => setImportDialog(true) },
         ] : []),
-        { label: "Uso diário das reservas", icon: appIcon("calendar"), command: () => { setUsageDialog(true); loadReservationUsage() } },
+        { label: "Uso diário das reservas", icon: appIcon("calendar"), command: () => { setUsageDialog(true); loadReservationUsage(usageDate, usageFilters) } },
     ]
 
     const reasonColors = {
@@ -180,33 +214,6 @@ export function Requests() {
             accept: () => accept(value),
         });
     };
-
-    async function updateReservationAvailability(motivo) {
-        if (!availabilityDialog?.reserva_floater_id) return;
-        if (motivo === "FALTA" && !absenceReason) {
-            showToast("warn", "Falta da reserva", "Selecione o motivo da falta.");
-            return;
-        }
-        try {
-            setLoading(true);
-            await connect.patch("/reservas", {
-                id: availabilityDialog.reserva_floater_id,
-                requisicao_id: availabilityDialog.id,
-                supervisor_usuario_id: availabilityDialog.supervisor_usuario_id || undefined,
-                disponivel: false,
-                motivo,
-                motivo_falta: motivo === "FALTA" ? absenceReason : undefined,
-            });
-            showToast("success", "Reserva indisponível", `${availabilityDialog.reserva} foi marcada como indisponível por ${motivo.toLowerCase()}.`);
-            setAvailabilityDialog(null);
-            setAbsenceReason(null);
-            setRefresh((previous) => previous + 1);
-        } catch (error) {
-            showToast("error", "Reserva", error.response?.data || "Não foi possível atualizar a disponibilidade.");
-        } finally {
-            setLoading(false);
-        }
-    }
 
     async function deleteRequest(row) {
         try {
@@ -321,16 +328,6 @@ export function Requests() {
                                 />
                             </InplaceContent>
                         </Inplace>
-                        {row.reserva_floater_id ? <Button
-                            icon={<AppIcon name="ban" />}
-                            text
-                            rounded
-                            severity="warning"
-                            disabled={!canEdit}
-                            aria-label={`Marcar ${row.reserva} como indisponível`}
-                            tooltip="Marcar como indisponível"
-                            onClick={() => { setAvailabilityDialog(row); setAbsenceReason(null); }}
-                        /> : null}
                     </div>
                 )
             }
@@ -453,7 +450,6 @@ export function Requests() {
 
             <div className="requests-speed-dial">
                 <Tooltip target=".requests-speed-dial .p-speeddial-action" position="left" showDelay={150} />
-                <SpeedDial model={speedDialItems} type="quarter-circle" direction="up-left" radius={132} showIcon={<AppIcon name="plus" />} hideIcon={<AppIcon name="x" />} aria-label="Ações de requisições" />
             </div>
 
             <div className="flex gap-2 align-items-center">
@@ -505,7 +501,11 @@ export function Requests() {
             <QuickRequestDialog visible={quickDialog} onHide={() => setQuickDialog(false)} onCreated={() => setRefresh((value) => value + 1)} />
             <RequestImportDialog visible={importDialog} onHide={() => setImportDialog(false)} onImported={() => setRefresh((value) => value + 1)} />
             <Dialog header="Uso diário das reservas" visible={usageDialog} modal className="reserve-usage-dialog" onHide={() => setUsageDialog(false)}>
-                <Calendar value={usageDate} onChange={(e) => { if (e.value) { setUsageDate(e.value); loadReservationUsage(e.value) } }} className="mt-4" dateFormat="dd/mm/yy" showIcon readOnlyInput />
+                <div className="reserve-usage-filters">
+                    <label><span>DATA</span><Calendar value={usageDate} onChange={(e) => { if (e.value) { setUsageDate(e.value); loadReservationUsage(e.value, usageFilters) } }} className="mt-4" dateFormat="dd/mm/yy" showIcon readOnlyInput /></label>
+                    <label><span>DPTO</span><MultiSelect value={usageFilters.departamentos || []} options={usageFiltersOptions.departamentos} optionLabel="label" optionValue="value" onChange={(e) => handleFilterChange("departamentos", e.value || [])} placeholder="Todos os departamentos" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+                    <label><span>CENTRO DE CUSTO</span><MultiSelect value={usageFilters.centros || []} options={usageFiltersOptions.centros} optionLabel="label" optionValue="value" onChange={(e) => handleFilterChange("centros", e.value || [])} placeholder="Todos os centros" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+                </div>
                 <div className="reserve-usage-grid">
                     <section>
                         <h3>Usadas ({reservationUsage.usadas.length})</h3>
@@ -552,24 +552,6 @@ export function Requests() {
                             )) : <span className="reserve-usage-empty">Nenhuma reserva indisponível nesta data.</span>}
                         </div>
                     </section>
-                </div>
-            </Dialog>
-            <Dialog
-                header="Marcar reserva como indisponível"
-                visible={Boolean(availabilityDialog)}
-                modal
-                className="reserve-availability-dialog"
-                onHide={() => { setAvailabilityDialog(null); setAbsenceReason(null); }}
-            >
-                <p>Por que <strong>{availabilityDialog?.reserva}</strong> não pode atender à reposição?</p>
-                <label className="reserve-availability-reason">
-                    <span>Motivo da falta</span>
-                    <Dropdown value={absenceReason} options={ABSENCE_REASONS} onChange={(event) => setAbsenceReason(event.value)} placeholder="Selecione o motivo" disabled={!canEditAbsences} />
-                    {!canEditAbsences ? <small>É necessária a permissão “alterar” no Controle de Faltas.</small> : null}
-                </label>
-                <div className="reserve-availability-options">
-                    <Button label="Falta" icon={<AppIcon name="user-minus" />} severity="danger" disabled={!canEditAbsences || !absenceReason} onClick={() => updateReservationAvailability("FALTA")} />
-                    <Button label="Apoio" icon={<AppIcon name="users" />} severity="warning" onClick={() => updateReservationAvailability("APOIO")} />
                 </div>
             </Dialog>
         </main>

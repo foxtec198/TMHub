@@ -62,11 +62,11 @@ export function EdinhoCard() {
   return <div className="edinho-balance" title={title} aria-label={title}>
     <span className="edinho-balance__coin" aria-hidden="true">
       {modelFailed || !modelReady ? (
-        <img className="edinho-balance__fallback" src="/edinho.svg" alt="" />
+        <img className="edinho-balance__fallback" src="/assets/edinho.svg" alt="" />
       ) : particlesEnabled ? (
         <model-viewer
           className="edinho-balance__model"
-          src="/edinho.glb"
+          src="/3d-models/edinho.glb"
           alt=""
           auto-rotate
           rotation-per-second="18deg"
@@ -80,7 +80,7 @@ export function EdinhoCard() {
       ) : (
         <model-viewer
           className="edinho-balance__model"
-          src="/edinho.glb"
+          src="/3d-models/edinho.glb"
           alt=""
           interaction-prompt="none"
           disable-zoom

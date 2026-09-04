@@ -22,7 +22,7 @@ const currentMonth = () => {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 };
 
-const initialFilters = () => ({ departamentos: [], mes: currentMonth() });
+const initialFilters = () => ({ departamentos: [], mes: currentMonth(), situacoes: [] });
 
 function SummaryCard({ icon, label, value, detail, tone = "neutral" }) {
   return <article className={`ql-summary-card tm-dashboard-card is-${tone}`}>
@@ -79,6 +79,7 @@ export function QLDashboard() {
     setLoading(true);
     const params = {
       departamento_empresa: filters.departamentos.join(",") || undefined,
+      situacao: filters.situacoes.join(",") || undefined,
     };
     const month = `${filters.mes.getFullYear()}-${String(filters.mes.getMonth() + 1).padStart(2, "0")}`;
     Promise.all([
@@ -178,7 +179,7 @@ export function QLDashboard() {
     if (!qlDepartmentOptions?.length) return [];
     return qlDepartmentOptions.map(option => {
       // O valor é no formato "empresa_id:departamento"
-      const [empresaId, deptNum] = String(option.value || "").split(":");
+      const [_, deptNum] = String(option.value || "").split(":"); _
       return {
         label: deptNum || option.label,
         value: option.value,
@@ -216,7 +217,7 @@ export function QLDashboard() {
               x: { grid: { color: chartTheme.grid }, ticks: { color: chartTheme.text } },
               y: { beginAtZero: true, grid: { color: chartTheme.grid }, ticks: { color: chartTheme.text, precision: 0 } },
             },
-          }} /> : <div className="ql-empty"><AppIcon name="chart-line"  />O histórico diário começa a ser salvo a partir de hoje.</div>}
+          }} /> : <div className="ql-empty"><AppIcon name="chart-line" />O histórico diário começa a ser salvo a partir de hoje.</div>}
         </div>
       </article>
       <article className="ql-panel tm-dashboard-panel ql-insight-panel">
@@ -248,31 +249,50 @@ export function QLDashboard() {
       <div className="standard-filter-fields">
         <div className="standard-filter-fields__toolbar"><strong>Filtros</strong></div>
         <label className="is-wide"><span>DATA</span>
-          <Calendar 
-            value={filters.mes} 
-            onChange={(event) => setFilters((current) => ({ ...current, mes: event.value || currentMonth() }))} 
-            selectionMode="single" 
-            view="month" 
-            dateFormat="mm/yy" 
-            readOnlyInput 
-            showIcon 
-            showButtonBar 
-            placeholder="Selecione o mês" 
+          <Calendar
+            value={filters.mes}
+            onChange={(event) => setFilters((current) => ({ ...current, mes: event.value || currentMonth() }))}
+            selectionMode="single"
+            view="month"
+            dateFormat="mm/yy"
+            // readOnlyInput
+            showButtonBar
+            placeholder="Selecione o mês"
           />
         </label>
-        <label><span>DPTO</span>
-          <MultiSelect 
-            value={filters.departamentos || []} 
-            options={departmentOptions} 
-            optionLabel="label" 
-            optionValue="value" 
-            onChange={(event) => setFilters((current) => ({ ...current, departamentos: event.value || [] }))} 
-            placeholder="Todos os departamentos" 
-            display="comma" 
-            filter 
-            showClear 
-            maxSelectedLabels={2} 
-            selectedItemsLabel="{0} selecionados" 
+        <label className="is-wide"><span>DPTO</span>
+          <MultiSelect
+            value={filters.departamentos || []}
+            options={departmentOptions}
+            optionLabel="label"
+            optionValue="value"
+            onChange={(event) => setFilters((current) => ({ ...current, departamentos: event.value || [] }))}
+            placeholder="Todos os departamentos"
+            display="comma"
+            filter
+            showClear
+            maxSelectedLabels={2}
+            selectedItemsLabel="{0} selecionados"
+          />
+        </label>
+        <label className="is-wide"><span>SITUAÇÃO</span>
+          <MultiSelect
+            value={filters.situacoes || []}
+            options={[
+              { label: "DÉFICIT", value: "DEFICIT" },
+              { label: "ACIMA DA META", value: "ACIMA" },
+              { label: "NO QUADRO", value: "COMPLETO" },
+              { label: "SEM META", value: "SEM_META" },
+            ]}
+            optionLabel="label"
+            optionValue="value"
+            onChange={(event) => setFilters((current) => ({ ...current, situacoes: event.value || [] }))}
+            placeholder="Todas as situações"
+            display="comma"
+            filter
+            showClear
+            maxSelectedLabels={3}
+            selectedItemsLabel="{0} selecionados"
           />
         </label>
       </div>

@@ -2,6 +2,7 @@ import { AppIcon } from "../../components/icons/AppIcon";
 // Widgets
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
+import { MultiSelect } from "primereact/multiselect";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -40,6 +41,8 @@ export function Floaters() {
     const [usageDialog, setUsageDialog] = useState(false);
     const [usageDate, setUsageDate] = useState(new Date());
     const [reservationUsage, setReservationUsage] = useState({ usadas: [], disponiveis: [], indisponiveis: [] });
+    const [usageFilters, setUsageFilters] = useState({ departamentos: [], centros: [] });
+    const [usageFiltersOptions, setUsageFiltersOptions] = useState({ departamentos: [], centros: [] });
     const [availabilityDialog, setAvailabilityDialog] = useState(null);
     const [absenceReason, setAbsenceReason] = useState(null);
     const filterPanel = useRef(null);
@@ -129,6 +132,22 @@ export function Floaters() {
         return { departments, centers };
     }, [reservas]);
 
+    // Buscar opções de filtros ao abrir o dialog
+    useEffect(() => {
+        if (usageDialog) {
+            connect.get("/reservas/opcoes-filtros")
+                .then(({ data }) => {
+                    setUsageFiltersOptions({
+                        departamentos: data.departamentos || [],
+                        centros: data.centros || []
+                    })
+                })
+                .catch((error) => {
+                    showToast("error", "Filtros", error.response?.data || "Não foi possível carregar as opções de filtros.")
+                })
+        }
+    }, [usageDialog]);
+
     useEffect(() => {
         const reloadForScope = () => setRefresh((value) => !value);
         window.addEventListener("tmhub:standard-filters-changed", reloadForScope);
@@ -189,13 +208,29 @@ export function Floaters() {
         }
     }
 
+    // Callback para atualizar filtros e recarregar dados
+    const handleFilterChange = (field, value) => {
+        setUsageFilters((current) => {
+            const newFilters = { ...current, [field]: value || [] };
+            // Recarrega os dados assim que o filtro muda
+            loadReservationUsage(usageDate, newFilters);
+            return newFilters;
+        });
+    };
+
     // Consulta um único dia operacional e mantém o mesmo contrato usado na tela de requisições.
-    async function loadReservationUsage(date = usageDate) {
+    async function loadReservationUsage(date = usageDate, filters = usageFilters) {
         const value = new Date(date);
         const yyyyMmDd = `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
 
         try {
-            const { data } = await connect.get("/repo/reservas-uso", { params: { data: yyyyMmDd } });
+            const { data } = await connect.get("/repo/reservas-uso", { 
+                params: { 
+                    data: yyyyMmDd,
+                    departamento: filters.departamentos.join(",") || undefined,
+                    centro: filters.centros.join(",") || undefined
+                } 
+            });
             setReservationUsage(data);
         } catch (error) {
             showToast("error", "Uso das reservas", error.response?.data || "Não foi possível consultar as reservas.");
@@ -232,7 +267,7 @@ export function Floaters() {
                         outlined
                         onClick={() => {
                             setUsageDialog(true);
-                            loadReservationUsage();
+                            loadReservationUsage(usageDate, usageFilters);
                         }}
                     />
                 </div>}
@@ -373,19 +408,46 @@ export function Floaters() {
 
             {/* A data pode ser alterada sem fechar o diálogo; cada troca refaz a consulta no backend. */}
             <Dialog header="Utilizadas x disponíveis" visible={usageDialog} modal className="floaters-usage-dialog" onHide={() => setUsageDialog(false)}>
-                <Calendar
-                    value={usageDate}
-                    onChange={(e) => {
-                        if (e.value) {
-                            setUsageDate(e.value);
-                            loadReservationUsage(e.value);
-                        }
-                    }}
-                    className="mt-4"
-                    dateFormat="dd/mm/yy"
-                    showIcon
-                    readOnlyInput
-                />
+                <div className="floaters-usage-filters">
+                    <label><span>DATA</span><Calendar
+                        value={usageDate}
+                        onChange={(e) => {
+                            if (e.value) {
+                                setUsageDate(e.value);
+                                loadReservationUsage(e.value, usageFilters);
+                            }
+                        }}
+                        dateFormat="dd/mm/yy"
+                        showIcon
+                        readOnlyInput
+                    /></label>
+                    <label><span>DPTO</span><MultiSelect 
+                        value={usageFilters.departamentos || []} 
+                        options={usageFiltersOptions.departamentos} 
+                        optionLabel="label" 
+                        optionValue="value" 
+                        onChange={(e) => handleFilterChange("departamentos", e.value || [])} 
+                        placeholder="Todos os departamentos" 
+                        display="comma" 
+                        filter 
+                        showClear 
+                        maxSelectedLabels={2} 
+                        selectedItemsLabel="{0} selecionados" 
+                    /></label>
+                    <label><span>CENTRO DE CUSTO</span><MultiSelect 
+                        value={usageFilters.centros || []} 
+                        options={usageFiltersOptions.centros} 
+                        optionLabel="label" 
+                        optionValue="value" 
+                        onChange={(e) => handleFilterChange("centros", e.value || [])} 
+                        placeholder="Todos os centros" 
+                        display="comma" 
+                        filter 
+                        showClear 
+                        maxSelectedLabels={2} 
+                        selectedItemsLabel="{0} selecionados" 
+                    /></label>
+                </div>
                 <div className="floaters-usage-grid">
                     <section>
                         <h3>Utilizadas ({reservationUsage.usadas.length})</h3>
