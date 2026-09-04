@@ -1,6 +1,7 @@
 import { AppIcon } from "../../components/icons/AppIcon";
-import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
+import { MultiSelect } from "primereact/multiselect";
+import { Calendar } from "primereact/calendar";
 import "./ql.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -172,6 +173,19 @@ export function QLDashboard() {
     },
   ], [dailyData?.dias]);
 
+  // Formata o departamento para exibição (apenas número, sem filial)
+  const departmentOptions = useMemo(() => {
+    if (!qlDepartmentOptions?.length) return [];
+    return qlDepartmentOptions.map(option => {
+      // O valor é no formato "empresa_id:departamento"
+      const [empresaId, deptNum] = String(option.value || "").split(":");
+      return {
+        label: deptNum || option.label,
+        value: option.value,
+      };
+    });
+  }, [qlDepartmentOptions]);
+
   const filterCount = filters.departamentos.length;
   return <main className="ql-dashboard p-4">
     <PageHeader
@@ -226,16 +240,42 @@ export function QLDashboard() {
       />
     </section>
 
-    <OverlayPanel ref={filterPanel} className="dashboard-filter-panel">
+    <OverlayPanel ref={filterPanel} className="dashboard-filter-panel ql-filter-panel">
       <div className="dashboard-filter-title">
         <div><strong>Filtrar dashboard</strong><span>As métricas, evolução e tabela respeitam o recorte selecionado.</span></div>
         <Button icon={<AppIcon name="filter-off" />} label="Limpar filtros" text severity="secondary" onClick={() => setFilters(initialFilters())} />
       </div>
-      <StandardFilterFields
-        date={{ value: filters.mes, onChange: (value) => setFilters((current) => ({ ...current, mes: value || currentMonth() })), view: "month", selectionMode: "single" }}
-        department={{ value: filters.departamentos, options: qlDepartmentOptions, onChange: (value) => setFilters((current) => ({ ...current, departamentos: value || [] })) }}
-        center={{ options: [] }}
-      />
+      <div className="standard-filter-fields">
+        <div className="standard-filter-fields__toolbar"><strong>Filtros</strong></div>
+        <label className="is-wide"><span>DATA</span>
+          <Calendar 
+            value={filters.mes} 
+            onChange={(event) => setFilters((current) => ({ ...current, mes: event.value || currentMonth() }))} 
+            selectionMode="single" 
+            view="month" 
+            dateFormat="mm/yy" 
+            readOnlyInput 
+            showIcon 
+            showButtonBar 
+            placeholder="Selecione o mês" 
+          />
+        </label>
+        <label><span>DPTO</span>
+          <MultiSelect 
+            value={filters.departamentos || []} 
+            options={departmentOptions} 
+            optionLabel="label" 
+            optionValue="value" 
+            onChange={(event) => setFilters((current) => ({ ...current, departamentos: event.value || [] }))} 
+            placeholder="Todos os departamentos" 
+            display="comma" 
+            filter 
+            showClear 
+            maxSelectedLabels={2} 
+            selectedItemsLabel="{0} selecionados" 
+          />
+        </label>
+      </div>
     </OverlayPanel>
   </main>;
 }

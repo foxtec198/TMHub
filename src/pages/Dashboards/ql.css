@@ -255,3 +255,32 @@
     font-weight: 600;
     white-space: nowrap;
 }
+
+/* Painel de filtro personalizado do QL */
+.ql-filter-panel .standard-filter-fields label {
+    margin-bottom: 1rem;
+}
+
+.ql-filter-panel .standard-filter-fields label span {
+    color: var(--text-color-secondary);
+    font-size: .8rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: .4rem;
+}
+
+.ql-filter-panel .p-multiselect {
+    width: 100%;
+}
+
+.ql-filter-panel .p-multiselect-label {
+    font-size: .9rem;
+}
+
+.ql-filter-panel .p-multiselect-selected-items {
+    font-size: .85rem;
+}
+
+.ql-filter-panel .p-calendar .p-inputtext {
+    width: 100%;
+}

@@ -34,7 +34,9 @@ connect.interceptors.request.use((config) => {
       config.headers["X-Empresa-Ids"] = selectedCompanyIds;
     }
     const selectedDepartmentIds = localStorage.getItem("selected_department_ids");
-    if (selectedDepartmentIds && selectedDepartmentIds !== "[]") {
+    // O Dashboard de QL usa formato diferente (empresa_id:departamento no query params),
+    // então não enviamos o header padrão para evitar conflitos
+    if (selectedDepartmentIds && selectedDepartmentIds !== "[]" && !config.skipStandardFilters) {
       config.headers["X-Departamento-Ids"] = selectedDepartmentIds;
     }
     const selectedCostCenterIds = localStorage.getItem("selected_cost_center_ids");
