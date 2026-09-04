@@ -74,7 +74,7 @@ export function TimoAssistant() {
     () => [...messages].reverse().find((message) => message.role === "timo"),
     [messages],
   );
-  const modelSource = skin === "timo_gold" ? "/timo-gold.glb?v=gold-1" : (skin === "timo_cyber" ? "/cyber_timo.glb" : "/timo.glb?v=current-1");
+  const modelSource = skin === "timo_gold" ? "/3d-models/timo-gold.glb?v=gold-1" : (skin === "timo_cyber" ? "/3d-models/cyber_timo.glb" : "/3d-models/timo.glb?v=current-1");
   const modelPoster = skin === "timo_gold" ? "/timo-gold-poster.png" : (skin === "timo_cyber" ? "/cyber_timo-poster.png" : "/timo-poster.png");
 
   useEffect(() => {
