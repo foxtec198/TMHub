@@ -20,10 +20,10 @@ const TIMO_SKIN_ART = {
   timo_cyber: "/3d-models/cyber_timo-poster.png",
 };
 const TIMO_SCENE_ART = {
-  timo_cenario_christmas: "/3d-models/scenes/christmas.webp",
-  timo_cenario_halloween: "/3d-models/scenes/halloween.webp",
-  timo_cenario_muertos: "/3d-models/scenes/muertos.webp",
-  timo_cenario_cyber: "/3d-models/scenes/cyberpunk.webp",
+  timo_cenario_christmas: "/scenes/christmas.webp",
+  timo_cenario_halloween: "/scenes/halloween.webp",
+  timo_cenario_muertos: "/scenes/muertos.webp",
+  timo_cenario_cyber: "/scenes/cyberpunk.webp",
 };
 const themeById = new Map(THEME_OPTIONS.map((theme) => [theme.id, theme]));
 

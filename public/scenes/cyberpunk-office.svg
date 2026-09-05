@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-label="Escritório cyberpunk futurista">
+  <defs>
+    <linearGradient id="room" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#050815"/>
+      <stop offset=".52" stop-color="#0b1230"/>
+      <stop offset="1" stop-color="#050611"/>
+    </linearGradient>
+    <linearGradient id="window" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#071530"/>
+      <stop offset="1" stop-color="#131047"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#101436"/>
+      <stop offset="1" stop-color="#03040b"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" x2="1">
+      <stop stop-color="#08e7ff"/>
+      <stop offset="1" stop-color="#796dff"/>
+    </linearGradient>
+    <linearGradient id="pink" x1="0" x2="1">
+      <stop stop-color="#fd3dcd"/>
+      <stop offset="1" stop-color="#8748ff"/>
+    </linearGradient>
+    <radialGradient id="platformGlow">
+      <stop stop-color="#17efff" stop-opacity=".52"/>
+      <stop offset=".42" stop-color="#596eff" stop-opacity=".19"/>
+      <stop offset="1" stop-color="#070914" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowCyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowPink" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="floorGrid" width="120" height="76" patternUnits="userSpaceOnUse" patternTransform="perspective(540)">
+      <path d="M0 0H120M0 0V76" fill="none" stroke="#187dba" stroke-opacity=".32" stroke-width="2"/>
+    </pattern>
+    <pattern id="dots" width="18" height="18" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#48eaff" fill-opacity=".55"/>
+    </pattern>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#room)"/>
+  <ellipse cx="960" cy="826" rx="710" ry="288" fill="url(#platformGlow)"/>
+
+  <!-- Ceiling and cyan architectural LEDs. -->
+  <path d="M0 0H1920V130L1510 203H412L0 130Z" fill="#060914"/>
+  <path d="M0 132L412 206M1920 132L1510 206" fill="none" stroke="#19e9ff" stroke-opacity=".76" stroke-width="5" filter="url(#glowCyan)"/>
+  <path d="M548 0L650 202M1372 0L1270 202" fill="none" stroke="#fd3dcd" stroke-opacity=".6" stroke-width="4" filter="url(#glowPink)"/>
+  <path d="M690 67H1230" stroke="#28efff" stroke-opacity=".5" stroke-width="3"/>
+
+  <!-- Back wall, panoramic windows, and city depth. -->
+  <rect x="176" y="170" width="1568" height="458" rx="18" fill="#071025" stroke="#163c64" stroke-width="5"/>
+  <rect x="206" y="200" width="1508" height="398" rx="10" fill="url(#window)"/>
+  <path d="M583 200V598M960 200V598M1337 200V598M206 400H1714" fill="none" stroke="#255178" stroke-opacity=".7" stroke-width="5"/>
+  <path d="M392 222V565M440 290V586M489 248V586M536 325V586M1416 255V586M1460 215V586M1512 292V586M1570 245V586" stroke="#202863" stroke-width="40" stroke-opacity=".68"/>
+  <path d="M258 469H635M1290 463H1667" stroke="#2aeaff" stroke-opacity=".22" stroke-width="4"/>
+  <g fill="#31efff" fill-opacity=".68">
+    <circle cx="301" cy="312" r="3"/><circle cx="348" cy="446" r="4"/><circle cx="477" cy="278" r="3"/><circle cx="532" cy="504" r="4"/>
+    <circle cx="1398" cy="333" r="4"/><circle cx="1465" cy="410" r="3"/><circle cx="1541" cy="286" r="4"/><circle cx="1610" cy="496" r="3"/>
+  </g>
+  <g fill="#ff4ad8" fill-opacity=".6">
+    <circle cx="372" cy="353" r="3"/><circle cx="582" cy="401" r="3"/><circle cx="1362" cy="285" r="3"/><circle cx="1590" cy="370" r="3"/>
+  </g>
+
+  <!-- Left workbench and holographic operations panel. -->
+  <path d="M0 628L376 548L583 610V820L0 892Z" fill="#080d20" stroke="#1d3659" stroke-width="4"/>
+  <path d="M0 644L370 568L583 624" fill="none" stroke="#18e8ff" stroke-opacity=".6" stroke-width="5" filter="url(#glowCyan)"/>
+  <path d="M132 465L433 394L490 522L182 585Z" fill="#09dfff" fill-opacity=".08" stroke="#16eaff" stroke-opacity=".78" stroke-width="3"/>
+  <path d="M155 486H390M155 518H315M155 550H358" stroke="#5ff8ff" stroke-opacity=".7" stroke-width="8"/>
+  <path d="M168 430L397 377" stroke="#ff4fd8" stroke-opacity=".68" stroke-width="3" filter="url(#glowPink)"/>
+  <g stroke="#61faff" stroke-width="2" stroke-opacity=".62" fill="none">
+    <path d="M108 522L138 492L167 511L204 462L250 480"/>
+    <circle cx="108" cy="522" r="5"/><circle cx="167" cy="511" r="5"/><circle cx="250" cy="480" r="5"/>
+  </g>
+  <rect x="60" y="702" width="260" height="128" rx="12" fill="url(#dots)" opacity=".52"/>
+
+  <!-- Right workbench and holographic analytics. -->
+  <path d="M1920 628L1544 548L1337 610V820L1920 892Z" fill="#080d20" stroke="#1d3659" stroke-width="4"/>
+  <path d="M1920 644L1550 568L1337 624" fill="none" stroke="#fc45d3" stroke-opacity=".67" stroke-width="5" filter="url(#glowPink)"/>
+  <path d="M1430 372L1748 446L1710 581L1391 505Z" fill="#fc3ed0" fill-opacity=".075" stroke="#f74ed7" stroke-opacity=".76" stroke-width="3"/>
+  <g fill="#ff69e1" fill-opacity=".72">
+    <rect x="1460" y="457" width="24" height="45" rx="3"/><rect x="1504" y="431" width="24" height="71" rx="3"/><rect x="1548" y="411" width="24" height="91" rx="3"/><rect x="1592" y="438" width="24" height="64" rx="3"/><rect x="1636" y="394" width="24" height="108" rx="3"/>
+  </g>
+  <path d="M1436 411L1490 424L1540 394L1591 421L1658 367" fill="none" stroke="#7efbff" stroke-width="5" filter="url(#glowCyan)"/>
+  <rect x="1610" y="698" width="270" height="135" rx="12" fill="url(#dots)" opacity=".45"/>
+
+  <!-- Floor and presentation platform deliberately clear for the Timo model. -->
+  <path d="M0 634H1920V1080H0Z" fill="url(#floor)"/>
+  <path d="M0 656L960 612L1920 656V1080H0Z" fill="url(#floorGrid)" opacity=".65"/>
+  <path d="M0 657L960 612L1920 657" stroke="#2ae9ff" stroke-opacity=".32" stroke-width="4"/>
+  <ellipse cx="960" cy="865" rx="400" ry="155" fill="#050817" stroke="#183c76" stroke-width="12"/>
+  <ellipse cx="960" cy="846" rx="356" ry="126" fill="#101438" stroke="url(#cyan)" stroke-width="5"/>
+  <ellipse cx="960" cy="829" rx="310" ry="99" fill="#080c22" stroke="#4cf7ff" stroke-opacity=".6" stroke-width="3" filter="url(#glowCyan)"/>
+  <ellipse cx="960" cy="805" rx="260" ry="74" fill="url(#platformGlow)"/>
+  <path d="M730 830H1190" stroke="#fc45d3" stroke-opacity=".52" stroke-width="4" filter="url(#glowPink)"/>
+  <path d="M772 856H1148" stroke="#50f7ff" stroke-opacity=".68" stroke-width="3"/>
+
+  <!-- Foreground accent light traces. -->
+  <path d="M38 1013C285 921 511 949 670 1062M1882 1013C1635 921 1409 949 1250 1062" fill="none" stroke="#10e8ff" stroke-opacity=".5" stroke-width="4" filter="url(#glowCyan)"/>
+  <path d="M0 945H214M1706 945H1920" stroke="#ff4fd8" stroke-opacity=".48" stroke-width="4" filter="url(#glowPink)"/>
+</svg>

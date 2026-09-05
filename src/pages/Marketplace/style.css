@@ -30,12 +30,15 @@
 .marketplace-card__art--timo-gold::before { content:""; position:absolute; inset:-50%; z-index:-1; background:conic-gradient(from 20deg,transparent,#ffd96a55,transparent 25%,#fff2b333,transparent 55%); animation:timo-gold-shine 7s linear infinite; }
 .marketplace-card__art--timo-gold img { width:8.6rem; height:8.6rem; object-fit:contain; filter:drop-shadow(0 .7rem 1rem #000b); }
 .marketplace-card__art--timo-gold span { position:absolute; right:.75rem; bottom:.7rem; padding:.2rem .42rem; border:1px solid #ffe19c; border-radius:.35rem; background:#2b1b07cc; color:#ffe19c; font-size:.62rem; font-weight:900; letter-spacing:.14em; }
-.marketplace-card__art--timo-scene { background:#080d13; }
+.marketplace-card__art--timo-scene { background:#080d13; isolation:isolate; }
 .marketplace-card__art--timo-scene::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 40%,rgba(1,5,9,.82)); pointer-events:none; }
 .marketplace-card__art--timo-scene img { width:100%; height:100%; object-fit:cover; transition:transform .45s ease; }
 .marketplace-card:hover .marketplace-card__art--timo-scene img { transform:scale(1.045); }
 .marketplace-card__art--timo-scene span { position:absolute; z-index:1; left:.75rem; bottom:.65rem; display:flex; align-items:center; gap:.35rem; padding:.28rem .48rem; border:1px solid #ffffff55; border-radius:.42rem; background:#071018bb; color:#fff; font-size:.62rem; font-weight:900; letter-spacing:.12em; backdrop-filter:blur(8px); }
 .marketplace-card__art--timo-scene span .tm-icon { font-size:.9rem; }
+.marketplace-card__art--timo-scene:has(img[src*="cyberpunk"]) { border-bottom:1px solid rgba(38,234,255,.3); background:#050817; }
+.marketplace-card__art--timo-scene:has(img[src*="cyberpunk"])::before { content:""; position:absolute; z-index:1; inset:0; opacity:.24; background:repeating-linear-gradient(180deg,transparent 0 4px,rgba(75,238,255,.12) 5px,transparent 7px); pointer-events:none; animation:marketplace-cyber-scan 5.5s linear infinite; }
+@keyframes marketplace-cyber-scan { from { transform:translateY(-12%); } to { transform:translateY(12%); } }
 @keyframes timo-gold-shine { to { transform:rotate(1turn); } }
 .marketplace-frame-preview { position:relative; width:6.25rem; height:6.25rem; padding:.32rem; border:4px solid var(--primary-color); border-radius:50%; box-shadow:0 0 0 4px color-mix(in srgb,var(--primary-color) 24%,transparent); }
 .marketplace-frame-preview img { width:100%; height:100%; object-fit:cover; border-radius:50%; }

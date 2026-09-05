@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { InputTextarea } from "primereact/inputtextarea";
 import { AppIcon } from "../../components/icons/AppIcon";
 import { useToast } from "../../contexts/ToastContext";
+import { useTheme } from "../../theme/useTheme";
 import connect from "../../utils/request";
 import { storeProfile } from "../../utils/profile";
 import { getAccessToken } from "../../utils/authSession";
@@ -28,9 +29,36 @@ const PREMIUM_SCENARIOS = [
   { id: "christmas", productCode: "timo_cenario_christmas", label: "Natal", description: "Oficina iluminada de Natal", icon: "gift", image: "/scenes/christmas.webp" },
   { id: "halloween", productCode: "timo_cenario_halloween", label: "Halloween", description: "Uma noite misteriosamente divertida", icon: "moon", image: "/scenes/halloween.webp" },
   { id: "muertos", productCode: "timo_cenario_muertos", label: "Día de los Muertos", description: "Jardim de cempasúchil", icon: "leaf", image: "/scenes/muertos.webp" },
-  { id: "cyberpunk", productCode: "timo_cenario_cyber", label: "Cyberpunk", description: "Escritório futurista com hologramas", icon: "chip", image: "/scenes/cyberpunk.webp" },
+  { id: "cyber", productCode: "timo_cenario_cyber", label: "Cyberpunk", description: "Escritório holográfico de alta tecnologia", icon: "chip", image: "/scenes/cyberpunk.webp" },
 ];
 const ALL_SCENARIOS = [...BASE_SCENARIOS, ...PREMIUM_SCENARIOS];
+
+const CYBER_PARTICLES = [
+  ["8%", "24%", "5px", "-2.2s"], ["15%", "54%", "3px", "-4.8s"], ["23%", "37%", "6px", "-1.1s"],
+  ["31%", "69%", "4px", "-5.4s"], ["71%", "22%", "4px", "-2.7s"], ["79%", "54%", "6px", "-4.1s"],
+  ["88%", "35%", "3px", "-1.8s"], ["94%", "72%", "5px", "-5.8s"], ["58%", "26%", "3px", "-3.5s"],
+  ["43%", "74%", "4px", "-2.9s"], ["64%", "64%", "3px", "-5.1s"], ["36%", "31%", "5px", "-1.5s"],
+];
+
+function normalizeScenarioId(value) {
+  return String(value || "workshop").toLowerCase() === "cyberpunk" ? "cyber" : String(value || "workshop").toLowerCase();
+}
+
+function CyberpunkEffects({ enabled }) {
+  if (!enabled) return null;
+  return (
+    <div className="timo-cyberfx" aria-hidden="true">
+      <span className="timo-cyberfx__scan" />
+      <span className="timo-cyberfx__glitch timo-cyberfx__glitch--left" />
+      <span className="timo-cyberfx__glitch timo-cyberfx__glitch--right" />
+      <span className="timo-cyberfx__holo timo-cyberfx__holo--left" />
+      <span className="timo-cyberfx__holo timo-cyberfx__holo--right" />
+      {CYBER_PARTICLES.map(([left, top, size, delay], index) => (
+        <i key={index} style={{ "--particle-left": left, "--particle-top": top, "--particle-size": size, "--particle-delay": delay }} />
+      ))}
+    </div>
+  );
+}
 
 function nowLabel() {
   return new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -39,6 +67,7 @@ function nowLabel() {
 export function TimoAssistant() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { particlesEnabled } = useTheme();
   const worldRef = useRef(null);
   const modelViewerRef = useRef(null);
   const conversationRef = useRef(null);
@@ -53,7 +82,7 @@ export function TimoAssistant() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [scenesOpen, setScenesOpen] = useState(false);
   const [skin, setSkin] = useState(() => localStorage.getItem("timo_skin") || "default");
-  const [scenarioId, setScenarioId] = useState(() => localStorage.getItem("timo_scene") || "workshop");
+  const [scenarioId, setScenarioId] = useState(() => normalizeScenarioId(localStorage.getItem("timo_scene")));
   const [ownedScenes, setOwnedScenes] = useState(new Map());
   const [savingScenario, setSavingScenario] = useState(false);
   const [messages, setMessages] = useState([{
@@ -104,7 +133,7 @@ export function TimoAssistant() {
   useEffect(() => {
     const syncProfile = (event) => {
       setSkin(event.detail?.timo_skin || localStorage.getItem("timo_skin") || "default");
-      setScenarioId(event.detail?.timo_cenario || localStorage.getItem("timo_scene") || "workshop");
+      setScenarioId(normalizeScenarioId(event.detail?.timo_cenario || localStorage.getItem("timo_scene")));
     };
     window.addEventListener("tmhub:profile", syncProfile);
     return () => window.removeEventListener("tmhub:profile", syncProfile);
@@ -219,6 +248,7 @@ export function TimoAssistant() {
     <main className="timo-world-page">
       <section ref={worldRef} className={`timo-world timo-world--${scenario.id}`}>
         <img key={scenario.id} className="timo-world__scene" src={scenario.image} alt="" aria-hidden="true" />
+        {scenario.id === "cyber" && <CyberpunkEffects enabled={particlesEnabled} />}
         <div className="timo-world__shade" />
         <header className="timo-world__toolbar">
           <div className="timo-world__identity"><span><AppIcon name="sparkles" /></span><div><strong>TIMO</strong><small>{scenario.description}</small></div></div>
