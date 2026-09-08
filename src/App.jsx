@@ -32,6 +32,7 @@ import { Requests } from "./pages/Requests/requests";
 import { Request } from "./pages/Requests/new.jsx";
 import { Auth } from "./pages/Auth";
 import { Init } from "./pages/Init";
+import { NotFound } from "./pages/NotFound";
 import { RequestsODS } from "./pages/Dashboards/requests_ods";
 import { History } from "./pages/Requests/history";
 import { Products } from "./pages/Stock/products";
@@ -551,7 +552,7 @@ export function AppRoutes() {
             }
           />
         </Route>
-        <Route path="*" element={<Navigate to={token() ? getPreferredHomePath() : "/"} />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <AuthRequirementsGate />
     </>

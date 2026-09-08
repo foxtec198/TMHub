@@ -6,7 +6,7 @@ import { can } from "../utils/permissions";
 import { useEffect, useState } from "react";
 import connect from "../utils/request";
 import { useToast } from "../contexts/ToastContext";
-import { capitalize, deny_roles } from "../utils/ui";
+import { capitalize } from "../utils/ui";
 import { socketio } from "../utils/socketio";
 import { clearAccessToken, getAccessToken } from "../utils/authSession";
 
@@ -83,7 +83,6 @@ export function MainLayout() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const deny = deny_roles.includes(role)
 
   useEffect(() => {
     const clearGlobalScope = () => {
@@ -407,7 +406,6 @@ export function MainLayout() {
     {
       label: "RPA Center",
       icon: appIcon("verified"),
-      className: deny ? "hidden" : null,
       items: [
         {
           label: "Ponto Mais",

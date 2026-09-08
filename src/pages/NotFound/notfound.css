@@ -1,0 +1,197 @@
+.notfound-page {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: clamp(1.4rem, 3vw, 2.8rem);
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 50% 43%, color-mix(in srgb, var(--primary) 11%, transparent), transparent 27rem),
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-1) 84%, var(--app-bg)), var(--app-bg));
+}
+
+.notfound-page::before,
+.notfound-page::after {
+  position: absolute;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.notfound-page::before {
+  inset: 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  border-radius: clamp(.7rem, 1.3vw, 1.2rem);
+  background: color-mix(in srgb, var(--surface-1) 52%, transparent);
+  box-shadow: var(--shadow-md);
+}
+
+.notfound-page::after {
+  right: 8%;
+  bottom: 22%;
+  left: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--primary) 45%, transparent), transparent);
+  opacity: .55;
+}
+
+.notfound-brand {
+  position: relative;
+  z-index: 1;
+  align-self: start;
+  padding: .55rem;
+}
+
+.notfound-brand .theme-logo { width: clamp(7.4rem, 11vw, 10rem); }
+
+.notfound-hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* gap: clamp(.65rem, 5vw, 5.5rem); */
+  gap: 8vw;
+  min-height: min(54vh, 33rem);
+  padding: 1rem 1rem 0;
+}
+
+.notfound-number {
+  color: var(--text-primary);
+  font-size: clamp(9rem, 25vw, 22rem);
+  font-weight: 800;
+  line-height: .75;
+  letter-spacing: -.11em;
+  text-shadow: 0 .8rem 1.6rem color-mix(in srgb, var(--app-bg) 36%, transparent);
+}
+
+.notfound-timo {
+  display: grid;
+  place-items: center;
+  width: clamp(11.5rem, 23vw, 18.5rem);
+  aspect-ratio: 1 / 1.12;
+  transform-origin: center 84%;
+  will-change: transform;
+}
+
+.notfound-timo__model { position: relative; width: 100%; height: 100%; }
+
+.notfound-timo__viewer,
+.notfound-timo__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.notfound-timo__viewer {
+  opacity: 0;
+  background: transparent;
+  filter: drop-shadow(0 1.15rem 1rem color-mix(in srgb, var(--app-bg) 64%, transparent));
+  pointer-events: none;
+  transition: opacity .35s ease;
+}
+
+.notfound-timo__model.is-ready .notfound-timo__viewer { opacity: 1; }
+.notfound-timo__model.is-ready .notfound-timo__poster { opacity: 0; }
+
+.notfound-timo__poster {
+  filter: drop-shadow(0 1.15rem 1rem color-mix(in srgb, var(--app-bg) 56%, transparent));
+  opacity: .78;
+  transition: opacity .25s ease;
+}
+
+/* Cada classe é aplicada uma única vez pela sequência do componente; não há
+   animação CSS em loop para o comportamento de procura do Timo. */
+.notfound-timo.is-spinning { animation: notfound-timo-jump .9s cubic-bezier(.25, .78, .28, 1) both; }
+.notfound-timo.is-looking-left { animation: notfound-timo-look-left .85s ease-in-out both; }
+.notfound-timo.is-looking-right { animation: notfound-timo-look-right .9s ease-in-out both; }
+.notfound-timo.is-no { animation: notfound-timo-no .95s ease-in-out both; }
+
+.notfound-message {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 38rem);
+  margin: 0 auto clamp(.1rem, 2vh, 1.2rem);
+  text-align: center;
+}
+
+.notfound-kicker {
+  margin: 0 0 .35rem;
+  color: var(--primary);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.notfound-message h1 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.1vw, 1.7rem);
+  line-height: 1.2;
+}
+
+.notfound-message > p:not(.notfound-kicker) {
+  max-width: 32rem;
+  margin: .55rem 0 1rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.notfound-home-button.p-button {
+  gap: .45rem;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--button-primary-text);
+  box-shadow: 0 .75rem 1.7rem color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.notfound-home-button.p-button:hover {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+@keyframes notfound-timo-jump {
+  0% { transform: translateY(0) rotate(0); }
+  32% { transform: translateY(-2.3rem) rotate(-13deg); }
+  61% { transform: translateY(-.85rem) rotate(12deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+@keyframes notfound-timo-look-left {
+  0% { transform: translateX(0) rotateY(0); }
+  65% { transform: translateX(-.35rem) rotateY(-19deg); }
+  100% { transform: translateX(-.28rem) rotateY(-16deg); }
+}
+
+@keyframes notfound-timo-look-right {
+  0% { transform: translateX(-.28rem) rotateY(-16deg); }
+  72% { transform: translateX(.42rem) rotateY(21deg); }
+  100% { transform: translateX(.32rem) rotateY(17deg); }
+}
+
+@keyframes notfound-timo-no {
+  0%, 100% { transform: translateX(0) rotateY(0); }
+  20% { transform: translateX(-.34rem) rotateY(-12deg); }
+  42% { transform: translateX(.34rem) rotateY(12deg); }
+  63% { transform: translateX(-.24rem) rotateY(-9deg); }
+  82% { transform: translateX(.16rem) rotateY(6deg); }
+}
+
+@media (max-width: 640px) {
+  .notfound-page { padding: 1.05rem; }
+  .notfound-page::before { inset: .55rem; }
+  .notfound-hero { gap: .1rem; min-height: min(48vh, 26rem); padding-inline: 0; }
+  .notfound-number { font-size: clamp(7rem, 27vw, 10rem); }
+  .notfound-timo { width: clamp(9.7rem, 35vw, 13rem); }
+  .notfound-message { padding-inline: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notfound-timo { animation: none !important; }
+}
