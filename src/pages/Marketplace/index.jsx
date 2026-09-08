@@ -16,8 +16,9 @@ import "./style.css";
 const CATEGORY_LABELS = { todos: "Todos", tema: "Temas", adorno: "Adornos de foto", timo_skin: "Skins do Timo", timo_cenario: "Cenários do Timo" };
 const PRODUCT_CATEGORY_LABELS = { tema: "Tema", adorno: "Adorno de foto", timo_skin: "Skin do Timo", timo_cenario: "Cenário do Timo" };
 const TIMO_SKIN_ART = {
-  timo_gold: "/assets/timo-gold-poster.png",
-  timo_cyber: "/3d-models/cyber_timo-poster.png",
+  timo_gold: "/3d-models/timo_gold_poster.png",
+  timo_cyber: "/3d-models/cyber_timo_poster.png",
+  timo_man: "/3d-models/timo_maintenace_poster.png",
 };
 const TIMO_SCENE_ART = {
   timo_cenario_christmas: "/scenes/christmas.webp",
