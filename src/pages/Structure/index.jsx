@@ -2,7 +2,6 @@ import { AppIcon, appIcon } from "../../components/icons/AppIcon";
 import { StandardFilterFields } from "../../components/filters/StandardFilterFields";
 import { StandardFilterButton } from "../../components/filters/StandardFilterButton";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -36,6 +35,36 @@ const ASSET_CATEGORY_OPTIONS = [
     { label: "Veículo", value: "VEÍCULO" },
 ];
 
+const formatRoutineDate = (value) => {
+    if (!value) return "Sem próxima execução";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Sem próxima execução";
+    return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
+    }).format(date);
+};
+
+const locationOptionsFor = (locations = []) => {
+    const locationsById = new Map(locations.map((location) => [location.id, location]));
+
+    const labelFor = (location) => {
+        const names = [location.nome];
+        const visited = new Set([location.id]);
+        let parent = locationsById.get(location.parent_id);
+        while (parent && !visited.has(parent.id)) {
+            names.unshift(parent.nome);
+            visited.add(parent.id);
+            parent = locationsById.get(parent.parent_id);
+        }
+        return names.join(" › ");
+    };
+
+    return locations
+        .map((location) => ({ ...location, label: labelFor(location) }))
+        .sort((left, right) => left.label.localeCompare(right.label, "pt-BR", { numeric: true }));
+};
+
 export function Structure() {
     const [departments, setDepartments] = useState([]);
     const [supervisors, setSupervisors] = useState([]);
@@ -47,12 +76,18 @@ export function Structure() {
     const [companies, setCompanies] = useState([]);
     const [routineDialog, setRoutineDialog] = useState(null);
     const [dragLocationId, setDragLocationId] = useState(null);
+    const [selectedContractId, setSelectedContractId] = useState(null);
+    const [selectedLocationId, setSelectedLocationId] = useState(null);
+    const [expandedLocationIds, setExpandedLocationIds] = useState(new Set());
+    const [expandedCompanyIds, setExpandedCompanyIds] = useState(new Set());
+    const [expandedBranchIds, setExpandedBranchIds] = useState(new Set());
+    const [expandedHierarchyDepartmentIds, setExpandedHierarchyDepartmentIds] = useState(new Set());
     const [form, setForm] = useState(EMPTY_FORM);
     const [refresh, setRefresh] = useState(0);
     const [filters, setFilters] = useState({
         search: "",
-        department: null,
-        contract: null,
+        departments: [],
+        contracts: [],
         supervisor: null,
         itemType: null,
     });
@@ -66,14 +101,10 @@ export function Structure() {
     useEffect(() => {
         let active = true;
         setLoading(true);
-        Promise.all([
-            connect.get("/estrutura"),
-            connect.get("/estrutura/supervisores"),
-        ])
-            .then(([structureResponse, supervisorsResponse]) => {
+        connect.get("/estrutura/navegador")
+            .then((structureResponse) => {
                 if (!active) return;
                 setDepartments(Array.isArray(structureResponse.data) ? structureResponse.data : []);
-                setSupervisors(Array.isArray(supervisorsResponse.data) ? supervisorsResponse.data : []);
             })
             .catch((error) => showToast(
                 "error",
@@ -83,27 +114,6 @@ export function Structure() {
             .finally(() => active && setLoading(false));
         return () => { active = false; };
     }, [refresh, setLoading, showToast]);
-
-    useEffect(() => {
-        if (!isAdmin) return undefined;
-        let active = true;
-        connect.get("/centro/empresas", { skipStandardFilters: true })
-            .then(({ data }) => {
-                if (!active) return;
-                setCompanies((Array.isArray(data) ? data : []).filter((company) => company.ativa));
-            })
-            .catch((error) => showToast("error", "Estrutura", error.response?.data || "Não foi possível carregar as empresas."));
-        return () => { active = false; };
-    }, [isAdmin, showToast]);
-
-    const totals = useMemo(() => departments.reduce((summary, department) => {
-        summary.contracts += department.contratos.length;
-        department.contratos.forEach((contract) => {
-            summary.locations += contract.locais.length;
-            summary.assets += contract.ativos.length;
-        });
-        return summary;
-    }, { contracts: 0, locations: 0, assets: 0 }), [departments]);
 
     const filterOptions = useMemo(() => {
         const contracts = departments.flatMap((department) => department.contratos);
@@ -115,7 +125,11 @@ export function Structure() {
             contracts: contracts
                 .map((item) => ({ label: `${item.id} - ${item.contrato}`, value: item.id }))
                 .sort((left, right) => left.label.localeCompare(right.label, "pt-BR", { numeric: true })),
-            supervisors: unique(contracts.map((item) => item.supervisor)),
+            supervisors: [...new Map(
+                contracts
+                    .flatMap((item) => item.supervisores || [])
+                    .map((supervisor) => [supervisor.id, { label: supervisor.nome, value: supervisor.id }]),
+            ).values()].sort((left, right) => left.label.localeCompare(right.label, "pt-BR")),
         };
     }, [departments]);
 
@@ -124,11 +138,11 @@ export function Structure() {
         return departments.map((department) => ({
             ...department,
             contratos: department.contratos.filter((contract) => {
-                if (filters.department && department.departamento !== filters.department) return false;
-                if (filters.contract && contract.id !== filters.contract) return false;
-                if (filters.supervisor && contract.supervisor !== filters.supervisor) return false;
-                if (filters.itemType === "local" && !contract.locais.length) return false;
-                if (filters.itemType === "ativo" && !contract.ativos.length) return false;
+                if (filters.departments.length && !filters.departments.includes(department.departamento)) return false;
+                if (filters.contracts.length && !filters.contracts.includes(contract.id)) return false;
+                if (filters.supervisor && !contract.supervisores?.some((supervisor) => supervisor.id === filters.supervisor)) return false;
+                if (filters.itemType === "local" && !(contract.locais_count ?? contract.locais.length)) return false;
+                if (filters.itemType === "ativo" && !(contract.ativos_count ?? contract.ativos.length)) return false;
                 if (!query) return true;
                 return [
                     department.departamento,
@@ -144,23 +158,146 @@ export function Structure() {
         })).filter((department) => department.contratos.length);
     }, [departments, filters]);
 
+    const visibleContracts = useMemo(
+        () => filteredDepartments.flatMap((department) => department.contratos.map((contract) => ({
+            ...contract,
+            departamento: department.departamento,
+        }))),
+        [filteredDepartments],
+    );
+
+    const effectiveSelectedContractId = useMemo(
+        () => (
+            visibleContracts.some((contract) => contract.id === selectedContractId)
+                ? selectedContractId
+                : visibleContracts[0]?.id || null
+        ),
+        [selectedContractId, visibleContracts],
+    );
+
+    const selectedContract = useMemo(
+        () => visibleContracts.find((contract) => contract.id === effectiveSelectedContractId) || null,
+        [effectiveSelectedContractId, visibleContracts],
+    );
+
+    const contractHierarchy = useMemo(() => {
+        const companiesById = new Map();
+        visibleContracts.forEach((contract) => {
+            const companyId = contract.empresa_id ?? "without-company";
+            const companyName = contract.empresa_nome || "SEM EMPRESA";
+            if (!companiesById.has(companyId)) {
+                companiesById.set(companyId, { id: companyId, nome: companyName, filiais: new Map() });
+            }
+            const company = companiesById.get(companyId);
+            const contractBranches = contract.filiais || [];
+            const branches = contractBranches.filter((branch) => (
+                Number(branch.id) !== 1 && String(branch.nome || "").toLocaleUpperCase("pt-BR") !== "MATRIZ"
+            ));
+            if (contractBranches.length && !branches.length) return;
+            const displayBranches = branches.length
+                ? branches
+                : [{ id: `without-branch-${companyId}`, nome: "Sem filial vinculada" }];
+            displayBranches.forEach((branch) => {
+                const branchId = String(branch.id);
+                if (!company.filiais.has(branchId)) {
+                    company.filiais.set(branchId, { id: branchId, nome: branch.nome, departamentos: new Map() });
+                }
+                const departmentId = String(contract.departamento || "SEM DEPARTAMENTO");
+                const branchEntry = company.filiais.get(branchId);
+                if (!branchEntry.departamentos.has(departmentId)) {
+                    branchEntry.departamentos.set(departmentId, { id: departmentId, contratos: [] });
+                }
+                branchEntry.departamentos.get(departmentId).contratos.push(contract);
+            });
+        });
+        return [...companiesById.values()]
+            .map((company) => ({
+                ...company,
+                filiais: [...company.filiais.values()]
+                    .map((branch) => ({
+                        ...branch,
+                        departamentos: [...branch.departamentos.values()]
+                            .map((department) => ({
+                                ...department,
+                                contratos: department.contratos.sort((left, right) => String(left.contrato || "").localeCompare(String(right.contrato || ""), "pt-BR", { numeric: true })),
+                            }))
+                            .sort((left, right) => left.id.localeCompare(right.id, "pt-BR", { numeric: true })),
+                    }))
+                    .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR", { numeric: true })),
+            }))
+            .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR", { numeric: true }));
+    }, [visibleContracts]);
+
+    const effectiveSelectedLocationId = useMemo(
+        () => (
+            selectedContract?.locais.some((location) => location.id === selectedLocationId)
+                ? selectedLocationId
+                : selectedContract?.estrutura?.[0]?.id || selectedContract?.locais[0]?.id || null
+        ),
+        [selectedContract, selectedLocationId],
+    );
+
+    const selectedLocation = useMemo(
+        () => selectedContract?.locais.find((location) => location.id === effectiveSelectedLocationId) || null,
+        [effectiveSelectedLocationId, selectedContract],
+    );
+
+    const dialogLocationOptions = useMemo(
+        () => locationOptionsFor(dialog?.locais),
+        [dialog],
+    );
+
+    const selectedLocationAssets = useMemo(
+        () => selectedContract?.ativos.filter((asset) => asset.local_id === effectiveSelectedLocationId) || [],
+        [effectiveSelectedLocationId, selectedContract],
+    );
+
+    const unassignedAssets = useMemo(
+        () => selectedContract?.ativos.filter((asset) => !asset.local_id) || [],
+        [selectedContract],
+    );
+
+    useEffect(() => {
+        if (!effectiveSelectedContractId) return undefined;
+        let active = true;
+        connect.get(`/estrutura/contratos/${effectiveSelectedContractId}`)
+            .then(({ data }) => {
+                if (!active || !data?.contrato) return;
+                setDepartments((current) => current.map((department) => ({
+                    ...department,
+                    contratos: department.contratos.map((contract) => (
+                        contract.id === effectiveSelectedContractId
+                            ? { ...contract, ...data.contrato }
+                            : contract
+                    )),
+                })));
+            })
+            .catch((error) => active && showToast(
+                "error",
+                "Estrutura",
+                error.response?.data || "Não foi possível carregar o contrato selecionado.",
+            ));
+        return () => { active = false; };
+    }, [effectiveSelectedContractId, refresh, showToast]);
+
     const activeFilterCount = Object.values(filters).filter((value) => value !== null && value !== "").length;
     const clearFilters = () => setFilters({
         search: "",
-        department: null,
-        contract: null,
+        departments: [],
+        contracts: [],
         supervisor: null,
         itemType: null,
     });
 
     const openCreate = (event, contract) => {
-        event.stopPropagation();
+        event?.stopPropagation();
         setDialog(contract);
         setForm(EMPTY_FORM);
     };
 
     const openSubstructureCreate = (event, contract, parent) => {
-        event.stopPropagation();
+        event?.stopPropagation();
+        setExpandedLocationIds((current) => new Set([...current, parent.id]));
         setDialog(contract);
         setForm({ ...EMPTY_FORM, tipo: "local", parent_id: parent.id });
     };
@@ -176,20 +313,38 @@ export function Structure() {
     };
 
     const openRoutineCreate = (event, contract, location) => {
-        event.stopPropagation();
+        event?.stopPropagation();
         setRoutineDialog({ contract, location });
     };
 
-    const openSupervisorEdit = (event, contract) => {
-        event.stopPropagation();
+    const openSupervisorEdit = async (event, contract) => {
+        event?.stopPropagation();
         setSupervisorDialog(contract);
         setSelectedSupervisorIds(contract.supervisor_usuario_ids || []);
+        setLoading(true);
+        try {
+            const { data } = await connect.get("/estrutura/supervisores", { params: { centro_id: contract.id } });
+            setSupervisors(Array.isArray(data) ? data : []);
+        } catch (error) {
+            showToast("error", "Estrutura", error.response?.data || "Não foi possível carregar os supervisores.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const openCompanyEdit = (event, contract) => {
-        event.stopPropagation();
+    const openCompanyEdit = async (event, contract) => {
+        event?.stopPropagation();
         setCompanyDialog(contract);
         setSelectedCompanyId(contract.empresa_id || null);
+        setLoading(true);
+        try {
+            const { data } = await connect.get("/centro/empresas", { skipStandardFilters: true });
+            setCompanies((Array.isArray(data) ? data : []).filter((company) => company.ativa));
+        } catch (error) {
+            showToast("error", "Estrutura", error.response?.data || "Não foi possível carregar as empresas.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const updateCompany = async () => {
@@ -276,28 +431,84 @@ export function Structure() {
         }
     };
 
-    const renderLocation = (location, contract, depth = 0) => (
-        <article
-            className="structure-item-card structure-location-card"
-            key={location.id}
-            draggable
-            onDragStart={() => setDragLocationId(location.id)}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={(event) => { event.preventDefault(); moveLocation(dragLocationId, location.id); }}
-            style={{ marginLeft: `${Math.min(depth, 6) * 1.1}rem` }}
-        >
-            <div><strong><AppIcon name="bars" className="mr-2"  />{location.nome}</strong>{location.descricao && <small>{location.descricao}</small>}</div>
-            <div className="structure-item-actions"><Tag value={depth ? "SUBESTRUTURA" : "LOCAL"} severity="info" />{canCreateRoutine && <Button icon={<AppIcon name="calendar-plus" />} text rounded aria-label={`Criar rotina para ${location.nome}`} tooltip="Criar rotina" onClick={(event) => openRoutineCreate(event, contract, location)} />}{canEdit && <Button icon={<AppIcon name="plus" />} text rounded aria-label={`Adicionar subestrutura em ${location.nome}`} tooltip="Adicionar subestrutura" onClick={(event) => openSubstructureCreate(event, contract, location)} />}{canEdit && <Button icon={<AppIcon name="trash" />} severity="danger" text rounded aria-label={`Excluir local ${location.nome}`} tooltip="Excluir local" onClick={(event) => removeItem(event, "local", location)} />}</div>
-            {location.filhos?.map((child) => renderLocation(child, contract, depth + 1))}
-        </article>
-    );
+    const renderLocationTree = (location, contract, depth = 0) => {
+        const isSelected = location.id === effectiveSelectedLocationId;
+        const childCount = location.filhos?.length || 0;
+        const isExpanded = expandedLocationIds.has(location.id);
+
+        const toggleExpansion = (event) => {
+            event.stopPropagation();
+            setExpandedLocationIds((current) => {
+                const next = new Set(current);
+                if (next.has(location.id)) next.delete(location.id);
+                else next.add(location.id);
+                return next;
+            });
+        };
+
+        return (
+            <li className="structure-tree-node" key={location.id}>
+                <article
+                    className={`structure-tree-item${isSelected ? " is-selected" : ""}`}
+                    draggable={canEdit}
+                    role="treeitem"
+                    aria-level={depth + 1}
+                    aria-selected={isSelected}
+                    tabIndex={0}
+                    onClick={() => setSelectedLocationId(location.id)}
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            setSelectedLocationId(location.id);
+                        }
+                    }}
+                    onDragStart={() => setDragLocationId(location.id)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                        event.preventDefault();
+                        moveLocation(dragLocationId, location.id);
+                    }}
+                >
+                    {childCount > 0 ? (
+                        <button
+                            type="button"
+                            className="structure-tree-toggle"
+                            aria-label={`${isExpanded ? "Recolher" : "Expandir"} ${location.nome}`}
+                            aria-expanded={isExpanded}
+                            onClick={toggleExpansion}
+                        >
+                            <AppIcon name={isExpanded ? "chevron-down" : "chevron-right"} />
+                        </button>
+                    ) : <span className="structure-tree-toggle structure-tree-toggle--placeholder" aria-hidden="true" />}
+                    <div className="structure-tree-item__content">
+                        <span className="structure-tree-item__icon"><AppIcon name={childCount ? "folder-open" : "map-pin"} /></span>
+                        <div>
+                            <strong>{location.nome}</strong>
+                            <small>{childCount ? `${childCount} sublocal${childCount > 1 ? "is" : ""}` : "Local final"}</small>
+                        </div>
+                    </div>
+                    <div className="structure-tree-item__actions">
+                        {canEdit && <Button icon={<AppIcon name="plus" />} text rounded aria-label={`Adicionar sublocal em ${location.nome}`} tooltip="Adicionar sublocal" onClick={(event) => openSubstructureCreate(event, contract, location)} />}
+                    </div>
+                </article>
+                {childCount > 0 && isExpanded && <ul role="group">{location.filhos.map((child) => renderLocationTree(child, contract, depth + 1))}</ul>}
+            </li>
+        );
+    };
 
     const removeItem = (event, type, item) => {
         event.stopPropagation();
         confirmDialog({
             header: `Excluir ${type}`,
+            className: "structure-delete-confirmation",
             message: type === "local"
-                ? `Deseja excluir o local “${item.nome}”? Os ativos vinculados ficarão sem local definido.`
+                ? (() => {
+                    const directChildren = selectedContract?.locais.filter((location) => location.parent_id === item.id).length || 0;
+                    const childrenNotice = directChildren
+                        ? ` Os ${directChildren} sublocal${directChildren > 1 ? "is" : ""} direto${directChildren > 1 ? "s" : ""} se tornarão estruturas principais.`
+                        : "";
+                    return `Deseja excluir o local “${item.nome}”? Os ativos vinculados ficarão sem local definido.${childrenNotice}`;
+                })()
                 : `Deseja excluir o ativo “${item.nome}” (${item.patrimonio})?`,
             icon: appIcon("alert-triangle"),
             acceptLabel: "Excluir",
@@ -318,51 +529,6 @@ export function Structure() {
         });
     };
 
-    const contractHeader = (contract) => (
-        <div className="structure-contract-header">
-            <span className="structure-contract-name">{contract.id} - {contract.contrato}</span>
-            <span className="structure-supervisor">
-                <AppIcon name="user"  />
-                {contract.supervisor}
-            </span>
-            <span className="structure-supervisor">
-                <AppIcon name="building"  />
-                {contract.empresa_nome || "SEM EMPRESA"}
-            </span>
-            {canEdit && (
-                <Button
-                    type="button"
-                    icon={<AppIcon name="user-edit" />}
-                    rounded
-                    text
-                    aria-label={`Alterar supervisor de ${contract.contrato}`}
-                    tooltip="Alterar supervisor"
-                    onClick={(event) => openSupervisorEdit(event, contract)}
-                />
-            )}
-            {isAdmin && (
-                <Button
-                    type="button"
-                    icon={<AppIcon name="building" />}
-                    rounded
-                    text
-                    aria-label={`Alterar empresa de ${contract.contrato}`}
-                    tooltip="Alterar empresa"
-                    onClick={(event) => openCompanyEdit(event, contract)}
-                />
-            )}
-            <Button
-                type="button"
-                icon={<AppIcon name="plus" />}
-                rounded
-                text
-                aria-label={`Adicionar item em ${contract.contrato}`}
-                tooltip="Adicionar local ou ativo"
-                onClick={(event) => openCreate(event, contract)}
-            />
-        </div>
-    );
-
     return (
         <main className="structure-page">
             <PageHeader
@@ -374,69 +540,260 @@ export function Structure() {
                 )}
             />
 
-            <section className="structure-summary" aria-label="Resumo da estrutura">
-                <div><strong>{departments.length}</strong><span>Departamentos</span></div>
-                <div><strong>{totals.contracts}</strong><span>Contratos</span></div>
-                <div><strong>{totals.locations}</strong><span>Locais</span></div>
-                <div><strong>{totals.assets}</strong><span>Ativos</span></div>
-            </section>
-
-            {filteredDepartments.length ? (
-                <Accordion multiple className="structure-departments">
-                    {filteredDepartments.map((department) => (
-                        <AccordionTab
-                            key={department.departamento}
-                            header={
-                                <div className="structure-department-header">
-                                    <AppIcon name="building"  />
-                                    <span>DPTO {department.departamento}</span>
-                                    <Tag value={`${department.contratos.length} contratos`} />
-                                </div>
-                            }
-                        >
-                            <Accordion multiple className="structure-contracts">
-                                {department.contratos.map((contract) => (
-                                    <AccordionTab key={contract.id} header={contractHeader(contract)}>
-                                        <div className="structure-items">
-                                            <section>
-                                                <h3><AppIcon name="map-pin"  /> Locais</h3>
-                                                {contract.locais.length ? (contract.estrutura || contract.locais.filter((location) => !location.parent_id)).map((location) => renderLocation(location, contract)) : <p className="structure-empty">Nenhum local cadastrado.</p>}
-                                            </section>
-                                            <section>
-                                                <h3><AppIcon name="box"  /> Ativos</h3>
-                                                {contract.ativos.length ? contract.ativos.map((asset) => {
-                                                    const location = contract.locais.find((item) => item.id === asset.local_id);
+            {visibleContracts.length && selectedContract ? (
+                <section className="structure-workspace" aria-label="Área de trabalho da estrutura">
+                    <aside className="structure-hierarchy-browser" aria-label="Contratos por empresa e filial">
+                        <header className="structure-hierarchy-browser__header">
+                            <div>
+                                <span>Navegação</span>
+                                <h2>Empresas e filiais</h2>
+                                <p>Escolha o contrato que deseja organizar.</p>
+                            </div>
+                            <Tag value={String(visibleContracts.length)} severity="info" rounded />
+                        </header>
+                        <div className="structure-hierarchy-list">
+                            {contractHierarchy.map((company) => {
+                                const companyId = String(company.id);
+                                const companyExpanded = expandedCompanyIds.has(companyId);
+                                return (
+                                    <section className="structure-hierarchy-company" key={companyId}>
+                                        <button
+                                            className="structure-hierarchy-company__button"
+                                            type="button"
+                                            aria-expanded={companyExpanded}
+                                            onClick={() => {
+                                                setExpandedCompanyIds((current) => {
+                                                    const next = new Set(current);
+                                                    if (next.has(companyId)) next.delete(companyId);
+                                                    else next.add(companyId);
+                                                    return next;
+                                                });
+                                            }}
+                                        >
+                                            <span className="structure-hierarchy-company__icon"><AppIcon name="building" /></span>
+                                            <span className="structure-hierarchy-company__content">
+                                                <strong>{company.nome}</strong>
+                                                <small>{company.filiais.length} {company.filiais.length === 1 ? "filial" : "filiais"}</small>
+                                            </span>
+                                            <AppIcon name={companyExpanded ? "chevron-down" : "chevron-right"} />
+                                        </button>
+                                        {companyExpanded && (
+                                            <div className="structure-hierarchy-branches">
+                                                {company.filiais.map((branch) => {
+                                                    const branchKey = `${companyId}:${branch.id}`;
+                                                    const branchContractCount = branch.departamentos.reduce((total, department) => total + department.contratos.length, 0);
+                                                    const branchExpanded = expandedBranchIds.has(branchKey);
                                                     return (
-                                                        <article className="structure-item-card" key={asset.id}>
-                                                            <div>
-                                                                <strong>{asset.nome}</strong>
-                                                                <small>{asset.categoria}{location ? ` · ${location.nome}` : ""}</small>
-                                                            </div>
-                                                            <div className="structure-item-actions">
-                                                                <Tag value={asset.patrimonio} severity="success" />
-                                                                {canEdit && (
-                                                                    <Button
-                                                                        icon={<AppIcon name="trash" />}
-                                                                        severity="danger"
-                                                                        text
-                                                                        rounded
-                                                                        aria-label={`Excluir ativo ${asset.nome}`}
-                                                                        tooltip="Excluir ativo"
-                                                                        onClick={(event) => removeItem(event, "ativo", asset)}
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                        </article>
+                                                        <section className="structure-hierarchy-branch" key={branchKey}>
+                                                            <button
+                                                                className="structure-hierarchy-branch__button"
+                                                                type="button"
+                                                                aria-expanded={branchExpanded}
+                                                                onClick={() => {
+                                                                    setExpandedBranchIds((current) => {
+                                                                        const next = new Set(current);
+                                                                        if (next.has(branchKey)) next.delete(branchKey);
+                                                                        else next.add(branchKey);
+                                                                        return next;
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <span className="structure-hierarchy-branch__content">
+                                                                    <AppIcon name="map-pin" />
+                                                                    <span><strong>{branch.nome}</strong><small>{branchContractCount} {branchContractCount === 1 ? "contrato" : "contratos"}</small></span>
+                                                                </span>
+                                                                <AppIcon name={branchExpanded ? "chevron-down" : "chevron-right"} />
+                                                            </button>
+                                                            {branchExpanded && (
+                                                                <div className="structure-hierarchy-departments">
+                                                                    {branch.departamentos.map((department) => {
+                                                                        const departmentKey = `${branchKey}:${department.id}`;
+                                                                        const departmentExpanded = expandedHierarchyDepartmentIds.has(departmentKey);
+                                                                        return (
+                                                                            <section className="structure-hierarchy-department" key={departmentKey}>
+                                                                                <button
+                                                                                    className="structure-hierarchy-department__button"
+                                                                                    type="button"
+                                                                                    aria-expanded={departmentExpanded}
+                                                                                    onClick={() => {
+                                                                                        setExpandedHierarchyDepartmentIds((current) => {
+                                                                                            const next = new Set(current);
+                                                                                            if (next.has(departmentKey)) next.delete(departmentKey);
+                                                                                            else next.add(departmentKey);
+                                                                                            return next;
+                                                                                        });
+                                                                                    }}
+                                                                                >
+                                                                                    <span><AppIcon name="hierarchy" /><strong>DPTO {department.id}</strong><small>{department.contratos.length} {department.contratos.length === 1 ? "CC" : "CCs"}</small></span>
+                                                                                    <AppIcon name={departmentExpanded ? "chevron-down" : "chevron-right"} />
+                                                                                </button>
+                                                                                {departmentExpanded && (
+                                                                                    <div className="structure-hierarchy-contracts">
+                                                                                        {department.contratos.map((contract) => (
+                                                                                            <button
+                                                                                                className={`structure-hierarchy-contract ${contract.id === effectiveSelectedContractId ? "is-selected" : ""}`}
+                                                                                                type="button"
+                                                                                                key={contract.id}
+                                                                                                onClick={() => setSelectedContractId(contract.id)}
+                                                                                            >
+                                                                                                <span className="structure-hierarchy-contract__content">
+                                                                                                    <strong title={contract.contrato}>{contract.contrato}</strong>
+                                                                                                    <small>CC {contract.numero || contract.id} · {contract.locais_count ?? contract.locais.length} locais</small>
+                                                                                                </span>
+                                                                                            </button>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                )}
+                                                                            </section>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
+                                                        </section>
                                                     );
-                                                }) : <p className="structure-empty">Nenhum ativo cadastrado.</p>}
-                                            </section>
+                                                })}
+                                            </div>
+                                        )}
+                                    </section>
+                                );
+                            })}
+                        </div>
+                    </aside>
+                    <section className="structure-workbench">
+                        <header className="structure-contract-overview">
+                            <div className="structure-contract-overview__identity">
+                                <span className="structure-contract-overview__icon"><AppIcon name="building" /></span>
+                                <div>
+                                    <span>{selectedContract.departamento} · CONTRATO {selectedContract.id}</span>
+                                    <h2>{selectedContract.contrato}</h2>
+                                    <p>
+                                        <AppIcon name="user" />
+                                        <span title={selectedContract.supervisor}>
+                                            {selectedContract.supervisores?.length
+                                                ? `${selectedContract.supervisores.length} supervisor${selectedContract.supervisores.length > 1 ? "es" : ""}`
+                                                : "Sem supervisor"}
+                                        </span>
+                                        <i />
+                                        <AppIcon name="building" /> {selectedContract.empresa_nome || "SEM EMPRESA"}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="structure-contract-overview__actions">
+                                {canEdit && <Button icon={<AppIcon name="user-edit" />} label="Supervisores" outlined onClick={() => openSupervisorEdit(null, selectedContract)} />}
+                                {isAdmin && <Button icon={<AppIcon name="building" />} label="Empresa" outlined onClick={() => openCompanyEdit(null, selectedContract)} />}
+                                {canEdit && <Button icon={<AppIcon name="plus" />} label="Adicionar" onClick={() => openCreate(null, selectedContract)} />}
+                            </div>
+                        </header>
+
+                        <div className="structure-workbench-grid">
+                            <section className="structure-tree-panel">
+                                <header className="structure-panel-heading">
+                                    <div>
+                                        <span>Mapa de locais</span>
+                                        <h2>Estrutura do contrato</h2>
+                                        <p>Arraste um local sobre outro para torná-lo sublocal.</p>
+                                    </div>
+                                    <Tag value={`${selectedContract.locais_count ?? selectedContract.locais.length} locais`} severity="info" rounded />
+                                </header>
+                                {canEdit && (
+                                    <div
+                                        className="structure-root-dropzone"
+                                        onDragOver={(event) => event.preventDefault()}
+                                        onDrop={(event) => {
+                                            event.preventDefault();
+                                            moveLocation(dragLocationId, null);
+                                        }}
+                                    >
+                                        <AppIcon name="hierarchy" />
+                                        Solte aqui para tornar um local principal
+                                    </div>
+                                )}
+                                {selectedContract.estrutura?.length ? (
+                                    <ul className="structure-tree" role="tree" aria-label={`Locais de ${selectedContract.contrato}`}>
+                                        {selectedContract.estrutura.map((location) => renderLocationTree(location, selectedContract))}
+                                    </ul>
+                                ) : <div className="structure-empty"><AppIcon name="map-pin" /> <span>Nenhum local cadastrado neste contrato.</span></div>}
+                                {unassignedAssets.length > 0 && (
+                                    <section className="structure-unassigned-assets">
+                                        <header><AppIcon name="box" /><strong>Ativos sem local</strong><Tag value={String(unassignedAssets.length)} severity="warning" rounded /></header>
+                                        {unassignedAssets.map((asset) => (
+                                            <article key={asset.id}>
+                                                <div><strong>{asset.nome}</strong><small>{asset.categoria} · {asset.patrimonio}</small></div>
+                                                {canEdit && <Button icon={<AppIcon name="trash" />} severity="danger" text rounded aria-label={`Excluir ativo ${asset.nome}`} tooltip="Excluir ativo" onClick={(event) => removeItem(event, "ativo", asset)} />}
+                                            </article>
+                                        ))}
+                                    </section>
+                                )}
+                            </section>
+
+                            <aside className="structure-detail-panel">
+                                {selectedLocation ? (
+                                    <>
+                                        <header className="structure-panel-heading">
+                                            <div>
+                                                <span>Local selecionado</span>
+                                                <h2>{selectedLocation.nome}</h2>
+                                                <p>{selectedLocation.descricao || "Sem observação cadastrada."}</p>
+                                            </div>
+                                            <span className="structure-detail-icon" aria-hidden="true"><AppIcon name="target" /></span>
+                                        </header>
+
+                                        <div className="structure-detail-metrics">
+                                            <div><span>SUBLOCAIS</span><strong>{selectedContract.locais.filter((location) => location.parent_id === selectedLocation.id).length}</strong></div>
+                                            <div><span>ATIVOS</span><strong>{selectedLocationAssets.length}</strong></div>
                                         </div>
-                                    </AccordionTab>
-                                ))}
-                            </Accordion>
-                        </AccordionTab>
-                    ))}
-                </Accordion>
+
+                                        <div className="structure-detail-actions">
+                                            {canEdit && <Button icon={<AppIcon name="plus" />} label="Adicionar sublocal" onClick={() => openSubstructureCreate(null, selectedContract, selectedLocation)} />}
+                                            {canCreateRoutine && <Button icon={<AppIcon name="calendar-plus" />} label="Criar rotina" outlined onClick={() => openRoutineCreate(null, selectedContract, selectedLocation)} />}
+                                            {canEdit && selectedLocation.parent_id && <Button icon={<AppIcon name="hierarchy" />} label="Tornar principal" severity="secondary" text onClick={() => moveLocation(selectedLocation.id, null)} />}
+                                            {canEdit && <Button icon={<AppIcon name="trash" />} label="Excluir local" severity="danger" text onClick={(event) => removeItem(event, "local", selectedLocation)} />}
+                                        </div>
+
+                                        <section className="structure-recent-routines">
+                                            <header>
+                                                <div><AppIcon name="calendar-clock" /><strong>Rotinas recentes</strong></div>
+                                                <Tag value={String(selectedLocation.rotinas_recentes?.length || 0)} severity="info" rounded />
+                                            </header>
+                                            {selectedLocation.rotinas_recentes?.length ? selectedLocation.rotinas_recentes.map((routine) => (
+                                                <article key={routine.id}>
+                                                    <span><AppIcon name="clock" /></span>
+                                                    <div>
+                                                        <strong>{routine.nome}</strong>
+                                                        <small>{routine.recorrencia_label} · {formatRoutineDate(routine.proxima_execucao)}</small>
+                                                    </div>
+                                                </article>
+                                            )) : <p className="structure-empty">Nenhuma rotina recente neste local.</p>}
+                                        </section>
+
+                                        <section className="structure-assets-panel">
+                                            <header>
+                                                <div><AppIcon name="box" /><strong>Ativos neste local</strong></div>
+                                                <Tag value={String(selectedLocationAssets.length)} severity="success" rounded />
+                                            </header>
+                                            {selectedLocationAssets.length ? selectedLocationAssets.map((asset) => (
+                                                <article className="structure-asset-card" key={asset.id}>
+                                                    <span className="structure-asset-card__icon"><AppIcon name="box" /></span>
+                                                    <div>
+                                                        <strong>{asset.nome}</strong>
+                                                        <small>{asset.categoria} · {asset.patrimonio}</small>
+                                                    </div>
+                                                    {canEdit && <Button icon={<AppIcon name="trash" />} severity="danger" text rounded aria-label={`Excluir ativo ${asset.nome}`} tooltip="Excluir ativo" onClick={(event) => removeItem(event, "ativo", asset)} />}
+                                                </article>
+                                            )) : <p className="structure-empty">Nenhum ativo vinculado a este local.</p>}
+                                        </section>
+                                    </>
+                                ) : (
+                                    <div className="structure-detail-empty">
+                                        <span><AppIcon name="map-pin" /></span>
+                                        <strong>Selecione um local</strong>
+                                        <p>Os detalhes, ativos e ações do local aparecerão aqui.</p>
+                                    </div>
+                                )}
+                            </aside>
+                        </div>
+                    </section>
+                </section>
             ) : (
                 <div className="structure-zero-state">
                     <AppIcon name="hierarchy"  />
@@ -464,21 +821,24 @@ export function Structure() {
                 </div>
                 <StandardFilterFields
                     department={{
-                        value: filters.department ? [filters.department] : [],
+                        value: filters.departments,
                         options: filterOptions.departments,
-                        onChange: (value) => setFilters((current) => ({ ...current, department: value?.[0] || null })),
+                        display: "chip",
+                        onChange: (value) => setFilters((current) => ({ ...current, departments: value || [] })),
                     }}
                     center={{
-                        value: filters.contract ? [filters.contract] : [],
+                        value: filters.contracts,
                         options: filterOptions.contracts,
-                        onChange: (value) => setFilters((current) => ({ ...current, contract: value?.[0] || null })),
+                        display: "chip",
+                        preserveOptionOrder: true,
+                        onChange: (value) => setFilters((current) => ({ ...current, contracts: value || [] })),
                     }}
                 />
                 <div className="structure-filter-grid">
                     <label className="structure-filter-search">
                         Busca
-                        <span className="p-input-icon-left">
-                            <AppIcon name="search"  />
+                        <span className="structure-filter-search__field">
+                            <AppIcon name="search" className="structure-filter-search__icon" />
                             <InputText
                                 value={filters.search}
                                 placeholder="Contrato, local, ativo ou patrimônio"
@@ -491,6 +851,8 @@ export function Structure() {
                         <Dropdown
                             value={filters.supervisor}
                             options={filterOptions.supervisors}
+                            optionLabel="label"
+                            optionValue="value"
                             showClear
                             filter
                             placeholder="Todos"
@@ -540,7 +902,11 @@ export function Structure() {
                 <div className="structure-supervisor-form">
                     <div className="structure-current-supervisor">
                         <span>Supervisores atuais</span>
-                        <strong><AppIcon name="user"  /> {supervisorDialog?.supervisor}</strong>
+                        <div className="structure-current-supervisor__list">
+                            {(supervisorDialog?.supervisores || []).map((supervisor) => (
+                                <Tag key={supervisor.id} value={supervisor.nome} icon={<AppIcon name="user" />} severity="info" rounded />
+                            ))}
+                        </div>
                     </div>
                     <label>
                         Supervisores responsáveis
@@ -554,6 +920,7 @@ export function Structure() {
                             placeholder="Selecione um ou mais supervisores"
                             emptyMessage="Nenhum supervisor disponível"
                             display="chip"
+                            maxSelectedLabels={2}
                             showClear
                             selectedItemsLabel="{0} supervisores selecionados"
                             onChange={(event) => setSelectedSupervisorIds(event.value || [])}
@@ -652,8 +1019,8 @@ export function Structure() {
                                 Estrutura pai
                                 <Dropdown
                                     value={form.parent_id}
-                                    options={dialog?.locais || []}
-                                    optionLabel="nome"
+                                    options={dialogLocationOptions}
+                                    optionLabel="label"
                                     optionValue="id"
                                     filter
                                     showClear
@@ -679,8 +1046,8 @@ export function Structure() {
                                     Local vinculado
                                     <Dropdown
                                         value={form.local_id}
-                                        options={dialog?.locais || []}
-                                        optionLabel="nome"
+                                        options={dialogLocationOptions}
+                                        optionLabel="label"
                                         optionValue="id"
                                         showClear
                                         placeholder="Sem local definido"

@@ -246,10 +246,13 @@ export function RoutineDialog({
         )}
         {fixedStructure && (
           <div className="tm-ops-routine-context">
-            <strong>{fixedStructure.location.nome}</strong>
-            <span>
-              {fixedStructure.contract.id} - {fixedStructure.contract.contrato}
-            </span>
+            <span className="tm-ops-routine-context__icon"><AppIcon name="map-pin" /></span>
+            <div>
+              <strong>{fixedStructure.location.nome}</strong>
+              <span>
+                {fixedStructure.contract.id} - {fixedStructure.contract.contrato}
+              </span>
+            </div>
           </div>
         )}
         <label className="is-wide">

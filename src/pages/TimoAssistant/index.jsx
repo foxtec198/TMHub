@@ -270,8 +270,8 @@ export function TimoAssistant() {
         </section>
 
         <div className="timo-world__bottom">
-          <nav className="timo-quick-actions" aria-label="Comandos rápidos">{QUICK_COMMANDS.map((item) => <button type="button" key={item.command} onClick={() => send(item.command)} disabled={sending}><AppIcon name={item.icon} /><span>{item.label}</span></button>)}</nav>
-          <div className="timo-world-composer"><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => { if (!sending) setAnimation("listening"); }} onBlur={() => { if (!sending) setAnimation("idle"); }} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Pergunte algo ao Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" />} aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div>
+          <nav className="timo-quick-actions" aria-label="Comandos rápidos">{QUICK_COMMANDS.map((item) => <button type="button" key={item.command} onClick={() => send(item.command)} disabled={sending}><AppIcon name={item.icon} size={16} /><span>{item.label}</span></button>)}</nav>
+          <div className="timo-world-composer"><span className="timo-world-composer__mark" aria-hidden="true"><AppIcon name="sparkles" size={18} /></span><InputTextarea value={text} onChange={(event) => setText(event.target.value)} onFocus={() => { if (!sending) setAnimation("listening"); }} onBlur={() => { if (!sending) setAnimation("idle"); }} onKeyDown={handleKeyDown} autoResize rows={1} maxLength={500} placeholder="Pergunte algo ao Timo…" aria-label="Mensagem para o Timo" /><Button icon={<AppIcon name="send" size={19} />} aria-label="Enviar mensagem" onClick={() => send()} loading={sending} disabled={!text.trim()} /></div>
           <small>Enter para enviar · O Timo respeita suas empresas, filiais e permissões.</small>
         </div>
 
