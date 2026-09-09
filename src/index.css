@@ -13,6 +13,26 @@ body, html, :root, #root {
     box-sizing: border-box;
 }
 
+.p-input-icon-left {
+    position: relative;
+    display: block;
+}
+
+.p-input-icon-left > .tm-icon {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: .8rem;
+    margin: 0;
+    color: var(--text-secondary);
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.p-input-icon-left > .tm-icon + .p-inputtext {
+    padding-left: 2.5rem;
+}
+
 :root[data-mode="dark"] body,
 :root[data-mode="dark"] .app-layout,
 :root[data-mode="dark"] .layout-outlet { background:var(--dark-black);color:var(--text-primary); }

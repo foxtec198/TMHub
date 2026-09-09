@@ -744,7 +744,7 @@ export function MainLayout() {
         <aside id="main-sidebar" className="layout-sidebar bg-primary shadow-4" aria-hidden={!isMenuVisible}>
           {companies.length > 0 ? (
             <FloatLabel className="flex mx-3 mt-5">
-              <MultiSelect inputId="layout-empresas" className="w-full" value={selectedCompanyIds} options={companies} optionLabel="nome" optionValue="id" onChange={handleCompaniesChange} placeholder="Selecione as empresas" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} empresas selecionadas" />
+              <MultiSelect inputId="layout-empresas" className="w-full layout-company-select" value={selectedCompanyIds} options={companies} optionLabel="nome" optionValue="id" onChange={handleCompaniesChange} placeholder="Selecione as empresas" display="chip" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} empresas selecionadas" />
               <label htmlFor="layout-empresas">Empresas</label>
             </FloatLabel>
           ) : null}

@@ -452,7 +452,7 @@ function AbsenceControlPage() {
     <div className="absence-panel">
       <div className="absence-filters">
         <span className="p-input-icon-left">
-          <AppIcon name="search" className="px-3"  />
+          <AppIcon name="search" />
           <InputText value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar colaborador, matrícula ou contrato" />
         </span>
       </div>

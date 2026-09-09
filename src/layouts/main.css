@@ -1,3 +1,17 @@
+.layout-company-select .p-multiselect-label-container {
+  min-width: 0;
+}
+
+.layout-company-select.p-multiselect-clearable .p-multiselect-label-container {
+  margin-right: 2rem;
+}
+
+.layout-company-select .p-multiselect-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .layout-sidebar .p-menuitem-icon,
 .layout-sidebar .p-panelmenu-icon,
 .layout-sidebar .p-panelmenu-header-icon,
