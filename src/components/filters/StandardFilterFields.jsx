@@ -46,7 +46,7 @@ const normalizeOptions = (options, prefix = "") => (options || []).map((option) 
   return { label: `${prefix}${option}`, value: option };
 });
 
-function BoundedCenterMultiSelect({ value, options, optionLabel, optionValue, onChange }) {
+function BoundedCenterMultiSelect({ value, options, optionLabel, optionValue, onChange, display, preserveOptionOrder }) {
   const [search, setSearch] = useState("");
   const normalized = normalizeOptions(options);
   const selectedValues = new Set((value || []).map((item) => String(item)));
@@ -57,16 +57,22 @@ function BoundedCenterMultiSelect({ value, options, optionLabel, optionValue, on
     .filter((option) => !selectedKeys.has(String(option?.[optionValue])))
     .filter((option) => !term || String(option?.[optionLabel] ?? "").toLocaleLowerCase("pt-BR").includes(term))
     .slice(0, 50);
+  const visibleKeys = new Set(visible.map((option) => String(option?.[optionValue])));
+  const renderedOptions = preserveOptionOrder
+    ? normalized.filter((option) => (
+      selectedKeys.has(String(option?.[optionValue])) || visibleKeys.has(String(option?.[optionValue]))
+    ))
+    : [...selected, ...visible];
 
   return <MultiSelect
     value={value || []}
-    options={[...selected, ...visible]}
+    options={renderedOptions}
     optionLabel={optionLabel}
     optionValue={optionValue}
     onChange={(event) => onChange(event.value || [])}
     onFilter={(event) => setSearch(event.filter || "")}
     placeholder="Todos os centros"
-    display="comma"
+    display={display || "comma"}
     filter
     resetFilterOnHide
     showClear
@@ -126,7 +132,7 @@ export function StandardFilterFields({ date, department, center }) {
   return <div className="standard-filter-fields">
     <div className="standard-filter-fields__toolbar"><strong>Filtros padrão</strong></div>
     <label className="is-wide"><span>DATA</span><Calendar value={controlledDate} onChange={(event) => onDateChange(event.value)} selectionMode={date?.selectionMode || (date?.view === "month" ? "single" : "range")} view={date?.view || "date"} dateFormat={date?.dateFormat || (date?.view === "month" ? "mm/yy" : "dd/mm/yy")} readOnlyInput showIcon showButtonBar={date?.view !== "month"} hideOnRangeSelection={date?.view !== "month"} placeholder={date?.placeholder || "Selecione o período"} /></label>
-    <label><span>DPTO</span><MultiSelect value={controlledDepartments || []} options={normalizeOptions(departmentOptions, "DPTO. ")} optionLabel={department?.optionLabel || "label"} optionValue={department?.optionValue || "value"} onChange={(event) => onDepartmentChange(event.value || [])} placeholder="Todos os departamentos" display="comma" filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
+    <label><span>DPTO</span><MultiSelect value={controlledDepartments || []} options={normalizeOptions(departmentOptions, "DPTO. ")} optionLabel={department?.optionLabel || "label"} optionValue={department?.optionValue || "value"} onChange={(event) => onDepartmentChange(event.value || [])} placeholder="Todos os departamentos" display={department?.display || "comma"} filter showClear maxSelectedLabels={2} selectedItemsLabel="{0} selecionados" /></label>
     <label><span>CENTRO DE CUSTO</span>{center?.remote
       ? <CostCenterMultiSelect
           value={controlledCenters || []}
@@ -136,6 +142,6 @@ export function StandardFilterFields({ date, department, center }) {
           excludeDepartments={center.excludeDepartments || []}
           placeholder="Todos os centros"
         />
-      : <BoundedCenterMultiSelect value={controlledCenters || []} options={centerOptions} optionLabel={center?.optionLabel || "label"} optionValue={center?.optionValue || "value"} onChange={onCenterChange} />}</label>
+      : <BoundedCenterMultiSelect value={controlledCenters || []} options={centerOptions} optionLabel={center?.optionLabel || "label"} optionValue={center?.optionValue || "value"} onChange={onCenterChange} display={center?.display} preserveOptionOrder={center?.preserveOptionOrder} />}</label>
   </div>;
 }
