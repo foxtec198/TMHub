@@ -15,6 +15,7 @@ import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
+import { AttachmentPreview } from "../../components/AttachmentPreview";
 import "./tickets.css";
 
 const STATUS = [
@@ -92,19 +93,67 @@ function isTicketRequesterMessage(ticket, message) {
 function TicketForm({ visible, onHide, onCreated, reasons }) {
   const [form, setForm] = useState(EMPTY_TICKET);
   const [saving, setSaving] = useState(false);
+  const [files, setFiles] = useState([]);
   const { showToast } = useToast();
 
   const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  
+  const handleFileSelect = async (event) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+    const maxSize = 15 * 1024 * 1024; // 15MB
+    
+    for (const file of selectedFiles) {
+      if (!allowedTypes.includes(file.type)) {
+        showToast("warn", "Arquivo inválido", `O arquivo "${file.name}" não é suportado.`);
+        continue;
+      }
+      
+      if (file.size > maxSize) {
+        showToast("warn", "Arquivo muito grande", `O arquivo "${file.name}" excede o limite de 15MB.`);
+        continue;
+      }
+      
+      setFiles(prev => [...prev, {
+        file,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+      }]);
+    }
+  };
+  
+  const removeFile = (index) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+  
   const save = async () => {
     if (!form.name.trim() || !form.observation.trim()) {
       showToast("warn", "Novo chamado", "Informe o título e a descrição do chamado.");
       return;
     }
+    
     setSaving(true);
     try {
-      const { data } = await connect.post("/tickets", form);
+      // Criar chamado primeiro
+      const { data: ticket } = await connect.post("/tickets", form);
+      
+      // Anexar arquivos se houver
+      if (files.length > 0) {
+        for (const fileData of files) {
+          const formData = new FormData();
+          formData.append("arquivo", fileData.file);
+          
+          await connect.post(`/tickets/${ticket.id}/anexos`, formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+          });
+        }
+      }
+      
       setForm(EMPTY_TICKET);
-      onCreated(data);
+      setFiles([]);
+      onCreated(ticket);
       showToast("success", "Chamado aberto", "O chamado já está disponível para atendimento.");
     } catch (error) {
       showToast("error", "Novo chamado", messageFrom(error, "Não foi possível abrir o chamado."));
@@ -118,6 +167,57 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
       <label><span>Título</span><InputText value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Descreva o chamado em uma frase" maxLength={180} /></label>
       <label><span>Motivo</span><Dropdown value={form.reason_id} options={reasons.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => update("reason_id", event.value)} placeholder="Selecione se necessário" showClear /></label>
       <label className="ticket-form__wide"><span>Descrição</span><InputTextarea value={form.observation} onChange={(event) => update("observation", event.target.value)} placeholder="Explique o que aconteceu e o que precisa ser tratado." rows={5} autoResize /></label>
+      
+      {files.length > 0 && (
+        <div className="ticket-form__wide">
+          <label><span>Anexos ({files.length})</span></label>
+          <div className="ticket-attachments-preview">
+            {files.map((fileData, index) => (
+              <div key={index} className="ticket-attachment-item">
+                <div className="ticket-attachment-thumb">
+                  {fileData.type.startsWith('image/') && fileData.preview ? (
+                    <img src={fileData.preview} alt={fileData.name} />
+                  ) : (
+                    <AppIcon name="file" />
+                  )}
+                </div>
+                <div className="ticket-attachment-info">
+                  <span className="ticket-attachment-name">{fileData.name}</span>
+                  <span className="ticket-attachment-size">{(fileData.size / 1024).toFixed(2)} KB</span>
+                </div>
+                <Button
+                  icon={<AppIcon name="trash" />}
+                  onClick={() => removeFile(index)}
+                  outlined
+                  severity="danger"
+                  rounded
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <label className="ticket-form__wide">
+        <span>Anexar arquivo</span>
+        <div className="ticket-file-upload">
+          <input
+            type="file"
+            id="ticket-file-upload"
+            accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls"
+            multiple
+            onChange={handleFileSelect}
+            style={{ display: 'none' }}
+          />
+          <Button
+            label="Selecionar arquivos"
+            icon={<AppIcon name="paperclip" />}
+            outlined
+            onClick={() => document.getElementById('ticket-file-upload').click()}
+          />
+          <small className="p-text-secondary">Suporta PDF, imagens (PNG/JPG) e Excel</small>
+        </div>
+      </label>
     </div>
     <div className="ticket-dialog__footer"><Button label="Cancelar" text severity="secondary" onClick={onHide} disabled={saving} /><Button label="Abrir chamado" icon={<AppIcon name="send" />} onClick={save} loading={saving} /></div>
   </Dialog>;
@@ -270,6 +370,7 @@ export function TicketDetail() {
   const [ticket, setTicket] = useState(null);
   const [assignees, setAssignees] = useState([]);
   const [comment, setComment] = useState("");
+  const [files, setFiles] = useState([]);
   const [statusValue, setStatusValue] = useState(null);
   const [responsibleValue, setResponsibleValue] = useState(null);
   const [sending, setSending] = useState(false);
@@ -313,14 +414,43 @@ export function TicketDetail() {
   };
 
   const sendComment = async () => {
-    if (!comment.trim()) return;
+    if (!comment.trim() && files.length === 0) return;
     setSending(true);
     try {
-      const { data } = await connect.post(`/tickets/${ticketId}/comentarios`, { description: comment.trim() });
-      setTicket((current) => ({ ...current, comments: [...(current?.comments || []), data] }));
+      // Criar comentário primeiro
+      const { data: commentData } = await connect.post(`/tickets/${ticketId}/comentarios`, { description: comment.trim() });
+      
+      // Anexar arquivos se houver
+      if (files.length > 0) {
+        for (const fileData of files) {
+          const formData = new FormData();
+          formData.append("arquivo", fileData.file);
+          
+          await connect.post(`/tickets/${ticketId}/comentarios/${commentData.id}/anexos`, formData, {
+            headers: { "Content-Type": "multipart/form-data" }
+          });
+        }
+      }
+      
+      setTicket((current) => ({
+        ...current, 
+        comments: [...(current?.comments || []), { 
+          ...commentData, 
+          attachments: files.map(f => ({
+            id: null,
+            filename: f.name,
+            url: URL.createObjectURL(f.file),
+            type: f.type.startsWith('image/') ? 'image' : 'other'
+          }))
+        }] 
+      }));
       setComment("");
-    } catch (error) { showToast("error", "Comentário", messageFrom(error, "Não foi possível enviar sua mensagem.")); }
-    finally { setSending(false); }
+      setFiles([]);
+    } catch (error) { 
+      showToast("error", "Comentário", messageFrom(error, "Não foi possível enviar sua mensagem.")); 
+    } finally { 
+      setSending(false); 
+    }
   };
 
   if (!ticket) return <section className="ticket-detail ticket-detail--loading"><AppIcon name="loader-2"  /> Carregando chamado…</section>;
@@ -330,7 +460,48 @@ export function TicketDetail() {
     <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><AppIcon name="clock"  /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
     <section className="ticket-conversation">
       <aside className="ticket-info-panel"><div className="ticket-info-panel__heading"><span>Informações</span><h2>{ticket.name}</h2></div><p>{ticket.observation}</p><dl><div><dt>Motivo</dt><dd>{ticket.reason?.nome || "Não informado"}</dd></div><div><dt>Solicitante</dt><dd><TicketAvatar user={ticket.created_by} />{ticket.created_by?.nome || "—"}</dd></div><div><dt>Responsável</dt><dd><TicketAvatar user={ticket.responsible} />{ticket.responsible?.nome || "Aguardando atribuição"}</dd></div></dl>{canEdit && <div className="ticket-info-panel__edit"><label><span>Status</span><Dropdown value={statusValue} options={STATUS} onChange={(event) => { setStatusValue(event.value); update({ status: event.value }, "O status foi alterado."); }} /></label>{isAdmin && <label><span>Responsável</span><Dropdown value={responsibleValue} options={assignees.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => { setResponsibleValue(event.value); update({ responsible_id: event.value }, "O responsável foi atualizado."); }} placeholder="Selecione" filter showClear /></label>}</div>}</aside>
-      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><AppIcon name="paperclip"  /> Abrir anexo</a>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={2} autoResize placeholder="Escreva uma atualização para o chamado…" /><Button icon={<AppIcon name="send" />} label="Enviar" onClick={sendComment} loading={sending} disabled={!comment.trim()} /></footer>}</main>
+      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><AppIcon name="paperclip"  /> Abrir anexo</a>}{item.attachments && item.attachments.length > 0 && <div className="ticket-message__attachments">{item.attachments.map((attachment, idx) => (
+        <div key={idx} className="ticket-message__attachment-item">
+          <div className="ticket-message__attachment-thumb">
+            {attachment.type === 'image' ? (
+              <img src={attachment.url} alt={attachment.filename} />
+            ) : (
+              <AppIcon name="file" />
+            )}
+          </div>
+          <div className="ticket-message__attachment-info">
+            <span className="ticket-message__attachment-name">{attachment.filename}</span>
+            <span className="ticket-message__attachment-type">{attachment.type === 'image' ? 'Imagem' : attachment.type === 'pdf' ? 'PDF' : 'Arquivo'}</span>
+          </div>
+          <div className="ticket-message__attachment-actions">
+            <a href={attachment.url} target="_blank" rel="noreferrer" className="p-button p-component p-button-icon-only" aria-label="Visualizar">
+              <AppIcon name="eye" />
+            </a>
+          </div>
+        </div>
+      ))}</div>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
+        <div key={idx} className="ticket-chat__attachment-preview">
+          {fileData.type.startsWith('image/') ? (
+            <img src={fileData.preview} alt={fileData.name} />
+          ) : (
+            <AppIcon name="file" />
+          )}
+          <span>{fileData.name}</span>
+          <button type="button" onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))}>
+            <AppIcon name="trash" />
+          </button>
+        </div>
+      ))}</div><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={2} autoResize placeholder="Escreva uma atualização para o chamado…" /><div className="ticket-chat__composer-actions"><input type="file" id="chat-file-upload" accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls" multiple onChange={(e) => {
+        const selectedFiles = Array.from(e.target.files || []);
+        const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+        const maxSize = 15 * 1024 * 1024;
+        for (const file of selectedFiles) {
+          if (!allowedTypes.includes(file.type)) continue;
+          if (file.size > maxSize) continue;
+          setFiles(prev => [...prev, { file, name: file.name, type: file.type, preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null }]);
+        }
+        e.target.value = '';
+      }} style={{ display: 'none' }} /><Button icon={<AppIcon name="paperclip" />} outlined onClick={() => document.getElementById('chat-file-upload').click()} /><Button icon={<AppIcon name="send" />} label="Enviar" onClick={sendComment} loading={sending} disabled={!comment.trim() && files.length === 0} /></div></footer>}</main>
     </section>
   </section>;
 }
