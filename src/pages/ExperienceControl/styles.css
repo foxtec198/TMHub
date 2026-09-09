@@ -179,7 +179,7 @@
   width: 100%;
 }
 
-.experience-search > .p-input-icon-left > i {
+.experience-search > .p-input-icon-left > .tm-icon {
   position: absolute;
   z-index: 1;
   top: 50%;

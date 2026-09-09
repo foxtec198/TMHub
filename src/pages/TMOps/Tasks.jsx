@@ -130,42 +130,46 @@ export function TMOpsTasks() {
         description="Acompanhe as tarefas geradas pelas rotinas e suas execuções."
       />
       <section className="tm-ops-task-cards">
-        <div>
-          <AppIcon name="list-check" />
+        <div className="tm-ops-task-card is-total">
+          <AppIcon name="list-check" size={20} stroke={1.8} />
           <b>{stats.total || 0}</b>
           <span>Total</span>
         </div>
-        <div>
-          <AppIcon name="folder-open" />
+        <div className="tm-ops-task-card is-open">
+          <AppIcon name="folder-open" size={20} stroke={1.8} />
           <b>{stats.abertas || 0}</b>
           <span>Abertas</span>
         </div>
-        <div>
-          <AppIcon name="alert-triangle" />
+        <div className="tm-ops-task-card is-overdue">
+          <AppIcon name="alert-triangle" size={20} stroke={1.8} />
           <b>{stats.atrasadas || 0}</b>
           <span>Atrasadas</span>
         </div>
-        <div>
-          <AppIcon name="pause" />
+        <div className="tm-ops-task-card is-paused">
+          <AppIcon name="pause" size={20} stroke={1.8} />
           <b>{stats.pausadas || 0}</b>
           <span>Pausadas</span>
         </div>
-        <div>
-          <AppIcon name="circle-check" />
+        <div className="tm-ops-task-card is-complete">
+          <AppIcon name="circle-check" size={20} stroke={1.8} />
           <b>{stats.concluidas || 0}</b>
           <span>Finalizadas</span>
         </div>
       </section>
       <section className="tm-ops-content-card">
         <div className="tm-ops-toolbar">
-          <InputText
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setFirst(0);
-            }}
-            placeholder="Buscar tarefa, local ou colaborador"
-          />
+          <span className="p-input-icon-left tm-ops-task-search">
+            <AppIcon name="search" size={18} />
+            <InputText
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setFirst(0);
+              }}
+              placeholder="Buscar tarefa, local ou colaborador"
+              aria-label="Buscar tarefa, local ou colaborador"
+            />
+          </span>
           <Dropdown
             value={status}
             showClear

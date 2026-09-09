@@ -19,7 +19,7 @@
 .vacation-panel__heading small { color: var(--text-color-secondary); }
 .vacation-toolbar { padding: .8rem 1rem; border-bottom: 1px solid var(--surface-border); }
 .vacation-toolbar .p-input-icon-left { position: relative; display: block; max-width: 28rem; }
-.vacation-toolbar .p-input-icon-left > i { position: absolute; z-index: 1; top: 50%; left: .8rem; margin-top: 0; color: var(--text-color-secondary); pointer-events: none; transform: translateY(-50%); }
+.vacation-toolbar .p-input-icon-left > .tm-icon { position: absolute; z-index: 1; top: 50%; left: .8rem; margin-top: 0; color: var(--text-color-secondary); pointer-events: none; transform: translateY(-50%); }
 .vacation-toolbar .p-inputtext { width: 100%; padding-left: 2.35rem; }
 .vacation-main-cell strong, .vacation-main-cell small { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .vacation-history-employee { display: flex; align-items: center; gap: .35rem; min-width: 0; }
@@ -51,7 +51,7 @@
 .vacation-filter-grid label > span, .vacation-leave-row label > span, .vacation-observation > span, .vacation-payment-field > span { font-size: .76rem; font-weight: 800; }
 .vacation-filter-grid .p-multiselect, .vacation-leave-row .p-calendar, .vacation-leave-row .p-inputnumber, .vacation-observation .p-inputtext { width: 100%; }
 .vacation-filter-search { position: relative; display: block; width: 100%; }
-.vacation-filter-search > i { position: absolute; z-index: 1; top: 50%; left: .8rem; margin-top: 0; color: var(--text-color-secondary); pointer-events: none; transform: translateY(-50%); }
+.vacation-filter-search > .tm-icon { position: absolute; z-index: 1; top: 50%; left: .8rem; margin-top: 0; color: var(--text-color-secondary); pointer-events: none; transform: translateY(-50%); }
 .vacation-filter-search .p-inputtext { width: 100%; padding-left: 2.35rem; }
 .vacation-speed-dial { position: fixed; z-index: 20; right: 1.5rem; bottom: 1.5rem; }
 .vacation-speed-dial .p-speeddial,
