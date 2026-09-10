@@ -68,6 +68,29 @@ const locationOptionsFor = (locations = []) => {
         .sort((left, right) => left.label.localeCompare(right.label, "pt-BR", { numeric: true }));
 };
 
+const mergeNavigatorWithLoadedContracts = (currentDepartments, navigatorDepartments) => {
+    const loadedContracts = new Map(
+        currentDepartments.flatMap((department) => department.contratos)
+            .filter((contract) => contract.detailsLoaded)
+            .map((contract) => [contract.id, contract]),
+    );
+
+    return navigatorDepartments.map((department) => ({
+        ...department,
+        contratos: department.contratos.map((contract) => {
+            const loadedContract = loadedContracts.get(contract.id);
+            if (!loadedContract) return contract;
+            return {
+                ...contract,
+                locais: loadedContract.locais,
+                estrutura: loadedContract.estrutura,
+                ativos: loadedContract.ativos,
+                detailsLoaded: true,
+            };
+        }),
+    }));
+};
+
 export function Structure() {
     const [departments, setDepartments] = useState([]);
     const [supervisors, setSupervisors] = useState([]);
@@ -121,7 +144,8 @@ export function Structure() {
         connect.get("/estrutura/navegador")
             .then((structureResponse) => {
                 if (!active) return;
-                setDepartments(Array.isArray(structureResponse.data) ? structureResponse.data : []);
+                const navigatorDepartments = Array.isArray(structureResponse.data) ? structureResponse.data : [];
+                setDepartments((current) => mergeNavigatorWithLoadedContracts(current, navigatorDepartments));
             })
             .catch((error) => showToast(
                 "error",
@@ -302,7 +326,7 @@ export function Structure() {
                     ...department,
                     contratos: department.contratos.map((contract) => (
                         contract.id === effectiveSelectedContractId
-                            ? { ...contract, ...data.contrato }
+                            ? { ...contract, ...data.contrato, detailsLoaded: true }
                             : contract
                     )),
                 })));
