@@ -15,6 +15,7 @@ import { CollaboratorDropdown } from "../../components/CollaboratorDropdown";
 import connect from "../../utils/request";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
+import { InputSwitch } from "primereact/inputswitch";
 
 const EMPTY_FORM = { nome: "", cpf: "", email: "", role: "USER", password: "", filial_ids: [], gerencia_faltas: false, permissions: [], colaborador_id: null, setor_id: null };
 const ROLE_OPTIONS = [
