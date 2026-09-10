@@ -16,7 +16,7 @@ import connect from "../../utils/request";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 
-const EMPTY_FORM = { nome: "", cpf: "", email: "", role: "USER", password: "", filial_ids: [], gerencia_faltas: false, permissions: [], colaborador_id: null };
+const EMPTY_FORM = { nome: "", cpf: "", email: "", role: "USER", password: "", filial_ids: [], gerencia_faltas: false, permissions: [], colaborador_id: null, setor_id: null };
 const ROLE_OPTIONS = [
   { label: "Supervisor", value: "SUPERVISOR" },
   { label: "Gerente", value: "GERENTE" },
@@ -40,6 +40,7 @@ export function UsersSettings() {
   const [users, setUsers] = useState([]);
   const [branches, setBranches] = useState([]);
   const [permissionCatalog, setPermissionCatalog] = useState([]);
+  const [sectors, setSectors] = useState([]);
   const [usersStatus, setUsersStatus] = useState("loading");
   const [usersError, setUsersError] = useState("");
   const [refresh, setRefresh] = useState(0);
@@ -82,6 +83,7 @@ export function UsersSettings() {
     if (canManage) {
       connect.get("/filiais", { skipStandardFilters: true }).then(({ data }) => setBranches((Array.isArray(data) ? data : []).filter((branch) => branch.ativa))).catch((error) => showToast("error", "Filiais", error.response?.data || "Não foi possível carregar as filiais dos usuários."));
       connect.get("/usuarios/permissoes/catalogo").then(({ data }) => setPermissionCatalog(Array.isArray(data) ? data : [])).catch((error) => showToast("error", "Permissões", error.response?.data || "Não foi possível carregar o catálogo de permissões."));
+      connect.get("/setores").then(({ data }) => setSectors(Array.isArray(data) ? data : [])).catch((error) => showToast("error", "Setores", error.response?.data || "Não foi possível carregar os setores."));
     }
   }, [canManage, refresh, showToast]);
 
@@ -94,7 +96,7 @@ export function UsersSettings() {
 
   const openEdit = (user) => {
     setEditingId(user.id);
-    setForm({ nome: user.nome || "", cpf: user.cpf || "", email: user.email || "", role: user.role || "USER", password: "", filial_ids: user.filial_ids || [], gerencia_faltas: Boolean(user.gerencia_faltas), permissions: user.permissions || [], colaborador_id: null });
+    setForm({ nome: user.nome || "", cpf: user.cpf || "", email: user.email || "", role: user.role || "USER", password: "", filial_ids: user.filial_ids || [], gerencia_faltas: Boolean(user.gerencia_faltas), permissions: user.permissions || [], colaborador_id: null, setor_id: user.setor_id || null });
     setSelectedCollaborator(null);
     setUserDialog(true);
   };
@@ -275,6 +277,7 @@ export function UsersSettings() {
     { header: "Nome", field: "nome", sortable: true },
     { header: "E-mail", field: "email", body: (user) => user.email || "—" },
     { header: "CPF", field: "cpf", body: (user) => user.cpf || "Restrito" },
+    { header: "Setor", body: (user) => user.setor?.nome || "—" },
     { header: "Último acesso", field: "last_login", body: (user) => formatDate(user.last_login) },
     { header: "Perfil", field: "role", body: (user) => <Tag value={user.role || "USER"} severity={user.role === "ADMIN" ? "success" : "secondary"} /> },
     { header: "Assinatura", body: (user) => <Tag value={user.assinatura_cadastrada ? "CADASTRADA" : "NÃO CADASTRADA"} severity={user.assinatura_cadastrada ? "success" : "secondary"} /> },
@@ -326,6 +329,8 @@ export function UsersSettings() {
           <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><Dropdown inputId="user-role" value={form.role} options={ROLE_OPTIONS} onChange={(event) => setForm({ ...form, role: event.value })} /><label htmlFor="user-role">Perfil</label></FloatLabel>
           <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><MultiSelect inputId="user-branches0" className="w-full" value={form.filial_ids} options={branches} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, filial_ids: event.value })} display="chip" filter /><label htmlFor="user-branches">Filiais com acesso</label></FloatLabel>
         </div>
+
+        {sectors.length > 0 && <FloatLabel className="mt-3"><Dropdown inputId="user-sector" value={form.setor_id} options={sectors} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, setor_id: event.value })} /><label htmlFor="user-sector">Setor</label></FloatLabel>}
 
         <FloatLabel className="mt-3"><Password autoComplete="off" aria-autocomplete="off" inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /><label htmlFor="user-password">{editingId ? "Nova senha (opcional)" : "Senha"}</label></FloatLabel>
 

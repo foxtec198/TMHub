@@ -8,6 +8,7 @@ import { Dropdown } from "primereact/dropdown";
 import { MultiSelect } from "primereact/multiselect";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { InputNumber } from "primereact/inputnumber";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -17,6 +18,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import connect from "../../utils/request";
 import { can } from "../../utils/permissions";
+import { StructureProductLocation } from "../../components/StructureProductLocation";
 import "./index.css";
 
 const EMPTY_FORM = {
@@ -27,6 +29,7 @@ const EMPTY_FORM = {
     local_id: null,
     parent_id: null,
     descricao: "",
+    produtos: [], // Lista de produtos selecionados
 };
 
 const ASSET_CATEGORY_OPTIONS = [
@@ -83,6 +86,8 @@ export function Structure() {
     const [expandedBranchIds, setExpandedBranchIds] = useState(new Set());
     const [expandedHierarchyDepartmentIds, setExpandedHierarchyDepartmentIds] = useState(new Set());
     const [form, setForm] = useState(EMPTY_FORM);
+    const [products, setProducts] = useState([]); // Produtos disponíveis
+    const [selectedLocationProducts, setSelectedLocationProducts] = useState([]); // Produtos do local
     const [refresh, setRefresh] = useState(0);
     const [filters, setFilters] = useState({
         search: "",
@@ -97,6 +102,18 @@ export function Structure() {
     const canEdit = can("estrutura", "edit");
     const canCreateRoutine = can("tm_ops", "create");
     const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
+
+    // Carregar produtos disponíveis
+    useEffect(() => {
+        let active = true;
+        connect.get("/estoque/produtos")
+            .then(({ data }) => {
+                if (!active) return;
+                setProducts(Array.isArray(data) ? data : []);
+            })
+            .catch(() => setProducts([]));
+        return () => { active = false; };
+    }, []);
 
     useEffect(() => {
         let active = true;
@@ -257,6 +274,24 @@ export function Structure() {
         [selectedContract],
     );
 
+    // Carregar produtos do local selecionado
+    useEffect(() => {
+        if (!effectiveSelectedLocationId) {
+            setSelectedLocationProducts([]);
+            return;
+        }
+        let active = true;
+        setLoading(true);
+        connect.get(`/estrutura/locais/${effectiveSelectedLocationId}/produtos`)
+            .then(({ data }) => {
+                if (!active) return;
+                setSelectedLocationProducts(Array.isArray(data) ? data : []);
+            })
+            .catch(() => setSelectedLocationProducts([]))
+            .finally(() => active && setLoading(false));
+        return () => { active = false; };
+    }, [effectiveSelectedLocationId, setLoading]);
+
     useEffect(() => {
         if (!effectiveSelectedContractId) return undefined;
         let active = true;
@@ -292,7 +327,7 @@ export function Structure() {
     const openCreate = (event, contract) => {
         event?.stopPropagation();
         setDialog(contract);
-        setForm(EMPTY_FORM);
+        setForm({ ...EMPTY_FORM, produtos: [] });
     };
 
     const openSubstructureCreate = (event, contract, parent) => {
@@ -421,6 +456,23 @@ export function Structure() {
                 ...form,
                 centro_custo_id: dialog.id,
             });
+            
+            // Salvar produtos se houver
+            if (form.produtos?.length > 0 && data.item?.id) {
+                for (const produto of form.produtos) {
+                    try {
+                        await connect.post(`/estrutura/locais/${data.item.id}/produtos`, {
+                            produto_id: produto.produto_id,
+                            quantidade_desejada: produto.quantidade_desejada,
+                            metragem_disponivel: produto.metragem_disponivel,
+                            observacao: produto.observacao,
+                        });
+                    } catch (error) {
+                        showToast("warn", "Estrutura", `Não foi possível adicionar o produto "${produto.produto?.nome || produto.produto_id}".`);
+                    }
+                }
+            }
+            
             showToast("success", "Estrutura", data.message);
             setDialog(null);
             setRefresh((value) => value + 1);
@@ -1074,6 +1126,14 @@ export function Structure() {
                                 onChange={(event) => setForm({ ...form, descricao: event.target.value })}
                             />
                         </label>
+
+                        {form.tipo === "local" && (
+                            <StructureProductLocation
+                                products={products}
+                                selectedProducts={form.produtos}
+                                onChange={(novosProdutos) => setForm({ ...form, produtos: novosProdutos })}
+                            />
+                        )}
                     </div>
                 )}
             </Dialog>

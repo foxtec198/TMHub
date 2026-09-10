@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputSwitch } from "primereact/inputswitch";
 import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
@@ -41,19 +42,24 @@ export function TicketManagement() {
   const [tickets, setTickets] = useState([]);
   const [reasons, setReasons] = useState([]);
   const [reasonDialog, setReasonDialog] = useState(false);
+  const [editingReasonId, setEditingReasonId] = useState(null);
   const [reasonName, setReasonName] = useState("");
+  const [reasonSector, setReasonSector] = useState(null);
+  const [sectors, setSectors] = useState([]);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
   const load = useCallback(async () => {
     try {
-      const [{ data: ticketData }, { data: reasonData }] = await Promise.all([
+      const [{ data: ticketData }, { data: reasonData }, { data: sectorData }] = await Promise.all([
         connect.get("/tickets"),
         connect.get("/tickets/motivos", { params: { include_inactive: true } }),
+        connect.get("/setores"),
       ]);
       setTickets(Array.isArray(ticketData) ? ticketData : []);
       setReasons(Array.isArray(reasonData) ? reasonData : []);
+      setSectors(Array.isArray(sectorData) ? sectorData : []);
     } catch (error) {
       showToast("error", "Gestão de chamados", messageFrom(error, "Não foi possível carregar os dados."));
     }
@@ -86,8 +92,9 @@ export function TicketManagement() {
     }
     setSaving(true);
     try {
-      await connect.post("/tickets/motivos", { nome: reasonName.trim() });
+      await connect.post("/tickets/motivos", { nome: reasonName.trim(), setor_id: reasonSector });
       setReasonName("");
+      setReasonSector(null);
       setReasonDialog(false);
       showToast("success", "Motivo criado", "O novo motivo já pode ser usado em chamados.");
       load();
@@ -108,6 +115,37 @@ export function TicketManagement() {
     }
   };
 
+  const openReasonEdit = (reason) => {
+    setEditingReasonId(reason.id);
+    setReasonName(reason.nome);
+    setReasonSector(reason.setor_id || null);
+    setReasonDialog(true);
+  };
+
+  const updateReason = async () => {
+    if (reasonName.trim().length < 2) {
+      showToast("warn", "Motivo", "Informe um motivo com ao menos 2 caracteres.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await connect.patch(`/tickets/motivos/${editingReasonId}`, { 
+        nome: reasonName.trim(),
+        setor_id: reasonSector 
+      });
+      setReasonName("");
+      setReasonSector(null);
+      setEditingReasonId(null);
+      setReasonDialog(false);
+      showToast("success", "Motivo atualizado", "As alterações já foram aplicadas.");
+      load();
+    } catch (error) {
+      showToast("error", "Motivo", messageFrom(error, "Não foi possível atualizar o motivo."));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const ticketColumns = [
     { header: "#", field: "id", sortable: true, style: { width: "5rem" } },
     { header: "Chamado", field: "name", sortable: true },
@@ -120,8 +158,10 @@ export function TicketManagement() {
 
   const reasonColumns = [
     { header: "Motivo", field: "nome", sortable: true },
+    { header: "Setor", body: (reason) => reason.setor?.nome || "—" },
     { header: "Situação", body: (reason) => <Tag value={reason.ativo ? "ATIVO" : "INATIVO"} severity={reason.ativo ? "success" : "secondary"} /> },
     { header: "Ativo", body: (reason) => <InputSwitch checked={Boolean(reason.ativo)} onChange={(event) => setReasonActive(reason, event.value)} /> },
+    { header: "Ações", body: (reason) => <Button icon={<AppIcon name="pencil" />} rounded text aria-label={`Editar ${reason.nome}`} onClick={() => openReasonEdit(reason)} /> },
   ];
 
   return <section className="ticket-management">
@@ -152,9 +192,10 @@ export function TicketManagement() {
       </article>
     </section>
 
-    <Dialog visible={reasonDialog} onHide={() => !saving && setReasonDialog(false)} modal draggable={false} header="Novo motivo de chamado" className="ticket-reason-dialog">
+    <Dialog visible={reasonDialog} onHide={() => !saving && setReasonDialog(false)} modal draggable={false} header={editingReasonId ? "Editar motivo" : "Novo motivo de chamado"} className="ticket-reason-dialog">
       <label className="ticket-reason-dialog__field"><span>Nome do motivo</span><InputText value={reasonName} onChange={(event) => setReasonName(event.target.value)} autoFocus placeholder="Ex.: Ajuste de acesso" maxLength={120} /></label>
-      <footer><Button label="Cancelar" severity="secondary" text disabled={saving} onClick={() => setReasonDialog(false)} /><Button label="Salvar motivo" icon={<AppIcon name="device-floppy" />} loading={saving} onClick={createReason} /></footer>
+      <label className="ticket-reason-dialog__field"><span>Setor (opcional)</span><Dropdown value={reasonSector} options={sectors} optionValue="id" optionLabel="nome" onChange={(event) => setReasonSector(event.value)} placeholder="Selecione um setor" /></label>
+      <footer><Button label="Cancelar" severity="secondary" text disabled={saving} onClick={() => setReasonDialog(false)} /><Button label={editingReasonId ? "Salvar alterações" : "Salvar motivo"} icon={<AppIcon name="device-floppy" />} loading={saving} onClick={editingReasonId ? updateReason : createReason} /></footer>
     </Dialog>
   </section>;
 }

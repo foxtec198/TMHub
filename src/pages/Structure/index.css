@@ -731,3 +731,25 @@
 .structure-delete-confirmation .p-confirm-dialog-icon { margin-right: .75rem; }
 .structure-delete-confirmation .p-confirm-dialog-message { line-height: 1.5; }
 .structure-delete-confirmation .p-dialog-footer { padding: .85rem 1.25rem 1.1rem; }
+
+/* Seleção de produtos em locais */
+.structure-product-location { margin-top: 1.5rem; }
+.structure-product-location__header { display: flex; justify-content: space-between; align-items: center; gap: .65rem; padding-bottom: .95rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.structure-product-location__header h3 { margin: 0; font-size: 1rem; color: var(--text-primary); }
+.structure-product-location__count { font-size: .85rem; color: var(--text-secondary); font-weight: 600; }
+.structure-product-location__selected { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1.25rem; }
+.structure-product-location__item { display: flex; align-items: center; gap: .85rem; padding: .75rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); transition: border-color .18s ease; }
+.structure-product-location__item:hover { border-color: var(--accent); }
+.structure-product-location__item-info strong { display: block; color: var(--text-primary); font-size: .9rem; margin-bottom: .15rem; }
+.structure-product-location__item-info small { font-size: .75rem; color: var(--text-secondary); }
+.structure-product-location__add { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.structure-product-location__add-header { padding: .75rem 1rem; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.structure-product-location__add-header span { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--accent); }
+.structure-product-location__add-form { display: grid; grid-template-columns: 1fr 1fr; gap: .95rem; padding: 1rem; }
+.structure-product-location__add-input { display: flex; flex-direction: column; gap: .35rem; }
+.structure-product-location__add-input label { font-size: .75rem; font-weight: 800; color: var(--text-secondary); }
+.structure-product-location__add-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: .35rem; }
+.structure-product-location__add-actions .p-button { padding: .55rem 1rem; font-size: .85rem; font-weight: 600; }
+@media(max-width: 640px) {
+    .structure-product-location__add-form { grid-template-columns: 1fr; }
+}
