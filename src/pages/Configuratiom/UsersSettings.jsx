@@ -278,6 +278,7 @@ export function UsersSettings() {
     { header: "E-mail", field: "email", body: (user) => user.email || "—" },
     { header: "CPF", field: "cpf", body: (user) => user.cpf || "Restrito" },
     { header: "Setor", body: (user) => user.setor?.nome || "—" },
+    { header: "Status", body: (user) => <Tag value={user.ativo ? "ATIVO" : "INATIVO"} severity={user.ativo ? "success" : "danger"} /> },
     { header: "Último acesso", field: "last_login", body: (user) => formatDate(user.last_login) },
     { header: "Perfil", field: "role", body: (user) => <Tag value={user.role || "USER"} severity={user.role === "ADMIN" ? "success" : "secondary"} /> },
     { header: "Assinatura", body: (user) => <Tag value={user.assinatura_cadastrada ? "CADASTRADA" : "NÃO CADASTRADA"} severity={user.assinatura_cadastrada ? "success" : "secondary"} /> },
@@ -331,6 +332,12 @@ export function UsersSettings() {
         </div>
 
         {sectors.length > 0 && <FloatLabel className="mt-3"><Dropdown inputId="user-sector" value={form.setor_id} options={sectors} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, setor_id: event.value })} /><label htmlFor="user-sector">Setor</label></FloatLabel>}
+
+        <div className="user-active-toggle mt-3">
+          <label htmlFor="user-active">Usuário Ativo</label>
+          <InputSwitch id="user-active" checked={form.ativo ?? true} onChange={(event) => setForm({ ...form, ativo: event.value })} />
+          <small>{form.ativo ? "Usuário pode acessar o sistema" : "Usuário não pode acessar o sistema"}</small>
+        </div>
 
         <FloatLabel className="mt-3"><Password autoComplete="off" aria-autocomplete="off" inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /><label htmlFor="user-password">{editingId ? "Nova senha (opcional)" : "Senha"}</label></FloatLabel>
 
