@@ -146,11 +146,7 @@ export function AppRoutes() {
         const isLoginRequest = String(error.config?.url || "").includes(
           "/login",
         );
-        const requestToken = error.config?.__tmhubAccessToken;
-        const currentToken = getAccessToken();
-        const isCurrentAuthenticatedRequest = Boolean(
-          requestToken && currentToken && requestToken === currentToken,
-        );
+        const isCurrentAuthenticatedRequest = !error.config?.skipAuth && !isLoginRequest;
         const authError = String(error.response?.data || "").toLocaleLowerCase("pt-BR");
         const isInvalidSession = /token.+(expirado|inv[aá]lido)|sess[aã]o.+(invalidada|n[aã]o encontrado)/i.test(authError);
         if (
@@ -232,7 +228,10 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
-          <Route path="/configuracoes" element={<Settings />} />
+          <Route
+            path="/configuracoes"
+            element={<PermissionGate authenticatedOnly><Settings /></PermissionGate>}
+          />
           <Route path="/timo" element={<TimoAssistant />} />
           <Route
             path="/tickets"

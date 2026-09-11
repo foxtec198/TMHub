@@ -46,9 +46,10 @@ const ADORNMENT_NAMES = {
 };
 
 export function Settings() {
-  const isAdmin = String(localStorage.getItem("role") || "").toUpperCase() === "ADMIN";
-  // Perfil, preferência visual e estados dos fluxos de senha/e-mail.
+  // A role vem do perfil validado pela API; localStorage não decide abas administrativas.
   const [profile, setProfile] = useState({ nome: "", email: "", foto_perfil: null, tema: "tmhub", modo_tema: "light", timo_tela_inicial: false, timo_cenario: "workshop" });
+  const isAdmin = String(profile.role || "").toUpperCase() === "ADMIN";
+  // Perfil, preferência visual e estados dos fluxos de senha/e-mail.
   const { theme, mode, particlesEnabled, setTheme, setMode, setParticlesEnabled } = useTheme();
   const availableThemes = useMemo(
     () => getAvailableThemeOptions(profile.temas_disponiveis),

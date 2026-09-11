@@ -10,6 +10,8 @@ import { Table } from "../../components/tables/Table";
 import { TaskExecutionMetrics } from "../../components/TMOps/TaskExecutionMetrics";
 import { TaskGeolocationMap } from "../../components/TMOps/TaskGeolocationMap";
 import connect from "../../utils/request";
+import { safeApiResourceUrl } from "../../utils/safeUrl";
+import { downloadProtectedFile } from "../../utils/protectedFile";
 import "./management.css";
 
 export function TMOpsTasks() {
@@ -274,18 +276,14 @@ export function TMOpsTasks() {
                                       : "photo"
                               }
                             />
-                            {evidence.url ? (
-                              <a
-                                href={`${import.meta.env.VITE_SERVER || ""}${evidence.url}`}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Abrir {evidence.tipo}
-                              </a>
+                            {safeApiResourceUrl(evidence.url) ? (
+                              <Button
+                                label={`Baixar ${evidence.tipo}`}
+                                text
+                                onClick={() => downloadProtectedFile(connect, evidence.url, `evidencia-${evidence.id}`)}
+                              />
                             ) : (
-                              <b>
-                                {evidence.tipo}: {evidence.valor}
-                              </b>
+                              <b>{evidence.url ? "Evidência indisponível" : `${evidence.tipo}: ${evidence.valor}`}</b>
                             )}
                           </span>
                         ))}
