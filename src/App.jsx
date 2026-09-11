@@ -72,6 +72,7 @@ import { JourneyControl } from "./pages/JourneyControl";
 import { RpaAgents } from "./pages/RpaAgents";
 import { MarketPlace } from "./pages/Marketplace";
 import { TimoAssistant } from "./pages/TimoAssistant";
+import { TERMINATIONS_ENABLED } from "./utils/features";
 
 // Theme tokens and PrimeReact overrides must be the final stylesheet layer.
 import "./theme/theme.css";
@@ -358,9 +359,9 @@ export function AppRoutes() {
           <Route
             path="/reports/rescisoes"
             element={
-              <PermissionGate screen="dashboard_rescisoes">
-                <TerminationDashboard />
-              </PermissionGate>
+              TERMINATIONS_ENABLED
+                ? <PermissionGate screen="dashboard_rescisoes"><TerminationDashboard /></PermissionGate>
+                : <Navigate to="/init" replace />
             }
           />
           <Route path="/reports/projetos" element={<PermissionGate screen="dashboard_projetos"><ProjectDashboard /></PermissionGate>} />
@@ -509,9 +510,9 @@ export function AppRoutes() {
           <Route
             path="/rescisoes"
             element={
-              <PermissionGate screen="controle_rescisoes">
-                <TerminationControl />
-              </PermissionGate>
+              TERMINATIONS_ENABLED
+                ? <PermissionGate screen="controle_rescisoes"><TerminationControl /></PermissionGate>
+                : <Navigate to="/init" replace />
             }
           />
 

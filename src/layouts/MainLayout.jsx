@@ -19,6 +19,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { getPreferredHomePath } from "../utils/profile";
 import { TimoAgentNavigationBridge } from "../components/Timo/TimoAgentNavigationBridge";
 import { UsageTelemetryTracker } from "../components/UsageTelemetryTracker";
+import { TERMINATIONS_ENABLED } from "../utils/features";
 
 // Styles
 import './main.css'
@@ -35,7 +36,6 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/indicadores/pcd": ["pcd", "colaboradores"],
   "/admissao/vagas": ["admissao"],
   "/admissao/aditivos": ["admissao"],
-  "/rescisoes": ["rescisoes", "colaboradores"],
   "/reposicoes/requisicoes": ["reposicoes.requisicoes"],
   "/reposicoes/requisicao": ["reposicoes.requisicoes", "reposicoes.reservas"],
   "/reposicoes/reservas": ["reposicoes.reservas"],
@@ -54,7 +54,6 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/estoque/movimentacoes": ["estoque.movimentos"],
   "/estrutura": ["estrutura", "estoque.movimentos"],
   "/projetos": ["projetos"],
-  "/reports/rescisoes": ["rescisoes", "colaboradores"],
   "/controle-medidas-disciplinares": ["medidas_disciplinares"],
   "/reports/medidas-disciplinares": ["medidas_disciplinares"],
   "/tickets": ["tickets"],
@@ -206,7 +205,7 @@ export function MainLayout() {
             {
               label: "Rescisões",
               icon: appIcon("user-minus"),
-              visible: can("dashboard_rescisoes"),
+              visible: TERMINATIONS_ENABLED && can("dashboard_rescisoes"),
               command: () => {
                 navigateTo("/reports/rescisoes");
               },
@@ -285,7 +284,7 @@ export function MainLayout() {
         {
           label: 'Rescisões',
           icon: appIcon("user-minus"),
-          visible: can("controle_rescisoes"),
+          visible: TERMINATIONS_ENABLED && can("controle_rescisoes"),
           command: () => { navigateTo("/rescisoes") }
         },
         {

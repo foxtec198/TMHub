@@ -84,6 +84,16 @@ npm.cmd run dev
 Em desenvolvimento, o frontend usa `http://localhost:8590`. Para o ambiente
 de produção, configure `VITE_SERVER` com a URL pública da API antes do build.
 
+### Recursos temporariamente desativáveis
+
+O controle e o dashboard de Rescisões ficam ocultos por padrão no frontend.
+Isso não altera rotas, permissões ou dados da API. Para reativá-los em um
+ambiente, defina a variável abaixo antes de executar o build:
+
+```env
+VITE_ENABLE_TERMINATIONS=true
+```
+
 Comandos úteis:
 
 | Comando | Finalidade |

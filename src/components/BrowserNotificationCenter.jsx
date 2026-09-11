@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { socketio } from "../utils/socketio";
+import { TERMINATIONS_ENABLED } from "../utils/features";
 
 const NOTIFICATION_ICON = "/brands/main_fav.png";
 const DEDUPE_WINDOW_MS = 1_500;
@@ -37,11 +38,13 @@ const CHANNEL_DETAILS = {
     body: "As vagas ou admissões foram atualizadas.",
     route: "/admissao/vagas",
   },
-  rescisoes: {
-    title: "Rescisões",
-    body: "Os registros de rescisão foram atualizados.",
-    route: "/rescisoes",
-  },
+  ...(TERMINATIONS_ENABLED ? {
+    rescisoes: {
+      title: "Rescisões",
+      body: "Os registros de rescisão foram atualizados.",
+      route: "/rescisoes",
+    },
+  } : {}),
   projetos: {
     title: "Projetos",
     body: "Há uma atualização em projetos ou cards.",
