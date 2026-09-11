@@ -15,7 +15,6 @@ import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
-import { AttachmentPreview } from "../../components/AttachmentPreview";
 import "./tickets.css";
 
 const STATUS = [
@@ -37,6 +36,8 @@ const STATUS_META = {
 };
 
 const EMPTY_TICKET = { name: "", observation: "", reason_id: null, responsible_id: null };
+const ACCEPTED_FILE_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/webp", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"];
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 function messageFrom(error, fallback) {
   const value = error?.response?.data;
@@ -90,6 +91,37 @@ function isTicketRequesterMessage(ticket, message) {
     && requesterId === authorId;
 }
 
+function attachmentUrl(ticketId, filename) {
+  return connect.getUri({ url: `/tickets/${ticketId}/anexos/${encodeURIComponent(filename)}` });
+}
+
+function isImageAttachment(attachment) {
+  return String(attachment?.content_type || attachment?.type || "").startsWith("image/");
+}
+
+function TicketAttachments({ ticketId, attachments = [] }) {
+  if (!attachments.length) return null;
+
+  return <div className="ticket-message__attachments">
+    {attachments.map((attachment) => {
+      const url = attachmentUrl(ticketId, attachment.filename);
+      const image = isImageAttachment(attachment);
+      return <article key={attachment.id} className="ticket-message__attachment-item">
+        <a href={url} target="_blank" rel="noreferrer" className="ticket-message__attachment-thumb" aria-label={`Abrir ${attachment.filename}`}>
+          {image ? <img src={url} alt={attachment.filename} /> : <AppIcon name="file" />}
+        </a>
+        <div className="ticket-message__attachment-info">
+          <strong>{attachment.filename}</strong>
+          <span>{image ? "Imagem" : attachment.content_type === "application/pdf" ? "PDF" : "Arquivo"}</span>
+        </div>
+        <a href={url} target="_blank" rel="noreferrer" className="ticket-message__attachment-open" aria-label={`Abrir ${attachment.filename}`}>
+          <AppIcon name="arrow-up-right" />
+        </a>
+      </article>;
+    })}
+  </div>;
+}
+
 function TicketForm({ visible, onHide, onCreated, reasons }) {
   const [form, setForm] = useState(EMPTY_TICKET);
   const [saving, setSaving] = useState(false);
@@ -100,16 +132,14 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
   
   const handleFileSelect = async (event) => {
     const selectedFiles = Array.from(event.target.files || []);
-    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
-    const maxSize = 15 * 1024 * 1024; // 15MB
     
     for (const file of selectedFiles) {
-      if (!allowedTypes.includes(file.type)) {
+      if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
         showToast("warn", "Arquivo inválido", `O arquivo "${file.name}" não é suportado.`);
         continue;
       }
       
-      if (file.size > maxSize) {
+      if (file.size > MAX_FILE_SIZE) {
         showToast("warn", "Arquivo muito grande", `O arquivo "${file.name}" excede o limite de 15MB.`);
         continue;
       }
@@ -122,6 +152,7 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
         preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
       }]);
     }
+    event.target.value = "";
   };
   
   const removeFile = (index) => {
@@ -141,14 +172,11 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
       
       // Anexar arquivos se houver
       if (files.length > 0) {
-        for (const fileData of files) {
+        await Promise.all(files.map(async (fileData) => {
           const formData = new FormData();
           formData.append("arquivo", fileData.file);
-          
-          await connect.post(`/tickets/${ticket.id}/anexos`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-          });
-        }
+          await connect.post(`/tickets/${ticket.id}/anexos`, formData);
+        }));
       }
       
       setForm(EMPTY_TICKET);
@@ -418,30 +446,23 @@ export function TicketDetail() {
     setSending(true);
     try {
       // Criar comentário primeiro
-      const { data: commentData } = await connect.post(`/tickets/${ticketId}/comentarios`, { description: comment.trim() });
+      const { data: commentData } = await connect.post(`/tickets/${ticketId}/comentarios`, {
+        description: comment.trim() || "Anexo enviado.",
+      });
       
       // Anexar arquivos se houver
-      if (files.length > 0) {
-        for (const fileData of files) {
+      const attachments = await Promise.all(files.map(async (fileData) => {
           const formData = new FormData();
           formData.append("arquivo", fileData.file);
-          
-          await connect.post(`/tickets/${ticketId}/comentarios/${commentData.id}/anexos`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-          });
-        }
-      }
+          const { data } = await connect.post(`/tickets/${ticketId}/comentarios/${commentData.id}/anexos`, formData);
+          return data.attachment;
+        }));
       
       setTicket((current) => ({
         ...current, 
         comments: [...(current?.comments || []), { 
           ...commentData, 
-          attachments: files.map(f => ({
-            id: null,
-            filename: f.name,
-            url: URL.createObjectURL(f.file),
-            type: f.type.startsWith('image/') ? 'image' : 'other'
-          }))
+          attachments,
         }] 
       }));
       setComment("");
@@ -460,26 +481,7 @@ export function TicketDetail() {
     <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><AppIcon name="clock"  /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
     <section className="ticket-conversation">
       <aside className="ticket-info-panel"><div className="ticket-info-panel__heading"><span>Informações</span><h2>{ticket.name}</h2></div><p>{ticket.observation}</p><dl><div><dt>Motivo</dt><dd>{ticket.reason?.nome || "Não informado"}</dd></div><div><dt>Solicitante</dt><dd><TicketAvatar user={ticket.created_by} />{ticket.created_by?.nome || "—"}</dd></div><div><dt>Responsável</dt><dd><TicketAvatar user={ticket.responsible} />{ticket.responsible?.nome || "Aguardando atribuição"}</dd></div></dl>{canEdit && <div className="ticket-info-panel__edit"><label><span>Status</span><Dropdown value={statusValue} options={STATUS} onChange={(event) => { setStatusValue(event.value); update({ status: event.value }, "O status foi alterado."); }} /></label>{isAdmin && <label><span>Responsável</span><Dropdown value={responsibleValue} options={assignees.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => { setResponsibleValue(event.value); update({ responsible_id: event.value }, "O responsável foi atualizado."); }} placeholder="Selecione" filter showClear /></label>}</div>}</aside>
-      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><AppIcon name="paperclip"  /> Abrir anexo</a>}{item.attachments && item.attachments.length > 0 && <div className="ticket-message__attachments">{item.attachments.map((attachment, idx) => (
-        <div key={idx} className="ticket-message__attachment-item">
-          <div className="ticket-message__attachment-thumb">
-            {attachment.type === 'image' ? (
-              <img src={attachment.url} alt={attachment.filename} />
-            ) : (
-              <AppIcon name="file" />
-            )}
-          </div>
-          <div className="ticket-message__attachment-info">
-            <span className="ticket-message__attachment-name">{attachment.filename}</span>
-            <span className="ticket-message__attachment-type">{attachment.type === 'image' ? 'Imagem' : attachment.type === 'pdf' ? 'PDF' : 'Arquivo'}</span>
-          </div>
-          <div className="ticket-message__attachment-actions">
-            <a href={attachment.url} target="_blank" rel="noreferrer" className="p-button p-component p-button-icon-only" aria-label="Visualizar">
-              <AppIcon name="eye" />
-            </a>
-          </div>
-        </div>
-      ))}</div>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
+      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p><TicketAttachments ticketId={ticket.id} attachments={ticket.attachments} /></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><AppIcon name="paperclip"  /> Abrir anexo</a>}{item.attachments?.length > 0 && <TicketAttachments ticketId={ticket.id} attachments={item.attachments} />}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
         <div key={idx} className="ticket-chat__attachment-preview">
           {fileData.type.startsWith('image/') ? (
             <img src={fileData.preview} alt={fileData.name} />
