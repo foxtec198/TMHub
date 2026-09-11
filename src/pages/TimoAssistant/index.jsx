@@ -264,7 +264,23 @@ export function TimoAssistant() {
           {latestTimoMessage && <article className={`timo-world-bubble${latestTimoMessage.error ? " is-error" : ""}`}><strong>Timo</strong><p>{sending ? "Só um instante, estou consultando isso para você…" : latestTimoMessage.text}</p></article>}
           <div className={`timo-model-wrap${modelLoaded ? " is-ready" : ""}${modelFailed ? " is-fallback" : ""}`}>
             <div className="timo-model-loading" aria-hidden={modelLoaded}><span className="timo-model-loading__halo" /><img src={modelPoster} alt="" />{!modelFailed && <small><i /><i /><i /> Carregando o Timo</small>}</div>
-            {viewerReady && !modelFailed && <model-viewer ref={modelViewerRef} key={modelSource} className="timo-world-model" alt="Timo em três dimensões" animation-name={animation} autoplay animation-crossfade-duration="420" interaction-prompt="none" shadow-intensity="1.2" shadow-softness=".8" exposure="1.05" camera-orbit="0deg 80deg 105%" />}
+            {viewerReady && !modelFailed &&
+              <model-viewer
+                ref={modelViewerRef}
+                key={modelSource}
+                className="timo-world-model"
+                alt="Timo em três dimensões"
+                animation-name={animation}
+                autoplay
+                animation-crossfade-duration="420"
+                interaction-prompt="none"
+                shadow-intensity="1.2"
+                shadow-softness=".8"
+                exposure="1.05"
+                camera-orbit="0deg 80deg 90%"
+                camera-target="0m 0.3m 0m"
+                field-of-view="45deg"
+              />}
           </div>
           <div className={`timo-world-status${modelFailed ? " is-warning" : ""}`}><i />{statusLabel}</div>
         </section>
