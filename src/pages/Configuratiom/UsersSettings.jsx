@@ -305,7 +305,7 @@ export function UsersSettings() {
     </div>
 
     <Dialog header={editingId ? "Editar usuário" : "Criar usuário"} visible={userDialog} modal className="user-dialog" onHide={() => setUserDialog(false)}>
-      <form className="user-form flex flex-column gap-4 mt-4" onSubmit={saveUser}>
+      <form className="user-form" onSubmit={saveUser}>
         {!editingId && <div className="user-collaborator-link">
           <label htmlFor="user-collaborator">Vincular colaborador (opcional)</label>
           <CollaboratorDropdown
@@ -322,25 +322,25 @@ export function UsersSettings() {
         </div>}
         <FloatLabel><InputText id="user-name" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required /><label htmlFor="user-name">Nome</label></FloatLabel>
 
-        <div className="flex flex-wrap gap-3 mt-3">
-          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><InputText id="user-cpf" value={form.cpf} onChange={(event) => setForm({ ...form, cpf: event.target.value })} maxLength={14} /><label htmlFor="user-cpf">CPF (opcional)</label></FloatLabel>
-          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><InputText id="user-email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /><label htmlFor="user-email">E-mail</label></FloatLabel>
+        <div className="user-form__row">
+          <FloatLabel><InputText id="user-cpf" value={form.cpf} onChange={(event) => setForm({ ...form, cpf: event.target.value })} maxLength={14} /><label htmlFor="user-cpf">CPF (opcional)</label></FloatLabel>
+          <FloatLabel><InputText id="user-email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /><label htmlFor="user-email">E-mail</label></FloatLabel>
         </div>
 
-        <div className="flex flex-wrap gap-3 mt-3">
-          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><Dropdown inputId="user-role" value={form.role} options={ROLE_OPTIONS} onChange={(event) => setForm({ ...form, role: event.value })} /><label htmlFor="user-role">Perfil</label></FloatLabel>
-          <FloatLabel className="flex-grow-1" style={{ flexBasis: '100px' }}><MultiSelect inputId="user-branches0" className="w-full" value={form.filial_ids} options={branches} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, filial_ids: event.value })} display="chip" filter /><label htmlFor="user-branches">Filiais com acesso</label></FloatLabel>
+        <div className="user-form__row">
+          <FloatLabel><Dropdown inputId="user-role" value={form.role} options={ROLE_OPTIONS} onChange={(event) => setForm({ ...form, role: event.value })} /><label htmlFor="user-role">Perfil</label></FloatLabel>
+          <FloatLabel><MultiSelect inputId="user-branches" value={form.filial_ids} options={branches} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, filial_ids: event.value })} display="chip" filter /><label htmlFor="user-branches">Filiais com acesso</label></FloatLabel>
         </div>
 
-        {sectors.length > 0 && <FloatLabel className="mt-3"><Dropdown inputId="user-sector" value={form.setor_id} options={sectors} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, setor_id: event.value })} /><label htmlFor="user-sector">Setor</label></FloatLabel>}
+        {sectors.length > 0 && <FloatLabel className="user-form__full"><Dropdown inputId="user-sector" value={form.setor_id} options={sectors} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, setor_id: event.value })} /><label htmlFor="user-sector">Setor</label></FloatLabel>}
 
-        <div className="user-active-toggle mt-3">
+        <div className="user-active-toggle">
           <label htmlFor="user-active">Usuário Ativo</label>
           <InputSwitch id="user-active" checked={form.ativo ?? true} onChange={(event) => setForm({ ...form, ativo: event.value })} />
           <small>{form.ativo ? "Usuário pode acessar o sistema" : "Usuário não pode acessar o sistema"}</small>
         </div>
 
-        <FloatLabel className="mt-3"><Password autoComplete="off" aria-autocomplete="off" inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /><label htmlFor="user-password">{editingId ? "Nova senha (opcional)" : "Senha"}</label></FloatLabel>
+        <FloatLabel className="user-form__full"><Password autoComplete="off" aria-autocomplete="off" inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /><label htmlFor="user-password">{editingId ? "Nova senha (opcional)" : "Senha"}</label></FloatLabel>
 
 
         <section className="permission-editor">

@@ -518,18 +518,35 @@
 
 .user-dialog {
   width: min(58rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+}
+
+.user-dialog .p-dialog-content {
+  padding: 1.15rem 1.35rem 1.35rem;
+  overflow-y: auto;
 }
 
 .user-form,
 .bulk-user-form {
   display: flex;
   flex-direction: column;
-  gap: 1.35rem;
-  padding-top: 1.25rem;
+  gap: 1rem;
+  padding-top: 0.2rem;
 }
 
-.user-form>.p-float-label {
+.user-form>.p-float-label,
+.user-form__full {
   width: 100%;
+}
+
+.user-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.user-form__row > .p-float-label {
+  min-width: 0;
 }
 
 .user-collaborator-link {
@@ -2170,4 +2187,19 @@
   border: 2px solid var(--primary);
   box-shadow: 0 0 0 100vmax rgb(0 0 0 / 48%);
   pointer-events: none;
+}
+
+
+@media (max-width: 640px) {
+  .user-dialog .p-dialog-content {
+    padding: 1rem;
+  }
+
+  .user-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .permission-editor {
+    padding: .8rem;
+  }
 }
