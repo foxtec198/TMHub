@@ -5,7 +5,6 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
-import { FloatLabel } from "primereact/floatlabel";
 import { SpeedDial } from "primereact/speeddial";
 import { Tag } from "primereact/tag";
 import { MultiSelect } from "primereact/multiselect";
@@ -320,27 +319,26 @@ export function UsersSettings() {
           />
           <small>Ao selecionar, o primeiro e o último nome e o CPF serão preenchidos automaticamente.</small>
         </div>}
-        <FloatLabel><InputText id="user-name" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required /><label htmlFor="user-name">Nome</label></FloatLabel>
+        <label className="user-form__field" htmlFor="user-name"><span>Nome</span><InputText id="user-name" value={form.nome} onChange={(event) => setForm({ ...form, nome: event.target.value })} required /></label>
 
         <div className="user-form__row">
-          <FloatLabel><InputText id="user-cpf" value={form.cpf} onChange={(event) => setForm({ ...form, cpf: event.target.value })} maxLength={14} /><label htmlFor="user-cpf">CPF (opcional)</label></FloatLabel>
-          <FloatLabel><InputText id="user-email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /><label htmlFor="user-email">E-mail</label></FloatLabel>
+          <label className="user-form__field" htmlFor="user-cpf"><span>CPF (opcional)</span><InputText id="user-cpf" value={form.cpf} onChange={(event) => setForm({ ...form, cpf: event.target.value })} maxLength={14} /></label>
+          <label className="user-form__field" htmlFor="user-email"><span>E-mail</span><InputText id="user-email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
         </div>
 
         <div className="user-form__row">
-          <FloatLabel><Dropdown inputId="user-role" value={form.role} options={ROLE_OPTIONS} onChange={(event) => setForm({ ...form, role: event.value })} /><label htmlFor="user-role">Perfil</label></FloatLabel>
-          <FloatLabel><MultiSelect inputId="user-branches" value={form.filial_ids} options={branches} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, filial_ids: event.value })} display="chip" filter /><label htmlFor="user-branches">Filiais com acesso</label></FloatLabel>
+          <label className="user-form__field" htmlFor="user-role"><span>Perfil</span><Dropdown inputId="user-role" value={form.role} options={ROLE_OPTIONS} onChange={(event) => setForm({ ...form, role: event.value })} /></label>
+          <label className="user-form__field" htmlFor="user-branches"><span>Filiais com acesso</span><MultiSelect inputId="user-branches" value={form.filial_ids} options={branches} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, filial_ids: event.value })} display="chip" filter /></label>
         </div>
 
-        {sectors.length > 0 && <FloatLabel className="user-form__full"><Dropdown inputId="user-sector" value={form.setor_id} options={sectors} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, setor_id: event.value })} /><label htmlFor="user-sector">Setor</label></FloatLabel>}
+        {sectors.length > 0 && <label className="user-form__field user-form__full" htmlFor="user-sector"><span>Setor</span><Dropdown inputId="user-sector" value={form.setor_id} options={sectors} optionValue="id" optionLabel="nome" onChange={(event) => setForm({ ...form, setor_id: event.value })} /></label>}
 
         <div className="user-active-toggle">
-          <label htmlFor="user-active">Usuário Ativo</label>
+          <div className="user-active-toggle__copy"><label htmlFor="user-active">Usuário ativo</label><small>{form.ativo ? "Pode acessar o sistema" : "Não pode acessar o sistema"}</small></div>
           <InputSwitch id="user-active" checked={form.ativo ?? true} onChange={(event) => setForm({ ...form, ativo: event.value })} />
-          <small>{form.ativo ? "Usuário pode acessar o sistema" : "Usuário não pode acessar o sistema"}</small>
         </div>
 
-        <FloatLabel className="user-form__full"><Password autoComplete="off" aria-autocomplete="off" inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /><label htmlFor="user-password">{editingId ? "Nova senha (opcional)" : "Senha"}</label></FloatLabel>
+        <label className="user-form__field user-form__full" htmlFor="user-password"><span>{editingId ? "Nova senha (opcional)" : "Senha"}</span><Password autoComplete="off" aria-autocomplete="off" inputId="user-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} toggleMask feedback={!editingId} required={!editingId} /></label>
 
 
         <section className="permission-editor">

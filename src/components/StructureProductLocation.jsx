@@ -18,17 +18,29 @@ export function StructureProductLocation({
     const [quantidade, setQuantidade] = useState(1);
     const [metragem, setMetragem] = useState(0);
     const [observacao, setObservacao] = useState("");
+    const [editingIndex, setEditingIndex] = useState(null);
 
     // Filtrar produtos disponíveis (não selecionados)
     const availableProducts = products?.filter((product) =>
-        !selectedProducts.some((selected) => selected.produto_id === product.id)
+        !selectedProducts.some((selected, index) => (
+            index !== editingIndex && selected.produto_id === product.id
+        ))
     ) || [];
-    const selectedProduct = availableProducts.find((product) => product.id === selectedProductId);
+    const selectedProduct = products?.find((product) => product.id === selectedProductId);
+
+    const resetEditor = () => {
+        setSelectedProductId(null);
+        setQuantidade(1);
+        setMetragem(0);
+        setObservacao("");
+        setEditingIndex(null);
+    };
 
     const handleAddProduct = () => {
         if (!selectedProduct) return;
 
         const newProduct = {
+            ...(editingIndex !== null ? selectedProducts[editingIndex] : {}),
             produto_id: selectedProduct.id,
             produto: selectedProduct,
             quantidade_desejada: quantidade,
@@ -36,17 +48,25 @@ export function StructureProductLocation({
             observacao,
         };
 
-        onChange([...selectedProducts, newProduct]);
-        
-        // Resetar campos
-        setSelectedProductId(null);
-        setQuantidade(1);
-        setMetragem(0);
-        setObservacao("");
+        onChange(editingIndex === null
+            ? [...selectedProducts, newProduct]
+            : selectedProducts.map((item, index) => index === editingIndex ? newProduct : item));
+        resetEditor();
     };
 
     const handleRemoveProduct = (index) => {
         onChange(selectedProducts.filter((_, i) => i !== index));
+        if (editingIndex === index) resetEditor();
+        else if (editingIndex !== null && index < editingIndex) setEditingIndex((current) => current - 1);
+    };
+
+    const handleEditProduct = (index) => {
+        const item = selectedProducts[index];
+        setEditingIndex(index);
+        setSelectedProductId(item.produto_id);
+        setQuantidade(item.quantidade_desejada ?? 1);
+        setMetragem(item.metragem_disponivel ?? 0);
+        setObservacao(item.observacao || "");
     };
 
     return (
@@ -69,15 +89,25 @@ export function StructureProductLocation({
                                     {item.observacao && ` | ${item.observacao}`}
                                 </small>
                             </div>
-                            <Button
-                                icon="pi pi-trash"
-                                severity="danger"
-                                text
-                                rounded
-                                onClick={() => handleRemoveProduct(index)}
-                                disabled={disabled}
-                                aria-label={`Remover ${item.produto?.nome}`}
-                            />
+                            <div className="structure-product-location__item-actions">
+                                <Button
+                                    icon="pi pi-pencil"
+                                    text
+                                    rounded
+                                    onClick={() => handleEditProduct(index)}
+                                    disabled={disabled}
+                                    aria-label={`Editar ${item.produto?.nome}`}
+                                />
+                                <Button
+                                    icon="pi pi-trash"
+                                    severity="danger"
+                                    text
+                                    rounded
+                                    onClick={() => handleRemoveProduct(index)}
+                                    disabled={disabled}
+                                    aria-label={`Remover ${item.produto?.nome}`}
+                                />
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -86,7 +116,7 @@ export function StructureProductLocation({
             {/* Formulário para adicionar produto */}
             <div className="structure-product-location__add">
                 <div className="structure-product-location__add-header">
-                    <span>Adicionar produto</span>
+                    <span>{editingIndex === null ? "Adicionar produto" : "Editar produto"}</span>
                 </div>
                 
                 <div className="structure-product-location__add-form">
@@ -140,9 +170,16 @@ export function StructureProductLocation({
                     </div>
 
                     <div className="structure-product-location__add-actions">
+                        {editingIndex !== null && <Button
+                            label="Cancelar edição"
+                            text
+                            severity="secondary"
+                            onClick={resetEditor}
+                            disabled={disabled}
+                        />}
                         <Button
-                            label="Adicionar"
-                            icon="pi pi-plus"
+                            label={editingIndex === null ? "Adicionar" : "Salvar produto"}
+                            icon={editingIndex === null ? "pi pi-plus" : "pi pi-check"}
                             onClick={handleAddProduct}
                             disabled={disabled || !selectedProduct}
                         />

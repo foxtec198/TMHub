@@ -237,6 +237,14 @@
     width: min(94vw, 600px);
 }
 
+.structure-dialog .p-dialog-content {
+    padding: 1.25rem 1.45rem 1.4rem;
+}
+
+.structure-dialog .structure-form {
+    margin-top: .1rem;
+}
+
 .structure-supervisor-dialog {
     width: min(94vw, 520px);
 }
@@ -347,6 +355,14 @@
 .structure-form__observation,
 .structure-form > .structure-product-location {
     grid-column: 1 / -1;
+}
+
+.structure-form--single-column {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.structure-products-dialog {
+    width: min(54rem, calc(100vw - 2rem));
 }
 
 .structure-form .p-inputtext,
@@ -641,6 +657,7 @@
 .structure-detail-metrics strong { color: var(--text-color); font-size: 1.15rem; }
 .structure-detail-actions { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1rem; }
 .structure-assets-panel { border-top: 1px solid var(--surface-border); }
+.structure-assets-panel__product-action { margin-top: .9rem; }
 .structure-assets-panel > header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .9rem 0 .7rem; }
 .structure-assets-panel > header > div { display: flex; align-items: center; gap: .45rem; color: var(--text-color); font-size: .84rem; }
 .structure-assets-panel > header i { color: var(--primary-color); }
@@ -745,8 +762,10 @@
 .structure-product-location__selected { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1.25rem; }
 .structure-product-location__item { display: flex; align-items: center; gap: .85rem; padding: .75rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); transition: border-color .18s ease; }
 .structure-product-location__item:hover { border-color: var(--accent); }
+.structure-product-location__item-info { flex: 1; min-width: 0; }
 .structure-product-location__item-info strong { display: block; color: var(--text-primary); font-size: .9rem; margin-bottom: .15rem; }
 .structure-product-location__item-info small { font-size: .75rem; color: var(--text-secondary); }
+.structure-product-location__item-actions { display: flex; flex: none; gap: .2rem; }
 .structure-product-location__add { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; container-type: inline-size; }
 .structure-product-location__add-header { padding: .75rem 1rem; border-bottom: 1px solid var(--border); background: var(--surface-2); }
 .structure-product-location__add-header span { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--accent); }

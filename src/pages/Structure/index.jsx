@@ -29,7 +29,6 @@ const EMPTY_FORM = {
     local_id: null,
     parent_id: null,
     descricao: "",
-    produtos: [], // Lista de produtos selecionados
 };
 
 const ASSET_CATEGORY_OPTIONS = [
@@ -101,6 +100,10 @@ export function Structure() {
     const [selectedCompanyId, setSelectedCompanyId] = useState(null);
     const [companies, setCompanies] = useState([]);
     const [routineDialog, setRoutineDialog] = useState(null);
+    const [locationEditDialog, setLocationEditDialog] = useState(null);
+    const [locationEditForm, setLocationEditForm] = useState({ nome: "", descricao: "" });
+    const [locationProductsDialog, setLocationProductsDialog] = useState(null);
+    const [locationProductsDraft, setLocationProductsDraft] = useState([]);
     const [dragLocationId, setDragLocationId] = useState(null);
     const [selectedContractId, setSelectedContractId] = useState(null);
     const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -314,7 +317,7 @@ export function Structure() {
             .catch(() => setSelectedLocationProducts([]))
             .finally(() => active && setLoading(false));
         return () => { active = false; };
-    }, [effectiveSelectedLocationId, setLoading]);
+    }, [effectiveSelectedLocationId, refresh, setLoading]);
 
     useEffect(() => {
         if (!effectiveSelectedContractId) return undefined;
@@ -351,7 +354,7 @@ export function Structure() {
     const openCreate = (event, contract) => {
         event?.stopPropagation();
         setDialog(contract);
-        setForm({ ...EMPTY_FORM, produtos: [] });
+        setForm(EMPTY_FORM);
     };
 
     const openSubstructureCreate = (event, contract, parent) => {
@@ -359,6 +362,71 @@ export function Structure() {
         setExpandedLocationIds((current) => new Set([...current, parent.id]));
         setDialog(contract);
         setForm({ ...EMPTY_FORM, tipo: "local", parent_id: parent.id });
+    };
+
+    const openLocationEdit = (event, location) => {
+        event?.stopPropagation();
+        setLocationEditDialog(location);
+        setLocationEditForm({ nome: location.nome || "", descricao: location.descricao || "" });
+    };
+
+    const saveLocationEdit = async () => {
+        if (!locationEditDialog || !locationEditForm.nome.trim()) {
+            showToast("warn", "Estrutura", "Informe o nome do local.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const { data } = await connect.patch(`/estrutura/locais/${locationEditDialog.id}`, {
+                nome: locationEditForm.nome,
+                descricao: locationEditForm.descricao,
+            });
+            showToast("success", "Estrutura", data.message);
+            setLocationEditDialog(null);
+            setRefresh((value) => value + 1);
+        } catch (error) {
+            showToast("error", "Estrutura", error.response?.data || "Não foi possível editar o local.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const openLocationProducts = (location) => {
+        setLocationProductsDialog(location);
+        setLocationProductsDraft(selectedLocationProducts.map((item) => ({ ...item, produto: { ...item.produto } })));
+    };
+
+    const saveLocationProducts = async () => {
+        if (!locationProductsDialog) return;
+        const locationId = locationProductsDialog.id;
+        const existingIds = new Set(selectedLocationProducts.map((item) => item.id).filter(Boolean));
+        const draftIds = new Set(locationProductsDraft.map((item) => item.id).filter(Boolean));
+        setLoading(true);
+        try {
+            await Promise.all([
+                ...[...existingIds].filter((id) => !draftIds.has(id)).map((id) => (
+                    connect.delete(`/estrutura/locais/${locationId}/produtos/${id}`)
+                )),
+                ...locationProductsDraft.map((item) => {
+                    const payload = {
+                        produto_id: item.produto_id,
+                        quantidade_desejada: item.quantidade_desejada,
+                        metragem_disponivel: item.metragem_disponivel,
+                        observacao: item.observacao,
+                    };
+                    return item.id
+                        ? connect.patch(`/estrutura/locais/${locationId}/produtos/${item.id}`, payload)
+                        : connect.post(`/estrutura/locais/${locationId}/produtos`, payload);
+                }),
+            ]);
+            showToast("success", "Estrutura", "Produtos do local atualizados.");
+            setLocationProductsDialog(null);
+            setRefresh((value) => value + 1);
+        } catch (error) {
+            showToast("error", "Estrutura", error.response?.data || "Não foi possível atualizar os produtos.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const moveLocation = async (locationId, parentId) => {
@@ -480,23 +548,6 @@ export function Structure() {
                 ...form,
                 centro_custo_id: dialog.id,
             });
-            
-            // Salvar produtos se houver
-            if (form.produtos?.length > 0 && data.item?.id) {
-                for (const produto of form.produtos) {
-                    try {
-                        await connect.post(`/estrutura/locais/${data.item.id}/produtos`, {
-                            produto_id: produto.produto_id,
-                            quantidade_desejada: produto.quantidade_desejada,
-                            metragem_disponivel: produto.metragem_disponivel,
-                            observacao: produto.observacao,
-                        });
-                    } catch (error) {
-                        showToast("warn", "Estrutura", `Não foi possível adicionar o produto "${produto.produto?.nome || produto.produto_id}".`);
-                    }
-                }
-            }
-            
             showToast("success", "Estrutura", data.message);
             setDialog(null);
             setRefresh((value) => value + 1);
@@ -565,6 +616,7 @@ export function Structure() {
                     </div>
                     <div className="structure-tree-item__actions">
                         {canEdit && <Button icon={<AppIcon name="plus" />} text rounded aria-label={`Adicionar sublocal em ${location.nome}`} tooltip="Adicionar sublocal" onClick={(event) => openSubstructureCreate(event, contract, location)} />}
+                        {canEdit && <Button icon={<AppIcon name="pencil" />} text rounded aria-label={`Editar ${location.nome}`} tooltip="Editar local" onClick={(event) => openLocationEdit(event, location)} />}
                     </div>
                 </article>
                 {childCount > 0 && isExpanded && <ul role="group">{location.filhos.map((child) => renderLocationTree(child, contract, depth + 1))}</ul>}
@@ -821,6 +873,8 @@ export function Structure() {
 
                                         <div className="structure-detail-actions">
                                             {canEdit && <Button icon={<AppIcon name="plus" />} label="Adicionar sublocal" onClick={() => openSubstructureCreate(null, selectedContract, selectedLocation)} />}
+                                            {canEdit && <Button icon={<AppIcon name="box" />} label="Adicionar produto" outlined onClick={() => openLocationProducts(selectedLocation)} />}
+                                            {canEdit && <Button icon={<AppIcon name="pencil" />} label="Editar local" outlined onClick={() => openLocationEdit(null, selectedLocation)} />}
                                             {canCreateRoutine && <Button icon={<AppIcon name="calendar-plus" />} label="Criar rotina" outlined onClick={() => openRoutineCreate(null, selectedContract, selectedLocation)} />}
                                             {canEdit && selectedLocation.parent_id && <Button icon={<AppIcon name="hierarchy" />} label="Tornar principal" severity="secondary" text onClick={() => moveLocation(selectedLocation.id, null)} />}
                                             {canEdit && <Button icon={<AppIcon name="trash" />} label="Excluir local" severity="danger" text onClick={(event) => removeItem(event, "local", selectedLocation)} />}
@@ -840,6 +894,23 @@ export function Structure() {
                                                     </div>
                                                 </article>
                                             )) : <p className="structure-empty">Nenhuma rotina recente neste local.</p>}
+                                        </section>
+
+                                        <section className="structure-assets-panel">
+                                            <header>
+                                                <div><AppIcon name="box" /><strong>Produtos neste local</strong></div>
+                                                <Tag value={String(selectedLocationProducts.length)} severity="info" rounded />
+                                            </header>
+                                            {selectedLocationProducts.length ? selectedLocationProducts.map((item) => (
+                                                <article className="structure-asset-card" key={item.id}>
+                                                    <span className="structure-asset-card__icon"><AppIcon name="box" /></span>
+                                                    <div>
+                                                        <strong>{item.produto?.nome || "Produto"}</strong>
+                                                        <small>Qtd. {item.quantidade_desejada} · {item.metragem_disponivel || 0} m²{item.observacao ? ` · ${item.observacao}` : ""}</small>
+                                                    </div>
+                                                </article>
+                                            )) : <p className="structure-empty">Nenhum produto vinculado a este local.</p>}
+                                            {canEdit && <Button className="structure-assets-panel__product-action" icon={<AppIcon name="pencil" />} label="Gerenciar produtos" outlined onClick={() => openLocationProducts(selectedLocation)} />}
                                         </section>
 
                                         <section className="structure-assets-panel">
@@ -1151,15 +1222,51 @@ export function Structure() {
                             />
                         </label>
 
-                        {form.tipo === "local" && (
-                            <StructureProductLocation
-                                products={products}
-                                selectedProducts={form.produtos}
-                                onChange={(novosProdutos) => setForm({ ...form, produtos: novosProdutos })}
-                            />
-                        )}
                     </div>
                 )}
+            </Dialog>
+            <Dialog
+                header={locationEditDialog ? `Editar local — ${locationEditDialog.nome}` : "Editar local"}
+                visible={Boolean(locationEditDialog)}
+                modal
+                className="structure-dialog"
+                onHide={() => setLocationEditDialog(null)}
+                footer={(
+                    <div className="structure-dialog-footer">
+                        <Button label="Cancelar" severity="secondary" text onClick={() => setLocationEditDialog(null)} />
+                        <Button label="Salvar alterações" icon={<AppIcon name="check" />} onClick={saveLocationEdit} />
+                    </div>
+                )}
+            >
+                <div className="structure-form structure-form--single-column">
+                    <label>
+                        Nome *
+                        <InputText value={locationEditForm.nome} onChange={(event) => setLocationEditForm((current) => ({ ...current, nome: event.target.value }))} />
+                    </label>
+                    <label className="structure-form__observation">
+                        Observação
+                        <InputTextarea value={locationEditForm.descricao} rows={4} autoResize onChange={(event) => setLocationEditForm((current) => ({ ...current, descricao: event.target.value }))} />
+                    </label>
+                </div>
+            </Dialog>
+            <Dialog
+                header={locationProductsDialog ? `Produtos — ${locationProductsDialog.nome}` : "Produtos no local"}
+                visible={Boolean(locationProductsDialog)}
+                modal
+                className="structure-dialog structure-products-dialog"
+                onHide={() => setLocationProductsDialog(null)}
+                footer={(
+                    <div className="structure-dialog-footer">
+                        <Button label="Cancelar" severity="secondary" text onClick={() => setLocationProductsDialog(null)} />
+                        <Button label="Salvar produtos" icon={<AppIcon name="check" />} onClick={saveLocationProducts} />
+                    </div>
+                )}
+            >
+                <StructureProductLocation
+                    products={products}
+                    selectedProducts={locationProductsDraft}
+                    onChange={setLocationProductsDraft}
+                />
             </Dialog>
             <ConfirmDialog />
         </main>

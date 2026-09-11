@@ -91,35 +91,98 @@ function isTicketRequesterMessage(ticket, message) {
     && requesterId === authorId;
 }
 
-function attachmentUrl(ticketId, filename) {
-  return connect.getUri({ url: `/tickets/${ticketId}/anexos/${encodeURIComponent(filename)}` });
-}
-
 function isImageAttachment(attachment) {
   return String(attachment?.content_type || attachment?.type || "").startsWith("image/");
 }
 
+function isPreviewableAttachment(attachment) {
+  return isImageAttachment(attachment) || attachment?.content_type === "application/pdf";
+}
+
+function attachmentKind(attachment) {
+  if (isImageAttachment(attachment)) return "Imagem";
+  if (attachment?.content_type === "application/pdf") return "PDF";
+  return "Arquivo";
+}
+
 function TicketAttachments({ ticketId, attachments = [] }) {
+  const { showToast } = useToast();
+  const [preview, setPreview] = useState(null);
+
+  useEffect(() => () => {
+    if (preview?.url) URL.revokeObjectURL(preview.url);
+  }, [preview]);
+
+  const fetchAttachment = async (attachment) => {
+    const { data } = await connect.get(
+      `/tickets/${ticketId}/anexos/${encodeURIComponent(attachment.filename)}`,
+      { responseType: "blob" },
+    );
+    return data;
+  };
+
+  const openPreview = async (attachment) => {
+    try {
+      const data = await fetchAttachment(attachment);
+      setPreview({ attachment, url: URL.createObjectURL(data) });
+    } catch (error) {
+      showToast("error", "Anexo", messageFrom(error, "Não foi possível carregar a prévia do anexo."));
+    }
+  };
+
+  const downloadAttachment = async (attachment) => {
+    try {
+      const data = await fetchAttachment(attachment);
+      const url = URL.createObjectURL(data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = attachment.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    } catch (error) {
+      showToast("error", "Anexo", messageFrom(error, "Não foi possível baixar o anexo."));
+    }
+  };
+
   if (!attachments.length) return null;
 
-  return <div className="ticket-message__attachments">
-    {attachments.map((attachment) => {
-      const url = attachmentUrl(ticketId, attachment.filename);
-      const image = isImageAttachment(attachment);
-      return <article key={attachment.id} className="ticket-message__attachment-item">
-        <a href={url} target="_blank" rel="noreferrer" className="ticket-message__attachment-thumb" aria-label={`Abrir ${attachment.filename}`}>
-          {image ? <img src={url} alt={attachment.filename} /> : <AppIcon name="file" />}
-        </a>
-        <div className="ticket-message__attachment-info">
-          <strong>{attachment.filename}</strong>
-          <span>{image ? "Imagem" : attachment.content_type === "application/pdf" ? "PDF" : "Arquivo"}</span>
-        </div>
-        <a href={url} target="_blank" rel="noreferrer" className="ticket-message__attachment-open" aria-label={`Abrir ${attachment.filename}`}>
-          <AppIcon name="arrow-up-right" />
-        </a>
-      </article>;
-    })}
-  </div>;
+  return <>
+    <div className="ticket-message__attachments">
+      {attachments.map((attachment) => {
+        const previewable = isPreviewableAttachment(attachment);
+        return <article key={attachment.id} className="ticket-message__attachment-item">
+          <div className="ticket-message__attachment-thumb" aria-hidden="true">
+            <AppIcon name={isImageAttachment(attachment) ? "photo" : attachment.content_type === "application/pdf" ? "file-type-pdf" : "file"} />
+          </div>
+          <div className="ticket-message__attachment-info">
+            <strong>{attachment.filename}</strong>
+            <span>{attachmentKind(attachment)}</span>
+          </div>
+          <div className="ticket-message__attachment-controls">
+            <button type="button" onClick={() => downloadAttachment(attachment)} aria-label={`Baixar ${attachment.filename}`} title="Baixar anexo">
+              <AppIcon name="download" />
+            </button>
+            {previewable && <button type="button" onClick={() => openPreview(attachment)} aria-label={`Expandir ${attachment.filename}`} title="Expandir prévia">
+              <AppIcon name="maximize" />
+            </button>}
+          </div>
+        </article>;
+      })}
+    </div>
+    <Dialog
+      header={preview?.attachment?.filename || "Prévia do anexo"}
+      visible={Boolean(preview)}
+      modal
+      className="ticket-attachment-preview-dialog"
+      onHide={() => setPreview(null)}
+    >
+      {preview && (isImageAttachment(preview.attachment)
+        ? <img className="ticket-attachment-preview__image" src={preview.url} alt={preview.attachment.filename} />
+        : <iframe className="ticket-attachment-preview__pdf" src={preview.url} title={`Prévia de ${preview.attachment.filename}`} />)}
+    </Dialog>
+  </>;
 }
 
 function TicketForm({ visible, onHide, onCreated, reasons }) {
@@ -237,13 +300,15 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
-          <Button
-            label="Selecionar arquivos"
-            icon={<AppIcon name="paperclip" />}
-            outlined
-            onClick={() => document.getElementById('ticket-file-upload').click()}
-          />
-          <small className="p-text-secondary">Suporta PDF, imagens (PNG/JPG) e Excel</small>
+          <div className="ticket-file-upload__controls">
+            <Button
+              label="Selecionar arquivos"
+              icon={<AppIcon name="paperclip" />}
+              outlined
+              onClick={() => document.getElementById('ticket-file-upload').click()}
+            />
+            <small>PDF, imagens (PNG/JPG/WEBP) e Excel · máximo de 15 MB por arquivo.</small>
+          </div>
         </div>
       </label>
     </div>
@@ -481,7 +546,7 @@ export function TicketDetail() {
     <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><AppIcon name="clock"  /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
     <section className="ticket-conversation">
       <aside className="ticket-info-panel"><div className="ticket-info-panel__heading"><span>Informações</span><h2>{ticket.name}</h2></div><p>{ticket.observation}</p><dl><div><dt>Motivo</dt><dd>{ticket.reason?.nome || "Não informado"}</dd></div><div><dt>Solicitante</dt><dd><TicketAvatar user={ticket.created_by} />{ticket.created_by?.nome || "—"}</dd></div><div><dt>Responsável</dt><dd><TicketAvatar user={ticket.responsible} />{ticket.responsible?.nome || "Aguardando atribuição"}</dd></div></dl>{canEdit && <div className="ticket-info-panel__edit"><label><span>Status</span><Dropdown value={statusValue} options={STATUS} onChange={(event) => { setStatusValue(event.value); update({ status: event.value }, "O status foi alterado."); }} /></label>{isAdmin && <label><span>Responsável</span><Dropdown value={responsibleValue} options={assignees.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => { setResponsibleValue(event.value); update({ responsible_id: event.value }, "O responsável foi atualizado."); }} placeholder="Selecione" filter showClear /></label>}</div>}</aside>
-      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p><TicketAttachments ticketId={ticket.id} attachments={ticket.attachments} /></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><AppIcon name="paperclip"  /> Abrir anexo</a>}{item.attachments?.length > 0 && <TicketAttachments ticketId={ticket.id} attachments={item.attachments} />}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
+      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p><TicketAttachments ticketId={ticket.id} attachments={ticket.attachments} /></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.attachments?.length > 0 && <TicketAttachments ticketId={ticket.id} attachments={item.attachments} />}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
         <div key={idx} className="ticket-chat__attachment-preview">
           {fileData.type.startsWith('image/') ? (
             <img src={fileData.preview} alt={fileData.name} />
