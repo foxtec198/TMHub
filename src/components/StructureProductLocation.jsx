@@ -14,22 +14,16 @@ export function StructureProductLocation({
     onChange,
     disabled = false
 }) {
-    console.log("StructureProductLocation render", { products: products?.length, selectedProducts: selectedProducts.length });
-    
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedProductId, setSelectedProductId] = useState(null);
     const [quantidade, setQuantidade] = useState(1);
     const [metragem, setMetragem] = useState(0);
     const [observacao, setObservacao] = useState("");
 
     // Filtrar produtos disponíveis (não selecionados)
-    const availableProducts = products?.filter(p => 
-        !selectedProducts.find(sp => sp.produto_id === p.id) &&
-        (p.nome?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-         p.unidade?.toLowerCase().includes(searchTerm.toLowerCase()))
+    const availableProducts = products?.filter((product) =>
+        !selectedProducts.some((selected) => selected.produto_id === product.id)
     ) || [];
-
-    console.log("availableProducts", availableProducts.length);
+    const selectedProduct = availableProducts.find((product) => product.id === selectedProductId);
 
     const handleAddProduct = () => {
         if (!selectedProduct) return;
@@ -45,7 +39,7 @@ export function StructureProductLocation({
         onChange([...selectedProducts, newProduct]);
         
         // Resetar campos
-        setSelectedProduct(null);
+        setSelectedProductId(null);
         setQuantidade(1);
         setMetragem(0);
         setObservacao("");
@@ -96,10 +90,10 @@ export function StructureProductLocation({
                 </div>
                 
                 <div className="structure-product-location__add-form">
-                    <div className="structure-product-location__add-input">
+                    <div className="structure-product-location__add-input structure-product-location__add-input--product">
                         <label>Produto</label>
                         <Dropdown
-                            value={selectedProduct}
+                            value={selectedProductId}
                             options={availableProducts}
                             optionLabel="nome"
                             optionValue="id"
@@ -107,9 +101,7 @@ export function StructureProductLocation({
                             filterBy="nome"
                             placeholder="Selecione um produto"
                             emptyMessage="Nenhum produto disponível"
-                            onChange={(e) => {
-                                setSelectedProduct(e.value ? availableProducts.find(p => p.id === e.value) : null);
-                            }}
+                            onChange={(event) => setSelectedProductId(event.value || null)}
                             disabled={disabled || availableProducts.length === 0}
                         />
                     </div>
@@ -137,7 +129,7 @@ export function StructureProductLocation({
                         />
                     </div>
 
-                    <div className="structure-product-location__add-input">
+                    <div className="structure-product-location__add-input structure-product-location__add-input--observation">
                         <label>Observação</label>
                         <InputText
                             value={observacao}

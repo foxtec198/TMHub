@@ -1141,7 +1141,7 @@ export function Structure() {
                                 </label>
                             </>
                         )}
-                        <label>
+                        <label className="structure-form__observation">
                             Observação
                             <InputTextarea
                                 value={form.descricao}
