@@ -5,7 +5,7 @@ import { AppIcon } from "../../components/icons/AppIcon";
 import { ThemeLogo } from "../../components/ThemeLogo";
 import "./notfound.css";
 
-const TIMO_MODEL = "/3d-models/timo.glb?v=current-1";
+const TIMO_MODEL = "/3d-models/cyber_timo.glb?v=current-1";
 const SEARCH_INTERVAL_MIN = 22000;
 const SEARCH_INTERVAL_RANGE = 9000;
 
@@ -21,7 +21,6 @@ export function NotFound() {
   const [viewerReady, setViewerReady] = useState(false);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [modelFailed, setModelFailed] = useState(false);
-  const [motion, setMotion] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -77,7 +76,7 @@ export function NotFound() {
 
     const finishMotion = () => {
       viewerRef.current?.pause();
-      setMotion("");
+      playClip("idle");
     };
 
     const playClip = (name) => {
@@ -90,26 +89,8 @@ export function NotFound() {
     };
 
     const runSearch = () => {
-      // A sequência é pontual: cada etapa termina antes da próxima começar.
-      setMotion("is-spinning");
-      playClip("playful_spin");
-      schedule(() => {
-        viewerRef.current?.pause();
-        setMotion("is-paused");
-      }, 1650);
-      schedule(() => {
-        setMotion("is-looking-left");
-        playClip("listening");
-      }, 2500);
-      schedule(() => {
-        setMotion("is-looking-right");
-        playClip("listening");
-      }, 3900);
-      schedule(() => {
-        setMotion("is-no");
-        playClip("thinking");
-      }, 5350);
-      schedule(finishMotion, 7050);
+      playClip("404");
+      schedule(finishMotion, 8810);
     };
 
     const repeat = () => {
@@ -129,7 +110,7 @@ export function NotFound() {
 
       <section className="notfound-hero" aria-labelledby="notfound-title">
         <span className="notfound-number" aria-hidden="true">4</span>
-        <div className={`notfound-timo ${motion}`}>
+        <div className={`notfound-timo`}>
           <div className={`notfound-timo__model${modelLoaded ? " is-ready" : ""}`}>
             {!modelLoaded && <img className="notfound-timo__poster" src="/timo-poster.png" alt="" aria-hidden="true" />}
             {viewerReady && !modelFailed && (
@@ -141,7 +122,8 @@ export function NotFound() {
                 shadow-intensity="1.15"
                 shadow-softness=".85"
                 exposure="1.05"
-                camera-orbit="0deg 80deg 105%"
+                camera-orbit="0deg 80deg 120%"
+                field-of-view="10deg"
               />
             )}
           </div>

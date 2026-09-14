@@ -277,9 +277,8 @@ export function TimoAssistant() {
                 shadow-intensity="1.2"
                 shadow-softness=".8"
                 exposure="1.05"
-                camera-orbit="0deg 80deg 90%"
-                camera-target="0m 0.3m 0m"
-                field-of-view="45deg"
+                camera-orbit="0deg 80deg 120%"
+                field-of-view="10deg"
               />}
           </div>
           <div className={`timo-world-status${modelFailed ? " is-warning" : ""}`}><i />{statusLabel}</div>
