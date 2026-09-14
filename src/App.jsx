@@ -41,7 +41,6 @@ import { BarcodeGenerator } from "./pages/Stock/barcode_generator.jsx";
 import { Floaters } from "./pages/Requests/floaters";
 import { ProjetosPage } from "./pages/Projects/ProjetosPage";
 import { Vacancies } from "./pages/Admission/vacancies.jsx";
-import { TerminationControl } from "./pages/TerminationControl";
 import { VacationControl } from "./pages/VacationControl";
 import { Settings } from "./pages/Configuratiom";
 import { AbsenceControl } from "./pages/FaltsControl";
@@ -55,7 +54,6 @@ import { ReservationDashboard } from "./pages/Dashboards/Reservations";
 import { ProjectDashboard } from "./pages/Dashboards/Projects";
 import { GlosaDashboard } from "./pages/Dashboards/Dissallownces";
 import { RocadaDashboard } from "./pages/Dashboards/Rocada";
-import { TerminationDashboard } from "./pages/Dashboards/Termination.jsx";
 import { Structure } from "./pages/Structure/index";
 import { TMOps } from "./pages/TMOps";
 import { TMOpsManagement } from "./pages/TMOps/Management";
@@ -354,14 +352,6 @@ export function AppRoutes() {
               </PermissionGate>
             }
           />
-          <Route
-            path="/reports/rescisoes"
-            element={
-              <PermissionGate screen="dashboard_rescisoes">
-                <TerminationDashboard />
-              </PermissionGate>
-            }
-          />
           <Route path="/reports/projetos" element={<PermissionGate screen="dashboard_projetos"><ProjectDashboard /></PermissionGate>} />
           <Route path="/reports/glosas" element={<PermissionGate screen="dashboard_glosas"><GlosaDashboard /></PermissionGate>} />
           <Route path="/reports/rocada" element={<PermissionGate screen="dashboard_glosas"><RocadaDashboard /></PermissionGate>} />
@@ -500,16 +490,6 @@ export function AppRoutes() {
             element={
               <PermissionGate screen="controle_medidas_disciplinares">
                 <DisciplinaryMeasures />
-              </PermissionGate>
-            }
-          />
-
-          {/* Rescisões */}
-          <Route
-            path="/rescisoes"
-            element={
-              <PermissionGate screen="controle_rescisoes">
-                <TerminationControl />
               </PermissionGate>
             }
           />

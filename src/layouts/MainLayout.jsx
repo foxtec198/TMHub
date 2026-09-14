@@ -35,7 +35,6 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/indicadores/pcd": ["pcd", "colaboradores"],
   "/admissao/vagas": ["admissao"],
   "/admissao/aditivos": ["admissao"],
-  "/rescisoes": ["rescisoes", "colaboradores"],
   "/reposicoes/requisicoes": ["reposicoes.requisicoes"],
   "/reposicoes/requisicao": ["reposicoes.requisicoes", "reposicoes.reservas"],
   "/reposicoes/reservas": ["reposicoes.reservas"],
@@ -54,7 +53,6 @@ const REALTIME_CHANNELS_BY_ROUTE = {
   "/estoque/movimentacoes": ["estoque.movimentos"],
   "/estrutura": ["estrutura", "estoque.movimentos"],
   "/projetos": ["projetos"],
-  "/reports/rescisoes": ["rescisoes", "colaboradores"],
   "/controle-medidas-disciplinares": ["medidas_disciplinares"],
   "/reports/medidas-disciplinares": ["medidas_disciplinares"],
   "/tickets": ["tickets"],
@@ -204,14 +202,6 @@ export function MainLayout() {
               command: () => { navigateTo("/reports/ql") }
             },
             {
-              label: "Rescisões",
-              icon: appIcon("user-minus"),
-              visible: can("dashboard_rescisoes"),
-              command: () => {
-                navigateTo("/reports/rescisoes");
-              },
-            },
-            {
               label: "Disciplina",
               icon: appIcon("file-pencil"),
               visible: can("dashboard_medidas_disciplinares"),
@@ -281,12 +271,6 @@ export function MainLayout() {
           icon: appIcon("heart"),
           visible: can("indicador_pcd"),
           command: () => { navigateTo("/indicadores/pcd") }
-        },
-        {
-          label: 'Rescisões',
-          icon: appIcon("user-minus"),
-          visible: can("controle_rescisoes"),
-          command: () => { navigateTo("/rescisoes") }
         },
         {
           label: 'Férias',

@@ -37,11 +37,6 @@ const CHANNEL_DETAILS = {
     body: "As vagas ou admissões foram atualizadas.",
     route: "/admissao/vagas",
   },
-  rescisoes: {
-    title: "Rescisões",
-    body: "Os registros de rescisão foram atualizados.",
-    route: "/rescisoes",
-  },
   projetos: {
     title: "Projetos",
     body: "Há uma atualização em projetos ou cards.",
