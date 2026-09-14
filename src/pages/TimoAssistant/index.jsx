@@ -20,6 +20,19 @@ const QUICK_COMMANDS = [
   { label: "Vagas abertas", command: "quantas vagas estão abertas", icon: "briefcase" },
 ];
 
+const TIMO_SKINS = [
+  { "timo_gold": "/3d-models/timo_gold.glb" },
+  { "timo_cyber": "/3d-models/cyber_timo.glb" },
+  { "capetimo": "/3d-models/capetimo.glb" },
+  { "default": "/3d-models/timo.glb" }
+]
+
+const TIMO_POSTERS = [
+  { "timo_gold": "/3d-models/timo_gold_poster.png" },
+  { "timo_cyber": "/3d-models/cyber_timo_poster.png" },
+  { "default": "/3d-models/timo_poster.png" }
+]
+
 const BASE_SCENARIOS = [
   { id: "workshop", label: "Oficina", description: "A base criativa do Timo", icon: "tool", image: "/scenes/workshop.webp" },
   { id: "orbit", label: "Órbita", description: "Observatório sobre a Terra", icon: "rocket", image: "/scenes/orbit.webp" },
@@ -103,8 +116,9 @@ export function TimoAssistant() {
     () => [...messages].reverse().find((message) => message.role === "timo"),
     [messages],
   );
-  const modelSource = skin === "timo_gold" ? "/3d-models/timo_gold.glb?v=gold-1" : (skin === "timo_cyber" ? "/3d-models/cyber_timo.glb" : "/3d-models/timo.glb?v=current-1");
-  const modelPoster = skin === "timo_gold" ? "/timo-gold-poster.png" : (skin === "timo_cyber" ? "/cyber_timo-poster.png" : "/timo-poster.png");
+
+  const modelSource = TIMO_SKINS.find(element => element[skin])?.[skin];
+  const modelPoster = TIMO_POSTERS.find(element => element[skin])?.[skin];
 
   useEffect(() => {
     let mounted = true;
