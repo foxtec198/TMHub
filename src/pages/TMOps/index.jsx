@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import tmOpsRequest from "../../utils/tmOpsRequest";
+import { clearTmOpsToken, getTmOpsToken, setTmOpsToken } from "../../utils/tmOpsSession";
 import { useToast } from "../../contexts/ToastContext";
 import { TaskQrScanner } from "./TaskQrScanner";
 import { TaskEvidenceCapture } from "./TaskEvidenceCapture";
@@ -141,11 +142,11 @@ export function TMOps() {
     };
   }, []);
   useEffect(() => {
-    if (sessionStorage.getItem("tm_ops_token"))
+    if (getTmOpsToken())
       tmOpsRequest
         .get("/tm-ops/sessao")
         .then(({ data }) => setSession(data))
-        .catch(() => sessionStorage.removeItem("tm_ops_token"));
+        .catch(() => clearTmOpsToken());
   }, []);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -266,7 +267,7 @@ export function TMOps() {
         matricula,
         password,
       });
-      sessionStorage.setItem("tm_ops_token", data.access_token);
+      setTmOpsToken(data.access_token);
       setSession(data);
     } catch (error) {
       showToast(
@@ -386,7 +387,7 @@ export function TMOps() {
           rounded
           text
           onClick={() => {
-            sessionStorage.removeItem("tm_ops_token");
+            clearTmOpsToken();
             setSession(null);
             navigate("/tm-ops/login");
           }}

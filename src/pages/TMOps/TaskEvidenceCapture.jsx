@@ -5,6 +5,8 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import tmOpsRequest from "../../utils/tmOpsRequest";
 import { useToast } from "../../contexts/ToastContext";
+import { safeApiResourceUrl } from "../../utils/safeUrl";
+import { downloadProtectedFile } from "../../utils/protectedFile";
 
 const EVIDENCE_META = {
   camera: { label: "Câmera", icon: appIcon("camera") },
@@ -329,17 +331,15 @@ export function TaskEvidenceCapture({ task, item, onSaved }) {
                   <AppIcon name="exclamation-mark"  />
                 </span>
               )}
-              {evidence?.url && (
-                <a
+              {safeApiResourceUrl(evidence?.url) && (
+                <Button
                   className="executor-evidence-open"
-                  href={`${import.meta.env.VITE_SERVER || ""}${evidence.url}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`Abrir ${meta.label} registrada`}
-                  title={`Abrir ${meta.label} registrada`}
-                >
-                  <AppIcon name="external-link"  />
-                </a>
+                  icon={<AppIcon name="download" />}
+                  text
+                  aria-label={`Baixar ${meta.label} registrada`}
+                  title={`Baixar ${meta.label} registrada`}
+                  onClick={() => downloadProtectedFile(tmOpsRequest, evidence.url, `evidencia-${evidence.id}`)}
+                />
               )}
             </div>
           );

@@ -9,6 +9,9 @@ import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import ProjectMemberAvatar from './ProjectMemberAvatar';
 import { createCardComment, deleteCardComment, deleteCardFile, updateCardComment, uploadCardFile } from '../pages/Projects/services/card';
+import { safeApiResourceUrl } from '../utils/safeUrl';
+import { downloadProtectedFile } from '../utils/protectedFile';
+import connect from '../utils/request';
 import './CardDetailDialog.css';
 
 export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHide, onSave, onDelete, onProjectChange }) {
@@ -153,7 +156,9 @@ export default function CardDetailDialog({ visible, card, membrosDoProjeto, onHi
             <Button icon={<AppIcon name="paperclip" />} label="Anexar arquivo" outlined loading={sending} onClick={() => fileInputRef.current?.click()} />
             {(card.arquivos || []).map((file) => (
               <span key={file.id} className="flex align-items-center gap-1 surface-100 border-round px-2 py-1 text-sm">
-                <a href={`${import.meta.env.VITE_SERVER || ''}${file.url}`} target="_blank" rel="noreferrer">{file.nome_original}</a>
+                {safeApiResourceUrl(file.url)
+                  ? <Button label={file.nome_original} text onClick={() => downloadProtectedFile(connect, file.url, file.nome_original)} />
+                  : <span title="Endereço de arquivo inválido">Arquivo indisponível</span>}
                 <Button icon={<AppIcon name="x" />} text rounded severity="danger" onClick={() => removeFile(file.id)} aria-label="Excluir arquivo" />
               </span>
             ))}

@@ -1,32 +1,33 @@
 const TOKEN_KEY = "token";
+let accessToken = null;
 
-/**
- * Mantém a sessão disponível após atualizar a página ou reabrir o navegador.
- * A validade continua sendo decidida pela API a partir do JWT.
- */
+// O token vive apenas na memória da aba. Nunca é gravado em localStorage ou
+// sessionStorage, para não ficar disponível a scripts injetados após recarga.
+function clearLegacyStoredTokens() {
+  sessionStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+clearLegacyStoredTokens();
+
 export function getAccessToken() {
-  const temporaryToken = sessionStorage.getItem(TOKEN_KEY);
-  const storedToken = localStorage.getItem(TOKEN_KEY);
-  const token = temporaryToken || storedToken;
-
-  if (token && !temporaryToken) {
-    sessionStorage.setItem(TOKEN_KEY, token);
-  }
-
-  return token;
+  return accessToken;
 }
 
 export function setAccessToken(token) {
-  if (!token) {
-    clearAccessToken();
-    return;
-  }
-
-  sessionStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(TOKEN_KEY, token);
+  accessToken = typeof token === "string" && token ? token : null;
 }
 
 export function clearAccessToken() {
-  sessionStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(TOKEN_KEY);
+  accessToken = null;
+  clearLegacyStoredTokens();
+}
+
+export function logoutAccessSession() {
+  clearAccessToken();
+  const server = import.meta.env.VITE_SERVER || window.location.origin;
+  return fetch(`${server}/login/logout`, {
+    method: "POST",
+    credentials: "include",
+  }).catch(() => undefined);
 }

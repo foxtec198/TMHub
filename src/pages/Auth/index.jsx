@@ -144,20 +144,20 @@ export function Auth() {
             navigate(getPreferredHomePath())
         } catch (error) {
             const msg = error.response?.data || "Não foi possível autenticar."
-            const isPwdError = msg.toLowerCase().includes("senha")
+            const invalidCredentials = error.response?.status === 401
 
-            if (isPwdError) {
+            if (invalidCredentials) {
                 const novasTentativas = tentativas + 1;
                 setTentativas(novasTentativas);
                 localStorage.setItem("tentativas", novasTentativas);
 
-                if (novasTentativas >= 3 && isPwdError) {
+                if (novasTentativas >= 3) {
                     const umMinutoDepois = Date.now() + 60000;
                     setBloqueadoAte(umMinutoDepois);
                     localStorage.setItem("bloqueadoAte", umMinutoDepois);
                     return showToast("info", "Bloqueio Temporario", "Voce esta temporariamente bloqueado. Tente novamente mais tarde!");
                 } else {
-                    showToast("error", "Senha Incorreta", `Senha incorreta! Tentativa ${novasTentativas} de 3.`);
+                    showToast("error", "Credenciais inválidas", `Usuário ou senha inválidos. Tentativa ${novasTentativas} de 3.`);
                 }
             } else {
                 showToast("error", "Erro no Login", msg);

@@ -7,7 +7,7 @@ import { Password } from "primereact/password";
 
 import connect from "../utils/request";
 import { socketio } from "../utils/socketio";
-import { clearAccessToken, getAccessToken, setAccessToken } from "../utils/authSession";
+import { getAccessToken, logoutAccessSession, setAccessToken } from "../utils/authSession";
 import { useLoading } from "../contexts/LoadingContext";
 import { useToast } from "../contexts/ToastContext";
 import "./AuthRequirementsGate.css";
@@ -64,11 +64,9 @@ export function AuthRequirementsGate() {
   }, []);
 
   useEffect(() => {
-    if (getAccessToken()) {
-      connect.get("/usuarios/pendencias")
-        .then(({ data }) => applyResponse(data))
-        .catch(() => {});
-    }
+    connect.get("/usuarios/pendencias")
+      .then(({ data }) => applyResponse(data))
+      .catch(() => {});
     const listener = (event) => applyResponse(event.detail || {});
     window.addEventListener("tmhub:auth-requirements", listener);
     return () => window.removeEventListener("tmhub:auth-requirements", listener);
@@ -139,9 +137,9 @@ export function AuthRequirementsGate() {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     socketio.disconnect();
-    clearAccessToken();
+    await logoutAccessSession();
     localStorage.removeItem("auth_requirements");
     window.location.href = "/login";
   };
@@ -151,7 +149,7 @@ export function AuthRequirementsGate() {
 
   return (
     <Dialog
-      visible={Boolean(getAccessToken() && requirements.interacao_pendente)}
+      visible={Boolean(requirements.interacao_pendente)}
       onHide={() => {}}
       closable={false}
       closeOnEscape={false}

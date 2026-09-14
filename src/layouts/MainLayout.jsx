@@ -8,7 +8,7 @@ import connect from "../utils/request";
 import { useToast } from "../contexts/ToastContext";
 import { capitalize } from "../utils/ui";
 import { socketio } from "../utils/socketio";
-import { clearAccessToken, getAccessToken } from "../utils/authSession";
+import { getAccessToken, logoutAccessSession } from "../utils/authSession";
 
 // Widgets
 import { PanelMenu } from "primereact/panelmenu";
@@ -103,9 +103,9 @@ export function MainLayout() {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     socketio.disconnect();
-    clearAccessToken();
+    await logoutAccessSession();
     localStorage.clear();
     navigateTo("/");
   };
@@ -644,11 +644,8 @@ export function MainLayout() {
   };
 
   useEffect(() => {
-    const token = getAccessToken();
-    socketio.auth = { token };
-    if (token) {
-      socketio.disconnect().connect();
-    }
+    socketio.auth = { token: getAccessToken() };
+    socketio.disconnect().connect();
   }, []);
 
   useEffect(() => {

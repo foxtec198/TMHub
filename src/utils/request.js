@@ -5,7 +5,7 @@ import { getAccessToken } from "./authSession";
 
 export const server = import.meta.env.VITE_SERVER;
 
-const connect = axios.create({ baseURL: server });
+const connect = axios.create({ baseURL: server, withCredentials: true });
 
 connect.interceptors.request.use((config) => {
   const token = config.skipAuth ? null : getAccessToken();

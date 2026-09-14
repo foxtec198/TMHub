@@ -16,6 +16,8 @@ import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
 import { AttachmentPreview } from "../../components/AttachmentPreview";
+import { downloadProtectedFile } from "../../utils/protectedFile";
+import { safeApiResourceUrl } from "../../utils/safeUrl";
 import "./tickets.css";
 
 const STATUS = [
@@ -417,8 +419,8 @@ export function TicketDetail() {
     if (!comment.trim() && files.length === 0) return;
     setSending(true);
     try {
-      // Criar comentário primeiro
-      const { data: commentData } = await connect.post(`/tickets/${ticketId}/comentarios`, { description: comment.trim() });
+      const description = comment.trim() || "Anexo enviado.";
+      const { data: commentData } = await connect.post(`/tickets/${ticketId}/comentarios`, { description });
       
       // Anexar arquivos se houver
       if (files.length > 0) {
@@ -432,20 +434,12 @@ export function TicketDetail() {
         }
       }
       
-      setTicket((current) => ({
-        ...current, 
-        comments: [...(current?.comments || []), { 
-          ...commentData, 
-          attachments: files.map(f => ({
-            id: null,
-            filename: f.name,
-            url: URL.createObjectURL(f.file),
-            type: f.type.startsWith('image/') ? 'image' : 'other'
-          }))
-        }] 
-      }));
+      files.forEach((fileData) => {
+        if (fileData.preview) URL.revokeObjectURL(fileData.preview);
+      });
       setComment("");
       setFiles([]);
+      await load();
     } catch (error) { 
       showToast("error", "Comentário", messageFrom(error, "Não foi possível enviar sua mensagem.")); 
     } finally { 
@@ -460,23 +454,17 @@ export function TicketDetail() {
     <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><AppIcon name="clock"  /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
     <section className="ticket-conversation">
       <aside className="ticket-info-panel"><div className="ticket-info-panel__heading"><span>Informações</span><h2>{ticket.name}</h2></div><p>{ticket.observation}</p><dl><div><dt>Motivo</dt><dd>{ticket.reason?.nome || "Não informado"}</dd></div><div><dt>Solicitante</dt><dd><TicketAvatar user={ticket.created_by} />{ticket.created_by?.nome || "—"}</dd></div><div><dt>Responsável</dt><dd><TicketAvatar user={ticket.responsible} />{ticket.responsible?.nome || "Aguardando atribuição"}</dd></div></dl>{canEdit && <div className="ticket-info-panel__edit"><label><span>Status</span><Dropdown value={statusValue} options={STATUS} onChange={(event) => { setStatusValue(event.value); update({ status: event.value }, "O status foi alterado."); }} /></label>{isAdmin && <label><span>Responsável</span><Dropdown value={responsibleValue} options={assignees.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => { setResponsibleValue(event.value); update({ responsible_id: event.value }, "O responsável foi atualizado."); }} placeholder="Selecione" filter showClear /></label>}</div>}</aside>
-      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.file && <a href={item.file} target="_blank" rel="noreferrer"><AppIcon name="paperclip"  /> Abrir anexo</a>}{item.attachments && item.attachments.length > 0 && <div className="ticket-message__attachments">{item.attachments.map((attachment, idx) => (
+      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.attachments && item.attachments.length > 0 && <div className="ticket-message__attachments">{item.attachments.map((attachment, idx) => (
         <div key={idx} className="ticket-message__attachment-item">
           <div className="ticket-message__attachment-thumb">
-            {attachment.type === 'image' ? (
-              <img src={attachment.url} alt={attachment.filename} />
-            ) : (
-              <AppIcon name="file" />
-            )}
+            <AppIcon name={attachment.type?.startsWith('image/') ? "image" : "file"} />
           </div>
           <div className="ticket-message__attachment-info">
             <span className="ticket-message__attachment-name">{attachment.filename}</span>
-            <span className="ticket-message__attachment-type">{attachment.type === 'image' ? 'Imagem' : attachment.type === 'pdf' ? 'PDF' : 'Arquivo'}</span>
+            <span className="ticket-message__attachment-type">{attachment.type?.startsWith('image/') ? 'Imagem' : attachment.type === 'application/pdf' ? 'PDF' : 'Arquivo'}</span>
           </div>
           <div className="ticket-message__attachment-actions">
-            <a href={attachment.url} target="_blank" rel="noreferrer" className="p-button p-component p-button-icon-only" aria-label="Visualizar">
-              <AppIcon name="eye" />
-            </a>
+            {safeApiResourceUrl(attachment.url) && <Button icon={<AppIcon name="download" />} text rounded onClick={() => downloadProtectedFile(connect, attachment.url, attachment.filename)} aria-label="Baixar anexo" />}
           </div>
         </div>
       ))}</div>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
@@ -487,7 +475,11 @@ export function TicketDetail() {
             <AppIcon name="file" />
           )}
           <span>{fileData.name}</span>
-          <button type="button" onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))}>
+          <button type="button" onClick={() => setFiles((prev) => {
+            const removed = prev[idx];
+            if (removed?.preview) URL.revokeObjectURL(removed.preview);
+            return prev.filter((_, i) => i !== idx);
+          })}>
             <AppIcon name="trash" />
           </button>
         </div>

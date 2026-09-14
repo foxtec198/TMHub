@@ -3,6 +3,7 @@ import { getAccessToken } from "./authSession";
 
 export const socketio = io(import.meta.env.VITE_SERVER, {
   auth: (callback) => callback({ token: getAccessToken() }),
+  withCredentials: true,
   reconnection: true,          // tenta reconectar automaticamente
   reconnectionAttempts: 10,    // número de tentativas
   reconnectionDelay: 2000,     // espera 2s entre tentativas

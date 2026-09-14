@@ -154,9 +154,9 @@ export function MobileMovement() {
             setStep("movimentacao");
         } catch (err) {
             const msg = err.response?.data ?? "Não foi possível autenticar.";
-            const isPwdError = typeof msg === "string" && msg.toLowerCase().includes("senha");
+            const invalidCredentials = err.response?.status === 401;
 
-            if (isPwdError) {
+            if (invalidCredentials) {
                 const novasTentativas = tentativas + 1;
                 setTentativas(novasTentativas);
                 localStorage.setItem("tentativas", novasTentativas);
@@ -167,7 +167,7 @@ export function MobileMovement() {
                     localStorage.setItem("bloqueadoAte", umMinutoDepois);
                     showToast("info", "Bloqueio Temporario", "Voce esta temporariamente bloqueado. Tente novamente mais tarde!");
                 } else {
-                    showToast("error", "Senha Incorreta", `Senha incorreta! Tentativa ${novasTentativas} de 3.`);
+                    showToast("error", "Credenciais inválidas", `Usuário ou senha inválidos. Tentativa ${novasTentativas} de 3.`);
                 }
             } else {
                 showToast("error", "Erro no Login", msg);
