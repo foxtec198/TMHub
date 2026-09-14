@@ -5,7 +5,7 @@ import { AppIcon } from "../../components/icons/AppIcon";
 import { ThemeLogo } from "../../components/ThemeLogo";
 import "./notfound.css";
 
-const TIMO_MODEL = "/3d-models/cyber_timo.glb?v=current-1";
+const TIMO_MODEL = "/3d-models/timo_maintenace.glb?v=current-1";
 const SEARCH_INTERVAL_MIN = 22000;
 const SEARCH_INTERVAL_RANGE = 9000;
 
