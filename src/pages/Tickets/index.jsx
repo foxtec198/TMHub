@@ -9,15 +9,14 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
 
 import { PageHeader } from "../../components/PageHeader";
-import { UserAvatar } from "../../components/UserAvatar";
 import { useLoading } from "../../contexts/LoadingContext";
 import { useToast } from "../../contexts/ToastContext";
 import { can } from "../../utils/permissions";
 import connect from "../../utils/request";
 import { socketio } from "../../utils/socketio";
-import { AttachmentPreview } from "../../components/AttachmentPreview";
 import { downloadProtectedFile } from "../../utils/protectedFile";
 import { safeApiResourceUrl } from "../../utils/safeUrl";
+import "../../components/UserAvatar.css";
 import "./tickets.css";
 
 const STATUS = [
@@ -39,6 +38,12 @@ const STATUS_META = {
 };
 
 const EMPTY_TICKET = { name: "", observation: "", reason_id: null, responsible_id: null };
+function ticketAdornment(value) {
+  const adornment = String(value || "").trim();
+  // Aceita somente códigos de adorno. Novos adornos usam a moldura padrão
+  // automaticamente; estilos especiais continuam definidos no CSS global.
+  return /^adorno_[a-z0-9_-]{1,64}$/i.test(adornment) ? adornment : "";
+}
 
 function messageFrom(error, fallback) {
   const value = error?.response?.data;
@@ -72,8 +77,39 @@ function dueLabel(ticket, now) {
   return `Restam ${hours ? `${hours}h ` : ""}${minutes}min para o prazo`;
 }
 
+function ticketInitials(name = "") {
+  return String(name)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "U";
+}
+
+function ticketProfilePhoto(value) {
+  const photo = String(value || "").trim();
+  return /^data:image\/(png|jpeg|webp);base64,[a-z0-9+/]+=*$/i.test(photo) ? photo : null;
+}
+
 function TicketAvatar({ user, className = "" }) {
-  return <UserAvatar user={user} className={className} />;
+  const photo = ticketProfilePhoto(user?.foto_perfil);
+  const isCurrentUser = Number(user?.id) === Number(localStorage.getItem("current_id"));
+  const configuredAdornment = user?.adorno_foto || (isCurrentUser ? localStorage.getItem("profile_adornment") : "");
+  const adornment = ticketAdornment(configuredAdornment);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [photo]);
+
+  const name = user?.nome || "Usuário";
+  return <span className={`ticket-user-avatar tm-user-avatar ${adornment ? `tm-user-avatar--${adornment}` : ""} ${className}`.trim()} title={name} aria-label={name}>
+    {photo && !imageFailed
+      ? <img src={photo} alt="" onError={() => setImageFailed(true)} />
+      : <span aria-hidden="true">{ticketInitials(name)}</span>}
+  </span>;
 }
 
 function TicketMessageAvatar({ user }) {
@@ -90,6 +126,167 @@ function isTicketRequesterMessage(ticket, message) {
   return Number.isInteger(requesterId)
     && requesterId > 0
     && requesterId === authorId;
+}
+
+function isImageAttachment(attachment) {
+  return String(attachment?.content_type || attachment?.type || "").startsWith("image/");
+}
+
+function attachmentExtension(attachment) {
+  const filename = String(attachment?.filename || attachment?.arquivo || attachment?.name || "");
+  return filename.includes(".") ? filename.split(".").pop().toLowerCase() : "";
+}
+
+function isPdfAttachment(attachment) {
+  return String(attachment?.content_type || attachment?.type || "") === "application/pdf"
+    || attachmentExtension(attachment) === "pdf";
+}
+
+function isSpreadsheetAttachment(attachment) {
+  const type = String(attachment?.content_type || attachment?.type || "");
+  return [
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ].includes(type) || ["xls", "xlsx"].includes(attachmentExtension(attachment));
+}
+
+function isPreviewableAttachment(attachment) {
+  return isImageAttachment(attachment) || isPdfAttachment(attachment);
+}
+
+function attachmentKind(attachment) {
+  if (isImageAttachment(attachment)) return "Imagem";
+  if (isPdfAttachment(attachment)) return "PDF";
+  if (isSpreadsheetAttachment(attachment)) return "Planilha";
+  return "Arquivo";
+}
+
+function attachmentIcon(attachment) {
+  if (isImageAttachment(attachment)) return "photo";
+  if (isPdfAttachment(attachment)) return "file-type-pdf";
+  if (isSpreadsheetAttachment(attachment)) return "file-spreadsheet";
+  return "file";
+}
+
+function TicketAttachments({ ticketId, attachments = [] }) {
+  const { showToast } = useToast();
+  const [preview, setPreview] = useState(null);
+  const [thumbnails, setThumbnails] = useState({});
+
+  useEffect(() => () => {
+    if (preview?.url) URL.revokeObjectURL(preview.url);
+  }, [preview]);
+
+  const attachmentPath = (attachment) => attachment?.url || (
+    attachment?.id ? `/tickets/${ticketId}/anexos/${attachment.id}` : null
+  );
+
+  const fetchAttachment = async (attachment) => {
+    const path = attachmentPath(attachment);
+    const safeUrl = safeApiResourceUrl(path);
+    if (!safeUrl) throw new Error("Endereço de anexo inválido.");
+    const { data } = await connect.get(safeUrl, { responseType: "blob" });
+    return data;
+  };
+
+  useEffect(() => {
+    let active = true;
+    const urls = [];
+    setThumbnails({});
+
+    const loadThumbnails = async () => {
+      const entries = await Promise.all(attachments.map(async (attachment, index) => {
+        if (!isImageAttachment(attachment)) return null;
+        try {
+          const data = await fetchAttachment(attachment);
+          const url = URL.createObjectURL(data);
+          if (!active) {
+            URL.revokeObjectURL(url);
+            return null;
+          }
+          urls.push(url);
+          return [String(attachment.id || attachment.filename || index), url];
+        } catch {
+          return null;
+        }
+      }));
+      if (active) setThumbnails(Object.fromEntries(entries.filter(Boolean)));
+    };
+
+    loadThumbnails();
+    return () => {
+      active = false;
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [attachments, ticketId]);
+
+  const openPreview = async (attachment) => {
+    try {
+      const data = await fetchAttachment(attachment);
+      setPreview({ attachment, url: URL.createObjectURL(data) });
+    } catch (error) {
+      showToast("error", "Anexo", messageFrom(error, "Não foi possível carregar a prévia do anexo."));
+    }
+  };
+
+  const downloadAttachment = async (attachment) => {
+    try {
+      const data = await fetchAttachment(attachment);
+      const url = URL.createObjectURL(data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = attachment.filename || attachment.arquivo || "arquivo";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    } catch (error) {
+      showToast("error", "Anexo", messageFrom(error, "Não foi possível baixar o anexo."));
+    }
+  };
+
+  if (!attachments.length) return null;
+
+  return <>
+    <div className="ticket-message__attachments">
+      {attachments.map((attachment) => {
+        const filename = attachment.filename || attachment.arquivo || "Arquivo";
+        const attachmentKey = String(attachment.id || attachment.filename || filename);
+        const previewable = isPreviewableAttachment(attachment);
+        const available = Boolean(safeApiResourceUrl(attachmentPath(attachment)));
+        return <article key={attachmentKey} className="ticket-message__attachment-item">
+          <div className="ticket-message__attachment-thumb" aria-hidden="true">
+            {thumbnails[attachmentKey]
+              ? <img src={thumbnails[attachmentKey]} alt="" />
+              : <AppIcon name={attachmentIcon(attachment)} />}
+          </div>
+          <div className="ticket-message__attachment-info">
+            <strong>{filename}</strong>
+            <span>{attachmentKind(attachment)}</span>
+          </div>
+          {available && <div className="ticket-message__attachment-controls">
+            <button type="button" onClick={() => downloadAttachment(attachment)} aria-label={`Baixar ${filename}`} title="Baixar anexo">
+              <AppIcon name="download" />
+            </button>
+            {previewable && <button type="button" onClick={() => openPreview(attachment)} aria-label={`Expandir ${filename}`} title="Expandir prévia">
+              <AppIcon name="maximize" />
+            </button>}
+          </div>}
+        </article>;
+      })}
+    </div>
+    <Dialog
+      header={preview?.attachment?.filename || preview?.attachment?.arquivo || "Prévia do anexo"}
+      visible={Boolean(preview)}
+      modal
+      className="ticket-attachment-preview-dialog"
+      onHide={() => setPreview(null)}
+    >
+      {preview && (isImageAttachment(preview.attachment)
+        ? <img className="ticket-attachment-preview__image" src={preview.url} alt={preview.attachment.filename || preview.attachment.arquivo} />
+        : <iframe className="ticket-attachment-preview__pdf" src={preview.url} title={`Prévia de ${preview.attachment.filename || preview.attachment.arquivo}`} sandbox="" referrerPolicy="no-referrer" />)}
+    </Dialog>
+  </>;
 }
 
 function TicketForm({ visible, onHide, onCreated, reasons }) {
@@ -127,7 +324,18 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
   };
   
   const removeFile = (index) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles((current) => {
+      const target = current[index];
+      if (target?.preview) URL.revokeObjectURL(target.preview);
+      return current.filter((_, itemIndex) => itemIndex !== index);
+    });
+  };
+
+  const clearFiles = () => {
+    setFiles((current) => {
+      current.forEach((fileData) => fileData.preview && URL.revokeObjectURL(fileData.preview));
+      return [];
+    });
   };
   
   const save = async () => {
@@ -138,25 +346,18 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
     
     setSaving(true);
     try {
-      // Criar chamado primeiro
-      const { data: ticket } = await connect.post("/tickets", form);
-      
-      // Anexar arquivos se houver
-      if (files.length > 0) {
-        for (const fileData of files) {
-          const formData = new FormData();
-          formData.append("arquivo", fileData.file);
-          
-          await connect.post(`/tickets/${ticket.id}/anexos`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-          });
-        }
+      const payload = files.length ? new FormData() : form;
+      if (payload instanceof FormData) {
+        payload.append("name", form.name);
+        payload.append("observation", form.observation);
+        if (form.reason_id) payload.append("reason_id", String(form.reason_id));
+        files.forEach((fileData) => payload.append("arquivos", fileData.file));
       }
-      
+      const { data: ticket } = await connect.post("/tickets", payload);
       setForm(EMPTY_TICKET);
-      setFiles([]);
+      clearFiles();
       onCreated(ticket);
-      showToast("success", "Chamado aberto", "O chamado já está disponível para atendimento.");
+      showToast("success", "Chamado aberto", "O chamado e seus anexos já estão disponíveis para atendimento.");
     } catch (error) {
       showToast("error", "Novo chamado", messageFrom(error, "Não foi possível abrir o chamado."));
     } finally {
@@ -164,7 +365,7 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
     }
   };
 
-  return <Dialog visible={visible} onHide={onHide} modal header="Abrir novo chamado" className="ticket-dialog" draggable={false}>
+  return <Dialog visible={visible} onHide={() => { clearFiles(); onHide(); }} modal header="Abrir novo chamado" className="ticket-dialog" draggable={false}>
     <div className="ticket-form mt-5">
       <label><span>Título</span><InputText value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Descreva o chamado em uma frase" maxLength={180} /></label>
       <label><span>Motivo</span><Dropdown value={form.reason_id} options={reasons.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => update("reason_id", event.value)} placeholder="Selecione se necessário" showClear /></label>
@@ -180,7 +381,7 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
                   {fileData.type.startsWith('image/') && fileData.preview ? (
                     <img src={fileData.preview} alt={fileData.name} />
                   ) : (
-                    <AppIcon name="file" />
+                    <AppIcon name={attachmentIcon(fileData)} />
                   )}
                 </div>
                 <div className="ticket-attachment-info">
@@ -221,7 +422,7 @@ function TicketForm({ visible, onHide, onCreated, reasons }) {
         </div>
       </label>
     </div>
-    <div className="ticket-dialog__footer"><Button label="Cancelar" text severity="secondary" onClick={onHide} disabled={saving} /><Button label="Abrir chamado" icon={<AppIcon name="send" />} onClick={save} loading={saving} /></div>
+    <div className="ticket-dialog__footer"><Button label="Cancelar" text severity="secondary" onClick={() => { clearFiles(); onHide(); }} disabled={saving} /><Button label="Abrir chamado" icon={<AppIcon name="send" />} onClick={save} loading={saving} /></div>
   </Dialog>;
 }
 
@@ -421,25 +622,27 @@ export function TicketDetail() {
     try {
       const description = comment.trim() || "Anexo enviado.";
       const { data: commentData } = await connect.post(`/tickets/${ticketId}/comentarios`, { description });
-      
-      // Anexar arquivos se houver
-      if (files.length > 0) {
+      let uploadedFiles = 0;
+      let attachmentUploadFailed = false;
+      try {
         for (const fileData of files) {
           const formData = new FormData();
           formData.append("arquivo", fileData.file);
-          
-          await connect.post(`/tickets/${ticketId}/comentarios/${commentData.id}/anexos`, formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-          });
+          await connect.post(`/tickets/${ticketId}/comentarios/${commentData.id}/anexos`, formData);
+          uploadedFiles += 1;
         }
+      } catch {
+        attachmentUploadFailed = true;
       }
-      
       files.forEach((fileData) => {
         if (fileData.preview) URL.revokeObjectURL(fileData.preview);
       });
       setComment("");
       setFiles([]);
       await load();
+      if (attachmentUploadFailed) {
+        showToast("warn", "Comentário enviado", `A mensagem foi salva, mas apenas ${uploadedFiles} de ${files.length} anexo(s) foram enviados.`);
+      }
     } catch (error) { 
       showToast("error", "Comentário", messageFrom(error, "Não foi possível enviar sua mensagem.")); 
     } finally { 
@@ -454,25 +657,12 @@ export function TicketDetail() {
     <section className="ticket-detail__meta"><div><span>Última atualização</span><strong>{asDate(ticket.updated_at)}</strong></div><div className={ticket.status === "ATRASADO" ? "is-overdue" : "is-on-time"}><span><AppIcon name="clock"  /> Prazo de resposta</span><strong>{dueLabel(ticket, now)}</strong></div><div>{statusTag(ticket.status)}</div></section>
     <section className="ticket-conversation">
       <aside className="ticket-info-panel"><div className="ticket-info-panel__heading"><span>Informações</span><h2>{ticket.name}</h2></div><p>{ticket.observation}</p><dl><div><dt>Motivo</dt><dd>{ticket.reason?.nome || "Não informado"}</dd></div><div><dt>Solicitante</dt><dd><TicketAvatar user={ticket.created_by} />{ticket.created_by?.nome || "—"}</dd></div><div><dt>Responsável</dt><dd><TicketAvatar user={ticket.responsible} />{ticket.responsible?.nome || "Aguardando atribuição"}</dd></div></dl>{canEdit && <div className="ticket-info-panel__edit"><label><span>Status</span><Dropdown value={statusValue} options={STATUS} onChange={(event) => { setStatusValue(event.value); update({ status: event.value }, "O status foi alterado."); }} /></label>{isAdmin && <label><span>Responsável</span><Dropdown value={responsibleValue} options={assignees.map((item) => ({ label: item.nome, value: item.id }))} onChange={(event) => { setResponsibleValue(event.value); update({ responsible_id: event.value }, "O responsável foi atualizado."); }} placeholder="Selecione" filter showClear /></label>}</div>}</aside>
-      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.attachments && item.attachments.length > 0 && <div className="ticket-message__attachments">{item.attachments.map((attachment, idx) => (
-        <div key={idx} className="ticket-message__attachment-item">
-          <div className="ticket-message__attachment-thumb">
-            <AppIcon name={attachment.type?.startsWith('image/') ? "image" : "file"} />
-          </div>
-          <div className="ticket-message__attachment-info">
-            <span className="ticket-message__attachment-name">{attachment.filename}</span>
-            <span className="ticket-message__attachment-type">{attachment.type?.startsWith('image/') ? 'Imagem' : attachment.type === 'application/pdf' ? 'PDF' : 'Arquivo'}</span>
-          </div>
-          <div className="ticket-message__attachment-actions">
-            {safeApiResourceUrl(attachment.url) && <Button icon={<AppIcon name="download" />} text rounded onClick={() => downloadProtectedFile(connect, attachment.url, attachment.filename)} aria-label="Baixar anexo" />}
-          </div>
-        </div>
-      ))}</div>}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
+      <main className="ticket-chat"><header><div><span>Conversa do chamado</span><h2>Tratativa em tempo real</h2></div><AppIcon name="messages"  /></header><div className="ticket-chat__messages"><article className="ticket-message ticket-message--origin"><TicketAvatar user={ticket.created_by} /><div><small>{ticket.created_by?.nome || "Solicitante"} · {asDate(ticket.created_at)}</small><p>{ticket.observation}</p><TicketAttachments ticketId={ticket.id} attachments={ticket.attachments || []} /></div></article>{(ticket.comments || []).map((item) => <article className={`ticket-message ${isTicketRequesterMessage(ticket, item) ? "ticket-message--requester" : ""} ${item.created_by?.avatar_type === "timo" ? "ticket-message--timo" : ""}`.trim()} key={item.id}><TicketMessageAvatar user={item.created_by} /><div><small>{item.created_by?.nome || "Atendimento"} · {asDate(item.created_at)}</small>{item.title && <strong>{item.title}</strong>}<p>{item.description}</p>{item.attachments?.length > 0 && <TicketAttachments ticketId={ticket.id} attachments={item.attachments} />}</div></article>)}{!(ticket.comments || []).length && <div className="ticket-chat__empty"><AppIcon name="messages"  />A conversa começa por aqui.</div>}</div>{canEdit && !isFinal && <footer className="ticket-chat__composer"><div className="ticket-chat__composer-attachments">{files.length > 0 && files.map((fileData, idx) => (
         <div key={idx} className="ticket-chat__attachment-preview">
           {fileData.type.startsWith('image/') ? (
             <img src={fileData.preview} alt={fileData.name} />
           ) : (
-            <AppIcon name="file" />
+            <AppIcon name={attachmentIcon(fileData)} />
           )}
           <span>{fileData.name}</span>
           <button type="button" onClick={() => setFiles((prev) => {
@@ -483,7 +673,7 @@ export function TicketDetail() {
             <AppIcon name="trash" />
           </button>
         </div>
-      ))}</div><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={2} autoResize placeholder="Escreva uma atualização para o chamado…" /><div className="ticket-chat__composer-actions"><input type="file" id="chat-file-upload" accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls" multiple onChange={(e) => {
+      ))}</div><InputTextarea value={comment} onChange={(event) => setComment(event.target.value)} onKeyDown={(event) => { if (event.ctrlKey && event.key === "Enter") sendComment(); }} rows={1} autoResize placeholder="Escreva uma atualização para o chamado…" /><div className="ticket-chat__composer-actions"><input type="file" id="chat-file-upload" accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls" multiple onChange={(e) => {
         const selectedFiles = Array.from(e.target.files || []);
         const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
         const maxSize = 15 * 1024 * 1024;
@@ -493,7 +683,7 @@ export function TicketDetail() {
           setFiles(prev => [...prev, { file, name: file.name, type: file.type, preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null }]);
         }
         e.target.value = '';
-      }} style={{ display: 'none' }} /><Button icon={<AppIcon name="paperclip" />} outlined onClick={() => document.getElementById('chat-file-upload').click()} /><Button icon={<AppIcon name="send" />} label="Enviar" onClick={sendComment} loading={sending} disabled={!comment.trim() && files.length === 0} /></div></footer>}</main>
+      }} style={{ display: 'none' }} /><Button icon={<AppIcon name="paperclip" />} outlined onClick={() => document.getElementById('chat-file-upload').click()} /><Button icon={<AppIcon name="send" />} label="Enviar" aria-label="Enviar mensagem" title="Enviar mensagem" onClick={sendComment} loading={sending} disabled={!comment.trim() && files.length === 0} /></div></footer>}</main>
     </section>
   </section>;
 }

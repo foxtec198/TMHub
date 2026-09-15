@@ -518,18 +518,47 @@
 
 .user-dialog {
   width: min(58rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+}
+
+.user-dialog .p-dialog-content {
+  padding: 1.15rem 1.35rem 1.35rem;
+  overflow-y: auto;
 }
 
 .user-form,
 .bulk-user-form {
   display: flex;
   flex-direction: column;
-  gap: 1.35rem;
-  padding-top: 1.25rem;
+  gap: 1rem;
+  padding-top: 0.2rem;
 }
 
-.user-form>.p-float-label {
+.user-form__full {
   width: 100%;
+}
+
+.user-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.user-form__field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.user-form__field > span {
+  color: var(--text-secondary);
+  font-size: .75rem;
+  font-weight: 800;
+}
+
+.user-form__row > .user-form__field {
+  min-width: 0;
 }
 
 .user-collaborator-link {
@@ -555,8 +584,38 @@
 .user-form .p-inputtext,
 .user-form .p-password,
 .user-form .p-dropdown,
+.user-form .p-multiselect,
 .user-form .p-password-input {
   width: 100%;
+}
+
+.user-active-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface-ground);
+}
+
+.user-active-toggle__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.user-active-toggle__copy label {
+  color: var(--text-color);
+  font-size: .85rem;
+  font-weight: 800;
+}
+
+.user-active-toggle__copy small {
+  color: var(--text-color-secondary);
+  font-size: .75rem;
 }
 
 .bulk-user-form input[type="file"] {
@@ -2170,4 +2229,19 @@
   border: 2px solid var(--primary);
   box-shadow: 0 0 0 100vmax rgb(0 0 0 / 48%);
   pointer-events: none;
+}
+
+
+@media (max-width: 640px) {
+  .user-dialog .p-dialog-content {
+    padding: 1rem;
+  }
+
+  .user-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .permission-editor {
+    padding: .8rem;
+  }
 }

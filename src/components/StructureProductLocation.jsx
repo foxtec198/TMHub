@@ -12,29 +12,38 @@ export function StructureProductLocation({
     products, 
     selectedProducts = [], 
     onChange,
-    disabled = false
+    disabled = false,
+    mode = "create",
 }) {
-    console.log("StructureProductLocation render", { products: products?.length, selectedProducts: selectedProducts.length });
-    
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedProductId, setSelectedProductId] = useState(null);
     const [quantidade, setQuantidade] = useState(1);
     const [metragem, setMetragem] = useState(0);
     const [observacao, setObservacao] = useState("");
+    const [editingIndex, setEditingIndex] = useState(null);
 
     // Filtrar produtos disponíveis (não selecionados)
-    const availableProducts = products?.filter(p => 
-        !selectedProducts.find(sp => sp.produto_id === p.id) &&
-        (p.nome?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-         p.unidade?.toLowerCase().includes(searchTerm.toLowerCase()))
+    const availableProducts = products?.filter((product) =>
+        !selectedProducts.some((selected, index) => (
+            index !== editingIndex && selected.produto_id === product.id
+        ))
     ) || [];
+    const selectedProduct = products?.find((product) => product.id === selectedProductId);
+    const isManaging = mode === "manage";
+    const showEditor = !isManaging || editingIndex !== null;
 
-    console.log("availableProducts", availableProducts.length);
+    const resetEditor = () => {
+        setSelectedProductId(null);
+        setQuantidade(1);
+        setMetragem(0);
+        setObservacao("");
+        setEditingIndex(null);
+    };
 
     const handleAddProduct = () => {
         if (!selectedProduct) return;
 
         const newProduct = {
+            ...(editingIndex !== null ? selectedProducts[editingIndex] : {}),
             produto_id: selectedProduct.id,
             produto: selectedProduct,
             quantidade_desejada: quantidade,
@@ -42,17 +51,25 @@ export function StructureProductLocation({
             observacao,
         };
 
-        onChange([...selectedProducts, newProduct]);
-        
-        // Resetar campos
-        setSelectedProduct(null);
-        setQuantidade(1);
-        setMetragem(0);
-        setObservacao("");
+        onChange(editingIndex === null
+            ? [...selectedProducts, newProduct]
+            : selectedProducts.map((item, index) => index === editingIndex ? newProduct : item));
+        resetEditor();
     };
 
     const handleRemoveProduct = (index) => {
         onChange(selectedProducts.filter((_, i) => i !== index));
+        if (editingIndex === index) resetEditor();
+        else if (editingIndex !== null && index < editingIndex) setEditingIndex((current) => current - 1);
+    };
+
+    const handleEditProduct = (index) => {
+        const item = selectedProducts[index];
+        setEditingIndex(index);
+        setSelectedProductId(item.produto_id);
+        setQuantidade(item.quantidade_desejada ?? 1);
+        setMetragem(item.metragem_disponivel ?? 0);
+        setObservacao(item.observacao || "");
     };
 
     return (
@@ -66,7 +83,7 @@ export function StructureProductLocation({
             {selectedProducts.length > 0 && (
                 <div className="structure-product-location__selected">
                     {selectedProducts.map((item, index) => (
-                        <div key={index} className="structure-product-location__item">
+                        <div key={index} className={`structure-product-location__item${isManaging ? " is-manageable" : ""}`}>
                             <div className="structure-product-location__item-info">
                                 <strong>{item.produto?.nome || "Produto"}</strong>
                                 <small>
@@ -75,31 +92,42 @@ export function StructureProductLocation({
                                     {item.observacao && ` | ${item.observacao}`}
                                 </small>
                             </div>
-                            <Button
-                                icon="pi pi-trash"
-                                severity="danger"
-                                text
-                                rounded
-                                onClick={() => handleRemoveProduct(index)}
-                                disabled={disabled}
-                                aria-label={`Remover ${item.produto?.nome}`}
-                            />
+                            {isManaging && <div className="structure-product-location__item-actions">
+                                <Button
+                                    icon="pi pi-pencil"
+                                    label="Editar"
+                                    outlined
+                                    size="small"
+                                    onClick={() => handleEditProduct(index)}
+                                    disabled={disabled}
+                                    aria-label={`Editar ${item.produto?.nome}`}
+                                />
+                                <Button
+                                    icon="pi pi-trash"
+                                    label="Excluir"
+                                    severity="danger"
+                                    text
+                                    size="small"
+                                    onClick={() => handleRemoveProduct(index)}
+                                    disabled={disabled}
+                                    aria-label={`Remover ${item.produto?.nome}`}
+                                />
+                            </div>}
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Formulário para adicionar produto */}
-            <div className="structure-product-location__add">
+            {showEditor && <div className="structure-product-location__add">
                 <div className="structure-product-location__add-header">
-                    <span>Adicionar produto</span>
+                    <span>{editingIndex === null ? "Adicionar produto" : "Editar produto"}</span>
                 </div>
                 
                 <div className="structure-product-location__add-form">
-                    <div className="structure-product-location__add-input">
+                    <div className="structure-product-location__add-input structure-product-location__add-input--product">
                         <label>Produto</label>
                         <Dropdown
-                            value={selectedProduct}
+                            value={selectedProductId}
                             options={availableProducts}
                             optionLabel="nome"
                             optionValue="id"
@@ -107,9 +135,7 @@ export function StructureProductLocation({
                             filterBy="nome"
                             placeholder="Selecione um produto"
                             emptyMessage="Nenhum produto disponível"
-                            onChange={(e) => {
-                                setSelectedProduct(e.value ? availableProducts.find(p => p.id === e.value) : null);
-                            }}
+                            onChange={(event) => setSelectedProductId(event.value || null)}
                             disabled={disabled || availableProducts.length === 0}
                         />
                     </div>
@@ -137,7 +163,7 @@ export function StructureProductLocation({
                         />
                     </div>
 
-                    <div className="structure-product-location__add-input">
+                    <div className="structure-product-location__add-input structure-product-location__add-input--observation">
                         <label>Observação</label>
                         <InputText
                             value={observacao}
@@ -148,15 +174,22 @@ export function StructureProductLocation({
                     </div>
 
                     <div className="structure-product-location__add-actions">
-                        <Button
-                            label="Adicionar"
-                            icon="pi pi-plus"
+                        {editingIndex !== null && <Button
+                            label="Cancelar edição"
+                            text
+                            severity="secondary"
+                            onClick={resetEditor}
+                            disabled={disabled}
+                        />}
+                        {(!isManaging || editingIndex !== null) && <Button
+                            label={editingIndex === null ? "Adicionar" : "Salvar produto"}
+                            icon={editingIndex === null ? "pi pi-plus" : "pi pi-check"}
                             onClick={handleAddProduct}
                             disabled={disabled || !selectedProduct}
-                        />
+                        />}
                     </div>
                 </div>
-            </div>
+            </div>}
         </div>
     );
 }
