@@ -81,6 +81,7 @@ export function Request() {
     const [additionalContext, setAdditionalContext] = useState(null)
     const [additionalLoading, setAdditionalLoading] = useState(false)
     const [manualCoverage, setManualCoverage] = useState(null)
+    const [noAdditionalCoverage, setNoAdditionalCoverage] = useState(false)
     const [activeStep, setActiveStep] = useState(0)
     const [additionalStepReleased, setAdditionalStepReleased] = useState(false)
     const [warning, selectedWarning] = useState(null)
@@ -236,13 +237,16 @@ export function Request() {
                 && reason
                 && disciplinaryMeasureInformed
                 && (checked || replace)
-                && (!manualCoverageRequired || manualCoverage);
+                && (!manualCoverageRequired || manualCoverage || noAdditionalCoverage);
             if (requestReady) {
                 const data = {
                     supervisor_usuario_id: user.id,
                     ausente_id: absent,
                     reserva_id: checked ? 0 : replace?.id,
                     cobertura_colaborador_id: checked ? manualCoverage?.id : null,
+                    // A API interpreta este campo como a confirmação de que a
+                    // requisição ficará sem reserva e sem cobertura manual.
+                    sem_cobertura: Boolean(checked && !manualCoverage),
                     motivo: reason,
                     advertencia: warning,
                     data: selectedRequestDate(),
@@ -250,7 +254,7 @@ export function Request() {
                 }
                 await connect.post("/repo/request", data)
                 showToast("success", "Sucesso na requisição", "Sua requisição foi criada com sucesso, aguarde novidades por email!")
-                selectedReplace(null); selectedAbsent(null); setAbsentDetails(null); setDisciplinaryContext(null); setAdditionalContext(null); setManualCoverage(null); selectedReason(null); setObs(""); selectedWarning(null); setChecked(false); setDateChoice("today"); setAdditionalStepReleased(false)
+                selectedReplace(null); selectedAbsent(null); setAbsentDetails(null); setDisciplinaryContext(null); setAdditionalContext(null); setManualCoverage(null); setNoAdditionalCoverage(false); selectedReason(null); setObs(""); selectedWarning(null); setChecked(false); setDateChoice("today"); setAdditionalStepReleased(false)
             }
             else{showToast("warn", "Atenção!", "Preencha todos os dados")}
         }
@@ -393,6 +397,7 @@ export function Request() {
                                         selectedAbsent(id);
                                         setAbsentDetails(collaborator);
                                         setManualCoverage(null);
+                                        setNoAdditionalCoverage(false);
                                         setAdditionalStepReleased(false);
                                         loadDisciplinaryContext(id);
                                         
@@ -427,6 +432,7 @@ export function Request() {
                                     onChange={(e) => {
                                         selectedReplace(e.value);
                                         setManualCoverage(null);
+                                        setNoAdditionalCoverage(false);
                                         setAdditionalStepReleased(false);
                                     }}
                                     options={replaces}
@@ -504,8 +510,11 @@ export function Request() {
                                         name="sem-reserva"
                                         onChange={(e) => {
                                             setChecked(e.checked);
+                                            setNoAdditionalCoverage(false);
                                             if (e.checked) selectedReplace(null);
-                                            if (!e.checked) setManualCoverage(null);
+                                            if (!e.checked) {
+                                                setManualCoverage(null);
+                                            }
                                             setAdditionalStepReleased(false);
                                         }}
                                         checked={checked}
@@ -545,13 +554,29 @@ export function Request() {
                                                 <div><dt>Departamento</dt><dd>{absentDetails?.departamento || "Não informado"}</dd></div>
                                                 <div className="is-wide"><dt>Motivo</dt><dd>{reason || "Selecione o motivo da ausência"}</dd></div>
                                             </dl>
-                                            <Dropdown
+                                            <label className="request-additional-no-coverage" htmlFor="request-no-additional-coverage">
+                                                <Checkbox
+                                                    inputId="request-no-additional-coverage"
+                                                    checked={noAdditionalCoverage}
+                                                    onChange={(event) => {
+                                                        setNoAdditionalCoverage(Boolean(event.checked));
+                                                        if (event.checked) setManualCoverage(null);
+                                                    }}
+                                                />
+                                                <span>
+                                                    <strong>Não há quem cubra esta colaboradora</strong>
+                                                    <small>A requisição seguirá sem cobertura e sem adicional a registrar.</small>
+                                                </span>
+                                            </label>
+
+                                            {!noAdditionalCoverage && <Dropdown
                                                 appendTo="self"
                                                 panelStyle={{ width: "100%" }}
                                                 className="w-full"
                                                 value={manualCoverage}
                                                 onChange={(e) => {
                                                     setManualCoverage(e.value);
+                                                    setNoAdditionalCoverage(false);
                                                     setChecked(true);
                                                 }}
                                                 options={additionalContext.candidatos || []}
@@ -570,7 +595,7 @@ export function Request() {
                                                         <small>{option.cargo || "Cargo não informado"}</small>
                                                     </div>
                                                 ) : <span className="p-placeholder">{props.placeholder}</span>}
-                                            />
+                                            />}
                                         </>
                                     )}
 

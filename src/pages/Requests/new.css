@@ -455,6 +455,40 @@
   margin: 0;
 }
 
+.request-additional-no-coverage {
+  display: flex;
+  gap: .7rem;
+  align-items: flex-start;
+  margin: .2rem 0;
+  padding: .8rem .9rem;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.request-additional-no-coverage .p-checkbox {
+  flex: 0 0 auto;
+  margin-top: .15rem;
+}
+
+.request-additional-no-coverage span {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.request-additional-no-coverage strong {
+  font-size: .9rem;
+}
+
+.request-additional-no-coverage small {
+  color: var(--text-secondary);
+  font-size: .8rem;
+  line-height: 1.35;
+}
+
 .request-additional-coverage__summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
